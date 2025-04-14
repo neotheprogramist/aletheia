@@ -11,12 +11,17 @@
 
 /* 🌙 Dark Theme (default) */
 :root {
-  --color-primary:rgb(7, 156, 124);
-  --color-secondary:rgb(3, 123, 160);
+  --color-primary: #00A472;
+  --color-secondary: #669c82;
   --color-background: #0A0F1D;
   --color-text: #ffffff;
   --color-border: #2d3748;
   --color-card: #131A2A;
+  --color-success: #4CAF50;
+  --color-info: #0CA9F4;
+  --color-error: #EF5350;
+  --color-warning: #FF9800;
+  --color-default: #374151;
   --font-ui: "Orbitron", sans-serif;
 }
 
@@ -142,19 +147,23 @@ body {
 }
 
 .toast-success {
-  background-color: #16a34a; 
+  background-color: var(--color-success); 
 }
 
 .toast-error {
-  background-color: #dc2626; 
+  background-color: var(--color-error); 
 }
 
 .toast-info {
-  background-color: #2563eb; 
+  background-color: var(--color-info); 
 }
 
 .toast-default {
-  background-color: #374151; 
+  background-color: var(--color-default); 
+}
+
+.toast-warning {
+  background-color: var(--color-warning)
 }
 
 .button-xl {
