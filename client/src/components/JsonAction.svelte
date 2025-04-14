@@ -25,16 +25,6 @@
 </script>
 
 <div class="mt-4 flex gap-4">
-	<button
-		on:click={copyData}
-		class="rounded-lg bg-blue-500 px-4 py-2 text-sm text-white shadow-md transition-transform hover:scale-105"
-	>
-		Copy Data
-	</button>
-	<button
-		on:click={downloadData}
-		class="rounded-lg bg-gray-500 px-4 py-2 text-sm text-white shadow-md transition-transform hover:scale-105"
-	>
-		Download JSON
-	</button>
+	<button on:click={copyData} class="button"> Copy Data </button>
+	<button on:click={downloadData} class="button-secondary"> Download JSON </button>
 </div>

@@ -12,7 +12,8 @@
 		"moduleResolution": "bundler"
 	},
 	"include": [
-		"src"
+		"src",
+		".svelte-kit/types"
 	]
 	// Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
 	// except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
