@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { isConnected, walletAddress } from '$lib/stores/wallet';
 	import { copyWalletAddress, disconnectWallet, shortAddress } from '$lib/utils/wallet';
+	import ToggleTheme from './ToggleTheme.svelte';
 </script>
 
 <nav class="navbar">
@@ -31,6 +32,7 @@
 			</button>
 
 			<button on:click={disconnectWallet} class="navbar-disconnect">Disconnect</button>
+			<ToggleTheme />
 		</div>
 	{/if}
 </nav>

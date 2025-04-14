@@ -43,6 +43,7 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
+		"lucide-svelte": "^0.488.0",
 		"starknetkit": "^2.10.4"
 	}
 }
