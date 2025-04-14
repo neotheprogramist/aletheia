@@ -19,24 +19,16 @@
 
 		await wrapWithToast(
 			async () => {
-				console.log('XD');
-
 				const { wallet: connectedWallet, connectorData } = await connect({
 					modalMode: 'neverAsk'
 				});
 				if (connectedWallet && connectorData?.account) {
-					console.log('XD1');
-
 					wallet.set(connectedWallet);
 					walletAddress.set(connectorData.account);
 					isConnected.set(true);
-					console.log('XD1');
 
 					goto('/deposit');
-					console.log('SHOULD BE ON THE DEPOSIT PAGE');
 				} else if (protectedPaths.includes(pathname)) {
-					console.log('XD2');
-
 					goto('/');
 					throw new Error('Please connect your wallet first');
 				}
