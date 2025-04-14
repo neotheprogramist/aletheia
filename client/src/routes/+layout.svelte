@@ -2,40 +2,52 @@
 	import '../app.css';
 	import Navbar from '../components/Navbar.svelte';
 	import Toast from '../components/Toast.svelte';
+	import PageContentContainer from '../components/PageContentContainer.svelte';
 
 	import { connect } from 'starknetkit';
-	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { isConnected, wallet, walletAddress } from '$lib/stores/wallet';
-	import PageContentContainer from '../components/PageContentContainer.svelte';
-	import { showToast } from '$lib/stores/toast';
+	import { wrapWithToast } from '$lib/utils/wrapWithToast';
+
+	let isInitializing = true;
+	const protectedPaths = ['/deposit', '/withdraw'];
 
 	onMount(async () => {
-		try {
-			const { wallet: connectedWallet, connectorData } = await connect({
-				modalMode: 'neverAsk'
-			});
-			if (connectedWallet && connectorData?.account) {
-				wallet.set(connectedWallet);
-				walletAddress.set(connectorData.account);
-				isConnected.set(true);
-				showToast('Wallet connected', 'success');
-			} else {
-				const protectedPaths = ['/deposit', '/withdraw'];
-				if (protectedPaths.includes($page.url.pathname)) {
-					showToast('Please connect your wallet first', 'info');
+		const pathname = $page.url.pathname;
+
+		await wrapWithToast(
+			async () => {
+				console.log('XD');
+
+				const { wallet: connectedWallet, connectorData } = await connect({
+					modalMode: 'neverAsk'
+				});
+				if (connectedWallet && connectorData?.account) {
+					console.log('XD1');
+
+					wallet.set(connectedWallet);
+					walletAddress.set(connectorData.account);
+					isConnected.set(true);
+					console.log('XD1');
+
+					goto('/deposit');
+					console.log('SHOULD BE ON THE DEPOSIT PAGE');
+				} else if (protectedPaths.includes(pathname)) {
+					console.log('XD2');
+
 					goto('/');
+					throw new Error('Please connect your wallet first');
 				}
+			},
+			{
+				error: (err) => `Wallet error: ${(err as Error).message}`,
+				showSuccess: false
 			}
-		} catch (error) {
-			console.warn('Auto-connect failed:', error);
-			showToast(`Failed to auto-connect wallet: ${error}`, 'error');
-			if (['/deposit', '/withdraw'].includes($page.url.pathname)) {
-				showToast('Please connect your wallet first', 'info');
-				goto('/');
-			}
-		}
+		);
+
+		isInitializing = false;
 	});
 </script>
 
@@ -44,11 +56,20 @@
 		<Navbar />
 	</header>
 
-	<div class="flex flex-1 flex-col pt-20">
-		<PageContentContainer>
-			<slot />
-		</PageContentContainer>
-	</div>
+	{#if isInitializing}
+		<div class="flex flex-1 flex-col items-center justify-center gap-2">
+			<div
+				class="h-6 w-6 animate-spin rounded-full border-4 border-gray-400 border-t-transparent"
+			></div>
+			<p class="text-sm text-gray-400">Connecting wallet...</p>
+		</div>
+	{:else}
+		<div class="flex flex-1 flex-col pt-20">
+			<PageContentContainer>
+				<slot />
+			</PageContentContainer>
+		</div>
+	{/if}
 
 	<Toast />
 </main>

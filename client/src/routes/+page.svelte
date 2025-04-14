@@ -2,20 +2,17 @@
 	import PageContentContainer from '../components/PageContentContainer.svelte';
 	import ActionButton from '../components/ActionButton.svelte';
 	import { connectWallet } from '$lib/utils/wallet';
+	import { wrapWithToast } from '$lib/utils/wrapWithToast';
 	import { goto } from '$app/navigation';
-	import { showToast } from '$lib/stores/toast';
 
 	async function handleConnect() {
-		try {
-			const success = await connectWallet();
+		const success = await wrapWithToast(() => connectWallet(), {
+			success: 'Wallet connected successfully!',
+			error: (err) => `Failed to connect wallet: ${(err as Error).message}`
+		});
 
-			if (success) {
-				showToast('Wallet connected successfully!', 'success');
-				goto('/deposit');
-			}
-		} catch (error) {
-			console.error('Failed to connect wallet: ', error);
-			showToast(`Failed to connect wallet: ${error}`, 'error');
+		if (success) {
+			goto('/deposit');
 		}
 	}
 </script>
