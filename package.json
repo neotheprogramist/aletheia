@@ -6,6 +6,11 @@
     ],
     "scripts": {
         "dev": "npm --workspace client run dev",
-        "build": "npm --workspace client run build"
+        "build": "npm --workspace client run build",
+        "fmt": "npm --workspace client run fmt",
+        "lint": "npm --workspace client run lint"
+    },
+    "devDependencies": {
+        "prettier": "^3.5.3"
     }
 }

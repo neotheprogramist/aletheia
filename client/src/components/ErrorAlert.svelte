@@ -6,7 +6,7 @@
 	<p class="mb-1 font-semibold">⚠️ An error occurred:</p>
 
 	{#if message}
-		<pre class="whitespace-pre-wrap text-sm">{message}</pre>
+		<pre class="text-sm whitespace-pre-wrap">{message}</pre>
 	{:else}
 		<slot />
 	{/if}

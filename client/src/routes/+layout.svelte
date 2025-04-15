@@ -44,7 +44,7 @@
 </script>
 
 <main class="flex min-h-screen flex-col">
-	<header class="fixed left-0 right-0 top-0 z-50">
+	<header class="fixed top-0 right-0 left-0 z-50">
 		<Navbar />
 	</header>
 

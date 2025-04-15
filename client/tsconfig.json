@@ -10,16 +10,9 @@
 		"sourceMap": true,
 		"strict": true,
 		"moduleResolution": "bundler",
-		"types": [
-			"svelte"
-		]
+		"types": ["svelte"]
 	},
-	"include": [
-		"src",
-		".svelte-kit/types",
-		"src/**/*",
-		"./.svelte-kit/ambient.d.ts"
-	]
+	"include": ["src", ".svelte-kit/types", "src/**/*", "./.svelte-kit/ambient.d.ts"]
 	// Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
 	// except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
 	//
