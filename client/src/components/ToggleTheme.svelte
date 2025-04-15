@@ -13,7 +13,7 @@
 
 <button
 	on:click={toggleTheme}
-	class="rounded-full p-2 transition-colors hover:bg-gray-700 dark:hover:bg-gray-300"
+	class="cursor-pointer rounded-full p-2 transition-colors hover:bg-gray-700 dark:hover:bg-gray-300"
 	aria-label="Toggle theme"
 >
 	{#if $theme === 'dark'}

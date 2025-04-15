@@ -44,6 +44,7 @@
 	},
 	"dependencies": {
 		"lucide-svelte": "^0.488.0",
+		"privacy-provider": "file:../../privacy-provider/privacy-provider-0.1.0.tgz",
 		"starknetkit": "^2.10.4"
 	}
 }
