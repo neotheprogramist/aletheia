@@ -1,0 +1,18 @@
+[package]
+name = "deposit"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "deposit"
+path = "src/main.rs"
+
+[dependencies]
+starknet.workspace = true
+clap.workspace = true
+url.workspace = true
+cainome-cairo-serde.workspace = true
+cainome-cairo-serde-derive.workspace = true
+tokio.workspace = true
+starknet-types-core.workspace = true
+thiserror.workspace = true
