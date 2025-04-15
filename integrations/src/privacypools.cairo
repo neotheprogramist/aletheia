@@ -8,7 +8,7 @@ pub trait IPrivacyPools<TContractState> {
         amount: u256,
         token_address: ContractAddress,
     ) -> bool;
-    fn withdraw(ref self: TContractState, proof: Span<felt252>) -> bool;
+    fn execute(ref self: TContractState, proof: Span<felt252>, external_contract_address: ContractAddress, calldata: Span<felt252>) -> bool;
     fn current_root(self: @TContractState) -> u256;
 }
 
@@ -44,7 +44,6 @@ pub mod PrivacyPools {
     const WITHDRAW_VERIFIER_CLASS_HASH: felt252 =
         0x56dbd57db028777433673cfd7108125ed9df76835434174b479fe67089aa622;
 
-
     use starknet::storage::StoragePointerWriteAccess;
     use starknet::storage::StoragePathEntry;
     use starknet::storage::StorageMapReadAccess;
@@ -52,12 +51,11 @@ pub mod PrivacyPools {
     use crate::{hash, verify_ultra_keccak_honk_proof_call};
     use crate::merkle::{MerkleTreeComponent, MerkleTreeComponent::InternalTrait};
     use super::{PublicInputWithdrawImpl};
-
     use openzeppelin::{
         access::ownable::OwnableComponent,
         token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait},
     };
-
+    use crate::executor::{IExecutorDispatcher, IExecutorDispatcherTrait};
     use starknet::{
         ContractAddress, get_caller_address, get_contract_address, event::EventEmitter,
         storage::{Map},
@@ -85,7 +83,7 @@ pub mod PrivacyPools {
     #[derive(Drop, PartialEq, starknet::Event)]
     enum Event {
         Deposit: Deposit,
-        Withdrawal: Withdrawal,
+        Execute: Execute,
         #[flat]
         OwnableEvent: OwnableComponent::Event,
         #[flat]
@@ -100,7 +98,7 @@ pub mod PrivacyPools {
     }
 
     #[derive(Drop, PartialEq, starknet::Event)]
-    pub struct Withdrawal {
+    pub struct Execute {
         #[key]
         pub caller: ContractAddress,
         #[key]
@@ -146,7 +144,7 @@ pub mod PrivacyPools {
             true
         }
 
-        fn withdraw(ref self: ContractState, proof: Span<felt252>) -> bool {
+        fn execute(ref self: ContractState, proof: Span<felt252>, external_contract_address: ContractAddress, calldata: Span<felt252>) -> bool {
             let public_input_serialized = verify_ultra_keccak_honk_proof_call(
                 WITHDRAW_VERIFIER_CLASS_HASH.try_into().unwrap(), proof,
             );
@@ -163,14 +161,19 @@ pub mod PrivacyPools {
 
             let token = IERC20Dispatcher { contract_address: public_input.token_address };
 
-            token.transfer(public_input.recipient, public_input.amount);
+            token.approve(external_contract_address, public_input.amount);
+
+            let external_contract = IExecutorDispatcher { contract_address: external_contract_address };
+            external_contract.execute(public_input.token_address, public_input.amount, calldata);
+
+            token.approve(external_contract_address, 0);
 
             self.merkle.add_leaf(public_input.refund_commitment_hash);
 
             let caller = get_caller_address();
             self
                 .emit(
-                    Withdrawal {
+                    Execute {
                         caller,
                         recipient: public_input.recipient,
                         amount: public_input.amount,
