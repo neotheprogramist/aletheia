@@ -86,7 +86,6 @@ pub mod PrivacyPools {
     enum Event {
         Deposit: Deposit,
         Withdrawal: Withdrawal,
-        FeeWithdrawal: FeeWithdrawal,
         #[flat]
         OwnableEvent: OwnableComponent::Event,
         #[flat]
@@ -111,43 +110,16 @@ pub mod PrivacyPools {
         pub refund_commitment_hash: u256,
     }
 
-    #[derive(Drop, PartialEq, starknet::Event)]
-    pub struct Merge {
-        #[key]
-        pub caller: ContractAddress,
-        pub merge_commitment_hash: u256,
-    }
-
-    #[derive(Drop, PartialEq, starknet::Event)]
-    pub struct Transfer {
-        #[key]
-        pub caller: ContractAddress,
-        pub refund_commitment_hash: u256,
-        pub transfer_commitment_hash: u256,
-    }
-
-    #[derive(Drop, PartialEq, starknet::Event)]
-    pub struct FeeWithdrawal {
-        #[key]
-        pub recipient: ContractAddress,
-        pub amount: u256,
-        pub token_address: ContractAddress,
-    }
-
     pub mod Errors {
         pub const INVALID_PROOF: felt252 = 'Pool: invalid proof';
         pub const NULLIFIER_ALREADY_USED: felt252 = 'Pool: nullifier already used';
         pub const INVALID_ROOT: felt252 = 'Pool: invalid root';
-        pub const INSUFFICIENT_FEE: felt252 = 'Pool: insufficient fee';
-        pub const INSUFFICIENT_TOTAL_FEE: felt252 = 'Pool: insufficient total fee';
     }
-
 
     #[constructor]
     fn constructor(
-        ref self: ContractState, owner: ContractAddress, fee_numerator: u256, fee_denominator: u256,
+        ref self: ContractState, owner: ContractAddress
     ) {
-        assert(fee_denominator > 0, 'Fee denominator cannot be 0');
         self.ownable.initializer(owner);
         self.merkle.initializer();
     }
