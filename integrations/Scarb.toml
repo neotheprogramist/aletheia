@@ -7,6 +7,8 @@ edition.workspace = true
 
 [dependencies]
 starknet.workspace = true
+openzeppelin.workspace = true
+garaga.workspace = true
 
 [dev-dependencies]
 snforge_std.workspace = true
@@ -14,9 +16,13 @@ assert_macros.workspace = true
 
 [[target.starknet-contract]]
 sierra = true
+casm = true
 
 [scripts]
 test = "snforge test"
+
+[tool.scarb]
+allow-prebuilt-plugins = ["snforge_std"]
 
 # Visit https://foundry-rs.github.io/starknet-foundry/appendix/scarb-toml.html for more information
 

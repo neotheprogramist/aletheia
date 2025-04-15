@@ -1,32 +1,30 @@
-/// Interface representing `HelloContract`.
-/// This interface allows modification and retrieval of the contract balance.
-#[starknet::interface]
-pub trait IHelloStarknet<TContractState> {
-    /// Increase contract balance.
-    fn increase_balance(ref self: TContractState, amount: felt252);
-    /// Retrieve contract balance.
-    fn get_balance(self: @TContractState) -> felt252;
+mod poseidon;
+mod merkle;
+
+
+use starknet::class_hash::ClassHash;
+use starknet::SyscallResultTrait;
+use core::circuit::u384;
+use poseidon::run_poseidon_grumpkin_circuit;
+
+fn hash(a: u256, b: u256) -> u256 {
+    let a: u384 = a.into();
+    let b: u384 = b.into();
+    run_poseidon_grumpkin_circuit(a, b).try_into().unwrap()
 }
 
-/// Simple contract for managing balance.
-#[starknet::contract]
-mod HelloStarknet {
-    use core::starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
+fn hash_one(a: u256) -> u256 {
+    hash(a, a)
+}
 
-    #[storage]
-    struct Storage {
-        balance: felt252,
-    }
+pub fn verify_ultra_keccak_honk_proof_call(
+    verifier_class_hash: ClassHash, proof: Span<felt252>,
+) -> Span<u256> {
+    let mut output_serialized = core::starknet::syscalls::library_call_syscall(
+        verifier_class_hash, selector!("verify_ultra_keccak_honk_proof"), proof,
+    )
+        .unwrap_syscall();
+    let output = Serde::<Option<Span<u256>>>::deserialize(ref output_serialized).unwrap().unwrap();
 
-    #[abi(embed_v0)]
-    impl HelloStarknetImpl of super::IHelloStarknet<ContractState> {
-        fn increase_balance(ref self: ContractState, amount: felt252) {
-            assert(amount != 0, 'Amount cannot be 0');
-            self.balance.write(self.balance.read() + amount);
-        }
-
-        fn get_balance(self: @ContractState) -> felt252 {
-            self.balance.read()
-        }
-    }
+    output
 }
