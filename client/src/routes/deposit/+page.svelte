@@ -10,14 +10,12 @@
 	import { privacy } from 'privacy-provider';
 	import { fetchTokenDecimals } from '$lib/utils/token';
 	import { wrapWithToast } from '$lib/utils/wrapWithToast';
-	// import JsonAction from '../../components/JsonAction.svelte';
+	import type { GeneratedOperation } from '$lib/types/api';
 
 	let tokenAddress: string = PUBLIC_STRK_TOKEN_ADDRESS;
 	let amount = '';
 	let processing = false;
-	let generated: any = null;
-	// let transactionHash: string = '';
-	// let depositData: Record<string, string> | null = null;
+	let generated: GeneratedOperation | null = null;
 
 	async function generateOperation() {
 		await wrapWithToast(
@@ -31,6 +29,10 @@
 					tokenAddress,
 					type: 'deposit'
 				});
+
+				if (!generated) {
+					throw new Error('Failed to generate operation');
+				}
 
 				await handleDeposit();
 			},
@@ -69,6 +71,8 @@
 				const { bigIntValue } = sanitizeAmount(amount, decimals);
 				if (bigIntValue <= 0n) throw new Error('Invalid amount');
 
+				if (!generated) throw new Error('Generated operation is null');
+
 				const secretAndNullifierHash = BigInt(generated.hash);
 				const [amountLow, amountHigh] = computeLowHighBits(bigIntValue);
 				const [secretLow, secretHigh] = computeLowHighBits(secretAndNullifierHash);
@@ -99,7 +103,10 @@
 			{
 				success: 'Deposit completed',
 				error: (e) => `Deposit failed: ${e instanceof Error ? e.message : String(e)}`,
-				onError: () => abortOperationExternally(generated.id)
+				onError: () => {
+					if (!generated) throw new Error('Generated operation is null');
+					abortOperationExternally(generated.id);
+				}
 			}
 		);
 
@@ -120,12 +127,4 @@
 		disabled={!tokenAddress || !amount || processing}
 		customClass="mt-4">{processing ? 'Processing...' : 'Deposit'}</ActionButton
 	>
-
-	<!-- {#if depositData}
-		<h2 class="mt-6 text-xl font-bold">Deposit Data:</h2>
-		<pre class="bg-card mt-2 w-full max-w-xl overflow-x-auto rounded-lg p-4 text-sm shadow-lg">
-		{JSON.stringify(depositData, null, 2)}
-	  </pre>
-		<JsonAction data={depositData} filePrefix={transactionHash} />
-	{/if} -->
 </PageContentContainer>
