@@ -1,5 +1,6 @@
 mod poseidon;
 mod merkle;
+pub mod privacypools;
 
 
 use starknet::class_hash::ClassHash;
