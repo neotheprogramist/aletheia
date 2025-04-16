@@ -2,12 +2,28 @@
 mod WithdrawExtension {
     use starknet::{
         ContractAddress,
+        event::EventEmitter
     };
 
     use openzeppelin::token::erc20::interface::{
         IERC20Dispatcher,
         IERC20DispatcherTrait,
     };
+
+    #[event]
+    #[derive(Drop, PartialEq, starknet::Event)]
+    enum Event {
+        TokenWithdrawn: TokenWithdrawn,
+    }
+    
+    #[derive(Drop, PartialEq, starknet::Event)]
+    struct TokenWithdrawn {
+        #[key]
+        recipient: ContractAddress,
+        #[key]
+        token: ContractAddress,
+        amount: u256,
+    }
 
     #[storage]
     struct Storage {}
@@ -22,6 +38,7 @@ mod WithdrawExtension {
             let amount: u256 = (*calldata[3]).try_into().unwrap();
 
             token.transfer_from(sender, recipient, amount);
+            self.emit(TokenWithdrawn {recipient, token: token_address, amount});
         }
     }
 }
