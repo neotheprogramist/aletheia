@@ -2,7 +2,7 @@
 # and https://foundry-rs.github.io/starknet-foundry/projects/configuration.html for more information
 
 [sncast.default] # Define a profile name
-url = "https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/<APIKEY>"
+url = "https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/M1xN5JzvCQoxejLv-feFyJp4xWLDT4J4"
 account = "argentACC"
 accounts-file = "accounts-file.json"
 # keystore = "~/keystore"                                  # Path to the keystore file

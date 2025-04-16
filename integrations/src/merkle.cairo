@@ -3,8 +3,10 @@ pub mod MerkleTreeComponent {
     use starknet::storage::StorageMapReadAccess;
 use core::starknet::storage::{
         StoragePointerReadAccess, StoragePointerWriteAccess, Map, StoragePathEntry, Vec,
-        MutableVecTrait,
+        MutableVecTrait, 
     };
+
+    use starknet::{ContractAddress, get_caller_address};
 
     use super::{precomputed_hashes, height};
     use crate::hash;
@@ -20,9 +22,19 @@ use core::starknet::storage::{
         pub used_commitments: Map<u256, bool>,
     }
 
+    #[derive(Drop, PartialEq, starknet::Event)]
+    pub struct Deposit {
+        #[key]
+        pub caller: ContractAddress,
+        pub deposit_commitment_hash: u256,
+    }
+
+
     #[event]
     #[derive(Drop, PartialEq, starknet::Event)]
-    pub enum Event {}
+    pub enum Event {
+        Deposit: Deposit
+    }
 
     #[generate_trait]
     pub impl InternalImpl<
@@ -62,6 +74,7 @@ use core::starknet::storage::{
             self.left_path.at(height - 1).write(hash_);
             self.roots.entry(hash_).write(true);
             self.root.write(hash_);
+            self.emit(Deposit { caller: get_caller_address(), deposit_commitment_hash: leaf });
         }
     }
 }
