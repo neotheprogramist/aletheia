@@ -9,3 +9,6 @@ edition = "2024_07"
 assert_macros = "2.9.2"
 snforge_std = "0.35.1"
 starknet = "2.9.2"
+openzeppelin = "0.20.0"
+garaga = { git = "https://github.com/keep-starknet-strange/garaga.git", tag = "v0.15.4" }
+
