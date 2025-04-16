@@ -126,7 +126,6 @@
 
 		try {
 			const decimalsResponse = await privacy.getTokenDecimals(tokenAddress);
-			console.log('X D ', decimalsResponse);
 
 			let decimals: any = null;
 			if (decimalsResponse?.error) {
