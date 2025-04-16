@@ -281,6 +281,7 @@
 			const calldata = [
 				...honkCalldataHex,
 				PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS,
+				"0x"+extensionCalldata.length.toString(16),
 				...extensionCalldata
 			];
 			const calls = [

@@ -47,7 +47,7 @@ impl PublicInputWithdrawImpl of PublicInputWithdrawTrait {
 #[starknet::contract]
 pub mod PrivacyPools {
     const WITHDRAW_VERIFIER_CLASS_HASH: felt252 =
-        0x6ba729580701d81e463f293d0106e94a4a2ed662ae2c04a8310bc9dff165236;
+        0x04b106a673a3272a37297b0a436cec0bbec9da4d95b76b4fb03ce1b0b6755efe;
 
 
     use starknet::storage::StoragePointerWriteAccess;
@@ -62,10 +62,7 @@ pub mod PrivacyPools {
         token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait},
     };
     use crate::zk_extension::{IZkExtensionDispatcher, IZkExtensionDispatcherTrait};
-    use starknet::{
-        ContractAddress, get_caller_address, get_contract_address,
-        storage::{Map},
-    };
+    use starknet::{ContractAddress, get_caller_address, get_contract_address, storage::{Map}};
 
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
     component!(path: MerkleTreeComponent, storage: merkle, event: MerkleEvent);
