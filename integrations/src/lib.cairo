@@ -3,7 +3,7 @@ mod merkle;
 mod zk_extension;
 pub mod privacypools;
 pub mod withdraw_extension;
-
+pub mod verifiers;
 
 use starknet::class_hash::ClassHash;
 use starknet::SyscallResultTrait;
