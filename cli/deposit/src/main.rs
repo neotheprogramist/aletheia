@@ -18,9 +18,11 @@ async fn main() -> Result<(), AppError> {
         args.account_private_key,
         args.contract_address,
         args.amount,
-        args.strk_address,
+        args.token_address,
     )
     .await?;
+
+    tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
     deposit(
         provider_url,
@@ -29,7 +31,7 @@ async fn main() -> Result<(), AppError> {
         args.contract_address,
         args.secret_nullifier_hash,
         args.amount,
-        args.strk_address,
+        args.token_address,
     )
     .await?;
 

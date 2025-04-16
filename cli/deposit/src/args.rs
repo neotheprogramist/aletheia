@@ -27,7 +27,7 @@ pub struct Args {
 
     /// The deposited token address (Hex string)
     #[arg(long, env)]
-    pub strk_address: Felt,
+    pub token_address: Felt,
 
     /// The amount for deposit (Hex string)
     #[arg(long, env)]
