@@ -33,7 +33,7 @@ mod WithdrawExtension {
         sender: ContractAddress,
         recipient: ContractAddress,
         token_address: ContractAddress,
-        amount: u256,
+        amount: felt252,
     }
 
     #[abi(embed_v0)]
@@ -48,6 +48,7 @@ mod WithdrawExtension {
             } = Serde::<WithdrawParams>::deserialize(ref input).unwrap();
         
             let token = IERC20Dispatcher { contract_address: token_address };
+            let amount: u256 = amount.into();
             token.transfer_from(sender, recipient, amount);
         
             self.emit(TokenWithdrawn {

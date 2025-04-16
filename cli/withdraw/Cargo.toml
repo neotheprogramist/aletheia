@@ -1,0 +1,21 @@
+[package]
+name = "withdraw"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "withdraw"
+path = "src/main.rs"
+
+[dependencies]
+starknet.workspace = true
+clap.workspace = true
+url.workspace = true
+cainome-cairo-serde.workspace = true
+cainome-cairo-serde-derive.workspace = true
+tokio.workspace = true
+starknet-types-core.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+rand.workspace = true

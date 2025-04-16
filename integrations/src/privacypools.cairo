@@ -8,7 +8,12 @@ pub trait IPrivacyPools<TContractState> {
         amount: u256,
         token_address: ContractAddress,
     ) -> bool;
-    fn execute(ref self: TContractState, proof: Span<felt252>, external_contract_address: ContractAddress, calldata: Span<felt252>) -> bool;
+    fn execute(
+        ref self: TContractState,
+        proof: Span<felt252>,
+        external_contract_address: ContractAddress,
+        calldata: Span<felt252>,
+    ) -> bool;
     fn current_root(self: @TContractState) -> u256;
 }
 
@@ -25,12 +30,12 @@ struct PublicInputWithdraw {
 #[generate_trait]
 impl PublicInputWithdrawImpl of PublicInputWithdrawTrait {
     fn from_u256_span(span: Span<u256>) -> PublicInputWithdraw {
-        let token_address: felt252 = (*span[1]).try_into().unwrap();
+        let token_address: felt252 = (*span[2]).try_into().unwrap();
         let recipient: felt252 = (*span[5]).try_into().unwrap();
 
         PublicInputWithdraw {
             root: *span[0],
-            nullifier_hash: *span[2],
+            nullifier_hash: *span[1],
             recipient: recipient.try_into().unwrap(),
             refund_commitment_hash: *span[4],
             amount: *span[3],
@@ -42,7 +47,8 @@ impl PublicInputWithdrawImpl of PublicInputWithdrawTrait {
 #[starknet::contract]
 pub mod PrivacyPools {
     const WITHDRAW_VERIFIER_CLASS_HASH: felt252 =
-        0x24813d6d4ab9e973ff8c087535272a410f10fcafa0a27505405d83a3a964e78;
+        0x6ba729580701d81e463f293d0106e94a4a2ed662ae2c04a8310bc9dff165236;
+
 
     use starknet::storage::StoragePointerWriteAccess;
     use starknet::storage::StoragePathEntry;
@@ -95,9 +101,7 @@ pub mod PrivacyPools {
     }
 
     #[constructor]
-    fn constructor(
-        ref self: ContractState, owner: ContractAddress
-    ) {
+    fn constructor(ref self: ContractState, owner: ContractAddress) {
         self.ownable.initializer(owner);
         self.merkle.initializer();
     }
@@ -123,7 +127,12 @@ pub mod PrivacyPools {
             true
         }
 
-        fn execute(ref self: ContractState, proof: Span<felt252>, external_contract_address: ContractAddress, calldata: Span<felt252>) -> bool {
+        fn execute(
+            ref self: ContractState,
+            proof: Span<felt252>,
+            external_contract_address: ContractAddress,
+            calldata: Span<felt252>,
+        ) -> bool {
             let public_input_serialized = verify_ultra_keccak_honk_proof_call(
                 WITHDRAW_VERIFIER_CLASS_HASH.try_into().unwrap(), proof,
             );
@@ -142,7 +151,9 @@ pub mod PrivacyPools {
 
             token.approve(external_contract_address, public_input.amount);
 
-            let external_contract = IZkExtensionDispatcher { contract_address: external_contract_address };
+            let external_contract = IZkExtensionDispatcher {
+                contract_address: external_contract_address,
+            };
             external_contract.execute(calldata);
 
             token.approve(external_contract_address, 0);
@@ -155,6 +166,5 @@ pub mod PrivacyPools {
         fn current_root(self: @ContractState) -> u256 {
             self.merkle.root.read()
         }
-
     }
 }
