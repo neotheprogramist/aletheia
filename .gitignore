@@ -1,5 +1,6 @@
 **/*.lock
 .snfoundry_cache/
+accounts-file.json
 
 #### PYTHON
 

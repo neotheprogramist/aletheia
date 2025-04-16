@@ -42,7 +42,7 @@ impl PublicInputWithdrawImpl of PublicInputWithdrawTrait {
 #[starknet::contract]
 pub mod PrivacyPools {
     const WITHDRAW_VERIFIER_CLASS_HASH: felt252 =
-        0x56dbd57db028777433673cfd7108125ed9df76835434174b479fe67089aa622;
+        0x24813d6d4ab9e973ff8c087535272a410f10fcafa0a27505405d83a3a964e78;
 
     use starknet::storage::StoragePointerWriteAccess;
     use starknet::storage::StoragePathEntry;
