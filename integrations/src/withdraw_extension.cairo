@@ -28,17 +28,34 @@ mod WithdrawExtension {
     #[storage]
     struct Storage {}
 
+    #[derive(Drop, Serde)]
+    struct WithdrawParams {
+        sender: ContractAddress,
+        recipient: ContractAddress,
+        token_address: ContractAddress,
+        amount: u256,
+    }
+
     #[abi(embed_v0)]
     impl WithdrawExtension of crate::zk_extension::IZkExtension<ContractState> {
-        fn execute(ref self: ContractState, calldata: Span<felt252>){
-            let sender: ContractAddress = (*calldata[0]).try_into().unwrap();
-            let recipient: ContractAddress = (*calldata[1]).try_into().unwrap();
-            let token_address: ContractAddress = (*calldata[2]).try_into().unwrap();
-            let token = IERC20Dispatcher {contract_address: token_address};
-            let amount: u256 = (*calldata[3]).try_into().unwrap();
-
+        fn execute(ref self: ContractState, calldata: Span<felt252>) {
+            let mut input = calldata;
+            let WithdrawParams {
+                sender,
+                recipient,
+                token_address,
+                amount,
+            } = Serde::<WithdrawParams>::deserialize(ref input).unwrap();
+        
+            let token = IERC20Dispatcher { contract_address: token_address };
             token.transfer_from(sender, recipient, amount);
-            self.emit(TokenWithdrawn {recipient, token: token_address, amount});
+        
+            self.emit(TokenWithdrawn {
+                recipient,
+                token: token_address,
+                amount,
+            });
         }
+        
     }
 }
