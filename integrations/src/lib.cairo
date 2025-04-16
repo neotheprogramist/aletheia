@@ -1,6 +1,6 @@
 mod poseidon;
 mod merkle;
-mod executor;
+mod zk_extension;
 pub mod privacypools;
 pub mod withdraw_extension;
 

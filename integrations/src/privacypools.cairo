@@ -55,7 +55,7 @@ pub mod PrivacyPools {
         access::ownable::OwnableComponent,
         token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait},
     };
-    use crate::executor::{IExecutorDispatcher, IExecutorDispatcherTrait};
+    use crate::zk_extension::{IZkExtensionDispatcher, IZkExtensionDispatcherTrait};
     use starknet::{
         ContractAddress, get_caller_address, get_contract_address, event::EventEmitter,
         storage::{Map},
@@ -163,8 +163,8 @@ pub mod PrivacyPools {
 
             token.approve(external_contract_address, public_input.amount);
 
-            let external_contract = IExecutorDispatcher { contract_address: external_contract_address };
-            external_contract.execute(public_input.token_address, public_input.amount, calldata);
+            let external_contract = IZkExtensionDispatcher { contract_address: external_contract_address };
+            external_contract.execute(calldata);
 
             token.approve(external_contract_address, 0);
 

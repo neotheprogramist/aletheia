@@ -13,11 +13,15 @@ mod WithdrawExtension {
     struct Storage {}
 
     #[abi(embed_v0)]
-    impl WithdrawExtension of crate::executor::IExecutor<ContractState> {
-        fn execute(ref self: ContractState, token_address: ContractAddress, amount: u256, calldata: Span<felt252>){
-            let recipient: ContractAddress = (*calldata[0]).try_into().unwrap();
+    impl WithdrawExtension of crate::zk_extension::IZkExtension<ContractState> {
+        fn execute(ref self: ContractState, calldata: Span<felt252>){
+            let sender: ContractAddress = (*calldata[0]).try_into().unwrap();
+            let recipient: ContractAddress = (*calldata[1]).try_into().unwrap();
+            let token_address: ContractAddress = (*calldata[2]).try_into().unwrap();
             let token = IERC20Dispatcher {contract_address: token_address};
-            token.transfer(recipient, amount);
+            let amount: u256 = (*calldata[3]).try_into().unwrap();
+
+            token.transfer_from(sender, recipient, amount);
         }
     }
 }
