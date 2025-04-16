@@ -12,7 +12,11 @@
 		}
 	});
 
-	import { PUBLIC_STRK_TOKEN_ADDRESS } from '$env/static/public';
+	import {
+		PUBLIC_STRK_TOKEN_ADDRESS,
+		PUBLIC_TORNADO_CONTRACT_ADDRESS,
+		PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS
+	} from '$env/static/public';
 
 	let showFeeModal = false;
 	let withdrawFee: string | null = null;
@@ -30,8 +34,10 @@
 	import ErrorAlert from '../../components/ErrorAlert.svelte';
 	import { privacy } from 'privacy-provider';
 	import { sanitizeAmount, validateAmountInput } from '$lib/utils/sanitize';
-	import { TxnType } from '$lib/types/api';
 	import JsonAction from '../../components/JsonAction.svelte';
+	import { get } from 'svelte/store';
+	import { wallet } from '$lib/stores/wallet';
+	import { computeLowHighBits } from '$lib/utils/conversions';
 
 	async function generateRefund(amount: string, tokenAddress: string) {
 		if (!amount || !tokenAddress) {
@@ -125,6 +131,9 @@
 		errorMessage = '';
 
 		try {
+			const connectedWallet = get(wallet);
+			if (!connectedWallet) throw new Error('Wallet not connected');
+
 			const decimalsResponse = await privacy.getTokenDecimals(tokenAddress);
 
 			let decimals: any = null;
@@ -167,44 +176,12 @@
 				throw new Error('⚠️ Unknown response from get token name.');
 			}
 
-			let bodyGetFee = JSON.stringify({ txn_type: 'Withdraw', token_name: tokenNameData });
-
-			const withdrawFeeResponse = await privacy.getFeeData(bodyGetFee);
-
-			let withdrawFeeData: any = null;
-
-			if (withdrawFeeResponse?.error) {
-				throw new Error(withdrawFeeResponse.error);
-			} else if (withdrawFeeResponse?.data) {
-				withdrawFeeData = withdrawFeeResponse.data;
-			} else {
-				throw new Error('⚠️ Unknown response from get fee data.');
-			}
-
-			const { displayValue: dispGasFee, bigIntValue: amountWeiGasFee } = sanitizeAmount(
-				withdrawFeeData.gas_fee.toString(),
-				decimals
-			);
-
-			const { displayValue: dispPaymasterFee, bigIntValue: amountWeiPaymasterFee } = sanitizeAmount(
-				withdrawFeeData.paymaster_fee.toString(),
-				decimals
-			);
-
-			const overallFee = amountWeiPaymasterFee + amountWeiGasFee;
-
-			maxWithdrawWei = commitmentAmountWeiGaraga - overallFee;
-
-			maxWithdraw = (Number(commitmentAmountWeiGaraga - overallFee) / 10 ** decimals).toString();
-
-			withdrawFee = (Number(overallFee) / 10 ** decimals).toString();
-
+			maxWithdrawWei = commitmentAmountWeiGaraga;
+			maxWithdraw = (Number(commitmentAmountWeiGaraga) / 10 ** decimals).toString();
 			tokenName = tokenNameData;
 
 			if (maxWithdrawWei < 0n) {
-				throw new Error(
-					'Not enough funds to withdraw, withdraw fee: ' + withdrawFee + ' ' + tokenName
-				);
+				throw new Error('Not enough funds to withdraw ' + tokenName);
 			}
 			showFeeModal = true;
 			const userAccepted = await new Promise<boolean>((resolve) => {
@@ -221,9 +198,7 @@
 				return;
 			}
 
-			const refundGaraga =
-				commitmentAmountWeiGaraga - amountWithdrawWei - amountWeiPaymasterFee - amountWeiGasFee;
-
+			const refundGaraga = commitmentAmountWeiGaraga - amountWithdrawWei;
 			const secretAndNullifierHash = selectedDeposit.hash;
 
 			const { hash: intermediateHashGaraga } = await privacy.poseidonHash({
@@ -257,9 +232,6 @@
 			}
 
 			const amountWeiGaragaHex = `0x${amountWithdrawWei.toString(16)}`;
-			const amountGasFeeHex = `0x${amountWeiGasFee.toString(16)}`;
-			const amountPaymasterFeeHex = `0x${amountWeiPaymasterFee.toString(16)}`;
-
 			const refundResponse = await generateRefund(
 				(Number(refundGaraga) / 10 ** decimals).toString(),
 				tokenAddress
@@ -278,8 +250,6 @@
 				hashpath_1: proofData.hash_path,
 				index_1: `0x${BigInt(proofData.index).toString(16)}`,
 				amount: amountWeiGaragaHex,
-				gas_fee: amountGasFeeHex,
-				paymaster_fee: amountPaymasterFeeHex,
 				_recipient: recipient
 			};
 
@@ -287,9 +257,9 @@
 				circuit: {
 					name: 'withdraw',
 					jsonUrl:
-						'https://raw.githubusercontent.com/Uacias/circuits-playground/main/withdraw/target/withdraw.json',
+						'https://raw.githubusercontent.com/neotheprogramist/aletheia/main/client/static/withdraw.json',
 					vkUrl:
-						'https://raw.githubusercontent.com/Uacias/circuits-playground/main/withdraw/target/vk_withdraw.bin'
+						'https://raw.githubusercontent.com/neotheprogramist/aletheia/main/client/static/vk_withdraw.bin'
 				},
 				witnessInput: dataToGenerateWitness
 			});
@@ -300,23 +270,30 @@
 
 			const honkCalldataHex = proof;
 
-			const body = JSON.stringify({
-				selector: 'withdraw',
-				calldata: honkCalldataHex,
-				token_address: tokenAddress,
-				expected_gas_fee: amountWeiGasFee.toString(),
-				expected_paymaster_fee: amountWeiPaymasterFee.toString(),
-				txn_type: TxnType.Withdraw
+			const [amountLow, amountHigh] = computeLowHighBits(BigInt(amount));
+			const extensionCalldata = [
+				PUBLIC_TORNADO_CONTRACT_ADDRESS,
+				recipient,
+				tokenAddress,
+				amountLow,
+				amountHigh
+			];
+			const calldata = [
+				...honkCalldataHex,
+				PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS,
+				...extensionCalldata
+			];
+			const calls = [
+				{
+					contract_address: PUBLIC_TORNADO_CONTRACT_ADDRESS,
+					entry_point: 'execute',
+					calldata
+				}
+			];
+			await connectedWallet.request({
+				type: 'wallet_addInvokeTransaction',
+				params: { calls }
 			});
-
-			const executeTransactionResponse = await privacy.exetuceTransacion(body);
-			if (executeTransactionResponse?.error) {
-				throw new Error(executeTransactionResponse.error);
-			} else if (executeTransactionResponse?.hash) {
-				transactionHash = executeTransactionResponse.hash;
-			} else {
-				throw new Error('⚠️ Unknown response from transaction.');
-			}
 
 			await confirmOperationExternally(refund.id);
 			await nullifyOperationExternally(selectedDeposit.id);

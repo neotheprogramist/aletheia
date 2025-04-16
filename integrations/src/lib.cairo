@@ -1,6 +1,8 @@
 mod poseidon;
 mod merkle;
 mod zk_extension;
+mod withdraw_verifier;
+
 pub mod privacypools;
 pub mod withdraw_extension;
 pub mod verifiers;

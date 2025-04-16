@@ -49,6 +49,7 @@ pub mod PrivacyPools {
     const WITHDRAW_VERIFIER_CLASS_HASH: felt252 =
         0x6ba729580701d81e463f293d0106e94a4a2ed662ae2c04a8310bc9dff165236;
 
+
     use starknet::storage::StoragePointerWriteAccess;
     use starknet::storage::StoragePathEntry;
     use starknet::storage::StorageMapReadAccess;
@@ -62,7 +63,7 @@ pub mod PrivacyPools {
     };
     use crate::zk_extension::{IZkExtensionDispatcher, IZkExtensionDispatcherTrait};
     use starknet::{
-        ContractAddress, get_caller_address, get_contract_address, event::EventEmitter,
+        ContractAddress, get_caller_address, get_contract_address,
         storage::{Map},
     };
 
@@ -87,30 +88,10 @@ pub mod PrivacyPools {
     #[event]
     #[derive(Drop, PartialEq, starknet::Event)]
     enum Event {
-        Deposit: Deposit,
-        Execute: Execute,
         #[flat]
         OwnableEvent: OwnableComponent::Event,
         #[flat]
         MerkleEvent: MerkleTreeComponent::Event,
-    }
-
-    #[derive(Drop, PartialEq, starknet::Event)]
-    pub struct Deposit {
-        #[key]
-        pub caller: ContractAddress,
-        pub deposit_commitment_hash: u256,
-    }
-
-    #[derive(Drop, PartialEq, starknet::Event)]
-    pub struct Execute {
-        #[key]
-        pub caller: ContractAddress,
-        #[key]
-        pub recipient: ContractAddress,
-        pub amount: u256,
-        pub token_address: ContractAddress,
-        pub refund_commitment_hash: u256,
     }
 
     pub mod Errors {
@@ -142,7 +123,6 @@ pub mod PrivacyPools {
             let this = get_contract_address();
             let token = IERC20Dispatcher { contract_address: token_address };
             token.transfer_from(caller, this, amount.into());
-            self.emit(Deposit { caller, deposit_commitment_hash });
 
             true
         }
@@ -179,18 +159,6 @@ pub mod PrivacyPools {
             token.approve(external_contract_address, 0);
 
             self.merkle.add_leaf(public_input.refund_commitment_hash);
-
-            let caller = get_caller_address();
-            self
-                .emit(
-                    Execute {
-                        caller,
-                        recipient: public_input.recipient,
-                        amount: public_input.amount,
-                        token_address: public_input.token_address,
-                        refund_commitment_hash: public_input.refund_commitment_hash,
-                    },
-                );
 
             true
         }
