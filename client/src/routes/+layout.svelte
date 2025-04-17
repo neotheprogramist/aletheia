@@ -19,15 +19,15 @@
 
 		await wrapWithToast(
 			async () => {
-				const { wallet: connectedWallet, connectorData } = await connect({
-					modalMode: 'neverAsk'
-				});
+				const { wallet: connectedWallet, connectorData } = await connect({ modalMode: 'neverAsk' });
 				if (connectedWallet && connectorData?.account) {
 					wallet.set(connectedWallet);
 					walletAddress.set(connectorData.account);
 					isConnected.set(true);
 
-					goto('/deposit');
+					if (pathname === '/') {
+						goto('/deposit');
+					}
 				} else if (protectedPaths.includes(pathname)) {
 					goto('/');
 					throw new Error('Please connect your wallet first');
