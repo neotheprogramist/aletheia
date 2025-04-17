@@ -20,7 +20,8 @@ pub enum AppError {
     SerdeError(#[from] serde_json::Error),
     #[error("Unexpected receipt type")]
     UnexpectedReceiptType,
+    #[error("Transaction failed: {0}")]
+    TransactionFailed(String),
     #[error(transparent)]
     FeltFromStr(#[from] starknet_types_core::felt::FromStrError),
-
 }

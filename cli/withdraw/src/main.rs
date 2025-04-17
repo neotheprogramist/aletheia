@@ -4,7 +4,7 @@ pub mod utils;
 use args::Args;
 use clap::Parser;
 use errors::AppError;
-use utils::{load_proof, withdraw};
+use utils::{load_garaga_proof, withdraw};
 
 #[tokio::main]
 async fn main() -> Result<(), AppError> {
@@ -19,7 +19,7 @@ async fn main() -> Result<(), AppError> {
         args.amount,
     ];
 
-    let proof = load_proof(&args.proof_path)?;
+    let proof = load_garaga_proof(&args.proof_path)?;
 
     withdraw(
         provider_url,
