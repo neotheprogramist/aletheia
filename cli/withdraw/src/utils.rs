@@ -4,9 +4,7 @@ use crate::errors::AppError;
 use starknet::{
     accounts::{Account, ExecutionEncoding, SingleOwnerAccount},
     core::{
-        types::{
-            Call, InvokeTransactionResult, 
-        },
+        types::{Call, InvokeTransactionResult},
         utils::get_selector_from_name,
     },
     providers::{
@@ -42,27 +40,36 @@ pub async fn withdraw(
 
     let mut extended_calldata = proof.clone();
     extended_calldata.extend(vec![external_contract_address]);
+    extended_calldata.extend(vec![Felt::from(calldata.len())]);
     extended_calldata.extend(calldata);
 
-    println!("proof {:?}", proof[5]);
 
     let deposit_call = Call {
         to: contract_address,
         selector: get_selector_from_name("execute")?,
-        calldata: proof,
+        calldata: extended_calldata,
     };
     let result = account.execute_v3(vec![deposit_call]).send().await?;
     println!("result: {:#?}", result);
     Ok(result)
 }
 
-pub fn load_proof(path: &PathBuf) -> Result<Vec<Felt>, AppError> {
+pub fn load_garaga_proof(path: &PathBuf) -> Result<Vec<Felt>, AppError> {
     let content = fs::read_to_string(path)?;
-    let hex_vec: Vec<String> = serde_json::from_str(&content)?;
-    let proof = hex_vec
-        .into_iter()
-        .map(|s| Felt::from_hex_unchecked(&s))
-        .collect();
-    Ok(proof)
-}
+    let numbers: Vec<&str> = content.split_whitespace().collect();
 
+    let proof: Vec<Felt> = numbers
+        .into_iter()
+        .map(|s| {
+            Felt::from_dec_str(&s)
+                .map_err(|e| AppError::FeltFromStr(e))
+                .unwrap()
+        })
+        .collect();
+
+    let proof_length = Felt::from(proof.len());
+    let mut extended_proof = vec![proof_length];
+    extended_proof.extend(proof);
+
+    Ok(extended_proof)
+}
