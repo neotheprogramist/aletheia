@@ -1,2 +1,2 @@
 [workspace]
-members = ["client/static/circuits/withdraw"]
+members = ["circuits/withdraw"]
