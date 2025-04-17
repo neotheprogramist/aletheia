@@ -270,18 +270,16 @@
 
 			const honkCalldataHex = proof;
 
-			const [amountLow, amountHigh] = computeLowHighBits(BigInt(amount));
 			const extensionCalldata = [
 				PUBLIC_TORNADO_CONTRACT_ADDRESS,
 				recipient,
 				tokenAddress,
-				amountLow,
-				amountHigh
+				amountWeiGaragaHex
 			];
 			const calldata = [
 				...honkCalldataHex,
 				PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS,
-				"0x"+extensionCalldata.length.toString(16),
+				'0x' + extensionCalldata.length.toString(16),
 				...extensionCalldata
 			];
 			const calls = [
