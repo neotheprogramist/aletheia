@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["cli/deposit", "cli/withdraw"]
+members = ["cli/deposit", "cli/withdraw", "cli/deployment"]
 
 [workspace.package]
 version = "0.1.0"
@@ -24,3 +24,5 @@ thiserror = "2.0.11"
 serde = { version = "1.0.217", features = ["derive"] }
 serde_json = "1.0.138"
 rand = "0.8.5"
+tracing = "0.1"
+tracing-subscriber = "0.2"
