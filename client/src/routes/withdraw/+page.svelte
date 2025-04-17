@@ -1,6 +1,36 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { PUBLIC_STRK_TOKEN_ADDRESS } from '$env/static/public';
+	import ActionButton from '../../components/ActionButton.svelte';
+	import InputField from '../../components/InputField.svelte';
+	import PageContentContainer from '../../components/PageContentContainer.svelte';
+	import ErrorAlert from '../../components/ErrorAlert.svelte';
+	import { sanitizeAmount, validateAmountInput } from '$lib/utils/sanitize';
+	import { TxnType } from '$lib/types/api';
+	import { privacy } from 'privacy-provider';
+	import JsonAction from '../../components/JsonAction.svelte';
+
+	let tokenAddress: string = PUBLIC_STRK_TOKEN_ADDRESS;
+	let withdrawFee: string | null = null;
+	let tokenName: string = '';
+	let onFeeAccepted: ((accepted: boolean) => void) | null = null;
+	let maxWithdraw: string = '';
+	let refund: any = null;
+	let proofData: any = null;
+	let transactionHash: string = '';
+	let commitmentAmount: string = '';
+	let recipient: string = '';
+	let amount: string = '';
+	let areInputsValid: boolean = false;
+	let maxWithdrawWei: bigint | null = null;
+	let amountWithdrawWei: bigint | null = null;
+	let refundData: Record<string, string> | null = null;
+	let processing: boolean = false;
+	let selectedDeposit: any = null;
+	let selectedDepositIndex: number = -1;
 	let deposits: any[] = [];
+	let showFeeModal = false;
+	let errorMessage: string = '';
 
 	onMount(async () => {
 		try {
@@ -12,27 +42,6 @@
 			console.error('❌ Privacy API error:', err);
 		}
 	});
-
-	import { PUBLIC_STRK_TOKEN_ADDRESS } from '$env/static/public';
-
-	let showFeeModal = false;
-	let withdrawFee: string | null = null;
-	let tokenName: string = '';
-	let onFeeAccepted: ((accepted: boolean) => void) | null = null;
-	let maxWithdraw: string = '';
-	let selectedDepositIndex: number = -1;
-	let refund: any = null;
-	let proofData: any = null;
-
-	import ActionButton from '../../components/ActionButton.svelte';
-	import InputField from '../../components/InputField.svelte';
-
-	import PageContentContainer from '../../components/PageContentContainer.svelte';
-	import ErrorAlert from '../../components/ErrorAlert.svelte';
-	import { sanitizeAmount, validateAmountInput } from '$lib/utils/sanitize';
-	import { TxnType } from '$lib/types/api';
-	import { privacy } from 'privacy-provider';
-	import JsonAction from '../../components/JsonAction.svelte';
 
 	async function generateRefund(amount: string, tokenAddress: string) {
 		if (!amount || !tokenAddress) {
@@ -74,21 +83,6 @@
 			console.error('❌ Nullify failed:', err);
 		}
 	}
-
-	let transactionHash: string = '';
-	let jsonError: boolean = false;
-	let commitmentAmount: string = '';
-	let recipient: string = '';
-	let amount: string = '';
-	let tokenAddress: string = PUBLIC_STRK_TOKEN_ADDRESS;
-	let areInputsValid: boolean = false;
-	let maxWithdrawWei: bigint | null = null;
-	let amountWithdrawWei: bigint | null = null;
-
-	let refundData: Record<string, string> | null = null;
-	let processing: boolean = false;
-	let errorMessage: string = '';
-	let selectedDeposit: any = null;
 
 	$: selectedDeposit = deposits.find((d) => d.index === selectedDepositIndex);
 
@@ -331,9 +325,6 @@
 <PageContentContainer title="Withdraw">
 	{#if errorMessage}
 		<ErrorAlert message={errorMessage} />
-	{/if}
-	{#if jsonError}
-		<p class="mt-2 text-red-500">Invalid JSON format</p>
 	{/if}
 
 	{#if deposits.length > 0}
