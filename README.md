@@ -27,7 +27,7 @@ Circuits and verifier contracts live outside this directory. Circuits are hosted
 - Starknet Sepolia STRK (can be obtained from the [Starknet Faucet](https://starknet-faucet.vercel.app/))
 
 > 🧪 If the Aletheia Privacy Extension is not yet available in the Chrome Web Store (latest version pending approval: `v1.1.0`), please contact the repository owner to obtain the `.zip` file.  
-> Once received, unzip it and load it manually via `chrome://extensions → Load unpacked`.
+> Once received, unzip it and load it manually via `chrome://extensions → Enable dev mode → Load unpacked → Select build folder`.
 
 ### Argent Wallet setup
 
@@ -54,6 +54,14 @@ Once the extension is ready, and you have:
 - Obtained **testnet ETH** from the [Starknet Faucet](https://starknet-faucet.vercel.app/)
 
 You can now start the frontend app:
+
+Inside `cleint` directory create `.env` file and insert these envs
+
+```
+PUBLIC_TORNADO_CONTRACT_ADDRESS="0x0737c26de1579c8f93b539d68b7f74b12f68ce1fef682265e0b3ccc4cc73be39"
+PUBLIC_STRK_TOKEN_ADDRESS="0x4718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"
+PUBLIC_PRIVACY_API="https://privacypoolsstaging.visoft.dev"
+```
 
 ```bash
 git clone git@github.com:neotheprogramist/aletheia.git
