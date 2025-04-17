@@ -4,11 +4,11 @@
 	import ActionButton from '../../components/ActionButton.svelte';
 	import InputField from '../../components/InputField.svelte';
 	import PageContentContainer from '../../components/PageContentContainer.svelte';
-	import ErrorAlert from '../../components/ErrorAlert.svelte';
 	import { sanitizeAmount, validateAmountInput } from '$lib/utils/sanitize';
 	import { TxnType } from '$lib/types/api';
 	import { privacy } from 'privacy-provider';
 	import JsonAction from '../../components/JsonAction.svelte';
+	import { wrapWithToast } from '$lib/utils/wrapWithToast';
 
 	let tokenAddress: string = PUBLIC_STRK_TOKEN_ADDRESS;
 	let withdrawFee: string | null = null;
@@ -30,58 +30,37 @@
 	let selectedDepositIndex: number = -1;
 	let deposits: any[] = [];
 	let showFeeModal = false;
-	let errorMessage: string = '';
 
-	onMount(async () => {
-		try {
-			console.log('[frontend] Waiting for Privacy API...');
-			const res = await privacy.getConfirmedOperations();
-			console.log('✅ Confirmed ops:', res.operations);
-			deposits = res.operations;
-		} catch (err) {
-			console.error('❌ Privacy API error:', err);
-		}
+	// Load confirmed operations
+	onMount(() => {
+		wrapWithToast(
+			async () => {
+				const res = await privacy.getConfirmedOperations();
+				deposits = res.operations;
+			},
+			{ error: 'Failed to load your deposits' }
+		);
 	});
 
 	async function generateRefund(amount: string, tokenAddress: string) {
 		if (!amount || !tokenAddress) {
-			alert('Please enter amount and token address');
-			return;
+			throw new Error('Please enter amount & token address');
 		}
-
-		try {
-			return await privacy.generateOperation({
-				amount,
-				tokenAddress,
-				type: 'deposit'
-			});
-		} catch (err) {
-			console.error('❌ Failed to generate operation:', err);
-		}
+		return privacy.generateOperation({
+			amount,
+			tokenAddress,
+			type: 'deposit'
+		});
 	}
 
 	async function confirmOperationExternally(id: number) {
-		try {
-			await privacy.confirmOperation(id);
-		} catch (err) {
-			console.error('❌ Confirm failed:', err);
-		}
+		return privacy.confirmOperation(id);
 	}
-
 	async function abortOperationExternally(id: number) {
-		try {
-			await privacy.abortOperation(id);
-		} catch (err) {
-			console.error('❌ Abort failed:', err);
-		}
+		return privacy.abortOperation(id);
 	}
-
 	async function nullifyOperationExternally(id: number) {
-		try {
-			await privacy.nullifyOperation(id);
-		} catch (err) {
-			console.error('❌ Nullify failed:', err);
-		}
+		return privacy.nullifyOperation(id);
 	}
 
 	$: selectedDeposit = deposits.find((d) => d.index === selectedDepositIndex);
@@ -90,243 +69,158 @@
 
 	async function withdrawHandler() {
 		processing = true;
-		errorMessage = '';
 
-		try {
-			const decimalsResponse = await privacy.getTokenDecimals(tokenAddress);
-			let decimals: any = null;
-			if (decimalsResponse?.error) {
-				throw new Error(decimalsResponse.error);
-			} else if (decimalsResponse?.data) {
-				console.log('✅ Fetch decimals successful:', decimalsResponse.data);
-				decimals = decimalsResponse.data.decimals;
-			} else {
-				throw new Error('⚠️ Unknown response from get decimals.');
-			}
+		await wrapWithToast(
+			async () => {
+				// fetch decimals
+				const decRes = await privacy.getTokenDecimals(tokenAddress);
+				const decimals =
+					decRes.data?.decimals ??
+					(() => {
+						throw new Error(decRes.error ?? 'No decimals');
+					})();
 
-			if (decimals === undefined || decimals === null) {
-				throw new Error('Failed to fetch token decimals.');
-			}
-			commitmentAmount = selectedDeposit.metadata.amount.toString();
-			const { displayValue: dispCommitment, bigIntValue: commitmentAmountWeiGaraga } =
-				sanitizeAmount(commitmentAmount, decimals);
-			const { displayValue: dispAmount, bigIntValue: amountWeiGaraga } = sanitizeAmount(
-				amount,
-				decimals
-			);
+				// get commitment + amount
+				commitmentAmount = selectedDeposit.metadata.amount.toString();
+				const { bigIntValue: commitmentWei } = sanitizeAmount(commitmentAmount, decimals);
+				const { bigIntValue: withdrawWei } = sanitizeAmount(amount, decimals);
+				amountWithdrawWei = withdrawWei;
+				if (commitmentWei <= 0n || withdrawWei <= 0n) throw new Error('Invalid amount');
 
-			amountWithdrawWei = amountWeiGaraga;
+				// token name
+				const nameRes = await privacy.getTokenName(tokenAddress);
+				tokenName =
+					nameRes.data?.name ??
+					(() => {
+						throw new Error(nameRes.error || 'No name');
+					})();
 
-			if (commitmentAmountWeiGaraga <= 0n) {
-				throw new Error('Invalid commitment amount');
-			}
-			if (amountWeiGaraga <= 0n) {
-				throw new Error('Invalid amount');
-			}
-
-			const tokenNameResponse = await privacy.getTokenName(tokenAddress);
-			let tokenNameData: string = '';
-
-			if (tokenNameResponse?.error) {
-				throw new Error(tokenNameResponse.error);
-			} else if (tokenNameResponse?.data) {
-				console.log('✅ Fetch token name successful:', tokenNameResponse.data);
-				tokenNameData = tokenNameResponse.data.name;
-			} else {
-				throw new Error('⚠️ Unknown response from get token name.');
-			}
-
-			console.log('name:', tokenNameData);
-
-			let bodyGetFee = JSON.stringify({ txn_type: 'Withdraw', token_name: tokenNameData });
-
-			const withdrawFeeResponse = await privacy.getFeeData(bodyGetFee);
-
-			let withdrawFeeData: any = null;
-
-			if (withdrawFeeResponse?.error) {
-				throw new Error(withdrawFeeResponse.error);
-			} else if (withdrawFeeResponse?.data) {
-				console.log('✅ Transaction successful:', withdrawFeeResponse.data);
-				withdrawFeeData = withdrawFeeResponse.data;
-			} else {
-				throw new Error('⚠️ Unknown response from get fee data.');
-			}
-
-			const { displayValue: dispGasFee, bigIntValue: amountWeiGasFee } = sanitizeAmount(
-				withdrawFeeData.gas_fee.toString(),
-				decimals
-			);
-
-			const { displayValue: dispPaymasterFee, bigIntValue: amountWeiPaymasterFee } = sanitizeAmount(
-				withdrawFeeData.paymaster_fee.toString(),
-				decimals
-			);
-
-			const overallFee = amountWeiPaymasterFee + amountWeiGasFee;
-
-			maxWithdrawWei = commitmentAmountWeiGaraga - overallFee;
-			maxWithdraw = (Number(commitmentAmountWeiGaraga - overallFee) / 10 ** decimals).toString();
-
-			withdrawFee = (Number(overallFee) / 10 ** decimals).toString();
-			tokenName = tokenNameData;
-
-			if (maxWithdrawWei < 0n) {
-				throw new Error(
-					'Not enough funds to withdraw, withdraw fee: ' + withdrawFee + ' ' + tokenName
+				// get fee
+				const feeRes = await privacy.getFeeData(
+					JSON.stringify({ txn_type: 'Withdraw', token_name: tokenName })
 				);
-			}
-			showFeeModal = true;
-			const userAccepted = await new Promise<boolean>((resolve) => {
-				onFeeAccepted = resolve;
-			});
-
-			if (!userAccepted) {
-				selectedDeposit = null;
-				selectedDepositIndex = -1;
-				recipient = '';
-				amount = '';
-				areInputsValid = false;
-				processing = false;
-				return;
-			}
-
-			const refundGaraga =
-				commitmentAmountWeiGaraga - amountWithdrawWei - amountWeiPaymasterFee - amountWeiGasFee;
-
-			const secretAndNullifierHash = selectedDeposit.hash;
-			console.log('secretandnullifierhash:', secretAndNullifierHash);
-
-			const { hash: intermediateHashGaraga } = await privacy.poseidonHash({
-				a: BigInt(secretAndNullifierHash),
-				b: commitmentAmountWeiGaraga
-			});
-
-			console.log('intermediateHashGaraga:', intermediateHashGaraga);
-
-			const { hash: commitmentGaraga } = await privacy.poseidonHash({
-				a: intermediateHashGaraga,
-				b: BigInt(tokenAddress)
-			});
-
-			console.log('commitmentGaraga:', commitmentGaraga);
-
-			const commitmentAmountWeiGaragaHex = `0x${commitmentAmountWeiGaraga.toString(16)}`;
-			const commitmentGaragaHex = `0x${BigInt(commitmentGaraga).toString(16)}`;
-
-			const getProofBody = JSON.stringify({ commitment: commitmentGaragaHex });
-
-			const getProofDataResponse = await privacy.getProofData(getProofBody);
-
-			if (getProofDataResponse?.error) {
-				throw new Error(getProofDataResponse.error);
-			} else if (getProofDataResponse?.data) {
-				console.log('✅ Transaction successful:', getProofDataResponse.data);
-				proofData = getProofDataResponse.data;
-			} else {
-				throw new Error('⚠️ Unknown response from get proof data.');
-			}
-
-			if (refundGaraga < 0) {
-				throw new Error(
-					'Withdrawal amount too large - max withdrawal amount: ' + maxWithdraw + tokenName
+				const feeData =
+					feeRes.data ??
+					(() => {
+						throw new Error(feeRes.error || 'No fee');
+					})();
+				const { bigIntValue: gasFee } = sanitizeAmount(feeData.gas_fee.toString(), decimals);
+				const { bigIntValue: paymasterFee } = sanitizeAmount(
+					feeData.paymaster_fee.toString(),
+					decimals
 				);
-			}
+				const overallFee = gasFee + paymasterFee;
 
-			const amountWeiGaragaHex = `0x${amountWithdrawWei.toString(16)}`;
-			const amountGasFeeHex = `0x${amountWeiGasFee.toString(16)}`;
-			const amountPaymasterFeeHex = `0x${amountWeiPaymasterFee.toString(16)}`;
+				// calculate max withdraw
+				maxWithdrawWei = commitmentWei - overallFee;
+				withdrawFee = (Number(overallFee) / 10 ** decimals).toString();
+				maxWithdraw = (Number(maxWithdrawWei) / 10 ** decimals).toString();
+				if (maxWithdrawWei < 0n)
+					throw new Error(`Insufficient funds (fee ${withdrawFee} ${tokenName})`);
 
-			const refundResponse = await generateRefund(
-				(Number(refundGaraga) / 10 ** decimals).toString(),
-				tokenAddress
-			);
-			if (!refundResponse?.id) {
-				throw new Error('Refund ID not returned');
-			}
-			refund = { id: refundResponse.id, decimals: decimals };
-
-			const dataToGenerateWitness: any = {
-				root_1: proofData.root,
-				deposits_id: [selectedDepositIndex],
-				refunds_id: [refund],
-				commitment_amount_1: commitmentAmountWeiGaragaHex,
-				token_address_1: tokenAddress,
-				hashpath_1: proofData.hash_path,
-				index_1: `0x${BigInt(proofData.index).toString(16)}`,
-				amount: amountWeiGaragaHex,
-				gas_fee: amountGasFeeHex,
-				paymaster_fee: amountPaymasterFeeHex,
-				_recipient: recipient
-			};
-			console.log('dataToGenerateWitness', dataToGenerateWitness);
-
-			const { error, proof } = await privacy.generateProof({
-				circuit: {
-					name: 'withdraw',
-					jsonUrl:
-						'https://raw.githubusercontent.com/Uacias/circuits-playground/main/withdraw/target/withdraw.json',
-					vkUrl:
-						'https://raw.githubusercontent.com/Uacias/circuits-playground/main/withdraw/target/vk_withdraw.bin'
-				},
-				witnessInput: dataToGenerateWitness
-			});
-
-			if (error) {
-				throw new Error(error);
-			}
-
-			const honkCalldataHex = proof;
-
-			const body = JSON.stringify({
-				selector: 'withdraw',
-				calldata: honkCalldataHex,
-				token_address: tokenAddress,
-				expected_gas_fee: amountWeiGasFee.toString(),
-				expected_paymaster_fee: amountWeiPaymasterFee.toString(),
-				txn_type: TxnType.Withdraw
-			});
-
-			const executeTransactionResponse = await privacy.exetuceTransacion(body);
-			if (executeTransactionResponse?.error) {
-				throw new Error(executeTransactionResponse.error);
-			} else if (executeTransactionResponse?.hash) {
-				console.log('✅ Transaction successful:', executeTransactionResponse.hash);
-				transactionHash = executeTransactionResponse.hash;
-			} else {
-				throw new Error('⚠️ Unknown response from transaction.');
-			}
-
-			await confirmOperationExternally(refund.id);
-			await nullifyOperationExternally(selectedDeposit.id);
-
-			selectedDepositIndex = -1;
-			recipient = '';
-			amount = '';
-			proofData = null;
-			areInputsValid = false;
-			alert('SUCCESS!');
-		} catch (error) {
-			console.error(error);
-			if (error instanceof Error) {
-				errorMessage = error.message;
-				if (refund && refund.id) {
-					await abortOperationExternally(refund.id);
+				// confirm withdrawal
+				showFeeModal = true;
+				const accepted = await new Promise<boolean>((r) => (onFeeAccepted = r));
+				if (!accepted) {
+					throw new Error('User rejected withdrawal');
 				}
-			} else {
-				errorMessage = 'Unknown error while withdrawing.';
+
+				// build refund
+				const refundAmount = commitmentWei - withdrawWei - paymasterFee - gasFee;
+				const { hash: h1 } = await privacy.poseidonHash({
+					a: BigInt(selectedDeposit.hash),
+					b: commitmentWei
+				});
+				const { hash: leaf } = await privacy.poseidonHash({ a: h1, b: BigInt(tokenAddress) });
+
+				const proofRes = await privacy.getProofData(
+					JSON.stringify({ commitment: `0x${BigInt(leaf).toString(16)}` })
+				);
+				proofData =
+					proofRes.data ??
+					(() => {
+						throw new Error(proofRes.error || 'No proof');
+					})();
+
+				if (refundAmount < 0n) throw new Error('Withdrawal amount too large');
+
+				// generate refund commitment
+				const refundResp = await generateRefund(
+					(Number(refundAmount) / 10 ** decimals).toString(),
+					tokenAddress
+				);
+				if (!refundResp) {
+					throw new Error('Failed to generate refund operation');
+				}
+				if (!refundResp.id) {
+					throw new Error('Refund ID missing');
+				}
+				refund = { id: refundResp.id, decimals };
+
+				// build witness + proof
+				const witnessInput = {
+					root_1: proofData.root,
+					deposits_id: [selectedDepositIndex],
+					refunds_id: [refund],
+					commitment_amount_1: `0x${commitmentWei.toString(16)}`,
+					token_address_1: tokenAddress,
+					hashpath_1: proofData.hash_path,
+					index_1: `0x${BigInt(proofData.index).toString(16)}`,
+					amount: `0x${withdrawWei.toString(16)}`,
+					gas_fee: `0x${gasFee.toString(16)}`,
+					paymaster_fee: `0x${paymasterFee.toString(16)}`,
+					_recipient: recipient
+				};
+
+				const { error, proof } = await privacy.generateProof({
+					circuit: {
+						name: 'withdraw',
+						jsonUrl:
+							'https://raw.githubusercontent.com/Uacias/circuits-playground/main/withdraw/target/withdraw.json',
+						vkUrl:
+							'https://raw.githubusercontent.com/Uacias/circuits-playground/main/withdraw/target/vk_withdraw.bin'
+					},
+					witnessInput
+				});
+				if (error) throw new Error(error);
+
+				// execute on‑chain
+				const execRes = await privacy.exetuceTransacion(
+					JSON.stringify({
+						selector: 'withdraw',
+						calldata: proof,
+						token_address: tokenAddress,
+						expected_gas_fee: gasFee.toString(),
+						expected_paymaster_fee: paymasterFee.toString(),
+						txn_type: TxnType.Withdraw
+					})
+				);
+				if (execRes.error) throw new Error(execRes.error);
+				transactionHash = execRes.hash!;
+
+				// finalize
+				await confirmOperationExternally(refund.id);
+				await nullifyOperationExternally(selectedDeposit.id);
+				selectedDepositIndex = -1;
+				recipient = amount = '';
+			},
+			{
+				success: 'Withdrawal complete!',
+				error: (e) => `Withdrawal failed: ${e instanceof Error ? e.message : String(e)}`,
+				onError: async (err) => {
+					console.error('Withdraw failed, aborting refund op:', err);
+					if (refund && refund.id) {
+						await abortOperationExternally(refund.id);
+					}
+				}
 			}
-		}
+		);
 
 		processing = false;
 	}
 </script>
 
 <PageContentContainer title="Withdraw">
-	{#if errorMessage}
-		<ErrorAlert message={errorMessage} />
-	{/if}
-
 	{#if deposits.length > 0}
 		<h2 class="mt-6 text-xl font-bold">Select Deposit:</h2>
 		<div class="mt-2 max-h-64 overflow-y-auto rounded-md border bg-gray-900 p-2">
