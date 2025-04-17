@@ -4,19 +4,16 @@
 
 	onMount(async () => {
 		try {
+			console.log('[frontend] Waiting for Privacy API...');
 			const res = await privacy.getConfirmedOperations();
-
+			console.log('✅ Confirmed ops:', res.operations);
 			deposits = res.operations;
 		} catch (err) {
 			console.error('❌ Privacy API error:', err);
 		}
 	});
 
-	import {
-		PUBLIC_STRK_TOKEN_ADDRESS,
-		PUBLIC_TORNADO_CONTRACT_ADDRESS,
-		PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS
-	} from '$env/static/public';
+	import { PUBLIC_STRK_TOKEN_ADDRESS } from '$env/static/public';
 
 	let showFeeModal = false;
 	let withdrawFee: string | null = null;
@@ -32,12 +29,10 @@
 
 	import PageContentContainer from '../../components/PageContentContainer.svelte';
 	import ErrorAlert from '../../components/ErrorAlert.svelte';
-	import { privacy } from 'privacy-provider';
 	import { sanitizeAmount, validateAmountInput } from '$lib/utils/sanitize';
+	import { TxnType } from '$lib/types/api';
+	import { privacy } from 'privacy-provider';
 	import JsonAction from '../../components/JsonAction.svelte';
-	import { get } from 'svelte/store';
-	import { wallet } from '$lib/stores/wallet';
-	import { computeLowHighBits } from '$lib/utils/conversions';
 
 	async function generateRefund(amount: string, tokenAddress: string) {
 		if (!amount || !tokenAddress) {
@@ -81,9 +76,7 @@
 	}
 
 	let transactionHash: string = '';
-	let depositDataJson: string = '';
 	let jsonError: boolean = false;
-	let secret: string = '';
 	let commitmentAmount: string = '';
 	let recipient: string = '';
 	let amount: string = '';
@@ -96,31 +89,6 @@
 	let processing: boolean = false;
 	let errorMessage: string = '';
 	let selectedDeposit: any = null;
-	$: {
-		if (depositDataJson.trim()) {
-			try {
-				const parsed = JSON.parse(depositDataJson);
-				if (parsed.secret && parsed.tokenAddress && parsed.amount) {
-					secret = parsed.secret;
-					tokenAddress = parsed.tokenAddress;
-					commitmentAmount = parsed.amount.toString();
-					jsonError = false;
-				} else {
-					secret = '';
-					commitmentAmount = '';
-					jsonError = true;
-				}
-			} catch (err) {
-				secret = '';
-				commitmentAmount = '';
-				jsonError = true;
-			}
-		} else {
-			secret = '';
-			commitmentAmount = '';
-			jsonError = false;
-		}
-	}
 
 	$: selectedDeposit = deposits.find((d) => d.index === selectedDepositIndex);
 
@@ -131,15 +99,12 @@
 		errorMessage = '';
 
 		try {
-			const connectedWallet = get(wallet);
-			if (!connectedWallet) throw new Error('Wallet not connected');
-
 			const decimalsResponse = await privacy.getTokenDecimals(tokenAddress);
-
 			let decimals: any = null;
 			if (decimalsResponse?.error) {
 				throw new Error(decimalsResponse.error);
 			} else if (decimalsResponse?.data) {
+				console.log('✅ Fetch decimals successful:', decimalsResponse.data);
 				decimals = decimalsResponse.data.decimals;
 			} else {
 				throw new Error('⚠️ Unknown response from get decimals.');
@@ -171,17 +136,51 @@
 			if (tokenNameResponse?.error) {
 				throw new Error(tokenNameResponse.error);
 			} else if (tokenNameResponse?.data) {
+				console.log('✅ Fetch token name successful:', tokenNameResponse.data);
 				tokenNameData = tokenNameResponse.data.name;
 			} else {
 				throw new Error('⚠️ Unknown response from get token name.');
 			}
 
-			maxWithdrawWei = commitmentAmountWeiGaraga;
-			maxWithdraw = (Number(commitmentAmountWeiGaraga) / 10 ** decimals).toString();
+			console.log('name:', tokenNameData);
+
+			let bodyGetFee = JSON.stringify({ txn_type: 'Withdraw', token_name: tokenNameData });
+
+			const withdrawFeeResponse = await privacy.getFeeData(bodyGetFee);
+
+			let withdrawFeeData: any = null;
+
+			if (withdrawFeeResponse?.error) {
+				throw new Error(withdrawFeeResponse.error);
+			} else if (withdrawFeeResponse?.data) {
+				console.log('✅ Transaction successful:', withdrawFeeResponse.data);
+				withdrawFeeData = withdrawFeeResponse.data;
+			} else {
+				throw new Error('⚠️ Unknown response from get fee data.');
+			}
+
+			const { displayValue: dispGasFee, bigIntValue: amountWeiGasFee } = sanitizeAmount(
+				withdrawFeeData.gas_fee.toString(),
+				decimals
+			);
+
+			const { displayValue: dispPaymasterFee, bigIntValue: amountWeiPaymasterFee } = sanitizeAmount(
+				withdrawFeeData.paymaster_fee.toString(),
+				decimals
+			);
+
+			const overallFee = amountWeiPaymasterFee + amountWeiGasFee;
+
+			maxWithdrawWei = commitmentAmountWeiGaraga - overallFee;
+			maxWithdraw = (Number(commitmentAmountWeiGaraga - overallFee) / 10 ** decimals).toString();
+
+			withdrawFee = (Number(overallFee) / 10 ** decimals).toString();
 			tokenName = tokenNameData;
 
 			if (maxWithdrawWei < 0n) {
-				throw new Error('Not enough funds to withdraw ' + tokenName);
+				throw new Error(
+					'Not enough funds to withdraw, withdraw fee: ' + withdrawFee + ' ' + tokenName
+				);
 			}
 			showFeeModal = true;
 			const userAccepted = await new Promise<boolean>((resolve) => {
@@ -198,17 +197,25 @@
 				return;
 			}
 
-			const refundGaraga = commitmentAmountWeiGaraga - amountWithdrawWei;
+			const refundGaraga =
+				commitmentAmountWeiGaraga - amountWithdrawWei - amountWeiPaymasterFee - amountWeiGasFee;
+
 			const secretAndNullifierHash = selectedDeposit.hash;
+			console.log('secretandnullifierhash:', secretAndNullifierHash);
 
 			const { hash: intermediateHashGaraga } = await privacy.poseidonHash({
 				a: BigInt(secretAndNullifierHash),
 				b: commitmentAmountWeiGaraga
 			});
+
+			console.log('intermediateHashGaraga:', intermediateHashGaraga);
+
 			const { hash: commitmentGaraga } = await privacy.poseidonHash({
 				a: intermediateHashGaraga,
 				b: BigInt(tokenAddress)
 			});
+
+			console.log('commitmentGaraga:', commitmentGaraga);
 
 			const commitmentAmountWeiGaragaHex = `0x${commitmentAmountWeiGaraga.toString(16)}`;
 			const commitmentGaragaHex = `0x${BigInt(commitmentGaraga).toString(16)}`;
@@ -220,6 +227,7 @@
 			if (getProofDataResponse?.error) {
 				throw new Error(getProofDataResponse.error);
 			} else if (getProofDataResponse?.data) {
+				console.log('✅ Transaction successful:', getProofDataResponse.data);
 				proofData = getProofDataResponse.data;
 			} else {
 				throw new Error('⚠️ Unknown response from get proof data.');
@@ -232,6 +240,9 @@
 			}
 
 			const amountWeiGaragaHex = `0x${amountWithdrawWei.toString(16)}`;
+			const amountGasFeeHex = `0x${amountWeiGasFee.toString(16)}`;
+			const amountPaymasterFeeHex = `0x${amountWeiPaymasterFee.toString(16)}`;
+
 			const refundResponse = await generateRefund(
 				(Number(refundGaraga) / 10 ** decimals).toString(),
 				tokenAddress
@@ -250,16 +261,19 @@
 				hashpath_1: proofData.hash_path,
 				index_1: `0x${BigInt(proofData.index).toString(16)}`,
 				amount: amountWeiGaragaHex,
+				gas_fee: amountGasFeeHex,
+				paymaster_fee: amountPaymasterFeeHex,
 				_recipient: recipient
 			};
+			console.log('dataToGenerateWitness', dataToGenerateWitness);
 
 			const { error, proof } = await privacy.generateProof({
 				circuit: {
 					name: 'withdraw',
 					jsonUrl:
-						'https://raw.githubusercontent.com/neotheprogramist/aletheia/main/client/static/withdraw.json',
+						'https://raw.githubusercontent.com/Uacias/circuits-playground/main/withdraw/target/withdraw.json',
 					vkUrl:
-						'https://raw.githubusercontent.com/neotheprogramist/aletheia/main/client/static/vk_withdraw.bin'
+						'https://raw.githubusercontent.com/Uacias/circuits-playground/main/withdraw/target/vk_withdraw.bin'
 				},
 				witnessInput: dataToGenerateWitness
 			});
@@ -270,29 +284,24 @@
 
 			const honkCalldataHex = proof;
 
-			const extensionCalldata = [
-				PUBLIC_TORNADO_CONTRACT_ADDRESS,
-				recipient,
-				tokenAddress,
-				amountWeiGaragaHex
-			];
-			const calldata = [
-				...honkCalldataHex,
-				PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS,
-				'0x' + extensionCalldata.length.toString(16),
-				...extensionCalldata
-			];
-			const calls = [
-				{
-					contract_address: PUBLIC_TORNADO_CONTRACT_ADDRESS,
-					entry_point: 'execute',
-					calldata
-				}
-			];
-			await connectedWallet.request({
-				type: 'wallet_addInvokeTransaction',
-				params: { calls }
+			const body = JSON.stringify({
+				selector: 'withdraw',
+				calldata: honkCalldataHex,
+				token_address: tokenAddress,
+				expected_gas_fee: amountWeiGasFee.toString(),
+				expected_paymaster_fee: amountWeiPaymasterFee.toString(),
+				txn_type: TxnType.Withdraw
 			});
+
+			const executeTransactionResponse = await privacy.exetuceTransacion(body);
+			if (executeTransactionResponse?.error) {
+				throw new Error(executeTransactionResponse.error);
+			} else if (executeTransactionResponse?.hash) {
+				console.log('✅ Transaction successful:', executeTransactionResponse.hash);
+				transactionHash = executeTransactionResponse.hash;
+			} else {
+				throw new Error('⚠️ Unknown response from transaction.');
+			}
 
 			await confirmOperationExternally(refund.id);
 			await nullifyOperationExternally(selectedDeposit.id);
@@ -328,7 +337,7 @@
 	{/if}
 
 	{#if deposits.length > 0}
-		<h2 class="mt-6 text-xl font-bold tracking-wide uppercase">Select Deposit:</h2>
+		<h2 class="mt-6 text-xl font-bold">Select Deposit:</h2>
 		<div class="mt-2 max-h-64 overflow-y-auto rounded-md border bg-gray-900 p-2">
 			{#each deposits as deposit, index}
 				{#if deposit.metadata.amount != 0}
@@ -338,11 +347,9 @@
 							name="deposit"
 							value={deposit.index}
 							bind:group={selectedDepositIndex}
-							class="mr-2 h-4 w-4 text-blue-600 accent-blue-500"
+							class="mr-2"
 						/>
-						<div
-							class="bg-card flex w-full items-center rounded-md border border-gray-700 p-2 shadow-sm"
-						>
+						<div class="flex w-full items-center rounded-md border bg-gray-800 p-2">
 							<div class="mr-4">
 								<p class="text-sm text-gray-400">Id: {deposit.index}</p>
 								<p class="text-sm text-gray-400">Amount: {deposit.metadata.amount}</p>
@@ -375,7 +382,7 @@
 	>
 	{#if showFeeModal}
 		<div class="bg-opacity-50 fixed inset-0 flex items-center justify-center bg-black">
-			<div class="bg-card rounded-lg border border-gray-700 p-6 text-white shadow-2xl">
+			<div class="rounded-lg bg-white p-6 text-black shadow-lg">
 				<h2 class="text-lg font-bold">Confirm Withdraw Fee</h2>
 				<p class="mt-2">Withdraw Fee: {withdrawFee} {tokenName}</p>
 				<p class="mt-2">Max withdrawal amount: {maxWithdraw}</p>
