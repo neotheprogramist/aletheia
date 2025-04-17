@@ -60,6 +60,7 @@ pub async fn deployment(
 
     let declare_result = account
         .declare_v3(Arc::new(flattened_class1), casm_class_hash1)
+        .gas_price(20000000000)
         .send()
         .await?;
 
@@ -88,6 +89,7 @@ pub async fn deployment(
 
     let declare_result = account
         .declare_v3(Arc::new(flattened_class1), casm_class_hash1)
+        .gas_price(20000000000)
         .send()
         .await?;
 
