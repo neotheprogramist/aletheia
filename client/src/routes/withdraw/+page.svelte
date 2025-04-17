@@ -115,9 +115,8 @@
 				maxWithdrawWei = commitmentWei - overallFee;
 				withdrawFee = (Number(overallFee) / 10 ** decimals).toString();
 				maxWithdraw = (Number(maxWithdrawWei) / 10 ** decimals).toString();
-				if (maxWithdrawWei < 0n)
-					throw new Error(`Insufficient funds (fee ${withdrawFee} ${tokenName})`);
-
+				if (maxWithdrawWei <= 0n)
+					throw new Error(`Amount is fully consumed by fees (${withdrawFee} ${tokenName})`);
 				// confirm withdrawal
 				showFeeModal = true;
 				const accepted = await new Promise<boolean>((r) => (onFeeAccepted = r));
