@@ -32,7 +32,7 @@ Circuits and verifier contracts live outside this directory. Circuits are hosted
 ### Argent Wallet setup
 
 - Installed and set up [Argent X](https://www.argent.xyz/argent-x/) on Starknet Sepolia
-- Obtained **Sepolia ETH** from the [Starknet Faucet](https://starknet-faucet.vercel.app/).
+- Obtained **Sepolia STRK** from the [Starknet Faucet](https://starknet-faucet.vercel.app/).
 
 ### Aletheia Privacy Extension setup
 
@@ -51,7 +51,7 @@ That's it! The extension is now ready to handle private ZK operations from the f
 Once the extension is ready, and you have:
 
 - Installed and set up **Argent X**
-- Obtained **testnet ETH** from the [Starknet Faucet](https://starknet-faucet.vercel.app/)
+- Obtained **testnet STRK** from the [Starknet Faucet](https://starknet-faucet.vercel.app/)
 
 You can now start the frontend app:
 
@@ -94,7 +94,7 @@ On the **Deposit** page, you can:
 - Enter the **token address** (currently supported token is the Starknet native token — STARK).
 - Enter the **amount** you want to deposit.
 
-> ⚠️ Make sure your **Argent X** wallet on Starknet Sepolia has enough testnet ETH (STARK).  
+> ⚠️ Make sure your **Argent X** wallet on Starknet Sepolia has enough testnet STRK.  
 > Otherwise, the deposit transaction will fail. You can top up using the [Starknet Faucet](https://starknet-faucet.vercel.app/).
 
 - After submitting the deposit, your wallet will ask you to confirm the transaction.
