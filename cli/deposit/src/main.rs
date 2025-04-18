@@ -17,12 +17,12 @@ async fn main() -> Result<(), AppError> {
         args.account_address,
         args.account_private_key,
         args.contract_address,
-        args.amount,
+        args.amount.clone(),
         args.token_address,
     )
     .await?;
 
-    tokio::time::sleep(std::time::Duration::from_secs(15)).await;
+    tokio::time::sleep(std::time::Duration::from_secs(30)).await;
 
     deposit(
         provider_url,

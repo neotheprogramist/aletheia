@@ -14,4 +14,6 @@ pub enum AppError {
     ProviderError(#[from] ProviderError),
     #[error(transparent)]
     NonAsciiNameError(#[from] NonAsciiNameError),
+    #[error(transparent)]
+    ParseBigIntError(#[from] num::bigint::ParseBigIntError),
 }
