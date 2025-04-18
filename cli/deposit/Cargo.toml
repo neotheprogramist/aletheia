@@ -16,3 +16,4 @@ cainome-cairo-serde-derive.workspace = true
 tokio.workspace = true
 starknet-types-core.workspace = true
 thiserror.workspace = true
+num.workspace = true
