@@ -15,7 +15,7 @@ pub struct Args {
 
     /// deposit secret and nullifier hash
     #[arg(long, short, env)]
-    pub secret_nullifier_hash: Felt,
+    pub secret_nullifier_hash: String,
 
     /// The account private key (Hex string)
     #[arg(long, env)]
@@ -31,5 +31,5 @@ pub struct Args {
 
     /// The amount for deposit (Hex string)
     #[arg(long, env)]
-    pub amount: Felt,
+    pub amount: String,
 }
