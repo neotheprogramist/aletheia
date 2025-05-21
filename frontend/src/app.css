@@ -1,2 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap');
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
+
+/* 🌙 Dark Theme (default) */
+:root {
+	--color-primary: #4a90e2;
+	--color-secondary: #6c757d;
+	--color-background: #181818;
+	--color-text: #e0e0e0;
+	--color-border: #333;
+	--color-card: #222;
+	--font-mono: 'Fira Code', 'JetBrains Mono', 'Courier New', monospace;
+}
+
+/* 🌞 Light Theme */
+.light {
+	--color-background: #ececec;
+	--color-text: #212529;
+	--color-border: #bbb;
+	--color-card: #f0f0f0;
+}
+
+body {
+	background-color: var(--color-background);
+	color: var(--color-text);
+	font-family: var(--font-mono);
+}
+
+.card {
+	background-color: var(--color-card);
+	border: 1px solid var(--color-border);
+}
+
+.button {
+	background-color: var(--color-primary);
+	color: #fff;
+}
+
+.button:hover {
+	background-color: var(--color-secondary);
+}
+
+.input {
+	background-color: var(--color-card);
+	border: 1px solid var(--color-border);
+	color: var(--color-text);
+}
+
+main {
+	display: grid;
+	grid-template-rows: auto 1fr;
+	height: 100vh;
+}
+
+.content {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	padding: 16px;
+	height: calc(100vh - 80px);
+	overflow-y: auto;
+}
+
+header {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 20;
+	background-color: var(--color-background);
+	padding: 16px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+nav {
+	background-color: var(--color-background);
+	padding: 16px;
+	z-index: 20;
+}
+
+/* ============================
+   🔔 Toasts
+============================ */
+
+.toast-container {
+	position: fixed;
+	z-index: 1000;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	left: 50%;
+	transform: translateX(-50%);
+	width: auto;
+	pointer-events: none;
+	gap: 0.5rem;
+}
+
+.toast-container.bottom-center {
+	bottom: 2rem;
+}
+
+.toast-container.top-center {
+	top: 2rem;
+}
+
+.toast {
+	position: relative;
+	pointer-events: auto;
+	min-width: 280px;
+	max-width: 480px;
+	width: 100%;
+	padding: 0.75rem 1.25rem;
+	border-radius: 0.5rem;
+	background-color: var(--color-card);
+	color: var(--color-text);
+	border: 1px solid var(--color-border);
+	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+	font-family: var(--font-mono);
+	font-size: 0.875rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.toast.success {
+	border-left: 4px solid #4ade80;
+}
+
+.toast.error {
+	border-left: 4px solid #ef4444;
+}
+
+.toast.loading {
+	border-left: 4px solid #3b82f6;
+}
+
+.toast.info {
+	border-left: 4px solid #6b7280;
+}
+
+.toast .dismiss {
+	position: absolute;
+	top: 0.5rem;
+	right: 0.75rem;
+	background: none;
+	border: none;
+	color: inherit;
+	font-weight: bold;
+	cursor: pointer;
+	font-size: 1.25rem;
+	line-height: 1;
+}
