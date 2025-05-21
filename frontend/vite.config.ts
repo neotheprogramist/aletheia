@@ -1,3 +1,9 @@
+import { config } from 'dotenv-safe';
+config({
+	example: '.env.example',
+	path: '.env'
+});
+
 import tailwindcss from '@tailwindcss/vite';
 import { svelteTesting } from '@testing-library/svelte/vite';
 import { sveltekit } from '@sveltejs/kit/vite';

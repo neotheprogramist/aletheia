@@ -35,8 +35,8 @@ declare module '$env/static/private' {
 	export const HISTCONTROL: string;
 	export const XDG_MENU_PREFIX: string;
 	export const TERM_PROGRAM_VERSION: string;
-	export const HOSTNAME: string;
 	export const HISTSIZE: string;
+	export const HOSTNAME: string;
 	export const NODE: string;
 	export const SSH_AUTH_SOCK: string;
 	export const COLOR: string;
@@ -130,7 +130,13 @@ declare module '$env/static/private' {
  * ```
  */
 declare module '$env/static/public' {
-	
+	export const PUBLIC_TORNADO_CONTRACT_ADDRESS: string;
+	export const PUBLIC_STRK_TOKEN_ADDRESS: string;
+	export const PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS: string;
+	export const PUBLIC_SWAP_EXTENSION_CONTRACT_ADDRESS: string;
+	export const PUBLIC_BORROW_EXTENSION_CONTRACT_ADDRESS: string;
+	export const PUBLIC_TORNADO_DEPOSIT_SELECTOR: string;
+	export const PUBLIC_NODE_URL: string;
 }
 
 /**
@@ -158,8 +164,8 @@ declare module '$env/dynamic/private' {
 		HISTCONTROL: string;
 		XDG_MENU_PREFIX: string;
 		TERM_PROGRAM_VERSION: string;
-		HOSTNAME: string;
 		HISTSIZE: string;
+		HOSTNAME: string;
 		NODE: string;
 		SSH_AUTH_SOCK: string;
 		COLOR: string;
@@ -260,6 +266,13 @@ declare module '$env/dynamic/private' {
  */
 declare module '$env/dynamic/public' {
 	export const env: {
+		PUBLIC_TORNADO_CONTRACT_ADDRESS: string;
+		PUBLIC_STRK_TOKEN_ADDRESS: string;
+		PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS: string;
+		PUBLIC_SWAP_EXTENSION_CONTRACT_ADDRESS: string;
+		PUBLIC_BORROW_EXTENSION_CONTRACT_ADDRESS: string;
+		PUBLIC_TORNADO_DEPOSIT_SELECTOR: string;
+		PUBLIC_NODE_URL: string;
 		[key: `PUBLIC_${string}`]: string | undefined;
 	}
 }
