@@ -8,7 +8,6 @@
 
 	let deposits: Operation[] = [];
 
-	// Mode: 'withdraw' or 'fee'
 	let selectionMode: 'withdraw' | 'fee' = 'withdraw';
 
 	// Withdrawal selection
@@ -37,7 +36,6 @@
 		});
 	});
 
-	// Updated handler signature: receive index directly
 	function handleRowClick(globalIdx: number) {
 		if (selectionMode === 'withdraw') {
 			selectedWithdrawIndex = globalIdx;
@@ -48,7 +46,7 @@
 		}
 	}
 
-	// Disable the deposit already chosen in the other mode
+	// Disable the deposit chosen in the other mode
 	$: disabledIndexes =
 		selectionMode === 'withdraw'
 			? selectedFeeIndex !== null
@@ -64,14 +62,14 @@
 	<div class="mb-6 inline-flex">
 		<button
 			class="rounded-l-md border border-gray-300 px-4 py-2
-			   {selectionMode === 'withdraw' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}"
+				{selectionMode === 'withdraw' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}"
 			on:click={() => (selectionMode = 'withdraw')}
 		>
 			Withdraw
 		</button>
 		<button
 			class="-ml-px rounded-r-md border border-gray-300 px-4 py-2
-			   {selectionMode === 'fee' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}"
+				{selectionMode === 'fee' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}"
 			on:click={() => (selectionMode = 'fee')}
 		>
 			Fee
@@ -87,7 +85,7 @@
 		{/if}
 	</p>
 
-	<!-- Deposits table using callback prop -->
+	<!-- Deposits table with style props -->
 	<PaginatedTable
 		{columns}
 		items={deposits}
@@ -95,6 +93,9 @@
 		keyField="index"
 		{disabledIndexes}
 		onRowClick={handleRowClick}
+		activeIndex={selectionMode === 'withdraw' ? selectedWithdrawIndex : selectedFeeIndex}
+		inactiveIndex={selectionMode === 'withdraw' ? selectedFeeIndex : selectedWithdrawIndex}
+		hoverClass="hover:bg-green-600"
 	/>
 
 	<!-- Detail cards -->

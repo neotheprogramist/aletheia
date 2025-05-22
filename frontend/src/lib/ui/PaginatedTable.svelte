@@ -16,6 +16,11 @@
 	export let disabledIndexes: number[] = [];
 	export let onRowClick: (idx: number) => void = () => {};
 
+	// style props
+	export let activeIndex: number | null = null;
+	export let inactiveIndex: number | null = null;
+	export let hoverClass: string = 'hover:bg-emerald-800';
+
 	let currentPage = 1;
 	$: totalPages = Math.ceil(items.length / pageSize);
 	$: paginatedItems = items.slice((currentPage - 1) * pageSize, currentPage * pageSize);
@@ -27,7 +32,6 @@
 	function handleRowClick(_item: any, localIdx: number) {
 		const globalIndex = (currentPage - 1) * pageSize + localIdx;
 		if (disabledIndexes.includes(globalIndex)) return;
-		// Call the callback prop
 		onRowClick(globalIndex);
 	}
 </script>
@@ -44,9 +48,14 @@
 		{#each paginatedItems as item, idx (item[keyField])}
 			<tr
 				on:click={() => handleRowClick(item, idx)}
-				class={disabledIndexes.includes((currentPage - 1) * pageSize + idx)
-					? 'pointer-events-none opacity-50'
-					: 'cursor-pointer hover:bg-emerald-800'}
+				class={// Active row in current mode
+				(currentPage - 1) * pageSize + idx === activeIndex
+					? 'bg-green-800 text-white'
+					: // Inactive row from the other mode
+						(currentPage - 1) * pageSize + idx === inactiveIndex
+						? 'pointer-events-none bg-red-300 text-red-900'
+						: // Everything else
+							`cursor-pointer ${hoverClass}`}
 			>
 				{#each columns as col}
 					<td class="border-b border-gray-300 px-2 py-1">
