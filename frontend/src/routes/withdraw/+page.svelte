@@ -8,14 +8,14 @@
 
 	let deposits: Operation[] = [];
 
-	// tryb wyboru: 'withdraw' lub 'fee'
+	// Mode: 'withdraw' or 'fee'
 	let selectionMode: 'withdraw' | 'fee' = 'withdraw';
 
-	// wybrany withdraw
+	// Withdrawal selection
 	let selectedWithdrawIndex: number | null = null;
 	let selectedWithdrawDeposit: Operation | null = null;
 
-	// wybrany fee
+	// Fee selection
 	let selectedFeeIndex: number | null = null;
 	let selectedFeeDeposit: Operation | null = null;
 
@@ -37,18 +37,18 @@
 		});
 	});
 
-	function handleRowClick(event: CustomEvent<number>) {
-		const idx = event.detail;
+	// Updated handler signature: receive index directly
+	function handleRowClick(globalIdx: number) {
 		if (selectionMode === 'withdraw') {
-			selectedWithdrawIndex = idx;
-			selectedWithdrawDeposit = deposits[idx];
+			selectedWithdrawIndex = globalIdx;
+			selectedWithdrawDeposit = deposits[globalIdx];
 		} else {
-			selectedFeeIndex = idx;
-			selectedFeeDeposit = deposits[idx];
+			selectedFeeIndex = globalIdx;
+			selectedFeeDeposit = deposits[globalIdx];
 		}
 	}
 
-	// gdy w trybie 'withdraw', wyłącz indeks z fee; w trybie 'fee' — wyłącz withdraw
+	// Disable the deposit already chosen in the other mode
 	$: disabledIndexes =
 		selectionMode === 'withdraw'
 			? selectedFeeIndex !== null
@@ -60,7 +60,7 @@
 </script>
 
 <div class="mx-auto max-w-3xl p-6">
-	<!-- Toggle trybu -->
+	<!-- Mode toggle -->
 	<div class="mb-6 inline-flex">
 		<button
 			class="rounded-l-md border border-gray-300 px-4 py-2
@@ -78,7 +78,7 @@
 		</button>
 	</div>
 
-	<!-- Instrukcja -->
+	<!-- Instruction -->
 	<p class="mb-4 font-medium">
 		{#if selectionMode === 'withdraw'}
 			Select a deposit to <strong>withdraw</strong> from:
@@ -87,17 +87,17 @@
 		{/if}
 	</p>
 
-	<!-- Tabela depozytów -->
+	<!-- Deposits table using callback prop -->
 	<PaginatedTable
 		{columns}
 		items={deposits}
 		pageSize={5}
 		keyField="index"
 		{disabledIndexes}
-		on:rowClick={handleRowClick}
+		onRowClick={handleRowClick}
 	/>
 
-	<!-- Karty z detalami -->
+	<!-- Detail cards -->
 	<div class="mt-6 flex flex-col gap-4 md:flex-row">
 		{#if selectedWithdrawDeposit}
 			<Card title="Withdrawal Deposit">

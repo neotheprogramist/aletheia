@@ -1,4 +1,5 @@
 <script lang="ts" context="module">
+	// Column type in module context
 	export type Column<T> = {
 		label: string;
 		field: string | ((row: T) => any);
@@ -7,15 +8,13 @@
 </script>
 
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
-
+	// Props
 	export let items: any[] = [];
 	export let columns: Column<any>[] = [];
 	export let pageSize: number = 10;
 	export let keyField: string;
 	export let disabledIndexes: number[] = [];
-
-	const dispatch = createEventDispatcher<{ rowClick: number }>();
+	export let onRowClick: (idx: number) => void = () => {};
 
 	let currentPage = 1;
 	$: totalPages = Math.ceil(items.length / pageSize);
@@ -28,7 +27,8 @@
 	function handleRowClick(_item: any, localIdx: number) {
 		const globalIndex = (currentPage - 1) * pageSize + localIdx;
 		if (disabledIndexes.includes(globalIndex)) return;
-		dispatch('rowClick', globalIndex);
+		// Call the callback prop
+		onRowClick(globalIndex);
 	}
 </script>
 
