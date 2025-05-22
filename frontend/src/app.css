@@ -55,12 +55,12 @@ main {
 
 .content {
 	display: flex;
-	justify-content: center;
-	align-items: center;
+	justify-content: flex-start; /* as you switched it */
+	align-items: flex-start; /* ditto */
 	flex-direction: column;
-	padding: 16px;
-	height: calc(100vh - 80px);
-	overflow-y: auto;
+	padding: 16px; /* your existing padding */
+	padding-top: calc(16px + 64px); /* 16px existing + 64px header height */
+	height: calc(100vh - (64px + 32px)); /* subtract header (64) + vertical padding (2×16) */
 }
 
 header {

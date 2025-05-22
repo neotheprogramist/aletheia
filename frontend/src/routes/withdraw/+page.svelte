@@ -7,14 +7,10 @@
 	import { getAllByStatus } from '$lib/db/operations';
 
 	let deposits: Operation[] = [];
-
 	let selectionMode: 'withdraw' | 'fee' = 'withdraw';
 
-	// Withdrawal selection
 	let selectedWithdrawIndex: number | null = null;
 	let selectedWithdrawDeposit: Operation | null = null;
-
-	// Fee selection
 	let selectedFeeIndex: number | null = null;
 	let selectedFeeDeposit: Operation | null = null;
 
@@ -34,11 +30,7 @@
 				const ops = await getAllByStatus('confirmed');
 				deposits = ops.sort((a, b) => a.index - b.index);
 			},
-			{
-				loading: '⏳ Loading…',
-				success: '',
-				error: '❌ Load error'
-			}
+			{ loading: '⏳ Loading…', success: '', error: '❌ Load error' }
 		);
 	});
 
@@ -52,7 +44,6 @@
 		}
 	}
 
-	// Disable the deposit chosen in the other mode
 	$: disabledIndexes =
 		selectionMode === 'withdraw'
 			? selectedFeeIndex !== null
@@ -63,19 +54,18 @@
 				: [];
 </script>
 
-<div class="mx-auto max-w-3xl p-6">
-	<!-- Mode toggle -->
+<div class="mx-auto p-6">
 	<div class="mb-6 inline-flex">
 		<button
-			class="rounded-l-md border border-gray-300 px-4 py-2
-				{selectionMode === 'withdraw' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}"
+			class="rounded-l-md px-4 py-2
+		  {selectionMode === 'withdraw' ? 'bg-blue-400 text-white' : 'bg-gray-100 text-gray-700'}"
 			on:click={() => (selectionMode = 'withdraw')}
 		>
 			Withdraw
 		</button>
 		<button
-			class="-ml-px rounded-r-md border border-gray-300 px-4 py-2
-				{selectionMode === 'fee' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}"
+			class="-ml-px rounded-r-md px-4 py-2
+		  {selectionMode === 'fee' ? 'bg-blue-400 text-white' : 'bg-gray-100 text-gray-700'}"
 			on:click={() => (selectionMode = 'fee')}
 		>
 			Fee
@@ -91,7 +81,7 @@
 		{/if}
 	</p>
 
-	<!-- Deposits table with style props -->
+	<!-- Deposits table -->
 	<PaginatedTable
 		{columns}
 		items={deposits}
@@ -104,8 +94,10 @@
 		hoverClass="hover:bg-green-600"
 	/>
 
-	<!-- Detail cards -->
-	<div class="mt-6 flex flex-col gap-4 md:flex-row">
+	<div
+		class="mt-6 grid w-full grid-cols-1 justify-items-center gap-4
+		md:grid-cols-2"
+	>
 		{#if selectedWithdrawDeposit}
 			<Card title="Withdrawal Deposit">
 				<div class="space-y-2 text-sm">
