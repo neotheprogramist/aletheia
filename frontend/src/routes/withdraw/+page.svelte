@@ -7,8 +7,17 @@
 	import { getAllByStatus } from '$lib/db/operations';
 
 	let deposits: Operation[] = [];
-	let selectedKey: number | null = null;
-	$: selectedDeposit = deposits.find((d) => d.index === selectedKey) ?? null;
+
+	// tryb wyboru: 'withdraw' lub 'fee'
+	let selectionMode: 'withdraw' | 'fee' = 'withdraw';
+
+	// wybrany withdraw
+	let selectedWithdrawIndex: number | null = null;
+	let selectedWithdrawDeposit: Operation | null = null;
+
+	// wybrany fee
+	let selectedFeeIndex: number | null = null;
+	let selectedFeeDeposit: Operation | null = null;
 
 	const columns: Column<Operation>[] = [
 		{ label: 'Index', field: 'index' },
@@ -27,29 +36,93 @@
 			error: '❌ Load error'
 		});
 	});
+
+	function handleRowClick(event: CustomEvent<number>) {
+		const idx = event.detail;
+		if (selectionMode === 'withdraw') {
+			selectedWithdrawIndex = idx;
+			selectedWithdrawDeposit = deposits[idx];
+		} else {
+			selectedFeeIndex = idx;
+			selectedFeeDeposit = deposits[idx];
+		}
+	}
+
+	// gdy w trybie 'withdraw', wyłącz indeks z fee; w trybie 'fee' — wyłącz withdraw
+	$: disabledIndexes =
+		selectionMode === 'withdraw'
+			? selectedFeeIndex !== null
+				? [selectedFeeIndex]
+				: []
+			: selectedWithdrawIndex !== null
+				? [selectedWithdrawIndex]
+				: [];
 </script>
 
-<div class="flex flex-col items-center space-y-6">
-	<div class="mx-auto w-full max-w-4xl">
-		<PaginatedTable items={deposits} {columns} pageSize={5} keyField="index" bind:selectedKey />
+<div class="mx-auto max-w-3xl p-6">
+	<!-- Toggle trybu -->
+	<div class="mb-6 inline-flex">
+		<button
+			class="rounded-l-md border border-gray-300 px-4 py-2
+			   {selectionMode === 'withdraw' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}"
+			on:click={() => (selectionMode = 'withdraw')}
+		>
+			Withdraw
+		</button>
+		<button
+			class="-ml-px rounded-r-md border border-gray-300 px-4 py-2
+			   {selectionMode === 'fee' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}"
+			on:click={() => (selectionMode = 'fee')}
+		>
+			Fee
+		</button>
 	</div>
 
-	{#if selectedDeposit}
-		<Card title={`Selected Deposit #${selectedDeposit.index}`}>
-			<div class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
-				<div class="text-muted font-medium">Index:</div>
-				<div>{selectedDeposit.index}</div>
+	<!-- Instrukcja -->
+	<p class="mb-4 font-medium">
+		{#if selectionMode === 'withdraw'}
+			Select a deposit to <strong>withdraw</strong> from:
+		{:else}
+			Select a deposit to pay <strong>fee</strong>:
+		{/if}
+	</p>
 
-				<div class="text-muted font-medium">Amount:</div>
-				<div>{selectedDeposit.data?.amount}</div>
+	<!-- Tabela depozytów -->
+	<PaginatedTable
+		{columns}
+		items={deposits}
+		pageSize={5}
+		keyField="index"
+		{disabledIndexes}
+		on:rowClick={handleRowClick}
+	/>
 
-				<div class="text-muted font-medium">Token Address:</div>
-				<div class="overflow-x-auto">
-					<code class="break-all">
-						{selectedDeposit.data?.tokenAddress}
-					</code>
+	<!-- Karty z detalami -->
+	<div class="mt-6 flex flex-col gap-4 md:flex-row">
+		{#if selectedWithdrawDeposit}
+			<Card title="Withdrawal Deposit">
+				<div class="space-y-2 text-sm">
+					<div><strong>Index:</strong> {selectedWithdrawDeposit.index}</div>
+					<div><strong>Amount:</strong> {selectedWithdrawDeposit.data?.amount}</div>
+					<div>
+						<strong>Token:</strong>
+						<code class="break-all">{selectedWithdrawDeposit.data?.tokenAddress}</code>
+					</div>
 				</div>
-			</div>
-		</Card>
-	{/if}
+			</Card>
+		{/if}
+
+		{#if selectedFeeDeposit}
+			<Card title="Fee Deposit">
+				<div class="space-y-2 text-sm">
+					<div><strong>Index:</strong> {selectedFeeDeposit.index}</div>
+					<div><strong>Amount:</strong> {selectedFeeDeposit.data?.amount}</div>
+					<div>
+						<strong>Token:</strong>
+						<code class="break-all">{selectedFeeDeposit.data?.tokenAddress}</code>
+					</div>
+				</div>
+			</Card>
+		{/if}
+	</div>
 </div>
