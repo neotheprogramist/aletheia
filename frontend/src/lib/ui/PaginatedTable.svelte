@@ -1,5 +1,4 @@
 <script lang="ts" context="module">
-	// Column type in module context
 	export type Column<T> = {
 		label: string;
 		field: string | ((row: T) => any);
@@ -8,7 +7,6 @@
 </script>
 
 <script lang="ts">
-	// Props
 	export let items: any[] = [];
 	export let columns: Column<any>[] = [];
 	export let pageSize: number = 10;
@@ -26,6 +24,7 @@
 	$: paginatedItems = items.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
 	function selectPage(page: number) {
+		if (page < 1 || page > totalPages) return;
 		currentPage = page;
 	}
 
@@ -48,14 +47,11 @@
 		{#each paginatedItems as item, idx (item[keyField])}
 			<tr
 				on:click={() => handleRowClick(item, idx)}
-				class={// Active row in current mode
-				(currentPage - 1) * pageSize + idx === activeIndex
+				class={(currentPage - 1) * pageSize + idx === activeIndex
 					? 'bg-green-800 text-white'
-					: // Inactive row from the other mode
-						(currentPage - 1) * pageSize + idx === inactiveIndex
+					: (currentPage - 1) * pageSize + idx === inactiveIndex
 						? 'pointer-events-none bg-red-300 text-red-900'
-						: // Everything else
-							`cursor-pointer ${hoverClass}`}
+						: `cursor-pointer ${hoverClass}`}
 			>
 				{#each columns as col}
 					<td class="border-b border-gray-300 px-2 py-1">
@@ -71,15 +67,34 @@
 	</tbody>
 </table>
 
-<div class="mt-2 flex justify-center gap-1 font-mono">
-	{#each Array(totalPages) as _, i}
+<div class="mt-2 flex items-center justify-center gap-2 font-mono">
+	<button
+		class="rounded border px-2 py-1 hover:bg-gray-100 disabled:opacity-50"
+		on:click={() => selectPage(currentPage - 1)}
+		disabled={currentPage === 1}
+	>
+		◀ Prev
+	</button>
+
+	<button class="rounded border px-2 py-1 hover:bg-gray-100" on:click={() => selectPage(1)}>
+		1
+	</button>
+
+	{#if totalPages > 1}
+		<span class="px-2">…</span>
 		<button
-			class="rounded border border-gray-300 px-2 py-1 {currentPage === i + 1
-				? 'bg-gray-700 text-white'
-				: 'bg-white'}"
-			on:click={() => selectPage(i + 1)}
+			class="rounded border px-2 py-1 hover:bg-gray-100"
+			on:click={() => selectPage(totalPages)}
 		>
-			{i + 1}
+			{totalPages}
 		</button>
-	{/each}
+	{/if}
+
+	<button
+		class="rounded border px-2 py-1 hover:bg-gray-100 disabled:opacity-50"
+		on:click={() => selectPage(currentPage + 1)}
+		disabled={currentPage === totalPages}
+	>
+		Next ▶
+	</button>
 </div>
