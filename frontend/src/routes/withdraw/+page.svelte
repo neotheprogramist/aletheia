@@ -29,11 +29,17 @@
 	];
 
 	onMount(async () => {
-		await wrapWithToast(async () => (deposits = await getAllByStatus('confirmed')), {
-			loading: '⏳ Loading…',
-			success: '',
-			error: '❌ Load error'
-		});
+		await wrapWithToast(
+			async () => {
+				const ops = await getAllByStatus('confirmed');
+				deposits = ops.sort((a, b) => a.index - b.index);
+			},
+			{
+				loading: '⏳ Loading…',
+				success: '',
+				error: '❌ Load error'
+			}
+		);
 	});
 
 	function handleRowClick(globalIdx: number) {
