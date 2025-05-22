@@ -54,6 +54,7 @@
 		"garaga": "^0.18.0",
 		"lucide-svelte": "^0.511.0",
 		"starknet": "^6.24.1",
-		"starknetkit": "^2.10.4"
+		"starknetkit": "^2.10.4",
+		"zod": "^3.25.20"
 	}
 }

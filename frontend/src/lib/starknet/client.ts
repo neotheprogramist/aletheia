@@ -1,5 +1,5 @@
 import {
-	PUBLIC_TORNADO_CONTRACT_ADDRESS,
+	PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
 	PUBLIC_TORNADO_DEPOSIT_SELECTOR
 } from '$env/static/public';
 import { provider } from '$lib/stores/provider';
@@ -17,7 +17,7 @@ export async function getDepositsFromRange(
 	const filter = {
 		from_block: { block_number: from },
 		to_block: { block_number: to },
-		address: PUBLIC_TORNADO_CONTRACT_ADDRESS,
+		address: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
 		keys: [[PUBLIC_TORNADO_DEPOSIT_SELECTOR]],
 		chunk_size: 100
 	};

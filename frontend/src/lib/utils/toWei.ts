@@ -37,3 +37,35 @@ export function toWei(amountStr: string, decimals: number) {
 
 	return result;
 }
+
+/**
+ * Converts a BigInt value in smallest unit (wei) back to a decimal string.
+ *
+ * Examples:
+ *   fromWei( BigInt("1230000000000000000"), 18 )  → "1.23"
+ *   fromWei( BigInt("1000000000000000000"), 18 )  → "1"
+ *   fromWei( BigInt("1"), 18 )                   → "0.000000000000000001"
+ *
+ * @param amountWei - the integer amount in smallest unit (wei)
+ * @param decimals   - number of decimals the token uses (e.g. 18)
+ * @returns a human‐readable string, with no trailing zeros in the fraction
+ */
+export function fromWei(amountWei: bigint, decimals: number): string {
+	const s = amountWei.toString();
+	// Ensure at least (decimals + 1) digits so we always have a whole part
+	const padded = s.padStart(decimals + 1, '0');
+
+	// Split into whole and fraction
+	const wholePart = padded.slice(0, -decimals);
+	let fracPart = padded.slice(-decimals);
+
+	// Trim trailing zeros from fraction
+	fracPart = fracPart.replace(/0+$/, '');
+
+	// If no fraction remains, return just the whole part
+	if (fracPart === '') {
+		return wholePart;
+	}
+
+	return `${wholePart}.${fracPart}`;
+}

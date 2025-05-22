@@ -2,7 +2,10 @@
 	import { get } from 'svelte/store';
 	import { wallet } from '$lib/stores/wallet';
 	import { wrapWithToast } from '$lib/utils/toast';
-	import { PUBLIC_STRK_TOKEN_ADDRESS, PUBLIC_TORNADO_CONTRACT_ADDRESS } from '$env/static/public';
+	import {
+		PUBLIC_STRK_TOKEN_ADDRESS,
+		PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS
+	} from '$env/static/public';
 
 	import Card from '$lib/ui/Card.svelte';
 	import Input from '$lib/ui/Input.svelte';
@@ -28,10 +31,10 @@
 			{
 				contract_address: tokenAddress,
 				entry_point: 'approve',
-				calldata: [PUBLIC_TORNADO_CONTRACT_ADDRESS, amountLow, amountHigh]
+				calldata: [PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, amountLow, amountHigh]
 			},
 			{
-				contract_address: PUBLIC_TORNADO_CONTRACT_ADDRESS,
+				contract_address: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
 				entry_point: 'deposit',
 				calldata: [hashLow, hashHigh, amountLow, amountHigh, tokenAddress]
 			}

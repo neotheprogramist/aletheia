@@ -11,7 +11,7 @@ export function fromLowHigh(low: string | bigint, high: string | bigint) {
 	return (hi << 128n) | lo;
 }
 
-export function fromLowHighHex(low: string, high: string) {
+export function fromLowHighHex(low: string, high: string, padding = true) {
 	const combined = fromLowHigh(low, high);
-	return `0x${combined.toString(16).padStart(64, '0')}`;
+	return padding ? `0x${combined.toString(16).padStart(64, '0')}` : `0x${combined.toString(16)}`;
 }
