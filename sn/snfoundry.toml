@@ -1,0 +1,17 @@
+# Visit https://foundry-rs.github.io/starknet-foundry/appendix/snfoundry-toml.html
+# and https://foundry-rs.github.io/starknet-foundry/projects/configuration.html for more information
+
+[sncast.default] # Define a profile name
+# url = "https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/ffGrvRxnad_MXHATSkRmHUu8vUlghEok" # Url of the RPC provider
+url = "https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/J0xXJUNyn2tHfn5Ct983g9Yxa3cZKwBf"
+account = "argentACC"
+accounts-file = "account-file.json"
+# url = "https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/-XuK5Z_YA43S7-3S4GaCB-Y0zgj__Ewg"                              # Url of the RPC provider
+# accounts-file = "accounts-file-sepolia.json"                      # Path to the file with the account data
+# account = "argentACC"                                       # Account from `accounts_file` or default account file that will be used for the transactions
+# keystore = "~/keystore"                                  # Path to the keystore file
+# wait-params = { timeout = 300, retry-interval = 10 }     # Wait for submitted transaction parameters
+# block-explorer = "StarkScan"                             # Block explorer service used to display links to transaction details
+# show-explorer-links = true                               # Print links pointing to pages with transaction details in the chosen block explorer
+
+# accounts-file = "~/.starknet_accounts/starknet_open_zeppelin_accounts.json"

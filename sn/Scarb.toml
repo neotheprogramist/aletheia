@@ -1,0 +1,29 @@
+[package]
+name = "sn"
+version = "0.1.0"
+edition = "2024_07"
+
+[dependencies]
+starknet = "2.11.4"
+garaga = { git = "https://github.com/keep-starknet-strange/garaga.git", tag = "v0.18.0" }
+ekubo = { git = "https://github.com/EkuboProtocol/abis.git", rev = "f4a16b95967c5596d5a3cd4e0422bb9a2e3eb017" }
+openzeppelin = "1.0.0"
+# alexandria_math = { git = "https://github.com/keep-starknet-strange/alexandria.git", tag = "v0.5.1" }
+
+
+[cairo]
+sierra-replace-ids = false
+inlining-strategy = 2
+
+[dev-dependencies]
+snforge_std = "0.35.1"
+assert_macros = "2.11.4"
+cairo_test = "2.11.4"
+
+[[target.starknet-contract]]
+sierra = true
+casm = true
+casm-add-pythonic-hints = true
+
+[scripts]
+test = "snforge test"
