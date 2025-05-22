@@ -85,11 +85,13 @@
 </script>
 
 <ProtectedRoute>
-	<Card title="Deposit">
-		<form on:submit|preventDefault={depositHandler} class="flex flex-col gap-4">
-			<Input bind:value={tokenAddress} required placeholder="Token Address" class_="w-full" />
-			<Input bind:value={amount} required placeholder="Amount" class_="w-full" />
-			<Button text="Deposit" class_="mt-2 w-full" loading={isLoading} type="submit" />
-		</form>
-	</Card>
+	<div class="mx-auto p-6">
+		<Card title="Deposit">
+			<form on:submit|preventDefault={depositHandler} class="flex flex-col gap-4">
+				<Input bind:value={tokenAddress} required placeholder="Token Address" class_="w-full" />
+				<Input bind:value={amount} required placeholder="Amount" class_="w-full" />
+				<Button text="Deposit" class_="mt-2 w-full" loading={isLoading} type="submit" />
+			</form>
+		</Card>
+	</div>
 </ProtectedRoute>
