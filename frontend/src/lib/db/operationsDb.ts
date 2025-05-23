@@ -1,6 +1,6 @@
 const DB_NAME = 'privacy-pools-data';
 const STORE_NAME = 'operations';
-const DB_VERSION = 3;
+const DB_VERSION = 6;
 
 /**
  * Opens or upgrades the IndexedDB and returns a database instance.

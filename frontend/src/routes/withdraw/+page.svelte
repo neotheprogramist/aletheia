@@ -19,6 +19,8 @@
 	} from '$env/static/public';
 	import { get } from 'svelte/store';
 	import { zkLibraries } from '$lib/stores/zkLibraries';
+	import { merkleTreeStore } from '$lib/stores/hybridMerkleTree';
+	import { merkleTree } from '$lib/services/depositProcessor';
 
 	let deposits: Operation[] = [];
 	let selectionMode: 'withdraw' | 'fee' = 'withdraw';
@@ -160,21 +162,15 @@
 
 		await wrapWithToast(
 			async () => {
-				// Withdraw Note Refund
 				if (!withdrawBalanceWei || !userWithdrawAmountWei)
 					throw new Error(
 						'Can not calculate refund - withdraw balance or user input does not exist.'
 					);
-				const withdrawRefund = withdrawBalanceWei - userWithdrawAmountWei;
-				console.log(withdrawRefund);
 
-				// Fee Note Refund
 				if (!feeNoteBalanceWei || !feeWei)
 					throw new Error(
 						'Can not calculate refund - fee balance or calculated fee does not exist.'
 					);
-				const feeRefund = feeNoteBalanceWei - feeWei;
-				console.log(feeRefund);
 
 				// Deposit Note Commitment
 				const { garaga } = get(zkLibraries);
@@ -182,17 +178,58 @@
 
 				if (!feeNote || !selectedFeeDeposit || !withdrawNote || !selectedWithdrawDeposit)
 					throw new Error('Missing fee or withdraw deposit.');
-				console.log('depositNote', selectedWithdrawDeposit);
+
+				console.log('===================');
+				console.log(
+					'selectedWithdrawDeposit.hash)',
+					BigInt(selectedWithdrawDeposit.hash),
+					selectedWithdrawDeposit.hash
+				);
+				console.log(BigInt(withdrawNote.amount));
+				console.log('===================');
 
 				const withdrawNoteIntermediateHash = garaga.poseidonHashBN254(
 					BigInt(selectedWithdrawDeposit.hash),
-					BigInt(feeNote.amount)
+					BigInt(withdrawBalanceWei)
 				);
+
+				console.log('===================');
+				console.log(withdrawNoteIntermediateHash);
+				console.log(BigInt(withdrawNote.tokenAddress));
+				console.log('withdrawnotetokenaddress', withdrawNote.tokenAddress);
+
+				console.log('===================');
 				const withdrawNoteCommitment = garaga.poseidonHashBN254(
 					withdrawNoteIntermediateHash,
-					BigInt(feeNote.tokenAddress)
+					BigInt(withdrawNote.tokenAddress)
 				);
 				console.log('withdrawNoteCommitment', withdrawNoteCommitment);
+
+				// Fee Note Commitment
+
+				const feeNoteIntermediateHash = garaga.poseidonHashBN254(
+					BigInt(selectedFeeDeposit.hash),
+					BigInt(feeNoteBalanceWei)
+				);
+				const feeNoteCommitment = garaga.poseidonHashBN254(
+					feeNoteIntermediateHash,
+					BigInt(feeNote.tokenAddress)
+				);
+				console.log('feeNoteCommitment', feeNoteCommitment);
+
+				// Get data for proving for both notes
+				const tree = merkleTree;
+				if (!tree) throw new Error('Merkle tree does not exist');
+
+				const withdrawDepositProofData = tree.getProofData(withdrawNoteCommitment);
+				const feeDepositProofData = tree.getProofData(feeNoteCommitment);
+
+				console.log('withdrawDepositProofData', withdrawDepositProofData);
+				console.log('feeDepositProofData', feeDepositProofData);
+
+				// Create refunds
+				const withdrawRefund = withdrawBalanceWei - userWithdrawAmountWei;
+				const feeRefund = feeNoteBalanceWei - feeWei;
 			},
 			{
 				loading: '⏳ Executing Withdraw',

@@ -1,6 +1,6 @@
 import {
 	PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
-	PUBLIC_TORNADO_DEPOSIT_SELECTOR
+	PUBLIC_TORNADO_LEAF_ADDED_SELECTOR
 } from '$env/static/public';
 import { provider } from '$lib/stores/provider';
 import { fromLowHighHex } from '$lib/utils/toLowHigh';
@@ -18,7 +18,7 @@ export async function getDepositsFromRange(
 		from_block: { block_number: from },
 		to_block: { block_number: to },
 		address: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
-		keys: [[PUBLIC_TORNADO_DEPOSIT_SELECTOR]],
+		keys: [[PUBLIC_TORNADO_LEAF_ADDED_SELECTOR]],
 		chunk_size: 100
 	};
 
@@ -34,7 +34,7 @@ export async function getDepositsFromRange(
 	} while (continuation_token);
 
 	const deposits = events.map((ev) => {
-		const commitment = fromLowHighHex(ev.data[0], ev.data[1]);
+		const commitment = fromLowHighHex(ev.data[0], ev.data[1], false);
 
 		const block_number = Number(ev.block_number);
 		return { hash: commitment, block_number };

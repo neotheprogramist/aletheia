@@ -1,6 +1,12 @@
 import { get } from 'svelte/store';
 import { zkLibraries } from '$lib/stores/zkLibraries';
 
+interface ProofData {
+	index: number;
+	path: (bigint[] | boolean[])[];
+	root: bigint;
+}
+
 export class HybridMerkleTree {
 	private readonly poseidon: (a: bigint, b: bigint) => bigint;
 
@@ -103,5 +109,21 @@ export class HybridMerkleTree {
 
 	getLayer0() {
 		return this.layers[0];
+	}
+
+	getProofData(leaf: bigint) {
+		const leafIndex = this.findLeafIndex(leaf);
+		if (!leafIndex) {
+			throw new Error('Leaf index not found');
+		}
+
+		const path = this.path(leafIndex);
+		const root = this.getRoot();
+
+		return {
+			index: leafIndex,
+			path,
+			root
+		} satisfies ProofData;
 	}
 }
