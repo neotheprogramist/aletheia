@@ -47,11 +47,11 @@
 
 		await wrapWithToast(
 			async () => {
-				const { hash } = await generateOperation({ data: { tokenAddress, amount } });
-				operationHash = hash;
-
 				const decimals = await fetchTokenDecimals(tokenAddress);
 				const amountWei = toWei(amount, decimals);
+				const { hash } = await generateOperation({ data: { tokenAddress, amount: amountWei } });
+				operationHash = hash;
+
 				const calls = createCalls(hash, amountWei);
 
 				const connectedWallet = get(wallet);

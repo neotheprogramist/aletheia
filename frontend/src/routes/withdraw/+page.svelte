@@ -5,7 +5,6 @@
 	import { Redo } from 'lucide-svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Card from '$lib/ui/Card.svelte';
-	import Input from '$lib/ui/Input.svelte';
 	import PaginatedTable, { type Column } from '$lib/ui/PaginatedTable.svelte';
 	import type { Operation } from '$lib/privacy/types';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
@@ -19,16 +18,25 @@
 	} from '$env/static/public';
 	import { get } from 'svelte/store';
 	import { zkLibraries } from '$lib/stores/zkLibraries';
-	import { merkleTreeStore } from '$lib/stores/hybridMerkleTree';
 	import { merkleTree } from '$lib/services/depositProcessor';
+	import Input from '$lib/ui/Input.svelte';
 
-	let deposits: Operation[] = [];
+	interface DisplayOperation extends Omit<Operation, 'data'> {
+		data: {
+			tokenAddress: string;
+			amount: string | bigint;
+		};
+		displayAmount: string;
+	}
+
+	let deposits: DisplayOperation[] = [];
 	let selectionMode: 'withdraw' | 'fee' = 'withdraw';
 
 	let selectedWithdrawIndex: number | null = null;
-	let selectedWithdrawDeposit: Operation | null = null;
+	let selectedWithdrawDeposit: DisplayOperation | null = null;
 	let selectedFeeIndex: number | null = null;
-	let selectedFeeDeposit: Operation | null = null;
+	let selectedFeeDeposit: DisplayOperation | null = null;
+
 	let withdrawNote: NoteData | null = null;
 	let feeNote: NoteData | null = null;
 
@@ -48,13 +56,13 @@
 	let feeNoteBalanceWei: bigint | null = null;
 	let feeWei: bigint | null = null;
 
-	const columns: Column<Operation>[] = [
+	const columns: Column<DisplayOperation>[] = [
 		{ label: 'Index', field: 'index' },
-		{ label: 'Amount', field: (d) => d.data?.amount },
+		{ label: 'Amount', field: (d) => d.displayAmount },
 		{
 			label: 'Token',
-			field: (d) => d.data?.tokenAddress,
-			render: (d) => `<code>${d.data?.tokenAddress}</code>`
+			field: (d) => d.data.tokenAddress,
+			render: (d) => `<code>${d.data.tokenAddress}</code>`
 		}
 	];
 
@@ -62,7 +70,35 @@
 		await wrapWithToast(
 			async () => {
 				const ops = await getAllByStatus('confirmed');
-				deposits = ops.sort((a, b) => a.index - b.index);
+
+				// 1) Unique token addresses
+				const uniqueAddrs = Array.from(new Set(ops.map((o) => o.data.tokenAddress)));
+
+				// 2) Fetch decimals for each unique
+				const decimalsMap: Record<string, number> = {};
+				await Promise.all(
+					uniqueAddrs.map(async (addr) => {
+						decimalsMap[addr] = await fetchTokenDecimals(addr);
+					})
+				);
+
+				// 3) Sort and add display amount (hex)
+				deposits = ops
+					.sort((a, b) => a.index - b.index)
+					.map((op) => {
+						const rawData = op.data as {
+							tokenAddress: string;
+							amount: string | bigint;
+						};
+						const rawWei =
+							typeof rawData.amount === 'bigint' ? rawData.amount : BigInt(rawData.amount);
+
+						return {
+							...op,
+							data: rawData,
+							displayAmount: fromWei(rawWei, decimalsMap[rawData.tokenAddress])
+						} as DisplayOperation;
+					});
 			},
 			{ loading: '⏳ Loading…', success: '', error: '❌ Load error' }
 		);
@@ -72,7 +108,6 @@
 		if (selectionMode === 'withdraw') {
 			selectedWithdrawIndex = globalIdx;
 			selectedWithdrawDeposit = deposits[globalIdx];
-			// reset the form each time you choose a new withdraw note
 			withdrawRecipient = '';
 			withdrawAmount = '';
 		} else {
@@ -97,7 +132,7 @@
 		selectedFeeDeposit = null;
 	}
 
-	/** First step: validate everything and show confirmation modal */
+	/** Step 1: Validate */
 	async function initiateWithdraw() {
 		isLoading = true;
 		await wrapWithToast(
@@ -106,13 +141,13 @@
 					throw new Error('Please pick both a withdraw note and a fee note');
 				}
 
-				// — Withdraw note parsing & validation
+				// — Parse Withdraw note
 				withdrawNote = NoteDataSchema.parse(selectedWithdrawDeposit.data);
 				const { tokenAddress: withdrawTokenAddress, amount: withdrawNoteBalance } = withdrawNote;
 				modalWithdrawToken = withdrawTokenAddress;
 
 				const withdrawDecimals = await fetchTokenDecimals(withdrawTokenAddress);
-				withdrawBalanceWei = toWei(withdrawNoteBalance, withdrawDecimals);
+				withdrawBalanceWei = BigInt(withdrawNoteBalance);
 				userWithdrawAmountWei = toWei(withdrawAmount, withdrawDecimals);
 
 				if (
@@ -123,13 +158,13 @@
 					throw new Error('Invalid withdraw amount');
 				}
 
-				// — Fee note parsing & validation
+				// — Parse Fee note
 				feeNote = NoteDataSchema.parse(selectedFeeDeposit.data);
 				const { tokenAddress: feeTokenAddress, amount: feeNoteBalance } = feeNote;
-				modalFeeToken = feeNote.tokenAddress;
+				modalFeeToken = feeTokenAddress;
 
 				const feeNoteDecimals = await fetchTokenDecimals(feeTokenAddress);
-				feeNoteBalanceWei = toWei(feeNoteBalance, feeNoteDecimals);
+				feeNoteBalanceWei = BigInt(feeNoteBalance);
 				feeWei = await fetchExtensionFee(
 					PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
 					PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS
@@ -138,15 +173,18 @@
 
 				if (feeWei > feeNoteBalanceWei) {
 					throw new Error(
-						`Fee (${feeWeiHex}) exceeds your fee note balance (${fromWei(feeNoteBalanceWei, feeNoteDecimals)})`
+						`Fee (${feeWeiHex}) exceeds your fee note balance (${fromWei(
+							feeNoteBalanceWei,
+							feeNoteDecimals
+						)})`
 					);
 				}
-				// everything looks good → confirmation
+
 				showFeeModal = true;
 			},
 			{
 				loading: '⏳ Executing Withdraw',
-				success: '✅ Withdraw complete!',
+				success: '✅ Withdraw ready!',
 				error: '❌ Withdraw failed'
 			},
 			async (err) => {
@@ -156,84 +194,46 @@
 		);
 	}
 
-	/** After user confirms in the modal, actually run the tx */
+	/** Proving */
 	async function confirmWithdraw() {
 		showFeeModal = false;
 
 		await wrapWithToast(
 			async () => {
-				if (!withdrawBalanceWei || !userWithdrawAmountWei)
-					throw new Error(
-						'Can not calculate refund - withdraw balance or user input does not exist.'
-					);
+				if (!withdrawBalanceWei || !userWithdrawAmountWei) {
+					throw new Error('Can not calculate refund - missing withdraw amounts');
+				}
+				if (!feeNoteBalanceWei || !feeWei) {
+					throw new Error('Can not calculate refund - missing fee amounts');
+				}
 
-				if (!feeNoteBalanceWei || !feeWei)
-					throw new Error(
-						'Can not calculate refund - fee balance or calculated fee does not exist.'
-					);
-
-				// Deposit Note Commitment
 				const { garaga } = get(zkLibraries);
 				if (!garaga) throw new Error('Garaga not initialized');
-
-				if (!feeNote || !selectedFeeDeposit || !withdrawNote || !selectedWithdrawDeposit)
+				if (!feeNote || !selectedFeeDeposit || !withdrawNote || !selectedWithdrawDeposit) {
 					throw new Error('Missing fee or withdraw deposit.');
-
-				console.log('===================');
-				console.log(
-					'selectedWithdrawDeposit.hash)',
-					BigInt(selectedWithdrawDeposit.hash),
-					selectedWithdrawDeposit.hash
-				);
-				console.log(BigInt(withdrawNote.amount));
-				console.log('===================');
-
-				const withdrawNoteIntermediateHash = garaga.poseidonHashBN254(
-					BigInt(selectedWithdrawDeposit.hash),
-					BigInt(withdrawBalanceWei)
-				);
-
-				console.log('===================');
-				console.log(withdrawNoteIntermediateHash);
-				console.log(BigInt(withdrawNote.tokenAddress));
-				console.log('withdrawnotetokenaddress', withdrawNote.tokenAddress);
-
-				console.log('===================');
-				const withdrawNoteCommitment = garaga.poseidonHashBN254(
-					withdrawNoteIntermediateHash,
-					BigInt(withdrawNote.tokenAddress)
-				);
-				console.log('withdrawNoteCommitment', withdrawNoteCommitment);
-
-				// Fee Note Commitment
-
-				const feeNoteIntermediateHash = garaga.poseidonHashBN254(
-					BigInt(selectedFeeDeposit.hash),
-					BigInt(feeNoteBalanceWei)
-				);
-				const feeNoteCommitment = garaga.poseidonHashBN254(
-					feeNoteIntermediateHash,
-					BigInt(feeNote.tokenAddress)
-				);
-				console.log('feeNoteCommitment', feeNoteCommitment);
-
-				// Get data for proving for both notes
+				}
 				const tree = merkleTree;
 				if (!tree) throw new Error('Merkle tree does not exist');
 
-				const withdrawDepositProofData = tree.getProofData(withdrawNoteCommitment);
-				const feeDepositProofData = tree.getProofData(feeNoteCommitment);
+				const withdrawCommitData = tree.getProofData(
+					garaga.poseidonHashBN254(
+						garaga.poseidonHashBN254(BigInt(selectedWithdrawDeposit.hash), withdrawBalanceWei),
+						BigInt(withdrawNote.tokenAddress)
+					)
+				);
+				const feeCommitData = tree.getProofData(
+					garaga.poseidonHashBN254(
+						garaga.poseidonHashBN254(BigInt(selectedFeeDeposit.hash), feeNoteBalanceWei!),
+						BigInt(feeNote.tokenAddress)
+					)
+				);
 
-				console.log('withdrawDepositProofData', withdrawDepositProofData);
-				console.log('feeDepositProofData', feeDepositProofData);
-
-				// Create refunds
-				const withdrawRefund = withdrawBalanceWei - userWithdrawAmountWei;
-				const feeRefund = feeNoteBalanceWei - feeWei;
+				console.log('withdraw proof:', withdrawCommitData);
+				console.log('fee proof:', feeCommitData);
 			},
 			{
-				loading: '⏳ Executing Withdraw',
-				success: '✅ Withdraw complete!',
+				loading: '⏳ Sending Withdraw Tx',
+				success: '✅ Withdraw sent!',
 				error: '❌ Withdraw failed'
 			}
 		);
@@ -242,7 +242,7 @@
 	}
 </script>
 
-<div class="mx-auto max-w-3xl p-6">
+<div class="mx-auto p-6">
 	{#if !deposits.length}
 		<h2>Please make a deposit first!</h2>
 	{:else}
@@ -275,7 +275,7 @@
 			</button>
 		</div>
 
-		<!-- Instruction -->
+		<!-- Instructions -->
 		<p class="mb-4 font-medium">
 			{#if selectionMode === 'withdraw'}
 				Select a deposit to <strong>withdraw</strong> from:
@@ -284,7 +284,7 @@
 			{/if}
 		</p>
 
-		<!-- Deposits table -->
+		<!-- Deposits Table -->
 		<PaginatedTable
 			{columns}
 			items={deposits}
@@ -297,7 +297,44 @@
 			hoverClass="hover:bg-green-600"
 		/>
 
-		<!-- Withdraw form -->
+		<!-- Selected‐deposit cards -->
+		{#if selectedWithdrawDeposit || selectedFeeDeposit}
+			<div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+				{#if selectedWithdrawDeposit}
+					<Card title="Withdrawal Deposit">
+						<div class="space-y-2 text-sm">
+							<div><strong>Index:</strong> {selectedWithdrawDeposit.index}</div>
+							<div>
+								<strong>Amount:</strong>
+								{selectedWithdrawDeposit.displayAmount}
+							</div>
+							<div>
+								<strong>Token:</strong>
+								<code class="break-all">{selectedWithdrawDeposit.data.tokenAddress}</code>
+							</div>
+						</div>
+					</Card>
+				{/if}
+
+				{#if selectedFeeDeposit}
+					<Card title="Fee Deposit">
+						<div class="space-y-2 text-sm">
+							<div><strong>Index:</strong> {selectedFeeDeposit.index}</div>
+							<div>
+								<strong>Amount:</strong>
+								{selectedFeeDeposit.displayAmount}
+							</div>
+							<div>
+								<strong>Token:</strong>
+								<code class="break-all">{selectedFeeDeposit.data.tokenAddress}</code>
+							</div>
+						</div>
+					</Card>
+				{/if}
+			</div>
+		{/if}
+
+		<!-- Withdraw Form -->
 		{#if selectedWithdrawDeposit && selectedFeeDeposit}
 			<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
 				<Card title="Withdraw">
@@ -319,36 +356,9 @@
 				</Card>
 			</div>
 		{/if}
-
-		<!-- Selected‐deposit cards -->
-		<div class="mt-6 grid w-full grid-cols-1 justify-items-center gap-4 md:grid-cols-2">
-			{#if selectedWithdrawDeposit}
-				<Card title="Withdrawal Deposit">
-					<div class="space-y-2 text-sm">
-						<div><strong>Index:</strong> {selectedWithdrawDeposit.index}</div>
-						<div><strong>Amount:</strong> {selectedWithdrawDeposit.data?.amount}</div>
-						<div>
-							<strong>Token:</strong>
-							<code class="break-all">{selectedWithdrawDeposit.data?.tokenAddress}</code>
-						</div>
-					</div>
-				</Card>
-			{/if}
-			{#if selectedFeeDeposit}
-				<Card title="Fee Deposit">
-					<div class="space-y-2 text-sm">
-						<div><strong>Index:</strong> {selectedFeeDeposit.index}</div>
-						<div><strong>Amount:</strong> {selectedFeeDeposit.data?.amount}</div>
-						<div>
-							<strong>Token:</strong>
-							<code class="break-all">{selectedFeeDeposit.data?.tokenAddress}</code>
-						</div>
-					</div>
-				</Card>
-			{/if}
-		</div>
 	{/if}
 
+	<!-- Modal Confirm -->
 	<Modal
 		show={showFeeModal}
 		title="Confirm Withdraw"
