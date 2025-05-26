@@ -40,7 +40,7 @@ export default defineConfig({
 					resolve: 'node_modules/@aztec/bb.js/dest/browser/thread.worker.js'
 				}
 			]),
-			apply: 'serve' // only in dev / preview
+			apply: 'serve'
 		},
 
 		sveltekit()

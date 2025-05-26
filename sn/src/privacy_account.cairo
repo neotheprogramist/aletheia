@@ -36,8 +36,6 @@ pub trait IPrivacyAccount<TContractState> {
     fn execute_extension(
         ref self: TContractState,
         proof: Span<felt252>,
-        gas_fee_route: RouteNode,
-        paymaster_fee_route: RouteNode,
         external_contract_address: ContractAddress,
         calldata: Span<felt252>,
     ) -> bool;
@@ -424,8 +422,6 @@ pub mod PrivacyAccount {
         fn execute_extension(
             ref self: ContractState,
             proof: Span<felt252>,
-            gas_fee_route: RouteNode,
-            paymaster_fee_route: RouteNode,
             external_contract_address: ContractAddress,
             calldata: Span<felt252>,
         ) -> bool {
@@ -465,18 +461,6 @@ pub mod PrivacyAccount {
 
             self.merkle.add_leaf(public_input.refund_commitment_hash_fee);
 
-            if self.strk_token_address.read() != public_input.token_address_2 {
-                self
-                    .multihop_swap(
-                        route: array![gas_fee_route],
-                        token_amount: TokenAmount {
-                            token: public_input.token_address_2,
-                            amount: i129 {
-                                mag: public_input.gas_fee.try_into().unwrap(), sign: false,
-                            },
-                        },
-                    );
-            }
             true
         }
 

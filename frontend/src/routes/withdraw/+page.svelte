@@ -23,6 +23,9 @@
 	import { generateProof } from '$lib/privacy/generateProof';
 	import { getAllByStatus } from '$lib/db/operationsDb';
 	import { getOperationDetails } from '$lib/db/operations';
+	import { paymasterWallet } from '$lib/stores/paymaster';
+	import { provider } from '$lib/stores/provider';
+	import { Contract } from 'starknet';
 
 	interface DisplayOperation extends Omit<Operation, 'data'> {
 		data: {
@@ -33,6 +36,18 @@
 	}
 
 	let deposits: DisplayOperation[] = [];
+	/** 1) narrow Operation → has data.tokenAddress:string & data.amount:string|bigint */
+	function isPricedOp(op: Operation): op is Omit<Operation, 'data'> & {
+		data: { tokenAddress: string; amount: string | bigint };
+	} {
+		return (
+			op.data !== undefined &&
+			typeof op.data === 'object' &&
+			typeof (op.data as any).tokenAddress === 'string' &&
+			(typeof (op.data as any).amount === 'string' || typeof (op.data as any).amount === 'bigint')
+		);
+	}
+
 	let selectionMode: 'withdraw' | 'fee' = 'withdraw';
 
 	let selectedWithdrawIndex: number | null = null;
@@ -72,12 +87,16 @@
 	onMount(async () => {
 		await wrapWithToast(
 			async () => {
+				// 1) Get all operations
 				const ops = await getAllByStatus('confirmed');
 
-				// 1) Unique token addresses
-				const uniqueAddrs = Array.from(new Set(ops.map((o) => o.data.tokenAddress)));
+				// 2) filtrujemy tylko te, które przejdą guardę
+				const pricedOps = ops.filter(isPricedOp);
 
-				// 2) Fetch decimals for each unique
+				// 3) Get unique token addresses
+				const uniqueAddrs = Array.from(new Set(pricedOps.map((o) => o.data.tokenAddress)));
+
+				// 4) Fetch decimals
 				const decimalsMap: Record<string, number> = {};
 				await Promise.all(
 					uniqueAddrs.map(async (addr) => {
@@ -85,22 +104,17 @@
 					})
 				);
 
-				// 3) Sort and add display amount (hex)
-				deposits = ops
+				// 5) Sort and create DisplayOperation
+				deposits = pricedOps
 					.sort((a, b) => a.index - b.index)
 					.map((op) => {
-						const rawData = op.data as {
-							tokenAddress: string;
-							amount: string | bigint;
-						};
-						const rawWei =
-							typeof rawData.amount === 'bigint' ? rawData.amount : BigInt(rawData.amount);
-
+						const { tokenAddress, amount } = op.data;
+						const wei = typeof amount === 'bigint' ? amount : BigInt(amount);
 						return {
 							...op,
-							data: rawData,
-							displayAmount: fromWei(rawWei, decimalsMap[rawData.tokenAddress])
-						} as DisplayOperation;
+							data: { tokenAddress, amount },
+							displayAmount: fromWei(wei, decimalsMap[tokenAddress])
+						};
 					});
 			},
 			{ loading: '⏳ Loading…', success: '', error: '❌ Load error' }
@@ -307,7 +321,6 @@
 					_recipient: withdrawRecipient
 				};
 				console.log('witnessInput', witnessInput);
-				downloadWitnessInput(witnessInput);
 
 				const honkCalldataHex = await generateProof(witnessInput, {
 					jsonUrl: 'circuits/extension.json',
@@ -315,17 +328,36 @@
 				});
 				console.log('honkCalldataHex', honkCalldataHex);
 
-				// const extensionCalldata = [
-				// 	PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
-				// 	withdrawRecipient,
-				// 	selectedWithdrawDeposit.data.tokenAddress,
-				// 	selectedFeeDeposit.data.amount
-				// ];
+				const extensionCalldata = [
+					PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+					withdrawRecipient,
+					selectedWithdrawDeposit.data.tokenAddress,
+					`0x${userWithdrawAmountWei.toString(16)}`
+				];
+				console.log('extensionCalldata', extensionCalldata);
 
-				// const dataToGenerateWitness = {
-				// 	root_1: withdrawCommitment.root,
-				// 	secret_1: selectedWithdrawDeposit.secret
-				// };
+				const rpc = get(provider);
+				if (!rpc) throw new Error('Missing Provider');
+
+				const { abi: privacyAccountAbi } = await rpc.getClassAt(
+					PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS
+				);
+				if (privacyAccountAbi === undefined) throw new Error('Missing Privacy Contract Abi');
+
+				const paymaster = get(paymasterWallet);
+				if (!paymaster) throw new Error('Missing Paymaster Wallet');
+
+				const privacyAccountContract = new Contract(
+					privacyAccountAbi,
+					PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+					rpc
+				);
+				privacyAccountContract.connect(paymaster);
+				privacyAccountContract.execute_extension(
+					honkCalldataHex,
+					PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS,
+					extensionCalldata
+				);
 			},
 			{
 				loading: '⏳ Sending Withdraw Tx',
@@ -335,19 +367,6 @@
 		);
 
 		isLoading = false;
-	}
-
-	function downloadWitnessInput(input: Record<string, any>, filename = 'witnessInput.json') {
-		const jsonStr = JSON.stringify(input, null, 2);
-		const blob = new Blob([jsonStr], { type: 'application/json' });
-		const url = URL.createObjectURL(blob);
-
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = filename;
-		a.click();
-
-		URL.revokeObjectURL(url);
 	}
 </script>
 

@@ -18,12 +18,8 @@ export async function generateProof(witnessInput: InputMap, circuitData: Circuit
 	const { witness } = await noir.execute(witnessInput);
 	const backend = new zkLibs.bb.UltraHonkBackend(program.bytecode);
 
-	let proofData;
-	try {
-		proofData = await backend.generateProof(witness, { keccak: true });
-	} catch (error) {
-		console.error('ERROREK', error);
-	}
+	const proofData = await backend.generateProof(witness, { keccak: true });
+
 	if (!proofData) throw new Error('NO PROOF DATA');
 	console.debug('-->  generate proof finished');
 
@@ -39,6 +35,7 @@ export async function generateProof(witnessInput: InputMap, circuitData: Circuit
 		`0x` + honkCalldata.length.toString(16),
 		...honkCalldata.map((element) => `0x${element.toString(16)}`)
 	];
+
 	return honkCalldataHex;
 }
 

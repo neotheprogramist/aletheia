@@ -55,7 +55,7 @@
 				const calls = createCalls(hash, amountWei);
 
 				const connectedWallet = get(wallet);
-				if (!connectedWallet) throw new Error('Please connect your wallet first.');
+				if (!connectedWallet) throw new Error('Please connect your wallet.');
 
 				await connectedWallet.request({
 					type: 'wallet_addInvokeTransaction',
