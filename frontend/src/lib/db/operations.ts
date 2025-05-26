@@ -1,26 +1,38 @@
 import type { Operation } from '$lib/privacy/types';
-import { withStore } from './operationsDb';
+import {
+	addOperation,
+	clearAllOperations,
+	deleteOperation,
+	getAllByStatus,
+	getOperationByHash,
+	updateOperation
+} from './operationsDb';
 
-export function addOperation(op: Operation) {
-	return withStore('readwrite', (store) => store.add(op));
+export function addOperationEntry(op: Operation) {
+	return addOperation(op);
 }
 
-export function getAllByStatus(status: Operation['status']) {
-	return withStore('readonly', (store) => store.index('status').getAll(status));
+export function listOperationsByStatus(status: Operation['status']) {
+	return getAllByStatus(status);
 }
 
-export function getOperationByHash(hash: string) {
-	return withStore<Operation | undefined>('readonly', (store) => store.get(hash));
+export function fetchOperation(hash: string) {
+	return getOperationByHash(hash);
 }
 
-export function updateOperation(op: Operation) {
-	return withStore('readwrite', (store) => store.put(op));
+export function modifyOperation(op: Operation) {
+	return updateOperation(op);
 }
 
-export function deleteOperation(hash: string) {
-	return withStore('readwrite', (store) => store.delete(hash));
+export function removeOperation(hash: string) {
+	return deleteOperation(hash);
 }
 
+export function clearOperations() {
+	return clearAllOperations();
+}
+
+// your getOperationDetails(...) stays the same
 /**
  * Fetches an operation by hash and returns details
  *   - secret
@@ -56,9 +68,4 @@ export async function getOperationDetails(hash: string): Promise<
 		amount: amount.toString(),
 		tokenAddress
 	};
-}
-
-/** Testing purposes */
-export function clearAllOperations() {
-	return withStore('readwrite', (store) => store.clear());
 }

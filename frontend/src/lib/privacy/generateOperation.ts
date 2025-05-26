@@ -1,7 +1,7 @@
 import { get } from 'svelte/store';
 import { zkLibraries } from '$lib/stores/zkLibraries';
-import { getAllByStatus, addOperation } from '$lib/db/operations';
 import type { Operation, OperationStatus } from './types';
+import { addOperation, getAllByStatus } from '$lib/db/operationsDb';
 
 export interface GenerateParams {
 	/** Any application-specific data to attach */

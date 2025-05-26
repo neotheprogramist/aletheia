@@ -1,4 +1,4 @@
-import { getOperationByHash, updateOperation } from '$lib/db/operations';
+import { getOperationByHash, updateOperation } from '$lib/db/operationsDb';
 
 /**
  * Move a previously confirmed operation → nullified.

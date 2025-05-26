@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { getAllByStatus, getOperationDetails } from '$lib/db/operations';
 	import { onMount } from 'svelte';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { Redo } from 'lucide-svelte';
@@ -22,6 +21,8 @@
 	import Input from '$lib/ui/Input.svelte';
 	import { generateOperation } from '$lib/privacy/generateOperation';
 	import { generateProof } from '$lib/privacy/generateProof';
+	import { getAllByStatus } from '$lib/db/operationsDb';
+	import { getOperationDetails } from '$lib/db/operations';
 
 	interface DisplayOperation extends Omit<Operation, 'data'> {
 		data: {

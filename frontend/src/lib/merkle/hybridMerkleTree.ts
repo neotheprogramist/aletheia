@@ -127,3 +127,10 @@ export class HybridMerkleTree {
 		} satisfies ProofData;
 	}
 }
+
+// Shape of a Merkle tree leaf
+export interface MerkleLeaf {
+	index: number;
+	hash: string;
+	block_number: number;
+}
