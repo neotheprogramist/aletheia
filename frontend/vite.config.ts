@@ -7,10 +7,27 @@ config({
 import tailwindcss from '@tailwindcss/vite';
 import { svelteTesting } from '@testing-library/svelte/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
+import serveStatic from 'vite-plugin-serve-static';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-	plugins: [tailwindcss(), sveltekit()],
+	plugins: [
+		tailwindcss(),
+
+		// === Garaga / bb.js worker fix for dev mode ===
+		{
+			...serveStatic([
+				{
+					pattern: /main\.worker\.js$/,
+					resolve: 'node_modules/@aztec/bb.js/dest/browser/main.worker.js'
+				}
+			]),
+			apply: 'serve'
+		},
+
+		sveltekit()
+	],
+
 	test: {
 		workspace: [
 			{

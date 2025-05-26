@@ -49,10 +49,10 @@ export function startDepositProcessor() {
 				console.log(`📥 Deposit ${hash} at block ${block_number}`);
 				await db_add_leaf(hash, block_number);
 				merkleTree.addLeaf(BigInt(hash));
-				console.log('added leaf', BigInt(hash));
+				// console.log('added leaf', BigInt(hash));
 			}
 
-			console.log('🌿 Current Merkle root:', `0x${merkleTree.getRoot().toString(16)}`);
+			// console.log('🌿 Current Merkle root:', `0x${merkleTree.getRoot().toString(16)}`);
 		} catch (err) {
 			console.error('❌ Error in fetcher:', err);
 		}

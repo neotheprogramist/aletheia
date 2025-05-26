@@ -113,7 +113,7 @@ export class HybridMerkleTree {
 
 	getProofData(leaf: bigint) {
 		const leafIndex = this.findLeafIndex(leaf);
-		if (!leafIndex) {
+		if (leafIndex === null) {
 			throw new Error('Leaf index not found');
 		}
 

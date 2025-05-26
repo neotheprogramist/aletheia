@@ -2,11 +2,15 @@ import { writable } from 'svelte/store';
 
 type GaragaType = typeof import('garaga');
 type NoirWasmType = typeof import('@noir-lang/noir_wasm');
+type BbType = typeof import('@aztec/bb.js');
+type NoirJsType = typeof import('@noir-lang/noir_js');
 
 export interface ZkLibraries {
 	status: 'idle' | 'loading' | 'ready' | 'error';
 	garaga: GaragaType | null;
 	noirWasm: NoirWasmType | null;
+	noirJs: NoirJsType | null;
+	bb: BbType | null;
 	error?: string;
 }
 
@@ -17,6 +21,8 @@ export const zkLibraries = writable<ZkLibraries>({
 	status: 'idle',
 	garaga: null,
 	noirWasm: null,
+	noirJs: null,
+	bb: null,
 	error: undefined
 });
 
@@ -29,16 +35,17 @@ export async function initZkLibraries() {
 
 	try {
 		// load modules in parallel
-		const [garagaModule, noirModule, acvmJs, noircAbi] = await Promise.all([
+		const [garagaModule, noirModule, acvmJs, noircAbi, noirJsModule, bbModule] = await Promise.all([
 			import('garaga'),
 			import('@noir-lang/noir_wasm'),
 			import('@noir-lang/acvm_js'),
-			import('@noir-lang/noirc_abi')
+			import('@noir-lang/noirc_abi'),
+			import('@noir-lang/noir_js'),
+			import('@aztec/bb.js')
 		]);
 
 		// initialize Garaga
 		await garagaModule.init();
-
 		// initialize ACVM & Noirc ABI
 		const initACVM = acvmJs.default;
 		const initNoirC = noircAbi.default;
@@ -55,7 +62,9 @@ export async function initZkLibraries() {
 		zkLibraries.set({
 			status: 'ready',
 			garaga: garagaModule,
-			noirWasm: noirModule
+			noirWasm: noirModule,
+			noirJs: noirJsModule,
+			bb: bbModule
 		});
 	} catch (err: unknown) {
 		console.error('Failed to initialize ZK libraries:', err);
@@ -67,6 +76,8 @@ export async function initZkLibraries() {
 			status: 'error',
 			garaga: null,
 			noirWasm: null,
+			noirJs: null,
+			bb: null,
 			error: message
 		});
 	}

@@ -1,6 +1,6 @@
 const DB_NAME = 'privacy-pools-data';
 const STORE_NAME = 'merkle_leaves';
-const DB_VERSION = 6;
+const DB_VERSION = 3;
 
 export interface MerkleLeaf {
 	index: number;
