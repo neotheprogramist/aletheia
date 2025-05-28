@@ -32,7 +32,7 @@ export async function generateProof(witnessInput: InputMap, circuitData: Circuit
 	console.debug('-->  honkCalldata finished');
 
 	const honkCalldataHex = [
-		`0x` + honkCalldata.length.toString(16),
+		// `0x` + honkCalldata.length.toString(16),
 		...honkCalldata.map((element) => `0x${element.toString(16)}`)
 	];
 

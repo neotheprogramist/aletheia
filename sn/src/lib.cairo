@@ -22,11 +22,11 @@ fn hash_one(a: u256) -> u256 {
     hash(a, a)
 }
 
-pub fn verify_ultra_keccak_zk_honk_proof(
+pub fn verify_ultra_keccak_honk_proof(
     verifier_class_hash: starknet::ClassHash, proof: Span<felt252>,
 ) -> Span<u256> {
     let mut output_serialized = starknet::syscalls::library_call_syscall(
-        verifier_class_hash, selector!("verify_ultra_keccak_zk_honk_proof"), proof,
+        verifier_class_hash, selector!("verify_ultra_keccak_honk_proof"), proof,
     )
         .unwrap_syscall();
     let output = Serde::<Option<Span<u256>>>::deserialize(ref output_serialized).unwrap().unwrap();

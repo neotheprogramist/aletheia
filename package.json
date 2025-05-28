@@ -15,5 +15,9 @@
     "check": "npm run check --workspace=frontend",
     "check:watch": "npm run check:watch --workspace=frontend",
     "test": "npm run test --workspaces"
+  },
+  "dependencies": {
+    "frontend": "^0.0.1",
+    "starknet": "^6.24.1"
   }
 }

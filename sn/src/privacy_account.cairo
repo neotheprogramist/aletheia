@@ -6,6 +6,14 @@ use ekubo::types::keys::PoolKey;
 use starknet::ContractAddress;
 use starknet::account::Call;
 
+#[starknet::interface]
+pub trait IUltraKeccakHonkVerifier<TContractState> {
+    fn verify_ultra_keccak_honk_proof(
+        self: @TContractState, full_proof_with_hints: Span<felt252>,
+    ) -> Option<Span<u256>>;
+}
+
+
 #[derive(Serde, Copy, Drop)]
 pub struct RouteNode {
     pub pool_key: PoolKey,
@@ -208,9 +216,10 @@ pub mod PrivacyAccount {
     use crate::merkle::MerkleTreeComponent::InternalTrait;
     use crate::utils::{execute_calls, is_valid};
     use crate::zk_extension::{IZkExtensionDispatcher, IZkExtensionDispatcherTrait};
-    use crate::{hash, verify_ultra_keccak_zk_honk_proof};
+    use crate::{hash, verify_ultra_keccak_honk_proof};
     use super::{
-        Delta, IPrivacyAccount, PublicInputMergeImpl, PublicInputTransferImpl,
+        Delta, IPrivacyAccount, IUltraKeccakHonkVerifierDispatcher,
+        IUltraKeccakHonkVerifierDispatcherTrait, PublicInputMergeImpl, PublicInputTransferImpl,
         PublicInputWithdrawImpl, RouteNode, Swap, TokenAmount,
     };
 
@@ -425,7 +434,7 @@ pub mod PrivacyAccount {
             external_contract_address: ContractAddress,
             calldata: Span<felt252>,
         ) -> bool {
-            let public_input_serialized = verify_ultra_keccak_zk_honk_proof(
+            let public_input_serialized = verify_ultra_keccak_honk_proof(
                 self.extension_verifier.read(), proof,
             );
 
@@ -470,7 +479,7 @@ pub mod PrivacyAccount {
             gas_fee_route: RouteNode,
             paymaster_fee_route: RouteNode,
         ) -> bool {
-            let public_input_serialized = verify_ultra_keccak_zk_honk_proof(
+            let public_input_serialized = verify_ultra_keccak_honk_proof(
                 self.merge_verifier.read(), proof,
             );
 
@@ -527,7 +536,7 @@ pub mod PrivacyAccount {
             gas_fee_route: RouteNode,
             paymaster_fee_route: RouteNode,
         ) -> bool {
-            let public_input_serialized = verify_ultra_keccak_zk_honk_proof(
+            let public_input_serialized = verify_ultra_keccak_honk_proof(
                 self.transfer_verifier.read(), proof,
             );
 

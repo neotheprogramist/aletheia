@@ -1,33 +1,33 @@
 fn main(
     // deposit data
-    root_1: pub Field,
+    root_1: pub Field, // 0
     secret_1: Field,
-    nullifier_1: pub Field,
+    nullifier_1: pub Field, //1
     commitment_amount_1: Field,
-    token_address_1: pub Field,
+    token_address_1: pub Field, //2
     hashpath_1: [Field; 31],
     index_1: Field,
-    amount: pub Field,
+    amount: pub Field, //3
     // fee deposit
-    root_2: pub Field,
+    root_2: pub Field, //4
     secret_2: Field,
-    nullifier_2: pub Field,
+    nullifier_2: pub Field, //5
     commitment_amount_2: Field,
-    token_address_2: pub Field,
+    token_address_2: pub Field, //6
     hashpath_2: [Field; 31],
     index_2: Field,
-    gas_fee: pub Field,
+    gas_fee: pub Field, //7
     // refund data for deposit 1
     refund_secret_1: Field,
     refund_nullifier_1: Field,
     refund_amount_1: Field,
-    refund_commitment_hash_1: pub Field,
+    refund_commitment_hash_1: pub Field, //8
     // refund data for fee deposit
     refund_secret_2: Field,
     refund_nullifier_2: Field,
     refund_amount_2: Field,
-    refund_commitment_hash_2: pub Field,
-    _recipient: pub Field,
+    refund_commitment_hash_2: pub Field, //9
+    _recipient: pub Field, //10
 ) {
     let computed_secret_nullifier_hash =
         std::hash::poseidon::bn254::hash_2([secret_1, nullifier_1]);

@@ -47,14 +47,14 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
-		"@aztec/bb.js": "^0.86.0-starknet.1",
+		"@aztec/bb.js": "0.86.0-starknet.1",
 		"@noir-lang/acvm_js": "^1.0.0-beta.3",
 		"@noir-lang/noir_js": "^1.0.0-beta.3",
 		"@noir-lang/noir_wasm": "^1.0.0-beta.3",
 		"@noir-lang/noirc_abi": "^1.0.0-beta.3",
 		"garaga": "^0.18.0",
 		"lucide-svelte": "^0.511.0",
-		"starknet": "^6.24.1",
+		"starknet": "^7.4.0",
 		"starknetkit": "^2.10.4",
 		"zod": "^3.25.20"
 	}

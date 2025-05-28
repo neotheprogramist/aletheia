@@ -26,6 +26,9 @@
 	import { paymasterWallet } from '$lib/stores/paymaster';
 	import { provider } from '$lib/stores/provider';
 	import { Contract } from 'starknet';
+	import { confirmOperation } from '$lib/privacy/confirmOperation';
+	import { nullifyOperation } from '$lib/privacy/nullifyOperation';
+	import { abortOperation } from '$lib/privacy/abortOperation';
 
 	interface DisplayOperation extends Omit<Operation, 'data'> {
 		data: {
@@ -60,6 +63,8 @@
 
 	let withdrawRecipient = '';
 	let withdrawAmount = '';
+	let withdrawRefundHash: string | null = null;
+	let feeRefundHash: string | null = null;
 
 	let feeWeiHex = '';
 	let modalWithdrawToken = '';
@@ -90,7 +95,7 @@
 				// 1) Get all operations
 				const ops = await getAllByStatus('confirmed');
 
-				// 2) filtrujemy tylko te, które przejdą guardę
+				// 2) Filter what passes the guard
 				const pricedOps = ops.filter(isPricedOp);
 
 				// 3) Get unique token addresses
@@ -251,19 +256,21 @@
 
 				// Refunds
 				const withdrawRefund = withdrawNoteBalanceWei - userWithdrawAmountWei;
-				const { hash: withdrawRefundHash } = await generateOperation({
+				const withdrawOpResult = await generateOperation({
 					data: {
 						tokenAddress: withdrawNote.tokenAddress,
 						amount: withdrawRefund
 					}
 				});
+				withdrawRefundHash = withdrawOpResult.hash;
 				const feeRefund = feeNoteBalanceWei - feeWei;
-				const { hash: feeRefundHash } = await generateOperation({
+				const feeOpResult = await generateOperation({
 					data: {
 						tokenAddress: feeNote.tokenAddress,
 						amount: feeRefund
 					}
 				});
+				feeRefundHash = feeOpResult.hash;
 				const withdrawRefundCommitmentHash = garaga.poseidonHashBN254(
 					garaga.poseidonHashBN254(BigInt(withdrawRefundHash), withdrawRefund),
 					BigInt(withdrawNote.tokenAddress)
@@ -320,13 +327,11 @@
 					// Recipient
 					_recipient: withdrawRecipient
 				};
-				console.log('witnessInput', witnessInput);
 
 				const honkCalldataHex = await generateProof(witnessInput, {
-					jsonUrl: 'circuits/extension.json',
-					vkUrl: 'circuits/vk_extension.bin'
+					jsonUrl: 'circuits/execute.json',
+					vkUrl: 'circuits/vk_execute.bin'
 				});
-				console.log('honkCalldataHex', honkCalldataHex);
 
 				const extensionCalldata = [
 					PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
@@ -338,31 +343,77 @@
 
 				const rpc = get(provider);
 				if (!rpc) throw new Error('Missing Provider');
+				const account = get(paymasterWallet);
+				const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
+				if (!privacyAbi) throw new Error('Brak ABI');
+				const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
+				privacy.connect(account);
+				const honkCalldataWithLen = [
+					`0x` + BigInt(honkCalldataHex.length).toString(16),
+					...honkCalldataHex
+				];
+				const extensionCalldataWithLen = [
+					`0x` + BigInt(extensionCalldata.length).toString(16),
+					...extensionCalldata
+				];
+				const call = {
+					contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+					entrypoint: 'execute_extension',
+					calldata: [
+						...honkCalldataWithLen,
+						PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS,
+						...extensionCalldataWithLen
+					]
+				};
 
-				const { abi: privacyAccountAbi } = await rpc.getClassAt(
-					PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS
-				);
-				if (privacyAccountAbi === undefined) throw new Error('Missing Privacy Contract Abi');
+				const tx = await account.execute(call);
+				const receipt = await rpc.waitForTransaction(tx.transaction_hash);
+				if (receipt.isSuccess()) {
+					console.log('✅ Transaction success:', receipt.value);
+				} else if (receipt.isReverted()) {
+					console.warn('⚠️ Transaction Reverted:', receipt.value);
+					throw new Error(`Transaction Reverted ${receipt.value}`);
+				} else {
+					console.error('❌ Transaction Error:', receipt.value);
+					throw new Error(`Transaction Error ${receipt.value}`);
+				}
+				console.log('receipt', receipt);
 
-				const paymaster = get(paymasterWallet);
-				if (!paymaster) throw new Error('Missing Paymaster Wallet');
+				// Confirm operations
+				await confirmOperation(withdrawRefundHash);
+				await confirmOperation(feeRefundHash);
 
-				const privacyAccountContract = new Contract(
-					privacyAccountAbi,
-					PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
-					rpc
-				);
-				privacyAccountContract.connect(paymaster);
-				privacyAccountContract.execute_extension(
-					honkCalldataHex,
-					PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS,
-					extensionCalldata
-				);
+				// Nullify operations
+				await nullifyOperation(selectedWithdrawDeposit.hash);
+				await nullifyOperation(selectedFeeDeposit.hash);
+
+				// Reset selections and inputs
+				resetAll();
 			},
 			{
 				loading: '⏳ Sending Withdraw Tx',
 				success: '✅ Withdraw sent!',
 				error: '❌ Withdraw failed'
+			},
+			async (err) => {
+				console.warn('❌ Withdraw failed with error:', err);
+				if (withdrawRefundHash) {
+					try {
+						await abortOperation(withdrawRefundHash);
+						console.warn('🧯 Aborted failed operation:', withdrawRefundHash);
+					} catch (abortError) {
+						console.error('🚨 Failed to abort operation:', abortError);
+					}
+				}
+
+				if (feeRefundHash) {
+					try {
+						await abortOperation(feeRefundHash);
+						console.warn('🧯 Aborted failed operation:', feeRefundHash);
+					} catch (abortError) {
+						console.error('🚨 Failed to abort operation:', abortError);
+					}
+				}
 			}
 		);
 
