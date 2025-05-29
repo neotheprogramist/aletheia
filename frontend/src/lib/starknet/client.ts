@@ -1,6 +1,6 @@
 import {
 	PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
-	PUBLIC_TORNADO_LEAF_ADDED_SELECTOR
+	PUBLIC_PRIVACY_LEAF_ADDED_SELECTOR
 } from '$env/static/public';
 import { provider } from '$lib/stores/provider';
 import { fromLowHighHex } from '$lib/utils/toLowHigh';
@@ -18,7 +18,7 @@ export async function getDepositsFromRange(
 		from_block: { block_number: from },
 		to_block: { block_number: to },
 		address: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
-		keys: [[PUBLIC_TORNADO_LEAF_ADDED_SELECTOR]],
+		keys: [[PUBLIC_PRIVACY_LEAF_ADDED_SELECTOR]],
 		chunk_size: 100
 	};
 
