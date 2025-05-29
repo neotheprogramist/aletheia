@@ -12,12 +12,12 @@
 	export let columns: Column<any>[] = [];
 	export let pageSize = 10;
 	export let keyField: string;
-	export let disabledIndexes: number[] = [];
+	export let disabledKeys: number[] = [];
 	export let onRowClick: (idx: number) => void = () => {};
 
 	// style props
-	export let activeIndex: number | null = null;
-	export let inactiveIndex: number | null = null;
+	export let activeKey: number | null = null;
+	export let inactiveKey: number | null = null;
 	export let hoverClass = 'hover:bg-emerald-800';
 
 	// **Sorting state**
@@ -69,7 +69,7 @@
 
 	function handleRowClick(_item: any, localIdx: number) {
 		const globalIndex = (currentPage - 1) * pageSize + localIdx;
-		if (disabledIndexes.includes(globalIndex)) return;
+		if (disabledKeys.includes(globalIndex)) return;
 		onRowClick(globalIndex);
 	}
 
@@ -111,9 +111,9 @@
 		{#each paginatedItems as item, idx (item[keyField])}
 			<tr
 				on:click={() => handleRowClick(item, idx)}
-				class={(currentPage - 1) * pageSize + idx === activeIndex
+				class={item[keyField] === activeKey
 					? 'bg-green-800 text-white'
-					: (currentPage - 1) * pageSize + idx === inactiveIndex
+					: item[keyField] === inactiveKey
 						? 'pointer-events-none bg-red-300 text-red-900'
 						: `cursor-pointer ${hoverClass}`}
 			>

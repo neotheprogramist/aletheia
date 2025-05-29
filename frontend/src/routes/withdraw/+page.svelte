@@ -30,6 +30,8 @@
 	import { nullifyOperation } from '$lib/privacy/nullifyOperation';
 	import { abortOperation } from '$lib/privacy/abortOperation';
 	import { toastStore } from '$lib/stores/toast';
+	import { tokens, selectedToken } from '$lib/stores/tokens';
+	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 
 	interface DisplayOperation extends Omit<Operation, 'data'> {
 		data: {
@@ -54,9 +56,9 @@
 
 	let selectionMode: 'withdraw' | 'fee' = 'withdraw';
 
-	let selectedWithdrawIndex: number | null = null;
+	let selectedWithdrawKey: number | null = null;
 	let selectedWithdrawDeposit: DisplayOperation | null = null;
-	let selectedFeeIndex: number | null = null;
+	let selectedFeeKey: number | null = null; //
 	let selectedFeeDeposit: DisplayOperation | null = null;
 
 	let withdrawNote: NoteData | null = null;
@@ -82,27 +84,21 @@
 
 	const columns: Column<DisplayOperation>[] = [
 		{ label: 'Index', field: 'index' },
-		{ label: 'Amount', field: (d) => d.displayAmount },
-		{
-			label: 'Token',
-			field: (d) => d.data.tokenAddress,
-			render: (d) => `<code>${d.data.tokenAddress}</code>`
-		}
+		{ label: 'Amount', field: (d) => d.displayAmount }
 	];
 
-	onMount(async () => {
+	$: if ($selectedToken) {
+		loadDepositsForSelectedToken();
+	}
+
+	async function loadDepositsForSelectedToken() {
+		isLoading = true;
 		await wrapWithToast(
 			async () => {
-				// 1) Get all operations
 				const ops = await getAllByStatus('confirmed');
-
-				// 2) Filter what passes the guard
 				const pricedOps = ops.filter(isPricedOp);
 
-				// 3) Get unique token addresses
 				const uniqueAddrs = Array.from(new Set(pricedOps.map((o) => o.data.tokenAddress)));
-
-				// 4) Fetch decimals
 				const decimalsMap: Record<string, number> = {};
 				await Promise.all(
 					uniqueAddrs.map(async (addr) => {
@@ -110,8 +106,8 @@
 					})
 				);
 
-				// 5) Sort and create DisplayOperation
 				deposits = pricedOps
+					.filter((op) => op.data.tokenAddress === $selectedToken)
 					.sort((a, b) => a.index - b.index)
 					.map((op) => {
 						const { tokenAddress, amount } = op.data;
@@ -125,33 +121,34 @@
 			},
 			{ loading: '⏳ Loading…', success: '', error: '❌ Load error' }
 		);
-	});
+		isLoading = false;
+	}
 
 	function handleRowClick(globalIdx: number) {
 		if (selectionMode === 'withdraw') {
-			selectedWithdrawIndex = globalIdx;
-			selectedWithdrawDeposit = deposits[globalIdx];
+			selectedWithdrawKey = deposits[globalIdx].index;
+			selectedWithdrawDeposit = deposits.find((d) => d.index === selectedWithdrawKey) ?? null;
 			withdrawRecipient = '';
 			withdrawAmount = '';
 		} else {
-			selectedFeeIndex = globalIdx;
-			selectedFeeDeposit = deposits[globalIdx];
+			selectedFeeKey = deposits[globalIdx].index;
+			selectedFeeDeposit = deposits.find((d) => d.index === selectedFeeKey) ?? null;
 		}
 	}
 
-	$: disabledIndexes =
+	$: disabledKeys =
 		selectionMode === 'withdraw'
-			? selectedFeeIndex !== null
-				? [selectedFeeIndex]
+			? selectedFeeKey !== null
+				? [selectedFeeKey]
 				: []
-			: selectedWithdrawIndex !== null
-				? [selectedWithdrawIndex]
+			: selectedWithdrawKey !== null
+				? [selectedWithdrawKey]
 				: [];
 
 	function resetAll() {
-		selectedWithdrawIndex = null;
+		selectedWithdrawKey = null;
 		selectedWithdrawDeposit = null;
-		selectedFeeIndex = null;
+		selectedFeeKey = null;
 		selectedFeeDeposit = null;
 	}
 
@@ -475,17 +472,25 @@
 				Select a deposit to pay <strong>fee</strong>:
 			{/if}
 		</p>
-
+		<p class="mb-2 text-sm text-gray-600 dark:text-gray-300">
+			Select a token to filter the list of available deposits:
+		</p>
+		<TokenSelect
+			tokens={$tokens}
+			bind:value={$selectedToken}
+			placeholder="Filter deposits by token"
+			class_="mb-4 w-64"
+		/>
 		<!-- Deposits Table -->
 		<PaginatedTable
 			{columns}
 			items={deposits}
 			pageSize={5}
 			keyField="index"
-			{disabledIndexes}
+			{disabledKeys}
 			onRowClick={handleRowClick}
-			activeIndex={selectionMode === 'withdraw' ? selectedWithdrawIndex : selectedFeeIndex}
-			inactiveIndex={selectionMode === 'withdraw' ? selectedFeeIndex : selectedWithdrawIndex}
+			activeKey={selectionMode === 'withdraw' ? selectedWithdrawKey : selectedFeeKey}
+			inactiveKey={selectionMode === 'withdraw' ? selectedFeeKey : selectedWithdrawKey}
 			hoverClass="hover:bg-green-600"
 		/>
 

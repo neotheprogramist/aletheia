@@ -14,7 +14,7 @@
 	}
 </script>
 
-<div class={`relative w-full ${class_}`}>
+<div class={`relative  ${class_}`}>
 	<button
 		type="button"
 		on:click={() => (isOpen = !isOpen)}
