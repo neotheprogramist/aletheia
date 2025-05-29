@@ -20,3 +20,5 @@ export async function initTokensWithSymbols() {
 	);
 	tokens.set(updated);
 }
+
+export const selectedToken = writable(initialTokens[0].address);

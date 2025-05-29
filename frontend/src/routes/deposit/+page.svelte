@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { get } from 'svelte/store';
-	import { tokens } from '$lib/stores/tokens';
+	import { tokens, selectedToken } from '$lib/stores/tokens';
 	import { wallet } from '$lib/stores/wallet';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS } from '$env/static/public';
@@ -18,16 +18,8 @@
 	import { abortOperation } from '$lib/privacy/abortOperation';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
 
-	let tokenAddress = '';
 	let amount = '';
 	let isLoading = false;
-
-	// Select first as chosen one
-	$: {
-		if (!tokenAddress && $tokens.length > 0) {
-			tokenAddress = $tokens[0].address;
-		}
-	}
 
 	function createCalls(hash: string, amountWei: bigint) {
 		const secretAndNullifierHash = BigInt(hash);
@@ -36,14 +28,14 @@
 
 		return [
 			{
-				contract_address: tokenAddress,
+				contract_address: $selectedToken,
 				entry_point: 'approve',
 				calldata: [PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, amountLow, amountHigh]
 			},
 			{
 				contract_address: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
 				entry_point: 'deposit',
-				calldata: [hashLow, hashHigh, amountLow, amountHigh, tokenAddress]
+				calldata: [hashLow, hashHigh, amountLow, amountHigh, $selectedToken]
 			}
 		];
 	}
@@ -54,9 +46,11 @@
 
 		await wrapWithToast(
 			async () => {
-				const decimals = await fetchTokenDecimals(tokenAddress);
+				const decimals = await fetchTokenDecimals($selectedToken);
 				const amountWei = toWei(amount, decimals);
-				const { hash } = await generateOperation({ data: { tokenAddress, amount: amountWei } });
+				const { hash } = await generateOperation({
+					data: { tokenAddress: $selectedToken, amount: amountWei }
+				});
 				operationHash = hash;
 
 				const calls = createCalls(hash, amountWei);
@@ -100,7 +94,7 @@
 			<form on:submit|preventDefault={depositHandler} class="flex flex-col gap-4">
 				<TokenSelect
 					tokens={$tokens}
-					bind:value={tokenAddress}
+					bind:value={$selectedToken}
 					placeholder="Select token"
 					class_="w-full"
 				/>
