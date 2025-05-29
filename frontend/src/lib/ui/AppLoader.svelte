@@ -5,10 +5,12 @@
 	import FullPageSpinner from './FullPageSpinner.svelte';
 	import FullPageError from './FullPageError.svelte';
 	import { initMerkleTree, startDepositProcessor } from '$lib/services/depositProcessor';
+	import { initTokensWithSymbols } from '$lib/stores/tokens';
 
 	onMount(() => {
 		initZkLibraries();
 		autoReconnect();
+		initTokensWithSymbols();
 
 		const unsubscribeZk = zkLibraries.subscribe(async ($lib) => {
 			if ($lib.status === 'ready') {
