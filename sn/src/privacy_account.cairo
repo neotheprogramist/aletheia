@@ -327,6 +327,7 @@ pub mod PrivacyAccount {
         strk_token_address: ContractAddress,
         usdc_token_address: ContractAddress,
         initial_fee_buffer: u256,
+        current_gas_price: u256,
     ) {
         // 1) Standard ownership & merkle init
         self.ownable.initializer(owner);
@@ -355,6 +356,9 @@ pub mod PrivacyAccount {
 
         // 6) Initialize users_balance to zero
         self.users_balance.write(0);
+
+        // 7) Set current gas price
+        self.current_gas_price.write(current_gas_price);
     }
 
     #[abi(embed_v0)]
