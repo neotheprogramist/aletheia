@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { Redo } from 'lucide-svelte';
 	import Button from '$lib/ui/Button.svelte';
@@ -491,7 +490,11 @@
 				{disabledKeys}
 				onRowClick={handleRowClick}
 				activeKey={selectionMode === 'withdraw' ? selectedWithdrawKey : selectedFeeKey}
-				inactiveKey={selectionMode === 'withdraw' ? selectedFeeKey : selectedWithdrawKey}
+				inactiveKeys={selectionMode === 'withdraw' && selectedFeeKey !== null
+					? [selectedFeeKey]
+					: selectionMode === 'fee' && selectedWithdrawKey !== null
+						? [selectedWithdrawKey]
+						: []}
 				hoverClass="hover:bg-green-600"
 			/>
 
@@ -527,7 +530,7 @@
 			<!-- Withdraw Form -->
 			{#if selectedWithdrawDeposit && selectedFeeDeposit}
 				<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
-					<Card title="Withdraw">
+					<Card>
 						<form on:submit|preventDefault={initiateWithdraw} class="mt-6 flex flex-col gap-4">
 							<Input
 								bind:value={withdrawRecipient}
@@ -541,7 +544,7 @@
 								placeholder="Amount to Withdraw"
 								class_="w-full"
 							/>
-							<Button text="Review" class_="mt-2 w-full" loading={isLoading} type="submit" />
+							<Button text="Withdraw" class_="mt-2 w-full" loading={isLoading} type="submit" />
 						</form>
 					</Card>
 				</div>

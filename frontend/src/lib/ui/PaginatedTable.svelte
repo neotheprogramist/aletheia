@@ -17,7 +17,7 @@
 
 	// style props
 	export let activeKey: number | null = null;
-	export let inactiveKey: number | null = null;
+	export let inactiveKeys: number[] = [];
 	export let hoverClass = 'hover:bg-emerald-800';
 
 	// **Sorting state**
@@ -113,7 +113,7 @@
 				on:click={() => handleRowClick(item, idx)}
 				class={item[keyField] === activeKey
 					? 'bg-green-800 text-white'
-					: item[keyField] === inactiveKey
+					: inactiveKeys.includes(item[keyField])
 						? 'pointer-events-none bg-red-300 text-red-900'
 						: `cursor-pointer ${hoverClass}`}
 			>
