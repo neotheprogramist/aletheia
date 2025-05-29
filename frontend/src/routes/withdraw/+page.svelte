@@ -104,7 +104,7 @@
 		await wrapWithToast(
 			async () => {
 				if (!selectedWithdrawDeposit || !selectedFeeDeposit) {
-					throw new Error('Please pick both a withdraw note and a fee note');
+					throw new Error('Please select both a withdraw note and a fee note');
 				}
 
 				// — Parse Withdraw note
