@@ -107,7 +107,7 @@
 				);
 
 				deposits = pricedOps
-					.filter((op) => op.data.tokenAddress === $selectedToken)
+					.filter((op) => op.data.tokenAddress === $selectedToken && BigInt(op.data.amount) > 0n)
 					.sort((a, b) => a.index - b.index)
 					.map((op) => {
 						const { tokenAddress, amount } = op.data;
