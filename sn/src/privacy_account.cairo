@@ -67,7 +67,6 @@ pub trait IPrivacyAccount<TContractState> {
     ) -> bool;
     fn current_root(self: @TContractState) -> u256;
     fn get_roots(self: @TContractState) -> Array<u256>;
-    fn withdraw_fee(ref self: TContractState, recipient: ContractAddress, amount: u256) -> bool;
     fn __execute__(self: @TContractState, calls: Array<Call>) -> Array<Span<felt252>>;
     fn __validate__(self: @TContractState, calls: Array<Call>) -> felt252;
     fn is_valid_signature(
@@ -85,6 +84,11 @@ pub trait IPrivacyAccount<TContractState> {
 
     // Does multiple multihop swaps
     fn multi_multihop_swap(ref self: TContractState, swaps: Array<Swap>) -> Array<Array<Delta>>;
+    fn get_accumulated_fee(self: @TContractState) -> u256;
+    fn withdraw_all_accumulated_fee(ref self: TContractState, recipient: ContractAddress) -> u256;
+    fn withdraw_accumulated_fee(
+        ref self: TContractState, recipient: ContractAddress, amount: u256,
+    ) -> u256;
 }
 
 #[derive(Drop)]
@@ -218,8 +222,7 @@ pub mod PrivacyAccount {
     use crate::zk_extension::{IZkExtensionDispatcher, IZkExtensionDispatcherTrait};
     use crate::{hash, verify_ultra_keccak_honk_proof};
     use super::{
-        Delta, IPrivacyAccount, IUltraKeccakHonkVerifierDispatcher,
-        IUltraKeccakHonkVerifierDispatcherTrait, PublicInputMergeImpl, PublicInputTransferImpl,
+        Delta, IPrivacyAccount, PublicInputMergeImpl, PublicInputTransferImpl,
         PublicInputWithdrawImpl, RouteNode, Swap, TokenAmount,
     };
 
@@ -265,6 +268,9 @@ pub mod PrivacyAccount {
         usdc_token_address: ContractAddress,
         current_gas_price: u256,
         trusted_extensions: Map<ContractAddress, u128>,
+        users_balance: u256,
+        accumulated_fee: u256,
+        initial_fee_buffer: u256,
     }
 
     #[derive(Drop, PartialEq, starknet::Event)]
@@ -320,16 +326,35 @@ pub mod PrivacyAccount {
         core_address: ContractAddress,
         strk_token_address: ContractAddress,
         usdc_token_address: ContractAddress,
+        initial_fee_buffer: u256,
     ) {
+        // 1) Standard ownership & merkle init
         self.ownable.initializer(owner);
         self.merkle.initializer();
+
+        // 2) Store verifier addresses
         self.extension_verifier.write(extension_verifier);
         self.merge_verifier.write(merge_verifier);
         self.transfer_verifier.write(transfer_verifier);
+
+        // 3) Store core dispatcher and token addresses
         let dispatcher: ICoreDispatcher = ICoreDispatcher { contract_address: core_address };
         self.core.write(dispatcher);
         self.strk_token_address.write(strk_token_address);
         self.usdc_token_address.write(usdc_token_address);
+
+        // 4) Pull initial_fee_buffer STRK from deployer into this contract
+        //    Deployer MUST have done: IERC20Dispatcher.approve(<this_contract>, initial_fee_buffer)
+        let this = get_contract_address();
+        let token = IERC20Dispatcher { contract_address: strk_token_address };
+        token.transfer_from(owner, this, initial_fee_buffer);
+
+        // 5) Seed your fee‐tracking storage
+        self.initial_fee_buffer.write(initial_fee_buffer);
+        self.accumulated_fee.write(initial_fee_buffer);
+
+        // 6) Initialize users_balance to zero
+        self.users_balance.write(0);
     }
 
     #[abi(embed_v0)]
@@ -420,11 +445,11 @@ pub mod PrivacyAccount {
             let token_u256: u256 = token_felt.into();
             let commitment_hash = hash(secret_nullifier_amount_hash, token_u256);
             self.merkle.add_leaf(commitment_hash);
-
             let caller = get_caller_address();
             let this = get_contract_address();
             let token = IERC20Dispatcher { contract_address: token_address };
             token.transfer_from(caller, this, amount.into());
+            self.users_balance.write(self.users_balance.read() + amount);
             true
         }
 
@@ -439,6 +464,15 @@ pub mod PrivacyAccount {
             );
 
             let public_input = PublicInputWithdrawImpl::from_u256_span(public_input_serialized);
+
+            // Validate gas fee
+            let calculated_fee = self.get_fee_for_extension(external_contract_address);
+            assert(public_input.gas_fee >= calculated_fee, Errors::INSUFFICIENT_FEE);
+
+            // Update accumulated fee and lower users balance -> funds going out of the contract
+            self.accumulated_fee.write(self.accumulated_fee.read() + public_input.gas_fee);
+            self.users_balance.write(self.users_balance.read() - public_input.amount);
+
             assert(
                 !self.nullifier_hashes.read(public_input.nullifier_1),
                 Errors::NULLIFIER_ALREADY_USED,
@@ -620,21 +654,6 @@ pub mod PrivacyAccount {
             roots
         }
 
-        fn withdraw_fee(ref self: ContractState, recipient: ContractAddress, amount: u256) -> bool {
-            self.ownable.assert_only_owner();
-            let token = IERC20Dispatcher { contract_address: self.usdc_token_address.read() };
-            token.transfer(recipient, amount);
-            self
-                .emit(
-                    FeeWithdrawal {
-                        recipient: recipient,
-                        amount: amount,
-                        token_address: self.usdc_token_address.read(),
-                    },
-                );
-            true
-        }
-
         fn __execute__(self: @ContractState, calls: Array<Call>) -> Array<Span<felt252>> {
             execute_calls(calls.span())
         }
@@ -680,6 +699,91 @@ pub mod PrivacyAccount {
             let gas_consumed_u256: u256 = gas_consumed.try_into().unwrap();
             let total_fee: u256 = gas_consumed_u256 * gas_price;
             total_fee
+        }
+
+        fn get_accumulated_fee(
+            self: @sn::privacy_account::PrivacyAccount::ContractState,
+        ) -> core::integer::u256 {
+            self.accumulated_fee.read()
+        }
+
+        fn withdraw_all_accumulated_fee(
+            ref self: sn::privacy_account::PrivacyAccount::ContractState,
+            recipient: starknet::contract_address::ContractAddress,
+        ) -> core::integer::u256 {
+            // only the owner may call
+            self.ownable.assert_only_owner();
+
+            // 1) read on‐chain STRK balance of this contract
+            let this = get_contract_address();
+            let token = IERC20Dispatcher { contract_address: self.strk_token_address.read() };
+            let contract_balance: u256 = token.balance_of(this);
+
+            // 2) read your storage counters
+            let user_balance: u256 = self.users_balance.read();
+            let buffer: u256 = self.initial_fee_buffer.read();
+
+            // 3) compute how much is truly “free float”
+            let withdrawable: u256 = if contract_balance > user_balance + buffer {
+                contract_balance - (user_balance + buffer)
+            } else {
+                0
+            };
+
+            // 4) transfer only that amount
+            if withdrawable > 0 {
+                token.transfer(recipient, withdrawable);
+            }
+
+            // 5) emit the FeeWithdrawal event with the actual amount
+            self
+                .emit(
+                    FeeWithdrawal {
+                        recipient: recipient,
+                        amount: withdrawable,
+                        token_address: self.strk_token_address.read(),
+                    },
+                );
+
+            // 6) return how much was sent
+            withdrawable
+        }
+
+
+        fn withdraw_accumulated_fee(
+            ref self: sn::privacy_account::PrivacyAccount::ContractState,
+            recipient: starknet::contract_address::ContractAddress,
+            amount: core::integer::u256,
+        ) -> core::integer::u256 {
+            self.ownable.assert_only_owner();
+
+            let this = get_contract_address();
+            let token = IERC20Dispatcher { contract_address: self.strk_token_address.read() };
+            let contract_balance: u256 = token.balance_of(this);
+
+            let user_balance: u256 = self.users_balance.read();
+            let buffer: u256 = self.initial_fee_buffer.read();
+
+            let withdrawable: u256 = if contract_balance > user_balance + buffer {
+                contract_balance - (user_balance + buffer)
+            } else {
+                0
+            };
+
+            assert!(amount <= withdrawable, "Requested amount exceeds available accumulated fee");
+
+            if amount > 0 {
+                token.transfer(recipient, amount);
+            }
+
+            self
+                .emit(
+                    FeeWithdrawal {
+                        recipient, amount, token_address: self.strk_token_address.read(),
+                    },
+                );
+
+            amount
         }
     }
 }

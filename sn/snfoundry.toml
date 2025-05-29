@@ -3,7 +3,7 @@
 
 [sncast.default] # Define a profile name
 # url = "https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/ffGrvRxnad_MXHATSkRmHUu8vUlghEok" # Url of the RPC provider
-url = "https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_8/J0xXJUNyn2tHfn5Ct983g9Yxa3cZKwBf"
+url = "https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_8/PrTrrlIeyaP-kMwd0UoAly4Uw4eGOTq1"
 account = "argentACC"
 accounts-file = "account-file.json"
 # url = "https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/-XuK5Z_YA43S7-3S4GaCB-Y0zgj__Ewg"                              # Url of the RPC provider

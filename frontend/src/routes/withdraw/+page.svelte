@@ -29,6 +29,7 @@
 	import { confirmOperation } from '$lib/privacy/confirmOperation';
 	import { nullifyOperation } from '$lib/privacy/nullifyOperation';
 	import { abortOperation } from '$lib/privacy/abortOperation';
+	import { toastStore } from '$lib/stores/toast';
 
 	interface DisplayOperation extends Omit<Operation, 'data'> {
 		data: {
@@ -216,61 +217,58 @@
 		);
 	}
 
-	/** Proving */
+	/** Proving & Execution */
 	async function confirmWithdraw() {
+		// 1) Close the modal and start the toast
 		showFeeModal = false;
 
 		await wrapWithToast(
 			async () => {
+				// 2) Validate that note balances and calculated amounts are present
 				if (!withdrawNoteBalanceWei || !userWithdrawAmountWei) {
-					throw new Error('Can not calculate refund - missing withdraw amounts');
+					throw new Error('Cannot calculate refund – missing withdraw amounts');
 				}
 				if (!feeNoteBalanceWei || !feeWei) {
-					throw new Error('Can not calculate refund - missing fee amounts');
+					throw new Error('Cannot calculate refund – missing fee amounts');
 				}
 
+				// 3) Ensure zk library and merkle tree are initialized
 				const { garaga } = get(zkLibraries);
 				if (!garaga) throw new Error('Garaga not initialized');
 				if (!feeNote || !selectedFeeDeposit || !withdrawNote || !selectedWithdrawDeposit) {
-					throw new Error('Missing fee or withdraw deposit.');
+					throw new Error('Missing fee or withdraw deposit');
 				}
 				const tree = merkleTree;
 				if (!tree) throw new Error('Merkle tree does not exist');
 
-				// Commitments
-				const withdrawCommitment = tree.getProofData(
+				// 4) Compute commitments for the withdraw and fee deposits
+				// And get the data for proving
+				const withdrawProofData = tree.getProofData(
 					garaga.poseidonHashBN254(
 						garaga.poseidonHashBN254(BigInt(selectedWithdrawDeposit.hash), withdrawNoteBalanceWei),
 						BigInt(withdrawNote.tokenAddress)
 					)
 				);
-				const feeCommitment = tree.getProofData(
+				const feeProofData = tree.getProofData(
 					garaga.poseidonHashBN254(
 						garaga.poseidonHashBN254(BigInt(selectedFeeDeposit.hash), feeNoteBalanceWei),
 						BigInt(feeNote.tokenAddress)
 					)
 				);
 
-				console.log('withdraw commitment:', withdrawCommitment);
-				console.log('fee commitment:', feeCommitment);
-
-				// Refunds
+				// 5) Generate refund operations and compute their commitment hashes
 				const withdrawRefund = withdrawNoteBalanceWei - userWithdrawAmountWei;
 				const withdrawOpResult = await generateOperation({
-					data: {
-						tokenAddress: withdrawNote.tokenAddress,
-						amount: withdrawRefund
-					}
+					data: { tokenAddress: withdrawNote.tokenAddress, amount: withdrawRefund }
 				});
 				withdrawRefundHash = withdrawOpResult.hash;
+
 				const feeRefund = feeNoteBalanceWei - feeWei;
 				const feeOpResult = await generateOperation({
-					data: {
-						tokenAddress: feeNote.tokenAddress,
-						amount: feeRefund
-					}
+					data: { tokenAddress: feeNote.tokenAddress, amount: feeRefund }
 				});
 				feeRefundHash = feeOpResult.hash;
+
 				const withdrawRefundCommitmentHash = garaga.poseidonHashBN254(
 					garaga.poseidonHashBN254(BigInt(withdrawRefundHash), withdrawRefund),
 					BigInt(withdrawNote.tokenAddress)
@@ -280,7 +278,7 @@
 					BigInt(feeNote.tokenAddress)
 				);
 
-				// 1) Get operations details
+				// 6) Fetch details for all four operations from the database
 				const withdrawOp = await getOperationDetails(selectedWithdrawDeposit.hash);
 				const feeOp = await getOperationDetails(selectedFeeDeposit.hash);
 				const withdrawRefundOp = await getOperationDetails(withdrawRefundHash);
@@ -290,72 +288,87 @@
 					throw new Error('One or more operations not found');
 				}
 
-				console.log('withdrawOp', withdrawOp);
-				console.log('feeOp', feeOp);
-				console.log('withdrawRefundOp', withdrawRefundOp);
-				console.log('feeRefundOp', feeRefundOp);
-				// 2) Prepare witness input
+				// 7) Build the witness input object for proof
 				const witnessInput = {
-					// Deposit data
-					root_1: `0x${withdrawCommitment.root.toString(16)}`,
+					// original deposit data
+					root_1: `0x${withdrawProofData.root.toString(16)}`,
 					secret_1: `0x${BigInt(withdrawOp.secret).toString(16)}`,
 					nullifier_1: `0x${BigInt(withdrawOp.nullifier).toString(16)}`,
 					commitment_amount_1: `0x${BigInt(withdrawOp.amount).toString(16)}`,
 					token_address_1: withdrawOp.tokenAddress,
-					hashpath_1: withdrawCommitment.path[0].map((e) => `0x${e.toString(16)}`),
-					index_1: `0x${BigInt(withdrawCommitment.index).toString(16)}`,
+					hashpath_1: withdrawProofData.path[0].map((e) => `0x${e.toString(16)}`),
+					index_1: `0x${BigInt(withdrawProofData.index).toString(16)}`,
 					amount: `0x${userWithdrawAmountWei.toString(16)}`,
-					// Fee deposit
-					root_2: `0x${feeCommitment.root.toString(16)}`,
+
+					// fee deposit data
+					root_2: `0x${feeProofData.root.toString(16)}`,
 					secret_2: `0x${BigInt(feeOp.secret).toString(16)}`,
 					nullifier_2: `0x${BigInt(feeOp.nullifier).toString(16)}`,
 					commitment_amount_2: `0x${BigInt(feeOp.amount).toString(16)}`,
 					token_address_2: feeOp.tokenAddress,
-					hashpath_2: feeCommitment.path[0].map((e) => `0x${e.toString(16)}`),
-					index_2: `0x${BigInt(feeCommitment.index).toString(16)}`,
+					hashpath_2: feeProofData.path[0].map((e) => `0x${e.toString(16)}`),
+					index_2: `0x${BigInt(feeProofData.index).toString(16)}`,
 					gas_fee: `0x${feeWei.toString(16)}`,
-					// refund data for deposit 1
+
+					// refund for withdraw deposit
 					refund_secret_1: `0x${BigInt(withdrawRefundOp.secret).toString(16)}`,
 					refund_nullifier_1: `0x${BigInt(withdrawRefundOp.nullifier).toString(16)}`,
 					refund_amount_1: `0x${withdrawRefund.toString(16)}`,
 					refund_commitment_hash_1: `0x${withdrawRefundCommitmentHash.toString(16)}`,
-					// refund data for fee deposit
+
+					// refund for fee deposit
 					refund_secret_2: `0x${BigInt(feeRefundOp.secret).toString(16)}`,
 					refund_nullifier_2: `0x${BigInt(feeRefundOp.nullifier).toString(16)}`,
 					refund_amount_2: `0x${feeRefund.toString(16)}`,
 					refund_commitment_hash_2: `0x${feeRefundCommitmentHash.toString(16)}`,
-					// Recipient
+
+					// recipient
 					_recipient: withdrawRecipient
 				};
+				const proofToastId = toastStore.addToast({
+					type: 'info',
+					message: '⏳ Generating zk proof, this may take ~15 seconds…'
+				});
 
+				// 8) Generate the zk proof and prepare it as calldata
 				const honkCalldataHex = await generateProof(witnessInput, {
 					jsonUrl: 'circuits/execute.json',
 					vkUrl: 'circuits/vk_execute.bin'
 				});
 
+				const honkCalldataWithLen = [
+					`0x${BigInt(honkCalldataHex.length).toString(16)}`,
+					...honkCalldataHex
+				];
+
+				toastStore.removeToast(proofToastId);
+
+				// 9) Prepare for the StarkNet transaction
+				const rpc = get(provider);
+				if (!rpc) throw new Error('Missing Provider');
+
+				const account = get(paymasterWallet);
+				if (!account) throw new Error('Missing Account');
+
+				const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
+				if (!privacyAbi) throw new Error('Missing ABI');
+
+				const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
+				privacy.connect(account);
+
+				// 10) Prepare calldata and Starknet call
 				const extensionCalldata = [
 					PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
 					withdrawRecipient,
 					selectedWithdrawDeposit.data.tokenAddress,
 					`0x${userWithdrawAmountWei.toString(16)}`
 				];
-				console.log('extensionCalldata', extensionCalldata);
 
-				const rpc = get(provider);
-				if (!rpc) throw new Error('Missing Provider');
-				const account = get(paymasterWallet);
-				const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
-				if (!privacyAbi) throw new Error('Brak ABI');
-				const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
-				privacy.connect(account);
-				const honkCalldataWithLen = [
-					`0x` + BigInt(honkCalldataHex.length).toString(16),
-					...honkCalldataHex
-				];
 				const extensionCalldataWithLen = [
-					`0x` + BigInt(extensionCalldata.length).toString(16),
+					`0x${BigInt(extensionCalldata.length).toString(16)}`,
 					...extensionCalldata
 				];
+
 				const call = {
 					contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
 					entrypoint: 'execute_extension',
@@ -368,26 +381,26 @@
 
 				const tx = await account.execute(call);
 				const receipt = await rpc.waitForTransaction(tx.transaction_hash);
+
+				// 10) Check receipt status and throw on failure
 				if (receipt.isSuccess()) {
-					console.log('✅ Transaction success:', receipt.value);
+					console.log('✅ Transaction succeeded:', receipt.value);
 				} else if (receipt.isReverted()) {
-					console.warn('⚠️ Transaction Reverted:', receipt.value);
-					throw new Error(`Transaction Reverted ${receipt.value}`);
+					console.warn('⚠️ Transaction reverted:', receipt.value);
+					throw new Error(`Transaction reverted: ${receipt.value}`);
 				} else {
-					console.error('❌ Transaction Error:', receipt.value);
-					throw new Error(`Transaction Error ${receipt.value}`);
+					console.error('❌ Transaction error:', receipt.value);
+					throw new Error(`Transaction error: ${receipt.value}`);
 				}
 				console.log('receipt', receipt);
 
-				// Confirm operations
+				// 11) Confirm and nullify operations in the database
 				await confirmOperation(withdrawRefundHash);
 				await confirmOperation(feeRefundHash);
-
-				// Nullify operations
 				await nullifyOperation(selectedWithdrawDeposit.hash);
 				await nullifyOperation(selectedFeeDeposit.hash);
 
-				// Reset selections and inputs
+				// 12) Reset component state after successful withdrawal
 				resetAll();
 			},
 			{
@@ -396,22 +409,22 @@
 				error: '❌ Withdraw failed'
 			},
 			async (err) => {
+				// 13) On error: abort any created refund operations
 				console.warn('❌ Withdraw failed with error:', err);
 				if (withdrawRefundHash) {
 					try {
 						await abortOperation(withdrawRefundHash);
-						console.warn('🧯 Aborted failed operation:', withdrawRefundHash);
+						console.warn('🧯 Aborted refund operation:', withdrawRefundHash);
 					} catch (abortError) {
-						console.error('🚨 Failed to abort operation:', abortError);
+						console.error('🚨 Failed to abort withdraw refund:', abortError);
 					}
 				}
-
 				if (feeRefundHash) {
 					try {
 						await abortOperation(feeRefundHash);
-						console.warn('🧯 Aborted failed operation:', feeRefundHash);
+						console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
 					} catch (abortError) {
-						console.error('🚨 Failed to abort operation:', abortError);
+						console.error('🚨 Failed to abort fee refund:', abortError);
 					}
 				}
 			}

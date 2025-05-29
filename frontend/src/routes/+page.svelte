@@ -1,8 +1,4 @@
 <script>
-	import { testPoseidon } from '$lib/stores/poseidon';
-	import { onMount } from 'svelte';
-
-	onMount(() => testPoseidon());
 </script>
 
 <div class="mx-auto p-6">
