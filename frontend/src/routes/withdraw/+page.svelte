@@ -3,8 +3,7 @@
 	import { Redo } from 'lucide-svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Card from '$lib/ui/Card.svelte';
-	import PaginatedTable, { type Column } from '$lib/ui/PaginatedTable.svelte';
-	import type { Operation } from '$lib/privacy/types';
+	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
 	import { fromWei, toWei } from '$lib/utils/toWei';
 	import { NoteDataSchema, type NoteData } from '$lib/schemas/schemas';
@@ -20,7 +19,6 @@
 	import Input from '$lib/ui/Input.svelte';
 	import { generateOperation } from '$lib/privacy/generateOperation';
 	import { generateProof } from '$lib/privacy/generateProof';
-	import { getAllByStatus } from '$lib/db/operationsDb';
 	import { getOperationDetails } from '$lib/db/operations';
 	import { paymasterWallet } from '$lib/stores/paymaster';
 	import { provider } from '$lib/stores/provider';
@@ -31,28 +29,13 @@
 	import { toastStore } from '$lib/stores/toast';
 	import { tokens, selectedToken } from '$lib/stores/tokens';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
-
-	interface DisplayOperation extends Omit<Operation, 'data'> {
-		data: {
-			tokenAddress: string;
-			amount: string | bigint;
-		};
-		displayAmount: string;
-	}
+	import {
+		getDisplayDepositsForToken,
+		type DisplayOperation
+	} from '$lib/utils/loadDepositsForToken';
+	import { defaultDepositColumns } from '$lib/utils/sharedColumns';
 
 	let deposits: DisplayOperation[] = [];
-	/** 1) narrow Operation → has data.tokenAddress:string & data.amount:string|bigint */
-	function isPricedOp(op: Operation): op is Omit<Operation, 'data'> & {
-		data: { tokenAddress: string; amount: string | bigint };
-	} {
-		return (
-			op.data !== undefined &&
-			typeof op.data === 'object' &&
-			typeof (op.data as any).tokenAddress === 'string' &&
-			(typeof (op.data as any).amount === 'string' || typeof (op.data as any).amount === 'bigint')
-		);
-	}
-
 	let selectionMode: 'withdraw' | 'fee' = 'withdraw';
 
 	let selectedWithdrawKey: number | null = null;
@@ -81,46 +64,10 @@
 	let feeNoteBalanceWei: bigint | null = null;
 	let feeWei: bigint | null = null;
 
-	const columns: Column<DisplayOperation>[] = [
-		{ label: 'Index', field: 'index' },
-		{ label: 'Amount', field: (d) => d.displayAmount }
-	];
-
 	$: if ($selectedToken) {
-		loadDepositsForSelectedToken();
-	}
-
-	async function loadDepositsForSelectedToken() {
-		isLoading = true;
-		await wrapWithToast(
-			async () => {
-				const ops = await getAllByStatus('confirmed');
-				const pricedOps = ops.filter(isPricedOp);
-
-				const uniqueAddrs = Array.from(new Set(pricedOps.map((o) => o.data.tokenAddress)));
-				const decimalsMap: Record<string, number> = {};
-				await Promise.all(
-					uniqueAddrs.map(async (addr) => {
-						decimalsMap[addr] = await fetchTokenDecimals(addr);
-					})
-				);
-
-				deposits = pricedOps
-					.filter((op) => op.data.tokenAddress === $selectedToken && BigInt(op.data.amount) > 0n)
-					.sort((a, b) => a.index - b.index)
-					.map((op) => {
-						const { tokenAddress, amount } = op.data;
-						const wei = typeof amount === 'bigint' ? amount : BigInt(amount);
-						return {
-							...op,
-							data: { tokenAddress, amount },
-							displayAmount: fromWei(wei, decimalsMap[tokenAddress])
-						};
-					});
-			},
-			{ loading: '⏳ Loading…', success: '', error: '❌ Load error' }
+		getDisplayDepositsForToken($selectedToken, (v) => (isLoading = v)).then(
+			(d) => (deposits = d ?? [])
 		);
-		isLoading = false;
 	}
 
 	function handleRowClick(globalIdx: number) {
@@ -483,7 +430,7 @@
 			/>
 			<!-- Deposits Table -->
 			<PaginatedTable
-				{columns}
+				columns={defaultDepositColumns}
 				items={deposits}
 				pageSize={5}
 				keyField="index"

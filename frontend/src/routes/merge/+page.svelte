@@ -1,44 +1,24 @@
 <script lang="ts">
-	import { getAllByStatus } from '$lib/db/operationsDb';
-	import type { Operation } from '$lib/privacy/types';
 	import { tokens, selectedToken } from '$lib/stores/tokens';
 	import Button from '$lib/ui/Button.svelte';
 	import Card from '$lib/ui/Card.svelte';
 	import type { Column } from '$lib/ui/PaginatedTable.svelte';
 	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
-	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
-	import { wrapWithToast } from '$lib/utils/toast';
-	import { fromWei } from '$lib/utils/toWei';
-	import { Car, Redo } from 'lucide-svelte';
+	import {
+		getDisplayDepositsForToken,
+		type DisplayOperation
+	} from '$lib/utils/loadDepositsForToken';
+	import { Redo } from 'lucide-svelte';
 
-	interface DisplayOperation extends Omit<Operation, 'data'> {
-		data: {
-			tokenAddress: string;
-			amount: string | bigint;
-		};
-		displayAmount: string;
-	}
 	let deposits: DisplayOperation[] = [];
-
-	function isPricedOp(op: Operation): op is Omit<Operation, 'data'> & {
-		data: { tokenAddress: string; amount: string | bigint };
-	} {
-		return (
-			op.data !== undefined &&
-			typeof op.data === 'object' &&
-			typeof (op.data as any).tokenAddress === 'string' &&
-			(typeof (op.data as any).amount === 'string' || typeof (op.data as any).amount === 'bigint')
-		);
-	}
-
 	let selectionMode: 'merge1' | 'merge2' | 'fee' = 'merge1';
 
 	let selectedMerge1Key: number | null = null;
 	let selectedMerge1Deposit: DisplayOperation | null = null;
 	let selectedMerge2Key: number | null = null;
 	let selectedMerge2Deposit: DisplayOperation | null = null;
-	let selectedFeeKey: number | null = null; //
+	let selectedFeeKey: number | null = null;
 	let selectedFeeDeposit: DisplayOperation | null = null;
 
 	let isLoading = false;
@@ -49,40 +29,9 @@
 	];
 
 	$: if ($selectedToken) {
-		loadDepositsForSelectedToken();
-	}
-
-	async function loadDepositsForSelectedToken() {
-		isLoading = true;
-		await wrapWithToast(
-			async () => {
-				const ops = await getAllByStatus('confirmed');
-				const pricedOps = ops.filter(isPricedOp);
-
-				const uniqueAddrs = Array.from(new Set(pricedOps.map((o) => o.data.tokenAddress)));
-				const decimalsMap: Record<string, number> = {};
-				await Promise.all(
-					uniqueAddrs.map(async (addr) => {
-						decimalsMap[addr] = await fetchTokenDecimals(addr);
-					})
-				);
-
-				deposits = pricedOps
-					.filter((op) => op.data.tokenAddress === $selectedToken && BigInt(op.data.amount) > 0n)
-					.sort((a, b) => a.index - b.index)
-					.map((op) => {
-						const { tokenAddress, amount } = op.data;
-						const wei = typeof amount === 'bigint' ? amount : BigInt(amount);
-						return {
-							...op,
-							data: { tokenAddress, amount },
-							displayAmount: fromWei(wei, decimalsMap[tokenAddress])
-						};
-					});
-			},
-			{ loading: '⏳ Loading…', success: '', error: '❌ Load error' }
+		getDisplayDepositsForToken($selectedToken, (v) => (isLoading = v)).then(
+			(d) => (deposits = d ?? [])
 		);
-		isLoading = false;
 	}
 
 	function handleRowClick(globalIdx: number) {
