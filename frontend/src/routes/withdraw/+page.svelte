@@ -82,15 +82,6 @@
 		}
 	}
 
-	// $: disabledKeys =
-	// 	selectionMode === 'withdraw'
-	// 		? selectedFeeKey !== null
-	// 			? [selectedFeeKey]
-	// 			: []
-	// 		: selectedWithdrawKey !== null
-	// 			? [selectedWithdrawKey]
-	// 			: [];
-
 	function resetAll() {
 		selectedWithdrawKey = null;
 		selectedWithdrawDeposit = null;

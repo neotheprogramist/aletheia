@@ -4,6 +4,7 @@
 		PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS
 	} from '$env/static/public';
 	import { getOperationDetails } from '$lib/db/operations';
+	import { abortOperation } from '$lib/privacy/abortOperation';
 	import { confirmOperation } from '$lib/privacy/confirmOperation';
 	import { generateOperation } from '$lib/privacy/generateOperation';
 	import { generateProof } from '$lib/privacy/generateProof';
@@ -355,6 +356,27 @@
 			},
 			async (err) => {
 				// 13) On error: abort any created refund operations
+				console.warn('❌ Merge failed with error:', err);
+
+				if (mergeRefundHash) {
+					try {
+						await abortOperation(mergeRefundHash);
+						console.warn('🧯 Aborted merge refund operation:', mergeRefundHash);
+					} catch (abortError) {
+						console.error('🚨 Failed to abort merge refund:', abortError);
+					}
+				}
+
+				if (feeRefundHash) {
+					try {
+						await abortOperation(feeRefundHash);
+						console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
+					} catch (abortError) {
+						console.error('🚨 Failed to abort fee refund:', abortError);
+					}
+				}
+
+				isLoading = false;
 			}
 		);
 		isLoading = false;
