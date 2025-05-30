@@ -162,15 +162,6 @@
 			}
 		);
 	}
-	function downloadWitness(input: Record<string, any>) {
-		const blob = new Blob([JSON.stringify(input, null, 2)], { type: 'application/json' });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = 'merge_witness.json';
-		a.click();
-		URL.revokeObjectURL(url);
-	}
 
 	/** Proving & Execution */
 	async function confirmMerge() {
@@ -297,8 +288,6 @@
 					refund_amount_2: `0x${mergeRefund.toString(16)}`,
 					refund_commitment_hash_2: `0x${mergeRefundCommitmentHash.toString(16)}`
 				};
-
-				downloadWitness(witnessInput);
 
 				// 8) Generate the zk proof and prepare it as calldata
 				const proofToastId = toastStore.addToast({
