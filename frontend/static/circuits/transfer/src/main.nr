@@ -8,27 +8,52 @@ fn main(
     hashpath_1: [Field; 31],
     index_1: Field,
     amount: pub Field,
-    // Refund Data
+    // Fee deposit
+    root_2: pub Field,
+    secret_2: Field,
+    nullifier_2: pub Field,
+    commitment_amount_2: Field,
+    token_address_2: pub Field,
+    hashpath_2: [Field; 31],
+    index_2: Field,
+    gas_fee: pub Field,
+    // refund data for deposit
     refund_secret_1: Field,
     refund_nullifier_1: Field,
     refund_amount_1: Field,
     refund_commitment_hash_1: pub Field,
+    // refund data for fee deposit
+    refund_secret_2: Field,
+    refund_nullifier_2: Field,
+    refund_amount_2: Field,
+    refund_commitment_hash_2: pub Field,
     _recipient_secret_and_nullifier_hash_1: pub Field,
-    gas_fee: pub Field,
-    paymaster_fee: pub Field,
 ) {
-    assert(amount == commitment_amount_1 - refund_amount_1 - gas_fee - paymaster_fee);
-
-    let computed_secret_and_nullifier_hash =
+    // Validate deposit
+    assert(commitment_amount_1 == amount + refund_amount_1);
+    let computed_secret_nullifier_hash =
         std::hash::poseidon::bn254::hash_2([secret_1, nullifier_1]);
-    let secret_nullifier_amount_hash = std::hash::poseidon::bn254::hash_2([
-        computed_secret_and_nullifier_hash,
-        commitment_amount_1,
-    ]);
+    let secret_nullifier_amount_hash =
+        std::hash::poseidon::bn254::hash_2([computed_secret_nullifier_hash, commitment_amount_1]);
     let leaf = std::hash::poseidon::bn254::hash_2([secret_nullifier_amount_hash, token_address_1]);
     verify_membership(root_1, leaf, index_1, hashpath_1);
 
-    // Refund deposit checks
+    // Validate fee deposit
+    let computed_secret_nullifier_hash_fee =
+        std::hash::poseidon::bn254::hash_2([secret_2, nullifier_2]);
+    assert(commitment_amount_2 == gas_fee + refund_amount_2);
+    let secret_nullifier_amount_hash_fee = std::hash::poseidon::bn254::hash_2([
+        computed_secret_nullifier_hash_fee,
+        commitment_amount_2,
+    ]);
+    let leaf_fee =
+        std::hash::poseidon::bn254::hash_2([secret_nullifier_amount_hash_fee, token_address_2]);
+    verify_membership(root_2, leaf_fee, index_2, hashpath_2);
+
+    // Make sure deposit != fee deposit
+    assert(leaf != leaf_fee);
+
+    // Validate new refund deposit
     let computed_secret_nullifier_hash_refund =
         std::hash::poseidon::bn254::hash_2([refund_secret_1, refund_nullifier_1]);
     let secret_nullifier_amount_hash_final = std::hash::poseidon::bn254::hash_2([
@@ -37,8 +62,20 @@ fn main(
     ]);
     let refund_computed_commitment =
         std::hash::poseidon::bn254::hash_2([secret_nullifier_amount_hash_final, token_address_1]);
-    println(refund_computed_commitment);
     assert(refund_commitment_hash_1 == refund_computed_commitment);
+
+    // Validate fee refund deposit
+    let computed_secret_nullifier_hash_refund_fee =
+        std::hash::poseidon::bn254::hash_2([refund_secret_2, refund_nullifier_2]);
+    let secret_nullifier_amount_hash_final_fee = std::hash::poseidon::bn254::hash_2([
+        computed_secret_nullifier_hash_refund_fee,
+        refund_amount_2,
+    ]);
+    let refund_computed_commitment_fee = std::hash::poseidon::bn254::hash_2([
+        secret_nullifier_amount_hash_final_fee,
+        token_address_2,
+    ]);
+    assert(refund_commitment_hash_2 == refund_computed_commitment_fee);
 }
 
 pub fn compute_merkle_root<let N: u32>(leaf: Field, index: Field, hash_path: [Field; N]) -> Field {
