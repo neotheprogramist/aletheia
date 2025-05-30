@@ -30,6 +30,12 @@
 			>
 				Merge
 			</a>
+			<a
+				href="/transfer"
+				class={page.url.pathname === '/transfer' ? 'font-bold text-sky-500' : 'hover:underline'}
+			>
+				Transfer
+			</a>
 		{/if}
 
 		<WalletConnector />

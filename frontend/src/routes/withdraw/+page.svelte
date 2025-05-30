@@ -40,7 +40,7 @@
 
 	let selectedWithdrawKey: number | null = null;
 	let selectedWithdrawDeposit: DisplayOperation | null = null;
-	let selectedFeeKey: number | null = null; //
+	let selectedFeeKey: number | null = null;
 	let selectedFeeDeposit: DisplayOperation | null = null;
 
 	let withdrawNote: NoteData | null = null;
@@ -50,10 +50,7 @@
 	let withdrawAmount = '';
 	let withdrawRefundHash: string | null = null;
 	let feeRefundHash: string | null = null;
-
 	let feeWeiHex = '';
-	let modalWithdrawToken = '';
-	let modalFeeToken = '';
 
 	let isLoading = false;
 	let showFeeModal = false;
@@ -101,7 +98,6 @@
 				// — Parse Withdraw note
 				withdrawNote = NoteDataSchema.parse(selectedWithdrawDeposit.data);
 				const { tokenAddress: withdrawTokenAddress, amount: withdrawNoteBalance } = withdrawNote;
-				modalWithdrawToken = withdrawTokenAddress;
 
 				const withdrawDecimals = await fetchTokenDecimals(withdrawTokenAddress);
 				withdrawNoteBalanceWei = BigInt(withdrawNoteBalance);
@@ -118,7 +114,6 @@
 				// — Parse Fee note
 				feeNote = NoteDataSchema.parse(selectedFeeDeposit.data);
 				const { tokenAddress: feeTokenAddress, amount: feeNoteBalance } = feeNote;
-				modalFeeToken = feeTokenAddress;
 
 				const feeNoteDecimals = await fetchTokenDecimals(feeTokenAddress);
 				feeNoteBalanceWei = BigInt(feeNoteBalance);
@@ -151,7 +146,7 @@
 		);
 	}
 
-	/** Proving & Execution */
+	/** Step 2: Proving & Execution */
 	async function confirmWithdraw() {
 		// 1) Close the modal and start the toast
 		showFeeModal = false;
@@ -212,7 +207,7 @@
 					BigInt(feeNote.tokenAddress)
 				);
 
-				// 6) Fetch details for all four operations from the database
+				// 6) Fetch details for all operations from the database
 				const withdrawOp = await getOperationDetails(selectedWithdrawDeposit.hash);
 				const feeOp = await getOperationDetails(selectedFeeDeposit.hash);
 				const withdrawRefundOp = await getOperationDetails(withdrawRefundHash);
@@ -510,11 +505,11 @@
 			<p class="text-sm">
 				You’re about to withdraw
 				<strong class="break-words">
-					{withdrawAmount} ({modalWithdrawToken})
+					{withdrawAmount}
 				</strong>
 				tokens, paying a fee of
 				<strong class="break-words">
-					{feeWeiHex} ({modalFeeToken})
+					{feeWeiHex}
 				</strong>
 				tokens. Proceed?
 			</p>

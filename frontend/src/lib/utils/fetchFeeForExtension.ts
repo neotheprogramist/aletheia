@@ -51,3 +51,24 @@ export async function fetchMergeFee(poolsContract: string): Promise<bigint> {
 
 	return BigInt(hex);
 }
+
+export async function fetchTransferFee(poolsContract: string): Promise<bigint> {
+	const rpc = get(provider);
+
+	const result = await rpc.callContract(
+		{
+			contractAddress: poolsContract,
+			entrypoint: 'get_fee_for_transfer',
+			calldata: []
+		},
+		'latest'
+	);
+
+	if (!result || result.length < 1) {
+		throw new Error(`Unexpected fee response: ${result}`);
+	}
+
+	const [hex] = result as [string, string];
+
+	return BigInt(hex);
+}

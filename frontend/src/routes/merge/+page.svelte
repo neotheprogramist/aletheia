@@ -1,8 +1,5 @@
 <script lang="ts">
-	import {
-		PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
-		PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS
-	} from '$env/static/public';
+	import { PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS } from '$env/static/public';
 	import { getOperationDetails } from '$lib/db/operations';
 	import { abortOperation } from '$lib/privacy/abortOperation';
 	import { confirmOperation } from '$lib/privacy/confirmOperation';
@@ -21,7 +18,7 @@
 	import Modal from '$lib/ui/Modal.svelte';
 	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
-	import { fetchExtensionFee, fetchMergeFee } from '$lib/utils/fetchFeeForExtension';
+	import { fetchMergeFee } from '$lib/utils/fetchFeeForExtension';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
 	import {
 		getDisplayDepositsForToken,
@@ -97,6 +94,7 @@
 		selectedFeeDeposit = null;
 	}
 
+	/** Step 1: Validate*/
 	async function initiateMerge() {
 		isLoading = true;
 
@@ -164,7 +162,7 @@
 		);
 	}
 
-	/** Proving & Execution */
+	/** Step 2: Proving & Execution */
 	async function confirmMerge() {
 		// 1) Close the modal and start the toast
 		showFeeModal = false;
@@ -240,7 +238,7 @@
 					BigInt(feeNote.tokenAddress)
 				);
 
-				// 6) Fetch details for all four operations from the database
+				// 6) Fetch details for all operations from the database
 				const merge1Op = await getOperationDetails(selectedMerge1Deposit.hash);
 				const merge2Op = await getOperationDetails(selectedMerge2Deposit.hash);
 				const feeOp = await getOperationDetails(selectedFeeDeposit.hash);
