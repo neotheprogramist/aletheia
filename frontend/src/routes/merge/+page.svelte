@@ -4,9 +4,15 @@
 		PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS
 	} from '$env/static/public';
 	import { getOperationDetails } from '$lib/db/operations';
+	import { confirmOperation } from '$lib/privacy/confirmOperation';
 	import { generateOperation } from '$lib/privacy/generateOperation';
+	import { generateProof } from '$lib/privacy/generateProof';
+	import { nullifyOperation } from '$lib/privacy/nullifyOperation';
 	import { NoteDataSchema, type NoteData } from '$lib/schemas/schemas';
 	import { merkleTree } from '$lib/services/depositProcessor';
+	import { paymasterWallet } from '$lib/stores/paymaster';
+	import { provider } from '$lib/stores/provider';
+	import { toastStore } from '$lib/stores/toast';
 	import { tokens, selectedToken } from '$lib/stores/tokens';
 	import { zkLibraries } from '$lib/stores/zkLibraries';
 	import Button from '$lib/ui/Button.svelte';
@@ -14,7 +20,7 @@
 	import Modal from '$lib/ui/Modal.svelte';
 	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
-	import { fetchExtensionFee } from '$lib/utils/fetchFeeForExtension';
+	import { fetchExtensionFee, fetchMergeFee } from '$lib/utils/fetchFeeForExtension';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
 	import {
 		getDisplayDepositsForToken,
@@ -24,6 +30,7 @@
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { fromWei } from '$lib/utils/toWei';
 	import { Redo } from 'lucide-svelte';
+	import { Contract } from 'starknet';
 	import { get } from 'svelte/store';
 
 	let deposits: DisplayOperation[] = [];
@@ -43,6 +50,7 @@
 	let merge1Amount = '';
 	let merge2Amount = '';
 
+	let mergeRefundHash: string | null = null;
 	let feeRefundHash: string | null = null;
 	let feeWeiHex = '';
 
@@ -79,12 +87,6 @@
 		}
 	}
 
-	$: disabledKeys = [
-		...(selectionMode !== 'merge1' && selectedMerge1Key !== null ? [selectedMerge1Key] : []),
-		...(selectionMode !== 'merge2' && selectedMerge2Key !== null ? [selectedMerge2Key] : []),
-		...(selectionMode !== 'fee' && selectedFeeKey !== null ? [selectedFeeKey] : [])
-	];
-
 	function resetAll() {
 		selectedMerge1Key = null;
 		selectedMerge1Deposit = null;
@@ -105,8 +107,10 @@
 
 				// — Parse first merge note
 				mergeNote1 = NoteDataSchema.parse(selectedMerge1Deposit.data);
+
 				const { tokenAddress: merge1TokenAddress, amount: merge1NoteBalance } = mergeNote1;
 				merge1NoteBalanceWei = BigInt(merge1NoteBalance);
+
 				const mergeTokenDecimals = await fetchTokenDecimals(merge1TokenAddress);
 				merge1Amount = fromWei(merge1NoteBalanceWei, mergeTokenDecimals);
 				if (merge1NoteBalanceWei <= 0n) {
@@ -115,8 +119,10 @@
 
 				// — Parse second merge note
 				mergeNote2 = NoteDataSchema.parse(selectedMerge2Deposit.data);
+
 				const { tokenAddress: merge2TokenAddress, amount: merge2NoteBalance } = mergeNote2;
 				merge2NoteBalanceWei = BigInt(merge2NoteBalance);
+
 				merge2Amount = fromWei(merge2NoteBalanceWei, mergeTokenDecimals);
 				if (merge2NoteBalanceWei <= 0n) {
 					throw new Error('Invalid first deposit balance');
@@ -124,15 +130,15 @@
 
 				// — Parse Fee note
 				feeNote = NoteDataSchema.parse(selectedFeeDeposit.data);
+
 				const { tokenAddress: feeTokenAddress, amount: feeNoteBalance } = feeNote;
 				modalFeeToken = feeTokenAddress;
 
 				const feeNoteDecimals = await fetchTokenDecimals(feeTokenAddress);
 				feeNoteBalanceWei = BigInt(feeNoteBalance);
-				feeWei = await fetchExtensionFee(
-					PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
-					PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS
-				);
+
+				feeWei = await fetchMergeFee(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
+
 				feeWeiHex = fromWei(feeWei, feeNoteDecimals);
 
 				if (feeWei > feeNoteBalanceWei) {
@@ -152,10 +158,18 @@
 				error: '❌ Merge failed'
 			},
 			async (err) => {
-				console.warn('❌ Merge failed with error:', err);
 				isLoading = false;
 			}
 		);
+	}
+	function downloadWitness(input: Record<string, any>) {
+		const blob = new Blob([JSON.stringify(input, null, 2)], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = 'merge_witness.json';
+		a.click();
+		URL.revokeObjectURL(url);
 	}
 
 	/** Proving & Execution */
@@ -168,6 +182,7 @@
 				if (!merge1NoteBalanceWei || !merge2NoteBalanceWei) {
 					throw new Error('Cannot calculate refund – missing deposits amounts');
 				}
+
 				if (!feeNoteBalanceWei || !feeWei) {
 					throw new Error('Cannot calculate refund – missing fee amounts');
 				}
@@ -212,6 +227,16 @@
 				);
 
 				// 5) Generate fee refund operation commitment hashe
+				const mergeRefund = merge1NoteBalanceWei + merge2NoteBalanceWei;
+				const mergeOpResult = await generateOperation({
+					data: { tokenAddress: mergeNote1.tokenAddress, amount: mergeRefund }
+				});
+				mergeRefundHash = mergeOpResult.hash;
+				const mergeRefundCommitmentHash = garaga.poseidonHashBN254(
+					garaga.poseidonHashBN254(BigInt(mergeRefundHash), mergeRefund),
+					BigInt(mergeNote1.tokenAddress)
+				);
+
 				const feeRefund = feeNoteBalanceWei - feeWei;
 				const feeOpResult = await generateOperation({
 					data: { tokenAddress: feeNote.tokenAddress, amount: feeRefund }
@@ -227,12 +252,111 @@
 				const merge1Op = await getOperationDetails(selectedMerge1Deposit.hash);
 				const merge2Op = await getOperationDetails(selectedMerge2Deposit.hash);
 				const feeOp = await getOperationDetails(selectedFeeDeposit.hash);
+				const mergeRefundOp = await getOperationDetails(mergeRefundHash);
 				const feeRefundOp = await getOperationDetails(feeRefundHash);
 
-				if (!merge1Op || !merge2Op || !feeOp || !feeRefundOp) {
+				if (!merge1Op || !merge2Op || !feeOp || !mergeRefundOp || !feeRefundOp) {
 					throw new Error('One or more operations not found');
 				}
 
+				// 7) Build the witness input object for proof
+				const witnessInput = {
+					// First deposit
+					secret_1: `0x${BigInt(merge1Op.secret).toString(16)}`,
+					nullifier_1: `0x${BigInt(merge1Op.nullifier).toString(16)}`,
+					commitment_amount_1: `0x${BigInt(merge1Op.amount).toString(16)}`,
+					token_address_1: merge1Op.tokenAddress,
+					hashpath_1: merge1ProofData.path[0].map((e) => `0x${e.toString(16)}`),
+					index_1: `0x${BigInt(merge1ProofData.index).toString(16)}`,
+					root_1: `0x${merge1ProofData.root.toString(16)}`,
+					// Second deposit
+					secret_2: `0x${BigInt(merge2Op.secret).toString(16)}`,
+					nullifier_2: `0x${BigInt(merge2Op.nullifier).toString(16)}`,
+					commitment_amount_2: `0x${BigInt(merge2Op.amount).toString(16)}`,
+					token_address_2: merge2Op.tokenAddress,
+					hashpath_2: merge2ProofData.path[0].map((e) => `0x${e.toString(16)}`),
+					index_2: `0x${BigInt(merge2ProofData.index).toString(16)}`,
+					root_2: `0x${merge2ProofData.root.toString(16)}`,
+					// Fee deposit
+					secret_3: `0x${BigInt(feeOp.secret).toString(16)}`,
+					nullifier_3: `0x${BigInt(feeOp.nullifier).toString(16)}`,
+					commitment_amount_3: `0x${BigInt(feeOp.amount).toString(16)}`,
+					token_address_3: feeOp.tokenAddress,
+					hashpath_3: feeProofData.path[0].map((e) => `0x${e.toString(16)}`),
+					index_3: `0x${BigInt(feeProofData.index).toString(16)}`,
+					root_3: `0x${feeProofData.root.toString(16)}`,
+					gas_fee: `0x${feeWei.toString(16)}`,
+					// Refund fee deposit
+					refund_secret_1: `0x${BigInt(feeRefundOp.secret).toString(16)}`,
+					refund_nullifier_1: `0x${BigInt(feeRefundOp.nullifier).toString(16)}`,
+					refund_amount_1: `0x${feeRefund.toString(16)}`,
+					refund_commitment_hash_1: `0x${feeRefundCommitmentHash.toString(16)}`,
+					// Refund for merge deposits
+					refund_secret_2: `0x${BigInt(mergeRefundOp.secret).toString(16)}`,
+					refund_nullifier_2: `0x${BigInt(mergeRefundOp.nullifier).toString(16)}`,
+					refund_amount_2: `0x${mergeRefund.toString(16)}`,
+					refund_commitment_hash_2: `0x${mergeRefundCommitmentHash.toString(16)}`
+				};
+
+				downloadWitness(witnessInput);
+
+				// 8) Generate the zk proof and prepare it as calldata
+				const proofToastId = toastStore.addToast({
+					type: 'info',
+					message: '⏳ Generating zk proof, this may take ~15 seconds…'
+				});
+
+				const honkCalldataHex = await generateProof(witnessInput, {
+					jsonUrl: 'circuits/merge.json',
+					vkUrl: 'circuits/vk_merge.bin'
+				});
+
+				const honkCalldataWithLen = [
+					`0x${BigInt(honkCalldataHex.length).toString(16)}`,
+					...honkCalldataHex
+				];
+
+				toastStore.removeToast(proofToastId);
+
+				// 9) Prepare for the StarkNet transaction
+				const rpc = get(provider);
+				if (!rpc) throw new Error('Missing Provider');
+
+				const account = get(paymasterWallet);
+				if (!account) throw new Error('Missing Account');
+
+				const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
+				if (!privacyAbi) throw new Error('Missing ABI');
+
+				const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
+				privacy.connect(account);
+
+				// 10) Prepare Starknet call
+				const call = {
+					contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+					entrypoint: 'merge',
+					calldata: honkCalldataWithLen
+				};
+
+				const tx = await account.execute(call);
+				const receipt = await rpc.waitForTransaction(tx.transaction_hash);
+
+				// 10) Check receipt status and throw on failure
+				if (receipt.isSuccess()) {
+				} else if (receipt.isReverted()) {
+					throw new Error(`Transaction reverted: ${receipt.value}`);
+				} else {
+					throw new Error(`Transaction error: ${receipt.value}`);
+				}
+
+				// 11) Confirm and nullify operations in the database
+				await confirmOperation(mergeRefundHash);
+				await confirmOperation(feeRefundHash);
+				await nullifyOperation(selectedMerge1Deposit.hash);
+				await nullifyOperation(selectedMerge2Deposit.hash);
+				await nullifyOperation(selectedFeeDeposit.hash);
+
+				// 12) Reset component state after successful withdrawal
 				resetAll();
 			},
 			{
@@ -242,7 +366,6 @@
 			},
 			async (err) => {
 				// 13) On error: abort any created refund operations
-				console.warn('❌ Merge failed with error:', err);
 			}
 		);
 		isLoading = false;
@@ -313,7 +436,7 @@
 				items={deposits}
 				pageSize={5}
 				keyField="index"
-				{disabledKeys}
+				disabledKeys={undefined}
 				onRowClick={handleRowClick}
 				activeKey={selectionMode === 'merge1'
 					? selectedMerge1Key

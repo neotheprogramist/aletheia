@@ -47,12 +47,7 @@ pub trait IPrivacyAccount<TContractState> {
         external_contract_address: ContractAddress,
         calldata: Span<felt252>,
     ) -> bool;
-    fn merge(
-        ref self: TContractState,
-        proof: Span<felt252>,
-        gas_fee_route: RouteNode,
-        paymaster_fee_route: RouteNode,
-    ) -> bool;
+    fn merge(ref self: TContractState, proof: Span<felt252>) -> bool;
     fn transfer(
         ref self: TContractState,
         proof: Span<felt252>,
@@ -60,6 +55,7 @@ pub trait IPrivacyAccount<TContractState> {
         paymaster_fee_route: RouteNode,
     ) -> bool;
     fn get_fee_for_extension(self: @TContractState, extension_address: ContractAddress) -> u256;
+    fn get_fee_for_merge(self: @TContractState) -> u256;
     fn get_current_gas_price(self: @TContractState) -> u256;
     fn set_current_gas_price(ref self: TContractState, gas_price: u256) -> bool;
     fn add_trusted_extension(
@@ -136,26 +132,33 @@ struct PublicInputMerge {
     deposit_root_1: u256,
     nullifier_hash_2: u256,
     deposit_root_2: u256,
+    fee_nullifier_hash: u256,
+    fee_deposit_root: u256,
     merge_commitment_hash: u256,
     gas_fee: u256,
-    paymaster_fee: u256,
+    refund_fee_commitment_hash: u256,
     token_address: ContractAddress,
+    token_address_fee: ContractAddress,
 }
 
 #[generate_trait]
 impl PublicInputMergeImpl of PublicInputMergeTrait {
     fn from_u256_span(span: Span<u256>) -> PublicInputMerge {
         let token_address: felt252 = (*span[1]).try_into().unwrap();
+        let token_address_fee: felt252 = (*span[6]).try_into().unwrap();
 
         PublicInputMerge {
             nullifier_hash_1: *span[0],
             deposit_root_1: *span[2],
             nullifier_hash_2: *span[3],
             deposit_root_2: *span[4],
-            merge_commitment_hash: *span[5],
-            gas_fee: *span[6],
-            paymaster_fee: *span[7],
+            fee_nullifier_hash: *span[5],
+            fee_deposit_root: *span[7],
+            gas_fee: *span[8],
+            refund_fee_commitment_hash: *span[9],
+            merge_commitment_hash: *span[10],
             token_address: token_address.try_into().unwrap(),
+            token_address_fee: token_address_fee.try_into().unwrap(),
         }
     }
 }
@@ -271,6 +274,7 @@ pub mod PrivacyAccount {
         users_balance: u256,
         accumulated_fee: u256,
         initial_fee_buffer: u256,
+        merge_gas_consumed: u128,
     }
 
     #[derive(Drop, PartialEq, starknet::Event)]
@@ -313,6 +317,7 @@ pub mod PrivacyAccount {
         pub const NULLIFIER_ALREADY_USED: felt252 = 'Pool: nullifier already used';
         pub const INVALID_ROOT: felt252 = 'Pool: invalid root';
         pub const INSUFFICIENT_FEE: felt252 = 'Pool: insufficient fee';
+        pub const INVALID_FEE_TOKEN: felt252 = 'Pool: invalid fee token';
     }
 
 
@@ -328,6 +333,7 @@ pub mod PrivacyAccount {
         usdc_token_address: ContractAddress,
         initial_fee_buffer: u256,
         current_gas_price: u256,
+        merge_gas_consumed: u128,
     ) {
         // 1) Standard ownership & merkle init
         self.ownable.initializer(owner);
@@ -359,6 +365,9 @@ pub mod PrivacyAccount {
 
         // 7) Set current gas price
         self.current_gas_price.write(current_gas_price);
+
+        // 8) Set gas consumed
+        self.merge_gas_consumed.write(merge_gas_consumed);
     }
 
     #[abi(embed_v0)]
@@ -469,6 +478,12 @@ pub mod PrivacyAccount {
 
             let public_input = PublicInputWithdrawImpl::from_u256_span(public_input_serialized);
 
+            // Validate if fee is in strk
+            assert(
+                public_input.token_address_2 == self.strk_token_address.read(),
+                Errors::INVALID_FEE_TOKEN,
+            );
+
             // Validate gas fee
             let calculated_fee = self.get_fee_for_extension(external_contract_address);
             assert(public_input.gas_fee >= calculated_fee, Errors::INSUFFICIENT_FEE);
@@ -511,60 +526,49 @@ pub mod PrivacyAccount {
             true
         }
 
-        fn merge(
-            ref self: ContractState,
-            proof: Span<felt252>,
-            gas_fee_route: RouteNode,
-            paymaster_fee_route: RouteNode,
-        ) -> bool {
+        fn merge(ref self: ContractState, proof: Span<felt252>) -> bool {
             let public_input_serialized = verify_ultra_keccak_honk_proof(
                 self.merge_verifier.read(), proof,
             );
 
             let public_input = PublicInputMergeImpl::from_u256_span(public_input_serialized);
+            // Validate if fee is in strk
+            assert(
+                public_input.token_address_fee == self.strk_token_address.read(),
+                Errors::INVALID_FEE_TOKEN,
+            );
 
+            // Validate gas fee - currently using execute extension fee
+            let calculated_fee = self.get_fee_for_merge();
+            assert(public_input.gas_fee >= calculated_fee, Errors::INSUFFICIENT_FEE);
+
+            // Validate if 1st deposit is not nullfied
             assert(
                 !self.nullifier_hashes.read(public_input.nullifier_hash_1),
                 Errors::NULLIFIER_ALREADY_USED,
             );
             self.nullifier_hashes.entry(public_input.nullifier_hash_1).write(true);
 
+            // Validate if second deposit is not nullifier
             assert(
                 !self.nullifier_hashes.read(public_input.nullifier_hash_2),
                 Errors::NULLIFIER_ALREADY_USED,
             );
             self.nullifier_hashes.entry(public_input.nullifier_hash_2).write(true);
 
+            // Validate if fee deposit is not nullfied
+            assert(
+                !self.nullifier_hashes.read(public_input.fee_nullifier_hash),
+                Errors::NULLIFIER_ALREADY_USED,
+            );
+            self.nullifier_hashes.entry(public_input.fee_nullifier_hash).write(true);
+
             assert(self.merkle.roots.read(public_input.deposit_root_1), Errors::INVALID_ROOT);
             assert(self.merkle.roots.read(public_input.deposit_root_2), Errors::INVALID_ROOT);
+            assert(self.merkle.roots.read(public_input.fee_deposit_root), Errors::INVALID_ROOT);
 
             self.merkle.add_leaf(public_input.merge_commitment_hash);
-
-            if self.strk_token_address.read() != public_input.token_address {
-                self
-                    .multihop_swap(
-                        route: array![gas_fee_route],
-                        token_amount: TokenAmount {
-                            token: public_input.token_address,
-                            amount: i129 {
-                                mag: public_input.gas_fee.try_into().unwrap(), sign: false,
-                            },
-                        },
-                    );
-            }
-
-            if self.usdc_token_address.read() != public_input.token_address {
-                self
-                    .multihop_swap(
-                        route: array![paymaster_fee_route],
-                        token_amount: TokenAmount {
-                            token: public_input.token_address,
-                            amount: i129 {
-                                mag: public_input.paymaster_fee.try_into().unwrap(), sign: false,
-                            },
-                        },
-                    );
-            }
+            self.merkle.add_leaf(public_input.refund_fee_commitment_hash);
             true
         }
 
@@ -788,6 +792,15 @@ pub mod PrivacyAccount {
                 );
 
             amount
+        }
+        fn get_fee_for_merge(
+            self: @sn::privacy_account::PrivacyAccount::ContractState,
+        ) -> core::integer::u256 {
+            let gas_consumed: u128 = self.merge_gas_consumed.read();
+            let gas_price: u256 = self.current_gas_price.read();
+            let gas_consumed_u256: u256 = gas_consumed.try_into().unwrap();
+            let total_fee: u256 = gas_consumed_u256 * gas_price;
+            total_fee
         }
     }
 }

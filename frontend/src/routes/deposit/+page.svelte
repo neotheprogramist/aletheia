@@ -90,7 +90,7 @@
 
 <ProtectedRoute>
 	<div class="mx-auto max-w-md p-6">
-		<Card title="Deposit">
+		<Card>
 			<form on:submit|preventDefault={depositHandler} class="flex flex-col gap-4">
 				<TokenSelect
 					tokens={$tokens}

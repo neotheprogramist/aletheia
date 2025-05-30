@@ -30,3 +30,24 @@ export async function fetchExtensionFee(
 
 	return fromLowHigh(lowHex, highHex);
 }
+
+export async function fetchMergeFee(poolsContract: string): Promise<bigint> {
+	const rpc = get(provider);
+
+	const result = await rpc.callContract(
+		{
+			contractAddress: poolsContract,
+			entrypoint: 'get_fee_for_merge',
+			calldata: []
+		},
+		'latest'
+	);
+
+	if (!result || result.length < 1) {
+		throw new Error(`Unexpected fee response: ${result}`);
+	}
+
+	const [hex] = result as [string, string];
+
+	return BigInt(hex);
+}

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import ToggleTheme from './ToggleTheme.svelte';
+	import { page } from '$app/state';
 	import WalletConnector from '$lib/ui/WalletConnector.svelte';
 	import { isConnected } from '$lib/stores/wallet';
+	import ToggleTheme from './ToggleTheme.svelte';
 </script>
 
 <nav
@@ -14,19 +14,19 @@
 		{#if $isConnected}
 			<a
 				href="/deposit"
-				class={$page.url.pathname === '/deposit' ? 'font-bold text-sky-500' : 'hover:underline'}
+				class={page.url.pathname === '/deposit' ? 'font-bold text-sky-500' : 'hover:underline'}
 			>
 				Deposit
 			</a>
 			<a
 				href="/withdraw"
-				class={$page.url.pathname === '/withdraw' ? 'font-bold text-sky-500' : 'hover:underline'}
+				class={page.url.pathname === '/withdraw' ? 'font-bold text-sky-500' : 'hover:underline'}
 			>
 				Withdraw
 			</a>
 			<a
 				href="/merge"
-				class={$page.url.pathname === '/merge' ? 'font-bold text-sky-500' : 'hover:underline'}
+				class={page.url.pathname === '/merge' ? 'font-bold text-sky-500' : 'hover:underline'}
 			>
 				Merge
 			</a>

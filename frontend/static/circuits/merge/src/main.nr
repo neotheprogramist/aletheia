@@ -15,20 +15,35 @@ fn main(
     hashpath_2: [Field; 31],
     index_2: Field,
     root_2: pub Field, // root 1/2 bcs root can change between get_proof_data requests
+    // Fee deposit
+    root_3: pub Field,
+    secret_3: Field,
+    nullifier_3: pub Field,
+    commitment_amount_3: Field,
+    token_address_3: pub Field,
+    hashpath_3: [Field; 31],
+    index_3: Field,
+    gas_fee: pub Field,
+    // Refund fee deposit
     refund_secret_1: Field,
     refund_nullifier_1: Field,
     refund_amount_1: Field,
     refund_commitment_hash_1: pub Field,
-    // gas fees
-    gas_fee: pub Field,
-    paymaster_fee: pub Field,
+    // New deposit after merge
+    refund_secret_2: Field,
+    refund_nullifier_2: Field,
+    refund_amount_2: Field,
+    refund_commitment_hash_2: pub Field,
 ) {
-    // token asserts
+    // token asserts -> checking if fee_token == STRK is in the contract
     assert(token_address_1 == token_address_2);
     let final_token_address = token_address_1; // final token address can be token_address_1 because is equal token_address_2 and merge can only be make from 2 the same tokens
 
     // amount asserts
-    assert(refund_amount_1 == commitment_amount_1 + commitment_amount_2 - gas_fee - paymaster_fee);
+    // Check fee
+    assert(refund_amount_1 == commitment_amount_3 - gas_fee);
+    // Check merge
+    assert(refund_amount_2 == commitment_amount_1 + commitment_amount_2);
 
     // first deposit checks
     let computed_secret_nullifier_hash_1 =
@@ -51,7 +66,16 @@ fn main(
     // cant merge 2 the same deposits
     assert(deposit_1 != deposit_2);
 
-    // final merge deposit checks
+    // Fee deposit check
+    let computed_secret_nullifier_hash_3 =
+        std::hash::poseidon::bn254::hash_2([secret_3, nullifier_3]);
+    let secret_nullifier_amount_hash_3 =
+        std::hash::poseidon::bn254::hash_2([computed_secret_nullifier_hash_3, commitment_amount_3]);
+    let deposit_3 =
+        std::hash::poseidon::bn254::hash_2([secret_nullifier_amount_hash_3, token_address_3]);
+    verify_membership(root_3, deposit_3, index_3, hashpath_3);
+
+    // Refund fee deposit check
     let computed_secret_nullifier_hash_final =
         std::hash::poseidon::bn254::hash_2([refund_secret_1, refund_nullifier_1]);
     let secret_nullifier_amount_hash_final =
@@ -61,6 +85,19 @@ fn main(
         final_token_address,
     ]);
     assert(refund_commitment_hash_1 == final_computed_commitment);
+
+    // Merged deposits check
+    let computed_secret_nullifier_hash_final2 =
+        std::hash::poseidon::bn254::hash_2([refund_secret_2, refund_nullifier_2]);
+    let secret_nullifier_amount_hash_final2 = std::hash::poseidon::bn254::hash_2([
+        computed_secret_nullifier_hash_final2,
+        refund_amount_2,
+    ]);
+    let final_computed_commitment2 = std::hash::poseidon::bn254::hash_2([
+        secret_nullifier_amount_hash_final2,
+        final_token_address,
+    ]);
+    assert(refund_commitment_hash_2 == final_computed_commitment2);
 }
 
 pub fn compute_merkle_root<let N: u32>(leaf: Field, index: Field, hash_path: [Field; N]) -> Field {

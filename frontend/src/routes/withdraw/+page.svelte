@@ -82,14 +82,14 @@
 		}
 	}
 
-	$: disabledKeys =
-		selectionMode === 'withdraw'
-			? selectedFeeKey !== null
-				? [selectedFeeKey]
-				: []
-			: selectedWithdrawKey !== null
-				? [selectedWithdrawKey]
-				: [];
+	// $: disabledKeys =
+	// 	selectionMode === 'withdraw'
+	// 		? selectedFeeKey !== null
+	// 			? [selectedFeeKey]
+	// 			: []
+	// 		: selectedWithdrawKey !== null
+	// 			? [selectedWithdrawKey]
+	// 			: [];
 
 	function resetAll() {
 		selectedWithdrawKey = null;
@@ -268,12 +268,13 @@
 					// recipient
 					_recipient: withdrawRecipient
 				};
+
+				// 8) Generate the zk proof and prepare it as calldata
 				const proofToastId = toastStore.addToast({
 					type: 'info',
 					message: '⏳ Generating zk proof, this may take ~15 seconds…'
 				});
 
-				// 8) Generate the zk proof and prepare it as calldata
 				const honkCalldataHex = await generateProof(witnessInput, {
 					jsonUrl: 'circuits/execute.json',
 					vkUrl: 'circuits/vk_execute.bin'
@@ -434,7 +435,7 @@
 				items={deposits}
 				pageSize={5}
 				keyField="index"
-				{disabledKeys}
+				disabledKeys={undefined}
 				onRowClick={handleRowClick}
 				activeKey={selectionMode === 'withdraw' ? selectedWithdrawKey : selectedFeeKey}
 				inactiveKeys={selectionMode === 'withdraw' && selectedFeeKey !== null
