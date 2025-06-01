@@ -296,7 +296,6 @@ pub mod PrivacyAccount {
         extension_verifier: ClassHash,
         merge_verifier: ClassHash,
         transfer_verifier: ClassHash,
-        core_address: ContractAddress,
         strk_token_address: ContractAddress,
         initial_fee_buffer: u256,
         current_gas_price: u256,
