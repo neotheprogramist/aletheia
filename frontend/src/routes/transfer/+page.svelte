@@ -1,14 +1,22 @@
 <script lang="ts">
 	import { PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS } from '$env/static/public';
 	import { getOperationDetails } from '$lib/db/operations';
+	import { abortOperation } from '$lib/privacy/abortOperation';
+	import { confirmOperation } from '$lib/privacy/confirmOperation';
 	import { generateOperation } from '$lib/privacy/generateOperation';
+	import { generateProof } from '$lib/privacy/generateProof';
+	import { nullifyOperation } from '$lib/privacy/nullifyOperation';
 	import { NoteDataSchema, type NoteData } from '$lib/schemas/schemas';
 	import { merkleTree } from '$lib/services/depositProcessor';
+	import { paymasterWallet } from '$lib/stores/paymaster';
+	import { provider } from '$lib/stores/provider';
+	import { toastStore } from '$lib/stores/toast';
 	import { selectedToken, tokens } from '$lib/stores/tokens';
 	import { zkLibraries } from '$lib/stores/zkLibraries';
 	import Button from '$lib/ui/Button.svelte';
 	import Card from '$lib/ui/Card.svelte';
 	import Input from '$lib/ui/Input.svelte';
+	import Modal from '$lib/ui/Modal.svelte';
 	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { fetchMergeFee } from '$lib/utils/fetchFeeForExtension';
@@ -21,6 +29,7 @@
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { fromWei, toWei } from '$lib/utils/toWei';
 	import { Redo } from 'lucide-svelte';
+	import { Contract } from 'starknet';
 	import { get } from 'svelte/store';
 
 	let deposits: DisplayOperation[] = [];
@@ -202,7 +211,99 @@
 					throw new Error('One or more operations not found');
 				}
 
-				const witnessInput = {};
+				// 7) Build the witness input object for proof
+				const witnessInput = {
+					// Deposit data
+					root_1: `0x${transferProofData.root.toString(16)}`,
+					secret_1: `0x${BigInt(transferOp.secret).toString(16)}`,
+					nullifier_1: `0x${BigInt(transferOp.nullifier).toString(16)}`,
+					commitment_amount_1: `0x${BigInt(transferOp.amount).toString(16)}`,
+					token_address_1: transferOp.tokenAddress,
+					hashpath_1: transferProofData.path[0].map((e) => `0x${e.toString(16)}`),
+					index_1: `0x${BigInt(transferProofData.index).toString(16)}`,
+					amount: `0x${userTransferAmountWei.toString(16)}`,
+					// Fee deposit data
+					root_2: `0x${feeProofData.root.toString(16)}`,
+					secret_2: `0x${BigInt(feeOp.secret).toString(16)}`,
+					nullifier_2: `0x${BigInt(feeOp.nullifier).toString(16)}`,
+					commitment_amount_2: `0x${BigInt(feeOp.amount).toString(16)}`,
+					token_address_2: feeOp.tokenAddress,
+					hashpath_2: feeProofData.path[0].map((e) => `0x${e.toString(16)}`),
+					index_2: `0x${BigInt(feeProofData.index).toString(16)}`,
+					gas_fee: `0x${feeWei.toString(16)}`,
+					// Refund for transfer deposit data
+					refund_secret_1: `0x${BigInt(transferRefundOp.secret).toString(16)}`,
+					refund_nullifier_1: `0x${BigInt(transferRefundOp.nullifier).toString(16)}`,
+					refund_amount_1: `0x${transferRefund.toString(16)}`,
+					refund_commitment_hash_1: `0x${transferRefundCommitmentHash.toString(16)}`,
+					// Refund for fee deposit data
+					refund_secret_2: `0x${BigInt(feeRefundOp.secret).toString(16)}`,
+					refund_nullifier_2: `0x${BigInt(feeRefundOp.nullifier).toString(16)}`,
+					refund_amount_2: `0x${feeRefund.toString(16)}`,
+					refund_commitment_hash_2: `0x${feeRefundCommitmentHash.toString(16)}`,
+					_recipient_secret_and_nullifier_hash_1: transferSecretAndNullifierHash
+				};
+
+				// 8) Generate the zk proof and prepare it as calldata
+				const proofToastId = toastStore.addToast({
+					type: 'info',
+					message: '⏳ Generating zk proof, this may take ~15 seconds…'
+				});
+
+				const honkCalldataHex = await generateProof(witnessInput, {
+					jsonUrl: 'circuits/transfer.json',
+					vkUrl: 'circuits/vk_transfer.bin'
+				});
+
+				const honkCalldataWithLen = [
+					`0x${BigInt(honkCalldataHex.length).toString(16)}`,
+					...honkCalldataHex
+				];
+				toastStore.removeToast(proofToastId);
+
+				// 9) Prepare for the StarkNet transaction
+				const rpc = get(provider);
+				if (!rpc) throw new Error('Missing Provider');
+
+				const account = get(paymasterWallet);
+				if (!account) throw new Error('Missing Account');
+
+				const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
+				if (!privacyAbi) throw new Error('Missing ABI');
+
+				const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
+				privacy.connect(account);
+
+				// 10) Prepare calldata and Starknet call
+				const call = {
+					contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+					entrypoint: 'transfer',
+					calldata: honkCalldataWithLen
+				};
+
+				const tx = await account.execute(call);
+				const receipt = await rpc.waitForTransaction(tx.transaction_hash);
+
+				// 10) Check receipt status and throw on failure
+				if (receipt.isSuccess()) {
+					console.log('✅ Transaction succeeded:', receipt.value);
+				} else if (receipt.isReverted()) {
+					console.warn('⚠️ Transaction reverted:', receipt.value);
+					throw new Error(`Transaction reverted: ${receipt.value}`);
+				} else {
+					console.error('❌ Transaction error:', receipt.value);
+					throw new Error(`Transaction error: ${receipt.value}`);
+				}
+				console.log('receipt', receipt);
+
+				// 11) Confirm and nullify operations in the database
+				await confirmOperation(transferRefundHash);
+				await confirmOperation(feeRefundHash);
+				await nullifyOperation(selectedTransferDeposit.hash);
+				await nullifyOperation(selectedFeeDeposit.hash);
+
+				// 12) Reset component state after successful withdrawal
+				resetAll();
 			},
 			{
 				loading: '⏳ Sending Transfer Tx',
@@ -211,6 +312,22 @@
 			},
 			async (err) => {
 				console.warn('❌ Transfer failed with error:', err);
+				if (transferRefundHash) {
+					try {
+						await abortOperation(transferRefundHash);
+						console.warn('🧯 Aborted refund operation:', transferRefundHash);
+					} catch (abortError) {
+						console.error('🚨 Failed to abort withdraw refund:', abortError);
+					}
+				}
+				if (feeRefundHash) {
+					try {
+						await abortOperation(feeRefundHash);
+						console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
+					} catch (abortError) {
+						console.error('🚨 Failed to abort fee refund:', abortError);
+					}
+				}
 			}
 		);
 	}
@@ -333,5 +450,33 @@
 				</div>
 			{/if}
 		{/if}
+		<Modal
+			show={showFeeModal}
+			title="Confirm Transfer"
+			confirmText="Accept"
+			cancelText="Reject"
+			closeOnOutsideClick={false}
+			onConfirm={confirmTransfer}
+			onCancel={() => {
+				showFeeModal = false;
+				isLoading = false;
+			}}
+			onClose={() => {
+				showFeeModal = false;
+				isLoading = false;
+			}}
+		>
+			<p class="text-sm">
+				You’re about to transfer
+				<strong class="break-words">
+					{transferAmount}
+				</strong>
+				tokens, paying a fee of
+				<strong class="break-words">
+					{feeWeiHex}
+				</strong>
+				tokens. Proceed?
+			</p>
+		</Modal>
 	</Card>
 </div>
