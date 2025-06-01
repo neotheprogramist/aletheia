@@ -1,8 +1,5 @@
 // SPDX-License-Identifier: MIT
 // Compatible with OpenZeppelin Contracts for Cairo ^0.20.0
-use ekubo::types::delta::Delta;
-use ekubo::types::i129::i129;
-use ekubo::types::keys::PoolKey;
 use starknet::ContractAddress;
 use starknet::account::Call;
 
@@ -11,26 +8,6 @@ pub trait IUltraKeccakHonkVerifier<TContractState> {
     fn verify_ultra_keccak_honk_proof(
         self: @TContractState, full_proof_with_hints: Span<felt252>,
     ) -> Option<Span<u256>>;
-}
-
-
-#[derive(Serde, Copy, Drop)]
-pub struct RouteNode {
-    pub pool_key: PoolKey,
-    pub sqrt_ratio_limit: u256,
-    pub skip_ahead: u128,
-}
-
-#[derive(Serde, Copy, Drop)]
-pub struct TokenAmount {
-    pub token: ContractAddress,
-    pub amount: i129,
-}
-
-#[derive(Serde, Drop)]
-pub struct Swap {
-    pub route: Array<RouteNode>,
-    pub token_amount: TokenAmount,
 }
 
 #[starknet::interface]
@@ -48,14 +25,10 @@ pub trait IPrivacyAccount<TContractState> {
         calldata: Span<felt252>,
     ) -> bool;
     fn merge(ref self: TContractState, proof: Span<felt252>) -> bool;
-    fn transfer(
-        ref self: TContractState,
-        proof: Span<felt252>,
-        gas_fee_route: RouteNode,
-        paymaster_fee_route: RouteNode,
-    ) -> bool;
+    fn transfer(ref self: TContractState, proof: Span<felt252>) -> bool;
     fn get_fee_for_extension(self: @TContractState, extension_address: ContractAddress) -> u256;
     fn get_fee_for_merge(self: @TContractState) -> u256;
+    fn get_fee_for_transfer(self: @TContractState) -> u256;
     fn get_current_gas_price(self: @TContractState) -> u256;
     fn set_current_gas_price(ref self: TContractState, gas_price: u256) -> bool;
     fn add_trusted_extension(
@@ -68,18 +41,6 @@ pub trait IPrivacyAccount<TContractState> {
     fn is_valid_signature(
         self: @TContractState, hash: felt252, signature: Array<felt252>,
     ) -> felt252;
-    // Does a single swap against a single node using tokens held by this contract, and receives the
-    // output to this contract
-    fn swap(ref self: TContractState, node: RouteNode, token_amount: TokenAmount) -> Delta;
-
-    // Does a multihop swap, where the output/input of each hop is passed as input/output of the
-    // next swap Note to do exact output swaps, the route must be given in reverse
-    fn multihop_swap(
-        ref self: TContractState, route: Array<RouteNode>, token_amount: TokenAmount,
-    ) -> Array<Delta>;
-
-    // Does multiple multihop swaps
-    fn multi_multihop_swap(ref self: TContractState, swaps: Array<Swap>) -> Array<Array<Delta>>;
     fn get_accumulated_fee(self: @TContractState) -> u256;
     fn withdraw_all_accumulated_fee(ref self: TContractState, recipient: ContractAddress) -> u256;
     fn withdraw_accumulated_fee(
@@ -165,32 +126,47 @@ impl PublicInputMergeImpl of PublicInputMergeTrait {
 
 #[derive(Drop)]
 struct PublicInputTransfer {
+    // Deposit
     root: u256,
+    nullifier_hash: u256,
     token_address: ContractAddress,
     token_address_to_hash: u256,
-    nullifier_hash: u256,
     amount: u256,
-    refund_commitment_hash: u256,
-    recipient_secret_and_nullifier_hash: u256,
+    // Fee deposit
+    fee_root: u256,
+    fee_nullifier: u256,
+    fee_token_address: ContractAddress,
     gas_fee: u256,
-    paymaster_fee: u256,
+    // Deposit refund
+    refund_commitment_hash: u256,
+    // Fee refund
+    refund_commitment_hash_fee: u256,
+    recipient_secret_and_nullifier_hash: u256,
 }
 
 #[generate_trait]
 impl PublicInputTransferImpl of PublicInputTransferTrait {
     fn from_u256_span(span: Span<u256>) -> PublicInputTransfer {
         let token_address: felt252 = (*span[2]).try_into().unwrap();
+        let token_address_fee: felt252 = (*span[6]).try_into().unwrap();
 
         PublicInputTransfer {
+            // Deposit
             root: *span[0],
             nullifier_hash: *span[1],
-            recipient_secret_and_nullifier_hash: *span[5],
-            refund_commitment_hash: *span[4],
-            amount: *span[3],
             token_address: token_address.try_into().unwrap(),
             token_address_to_hash: *span[2],
-            gas_fee: *span[6],
-            paymaster_fee: *span[7],
+            amount: *span[3],
+            // Fee deposit
+            fee_root: *span[4],
+            fee_nullifier: *span[5],
+            fee_token_address: token_address_fee.try_into().unwrap(),
+            gas_fee: *span[7],
+            // Refund deposit
+            refund_commitment_hash: *span[8],
+            // Refund fee
+            refund_commitment_hash_fee: *span[9],
+            recipient_secret_and_nullifier_hash: *span[10],
         }
     }
 }
@@ -200,12 +176,6 @@ impl PublicInputTransferImpl of PublicInputTransferTrait {
 pub mod PrivacyAccount {
     use core::array::{Array, ArrayTrait};
     use core::option::OptionTrait;
-    use ekubo::components::clear::ClearImpl;
-    use ekubo::components::shared_locker::{
-        call_core_with_callback, consume_callback_data, handle_delta,
-    };
-    use ekubo::interfaces::core::{ICoreDispatcher, ICoreDispatcherTrait, ILocker, SwapParameters};
-    use ekubo::types::i129::i129;
     use openzeppelin::access::ownable::OwnableComponent;
     use openzeppelin::account::extensions::SRC9Component;
     use openzeppelin::introspection::src5::SRC5Component;
@@ -225,8 +195,7 @@ pub mod PrivacyAccount {
     use crate::zk_extension::{IZkExtensionDispatcher, IZkExtensionDispatcherTrait};
     use crate::{hash, verify_ultra_keccak_honk_proof};
     use super::{
-        Delta, IPrivacyAccount, PublicInputMergeImpl, PublicInputTransferImpl,
-        PublicInputWithdrawImpl, RouteNode, Swap, TokenAmount,
+        IPrivacyAccount, PublicInputMergeImpl, PublicInputTransferImpl, PublicInputWithdrawImpl,
     };
 
     #[abi(embed_v0)]
@@ -266,15 +235,14 @@ pub mod PrivacyAccount {
         pub extension_verifier: ClassHash,
         pub merge_verifier: ClassHash,
         pub transfer_verifier: ClassHash,
-        core: ICoreDispatcher,
         strk_token_address: ContractAddress,
-        usdc_token_address: ContractAddress,
         current_gas_price: u256,
         trusted_extensions: Map<ContractAddress, u128>,
         users_balance: u256,
         accumulated_fee: u256,
         initial_fee_buffer: u256,
         merge_gas_consumed: u128,
+        transfer_gas_consumed: u128,
     }
 
     #[derive(Drop, PartialEq, starknet::Event)]
@@ -330,10 +298,10 @@ pub mod PrivacyAccount {
         transfer_verifier: ClassHash,
         core_address: ContractAddress,
         strk_token_address: ContractAddress,
-        usdc_token_address: ContractAddress,
         initial_fee_buffer: u256,
         current_gas_price: u256,
         merge_gas_consumed: u128,
+        transfer_gas_consumed: u128,
     ) {
         // 1) Standard ownership & merkle init
         self.ownable.initializer(owner);
@@ -344,11 +312,8 @@ pub mod PrivacyAccount {
         self.merge_verifier.write(merge_verifier);
         self.transfer_verifier.write(transfer_verifier);
 
-        // 3) Store core dispatcher and token addresses
-        let dispatcher: ICoreDispatcher = ICoreDispatcher { contract_address: core_address };
-        self.core.write(dispatcher);
+        // 3) Store STRK token addresses
         self.strk_token_address.write(strk_token_address);
-        self.usdc_token_address.write(usdc_token_address);
 
         // 4) Pull initial_fee_buffer STRK from deployer into this contract
         //    Deployer MUST have done: IERC20Dispatcher.approve(<this_contract>, initial_fee_buffer)
@@ -368,81 +333,7 @@ pub mod PrivacyAccount {
 
         // 8) Set gas consumed
         self.merge_gas_consumed.write(merge_gas_consumed);
-    }
-
-    #[abi(embed_v0)]
-    impl LockerImpl of ILocker<ContractState> {
-        fn locked(ref self: ContractState, id: u32, data: Span<felt252>) -> Span<felt252> {
-            let core = self.core.read();
-
-            let mut swaps = consume_callback_data::<Array<Swap>>(core, data);
-            let mut outputs: Array<Array<Delta>> = ArrayTrait::new();
-
-            while let Option::Some(swap) = swaps.pop_front() {
-                let mut route = swap.route;
-                let mut token_amount = swap.token_amount;
-
-                let mut deltas: Array<Delta> = ArrayTrait::new();
-                // we track this to know how much to pay in the case of exact input and how much to
-                // pull in the case of exact output
-                let mut first_swap_amount: Option<TokenAmount> = Option::None;
-
-                while let Option::Some(node) = route.pop_front() {
-                    let is_token1 = token_amount.token == node.pool_key.token1;
-
-                    let delta = core
-                        .swap(
-                            node.pool_key,
-                            SwapParameters {
-                                amount: token_amount.amount,
-                                is_token1: is_token1,
-                                sqrt_ratio_limit: node.sqrt_ratio_limit,
-                                skip_ahead: node.skip_ahead,
-                            },
-                        );
-
-                    deltas.append(delta);
-
-                    if first_swap_amount.is_none() {
-                        first_swap_amount =
-                            if is_token1 {
-                                Option::Some(
-                                    TokenAmount {
-                                        token: node.pool_key.token1, amount: delta.amount1,
-                                    },
-                                )
-                            } else {
-                                Option::Some(
-                                    TokenAmount {
-                                        token: node.pool_key.token0, amount: delta.amount0,
-                                    },
-                                )
-                            }
-                    }
-
-                    token_amount =
-                        if (is_token1) {
-                            TokenAmount { amount: -delta.amount0, token: node.pool_key.token0 }
-                        } else {
-                            TokenAmount { amount: -delta.amount1, token: node.pool_key.token1 }
-                        };
-                }
-
-                let recipient = get_contract_address();
-
-                outputs.append(deltas);
-
-                let first = first_swap_amount.unwrap();
-                handle_delta(core, token_amount.token, -token_amount.amount, recipient);
-                handle_delta(core, first.token, first.amount, recipient);
-            }
-
-            let mut serialized: Array<felt252> = array![];
-
-            Serde::serialize(@outputs, ref serialized);
-
-            serialized.span()
-        }
+        self.transfer_gas_consumed.write(transfer_gas_consumed);
     }
 
     #[abi(embed_v0)]
@@ -572,28 +463,35 @@ pub mod PrivacyAccount {
             true
         }
 
-        fn transfer(
-            ref self: ContractState,
-            proof: Span<felt252>,
-            gas_fee_route: RouteNode,
-            paymaster_fee_route: RouteNode,
-        ) -> bool {
+        fn transfer(ref self: ContractState, proof: Span<felt252>) -> bool {
             let public_input_serialized = verify_ultra_keccak_honk_proof(
                 self.transfer_verifier.read(), proof,
             );
 
             let public_input = PublicInputTransferImpl::from_u256_span(public_input_serialized);
 
+            // Validate despoit and fee deposit nullifiers
             assert(
                 !self.nullifier_hashes.read(public_input.nullifier_hash),
                 Errors::NULLIFIER_ALREADY_USED,
             );
             self.nullifier_hashes.entry(public_input.nullifier_hash).write(true);
 
+            assert(
+                !self.nullifier_hashes.read(public_input.fee_nullifier),
+                Errors::NULLIFIER_ALREADY_USED,
+            );
+            self.nullifier_hashes.entry(public_input.fee_nullifier).write(true);
+
+            // Valdiate despoit and fee deposit roots
             assert(self.merkle.roots.read(public_input.root), Errors::INVALID_ROOT);
+            assert(self.merkle.roots.read(public_input.fee_root), Errors::INVALID_ROOT);
 
+            // Add refund leaves for deposit and fee desposit
             self.merkle.add_leaf(public_input.refund_commitment_hash);
+            self.merkle.add_leaf(public_input.refund_commitment_hash_fee);
 
+            // Add leaf for transfered funds
             let secret_nullifier_amount_hash = hash(
                 public_input.recipient_secret_and_nullifier_hash, public_input.amount,
             );
@@ -601,53 +499,7 @@ pub mod PrivacyAccount {
                 secret_nullifier_amount_hash, public_input.token_address_to_hash,
             );
             self.merkle.add_leaf(transfer_commitment_hash);
-
-            if self.strk_token_address.read() != public_input.token_address {
-                self
-                    .multihop_swap(
-                        route: array![gas_fee_route],
-                        token_amount: TokenAmount {
-                            token: public_input.token_address,
-                            amount: i129 {
-                                mag: public_input.gas_fee.try_into().unwrap(), sign: false,
-                            },
-                        },
-                    );
-            }
-
-            if self.usdc_token_address.read() != public_input.token_address {
-                self
-                    .multihop_swap(
-                        route: array![paymaster_fee_route],
-                        token_amount: TokenAmount {
-                            token: public_input.token_address,
-                            amount: i129 {
-                                mag: public_input.paymaster_fee.try_into().unwrap(), sign: false,
-                            },
-                        },
-                    );
-            }
-
             true
-        }
-
-        fn swap(ref self: ContractState, node: RouteNode, token_amount: TokenAmount) -> Delta {
-            let mut deltas: Array<Delta> = self.multihop_swap(array![node], token_amount);
-            deltas.pop_front().unwrap()
-        }
-
-        #[inline(always)]
-        fn multihop_swap(
-            ref self: ContractState, route: Array<RouteNode>, token_amount: TokenAmount,
-        ) -> Array<Delta> {
-            let mut result = self.multi_multihop_swap(array![Swap { route, token_amount }]);
-
-            result.pop_front().unwrap()
-        }
-
-        #[inline(always)]
-        fn multi_multihop_swap(ref self: ContractState, swaps: Array<Swap>) -> Array<Array<Delta>> {
-            call_core_with_callback(self.core.read(), @swaps)
         }
 
         fn current_root(self: @ContractState) -> u256 {
@@ -793,10 +645,21 @@ pub mod PrivacyAccount {
 
             amount
         }
+
         fn get_fee_for_merge(
             self: @sn::privacy_account::PrivacyAccount::ContractState,
         ) -> core::integer::u256 {
             let gas_consumed: u128 = self.merge_gas_consumed.read();
+            let gas_price: u256 = self.current_gas_price.read();
+            let gas_consumed_u256: u256 = gas_consumed.try_into().unwrap();
+            let total_fee: u256 = gas_consumed_u256 * gas_price;
+            total_fee
+        }
+
+        fn get_fee_for_transfer(
+            self: @sn::privacy_account::PrivacyAccount::ContractState,
+        ) -> core::integer::u256 {
+            let gas_consumed: u128 = self.transfer_gas_consumed.read();
             let gas_price: u256 = self.current_gas_price.read();
             let gas_consumed_u256: u256 = gas_consumed.try_into().unwrap();
             let total_fee: u256 = gas_consumed_u256 * gas_price;
