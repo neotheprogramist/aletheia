@@ -12,7 +12,7 @@
 {#if $isConnected}
 	<slot />
 {:else}
-	<div class="flex h-full items-center justify-center">
+	<div class="2-full flex w-full items-center justify-center">
 		<p class="text-gray-500">Redirecting to home…</p>
 	</div>
 {/if}

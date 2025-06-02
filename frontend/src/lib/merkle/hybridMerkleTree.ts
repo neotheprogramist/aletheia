@@ -114,7 +114,9 @@ export class HybridMerkleTree {
 	getProofData(leaf: bigint) {
 		const leafIndex = this.findLeafIndex(leaf);
 		if (leafIndex === null) {
-			throw new Error('Leaf index not found');
+			throw new Error(
+				'Leaf index not found. Possible reasons: the deposit does not exist or has not yet been indexed. Please wait a moment and try again.'
+			);
 		}
 
 		const path = this.path(leafIndex);

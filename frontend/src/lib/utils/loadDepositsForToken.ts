@@ -12,12 +12,6 @@ export interface DisplayOperation extends Omit<Operation, 'data'> {
 	displayAmount: string;
 }
 
-/**
- * Dla "pending empty" operacji trzymamy:
- * - wszystkie pola Operation (poza data),
- * - shortHex: skrócony hex do wyświetlenia,
- * - fullHex: cały hex (użyty do kopiowania).
- */
 export interface DisplayPendingEmptyOperation extends Omit<Operation, 'data'> {
 	shortHex: string;
 	fullHex: string;
