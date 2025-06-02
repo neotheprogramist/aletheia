@@ -26,10 +26,16 @@
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { fetchMergeFee } from '$lib/utils/fetchFeeForExtension';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
-	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
-	import { defaultDepositColumns } from '$lib/utils/sharedColumns';
+	import {
+		loadDeposits,
+		loadPendingEmptyDeposits,
+		type DisplayOperation,
+		type DisplayPendingEmptyOperation
+	} from '$lib/utils/loadDepositsForToken';
+	import { defaultDepositColumns, defaultPendingDepositColumns } from '$lib/utils/sharedColumns';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { fromWei, toWei } from '$lib/utils/toWei';
+	import { Copy, Trash2 } from 'lucide-svelte';
 	import { Contract } from 'starknet';
 	import { get } from 'svelte/store';
 
@@ -61,12 +67,20 @@
 	let feeWei: bigint | null = null;
 
 	// Recipient view mode
-	let pendingEmptyDeposits: Operation[] | null = null;
+	let pendingEmptyDeposits: DisplayPendingEmptyOperation[] | null = null;
 
-	$: if ($selectedToken) {
+	$: if (viewMode === 'sender' && $selectedToken) {
 		loadDeposits(
 			$selectedToken,
 			(d) => (deposits = d),
+			(b) => (isLoading = b)
+		);
+	}
+
+	$: if (viewMode === 'recipient' && $selectedToken) {
+		loadPendingEmptyDeposits(
+			$selectedToken,
+			(ops) => (pendingEmptyDeposits = ops),
 			(b) => (isLoading = b)
 		);
 	}
@@ -358,8 +372,42 @@
 				isLoading = false;
 			}
 		);
+		loadPendingEmptyDeposits(
+			$selectedToken,
+			(ops) => (pendingEmptyDeposits = ops),
+			(b) => (isLoading = b)
+		);
 		isLoading = false;
 	}
+
+	const actions = [
+		{
+			icon: Copy,
+			handler: (row: DisplayPendingEmptyOperation) => {
+				navigator.clipboard.writeText(row.fullHex);
+				toastStore.addToast({ type: 'success', message: 'Hash skopiowany do schowka' });
+			},
+			title: 'Copy full hex'
+		},
+		{
+			icon: Trash2,
+			handler: async (row: DisplayPendingEmptyOperation) => {
+				try {
+					await abortOperation(row.hash);
+					toastStore.addToast({ type: 'info', message: 'Operation aborted' });
+					loadPendingEmptyDeposits(
+						$selectedToken,
+						(ops) => (pendingEmptyDeposits = ops),
+						(b) => (isLoading = b)
+					);
+				} catch (e) {
+					console.error('Error while aborting:', e);
+					toastStore.addToast({ type: 'error', message: 'Failed to abort' });
+				}
+			},
+			title: 'Abort operation'
+		}
+	];
 </script>
 
 <ProtectedRoute>
@@ -374,9 +422,25 @@
 		/>
 		<Card>
 			{#if viewMode === 'recipient'}
-				<div class="grid w-full grid-cols-1 justify-items-center">
-					<form on:submit|preventDefault={generateEmptyOperaition} class=" flex flex-col gap-4">
-						<Button text="Generate" class_=" w-full" loading={isLoading} type="submit" />
+				<PaginatedTable
+					columns={defaultPendingDepositColumns}
+					items={pendingEmptyDeposits ?? []}
+					rowActions={actions}
+					pageSize={5}
+					keyField="index"
+				/>
+
+				<div class="mt-4 grid w-full grid-cols-1 justify-items-center">
+					<form
+						on:submit|preventDefault={generateEmptyOperaition}
+						class="flex w-full flex-col gap-4"
+					>
+						<Button
+							text="Generate Empty Deposit"
+							class_="w-full"
+							loading={isLoading}
+							type="submit"
+						/>
 					</form>
 				</div>
 			{:else}
