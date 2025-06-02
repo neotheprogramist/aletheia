@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { wrapWithToast } from '$lib/utils/toast';
-	import { Redo } from 'lucide-svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Card from '$lib/ui/Card.svelte';
 	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
@@ -35,8 +34,11 @@
 	} from '$lib/utils/loadDepositsForToken';
 	import { defaultDepositColumns } from '$lib/utils/sharedColumns';
 
+	import SelectionToggle from '$lib/ui/SelectionToggle.svelte';
+	import Instructions, { type WithdrawMode } from '$lib/ui/Instructions.svelte';
+
 	let deposits: DisplayOperation[] = [];
-	let selectionMode: 'withdraw' | 'fee' = 'withdraw';
+	let selectionMode: WithdrawMode = 'withdraw';
 
 	let selectedWithdrawKey: number | null = null;
 	let selectedWithdrawDeposit: DisplayOperation | null = null;
@@ -71,6 +73,7 @@
 		if (selectionMode === 'withdraw') {
 			selectedWithdrawKey = deposits[globalIdx].index;
 			selectedWithdrawDeposit = deposits.find((d) => d.index === selectedWithdrawKey) ?? null;
+			// resetujemy pola po wybraniu innego withdraw:
 			withdrawRecipient = '';
 			withdrawAmount = '';
 		} else {
@@ -84,6 +87,10 @@
 		selectedWithdrawDeposit = null;
 		selectedFeeKey = null;
 		selectedFeeDeposit = null;
+	}
+
+	function handleSelectionChange(value: string) {
+		selectionMode = value as 'withdraw' | 'fee';
 	}
 
 	/** Step 1: Validate */
@@ -219,7 +226,7 @@
 
 				// 7) Build the witness input object for proof
 				const witnessInput = {
-					// original deposit data
+					// Deposit data
 					root_1: `0x${withdrawProofData.root.toString(16)}`,
 					secret_1: `0x${BigInt(withdrawOp.secret).toString(16)}`,
 					nullifier_1: `0x${BigInt(withdrawOp.nullifier).toString(16)}`,
@@ -228,8 +235,7 @@
 					hashpath_1: withdrawProofData.path[0].map((e) => `0x${e.toString(16)}`),
 					index_1: `0x${BigInt(withdrawProofData.index).toString(16)}`,
 					amount: `0x${userWithdrawAmountWei.toString(16)}`,
-
-					// fee deposit data
+					// Fee deposit data
 					root_2: `0x${feeProofData.root.toString(16)}`,
 					secret_2: `0x${BigInt(feeOp.secret).toString(16)}`,
 					nullifier_2: `0x${BigInt(feeOp.nullifier).toString(16)}`,
@@ -238,19 +244,16 @@
 					hashpath_2: feeProofData.path[0].map((e) => `0x${e.toString(16)}`),
 					index_2: `0x${BigInt(feeProofData.index).toString(16)}`,
 					gas_fee: `0x${feeWei.toString(16)}`,
-
-					// refund for withdraw deposit
+					// Refund for withdraw deposit
 					refund_secret_1: `0x${BigInt(withdrawRefundOp.secret).toString(16)}`,
 					refund_nullifier_1: `0x${BigInt(withdrawRefundOp.nullifier).toString(16)}`,
 					refund_amount_1: `0x${withdrawRefund.toString(16)}`,
 					refund_commitment_hash_1: `0x${withdrawRefundCommitmentHash.toString(16)}`,
-
-					// refund for fee deposit
+					// Refund for fee deposit
 					refund_secret_2: `0x${BigInt(feeRefundOp.secret).toString(16)}`,
 					refund_nullifier_2: `0x${BigInt(feeRefundOp.nullifier).toString(16)}`,
 					refund_amount_2: `0x${feeRefund.toString(16)}`,
 					refund_commitment_hash_2: `0x${feeRefundCommitmentHash.toString(16)}`,
-
 					// recipient
 					_recipient: withdrawRecipient
 				};
@@ -369,46 +372,19 @@
 		{#if !deposits.length}
 			<h2>Please make a deposit first!</h2>
 		{:else}
-			<!-- Toggle + Reset -->
-			<div class="mb-6 flex items-center justify-between">
-				<div class="inline-flex">
-					<button
-						class="rounded-l-md px-4 py-2 {selectionMode === 'withdraw'
-							? 'bg-blue-400 text-white'
-							: 'bg-gray-100 text-gray-700'}"
-						on:click={() => (selectionMode = 'withdraw')}
-					>
-						Withdraw
-					</button>
-					<button
-						class="-ml-px rounded-r-md px-4 py-2 {selectionMode === 'fee'
-							? 'bg-blue-400 text-white'
-							: 'bg-gray-100 text-gray-700'}"
-						on:click={() => (selectionMode = 'fee')}
-					>
-						Fee
-					</button>
-				</div>
-				<button
-					on:click={resetAll}
-					title="Reset selections"
-					class="rounded-full p-2 text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
-				>
-					<Redo size="20" />
-				</button>
-			</div>
+			<SelectionToggle
+				options={[
+					{ label: 'Withdraw', value: 'withdraw', isFirst: true },
+					{ label: 'Fee', value: 'fee', isLast: true }
+				]}
+				selected={selectionMode}
+				onChange={handleSelectionChange}
+				onReset={resetAll}
+			/>
 
 			<!-- Instructions -->
-			<p class="mb-4 font-medium">
-				{#if selectionMode === 'withdraw'}
-					Select a deposit to <strong>withdraw</strong> from:
-				{:else}
-					Select a deposit to pay <strong>fee</strong>:
-				{/if}
-			</p>
-			<p class="mb-2 text-sm text-gray-600 dark:text-gray-300">
-				Select a token to filter the list of available deposits:
-			</p>
+			<Instructions action="withdraw" mode={selectionMode} />
+
 			<TokenSelect
 				tokens={$tokens}
 				bind:value={$selectedToken}
@@ -504,13 +480,9 @@
 		>
 			<p class="text-sm">
 				You’re about to withdraw
-				<strong class="break-words">
-					{withdrawAmount}
-				</strong>
+				<strong class="break-words">{withdrawAmount}</strong>
 				tokens, paying a fee of
-				<strong class="break-words">
-					{feeWeiHex}
-				</strong>
+				<strong class="break-words">{feeWeiHex}</strong>
 				tokens. Proceed?
 			</p>
 		</Modal>

@@ -15,8 +15,10 @@
 	import { zkLibraries } from '$lib/stores/zkLibraries';
 	import Button from '$lib/ui/Button.svelte';
 	import Card from '$lib/ui/Card.svelte';
+	import Instructions, { type MergeMode } from '$lib/ui/Instructions.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
 	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
+	import SelectionToggle from '$lib/ui/SelectionToggle.svelte';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { fetchMergeFee } from '$lib/utils/fetchFeeForExtension';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
@@ -27,12 +29,11 @@
 	import { defaultDepositColumns } from '$lib/utils/sharedColumns';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { fromWei } from '$lib/utils/toWei';
-	import { Redo } from 'lucide-svelte';
 	import { Contract } from 'starknet';
 	import { get } from 'svelte/store';
 
 	let deposits: DisplayOperation[] = [];
-	let selectionMode: 'merge1' | 'merge2' | 'fee' = 'merge1';
+	let selectionMode: MergeMode = 'merge1';
 
 	let selectedMerge1Key: number | null = null;
 	let selectedMerge1Deposit: DisplayOperation | null = null;
@@ -90,6 +91,10 @@
 		selectedMerge2Deposit = null;
 		selectedFeeKey = null;
 		selectedFeeDeposit = null;
+	}
+
+	function handleSelectionChange(value: string) {
+		selectionMode = value as 'merge1' | 'merge2' | 'fee';
 	}
 
 	/** Step 1: Validate*/
@@ -377,54 +382,17 @@
 		{#if !deposits.length}
 			<h2>Please make a deposit first!</h2>
 		{:else}
-			<!-- Toggle + Reset -->
-			<div class="mb-6 flex items-center justify-between">
-				<div class="inline-flex">
-					<button
-						class="rounded-l-md px-4 py-2 {selectionMode === 'merge1'
-							? 'bg-blue-400 text-white'
-							: 'bg-gray-100 text-gray-700'}"
-						on:click={() => (selectionMode = 'merge1')}
-					>
-						First
-					</button>
-					<button
-						class="px-4 py-2 {selectionMode === 'merge2'
-							? 'bg-blue-400 text-white'
-							: 'bg-gray-100 text-gray-700'}"
-						on:click={() => (selectionMode = 'merge2')}
-					>
-						Second
-					</button>
-					<button
-						class="-ml-px rounded-r-md px-4 py-2 {selectionMode === 'fee'
-							? 'bg-blue-400 text-white'
-							: 'bg-gray-100 text-gray-700'}"
-						on:click={() => (selectionMode = 'fee')}
-					>
-						Fee
-					</button>
-				</div>
-				<button
-					on:click={resetAll}
-					title="Reset selections"
-					class="rounded-full p-2 text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
-				>
-					<Redo size="20" />
-				</button>
-			</div>
-			<p class="mb-4 font-medium">
-				{#if selectionMode === 'merge1'}
-					Select <strong>first</strong> deposit to <strong>merge</strong>:
-				{:else if selectionMode === 'merge2'}
-					Select <strong>second</strong> deposit to <strong>merge</strong>:
-				{:else}
-					Select a deposit to pay <strong>fee</strong>:
-				{/if}
-			</p>
-			<p class="mb-2 text-sm text-gray-600 dark:text-gray-300">
-				Select a token to filter the list of available deposits:
-			</p>
+			<SelectionToggle
+				options={[
+					{ label: 'First', value: 'merge1', isFirst: true },
+					{ label: 'Second', value: 'merge2' },
+					{ label: 'Fee', value: 'fee', isLast: true }
+				]}
+				selected={selectionMode}
+				onChange={handleSelectionChange}
+				onReset={resetAll}
+			/>
+			<Instructions action="merge" mode={selectionMode} />
 			<TokenSelect
 				tokens={$tokens}
 				bind:value={$selectedToken}
