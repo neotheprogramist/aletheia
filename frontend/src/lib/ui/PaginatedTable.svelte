@@ -1,11 +1,13 @@
 <script lang="ts" context="module">
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 
 	/**
-	 * Column<T> describes a single data‐column in the table.
+	 * Column<T> describes a single data-column in the table.
 	 * - `label`: header text for that column.
-	 * - `field`: either a string key (row[field]) or a function returning a value.
-	 * - `render`: optional function returning raw HTML for custom cell rendering.
+	 * - `field`: either
+	 *     • a string key, e.g. "index", meaning “render row[index]”, or
+	 *     • a function (row => some derived value).
+	 * - `render`: optional function returning raw HTML for custom cell content.
 	 */
 	export type Column<T> = {
 		label: string;
@@ -14,55 +16,53 @@
 	};
 
 	/**
-	 * RowAction<T> allows you to append an icon button at the end of each row.
-	 * - `icon`: any Svelte component (e.g. Copy or Trash2 from lucide-svelte).
-	 * - `handler`: function that will be called with the row data when clicked.
-	 * - `title`: tooltip text for accessibility (hover).
+	 * RowAction<T> lets you append an icon button at the end of each row.
+	 * - `icon`: any Svelte component class (e.g. `Copy` or `Trash2` from lucide-svelte).
+	 *           In Svelte 5, we type it as `Component<any>`.
+	 * - `handler`: function called with the row’s data object when the icon is clicked.
+	 * - `title`: tooltip text (shown on hover).
 	 */
 	export interface RowAction<T> {
-		// ComponentType<any> means “some Svelte component” without specifying exact props.
-		icon: ComponentType<any>;
+		icon: Component<any>;
 		handler: (row: T) => void;
 		title: string;
 	}
 </script>
 
 <script lang="ts">
-	/** The array of row‐objects to display */
+	/** The list of data rows to display. */
 	export let items: any[] = [];
-	/** Definitions for each data‐column */
+	/** Definitions for each data column. */
 	export let columns: Column<any>[] = [];
-	/** How many rows per page */
+	/** How many rows to show per page. */
 	export let pageSize = 10;
-	/** Unique key field name in each row object (e.g. "index") */
+	/** Unique key field name in each row object (e.g. "index"). */
 	export let keyField: string;
-	/** If certain rows should be non-clickable (by their global index) */
+	/** If you want certain rows to be non-clickable by their global index. */
 	export let disabledKeys: number[] = [];
-	/** Optional callback when a row is clicked; receives global index */
+	/** Callback fired when a row is clicked; receives that row’s global index. */
 	export let onRowClick: (idx: number) => void = () => {};
 
-	/** If you want to append icon‐buttons to each row, pass them here */
+	/** List of per-row icon buttons to render at the end of each row. */
 	export let rowActions: RowAction<any>[] = [];
 
-	// Optional styling props
+	// Optional styling props:
 	export let activeKey: number | null = null;
 	export let inactiveKeys: number[] = [];
 	export let hoverClass = '';
 
-	// ===== SORTING STATE =====
+	// === Sorting state ===
 	let sortField: string | ((row: any) => any) | null = null;
 	let sortAsc = true;
 
-	// ===== PAGINATION STATE =====
+	// === Pagination state ===
 	let currentPage = 1;
 	$: totalPages = Math.ceil(sortedItems.length / pageSize);
 
-	// 1️⃣ Compute sorted items whenever items / sortField / sortAsc change
+	// 1) Compute `sortedItems` whenever `items` / `sortField` / `sortAsc` change
 	$: sortedItems = sortField
 		? [...items].sort((a, b) => {
-				let aVal: any;
-				let bVal: any;
-
+				let aVal: any, bVal: any;
 				if (typeof sortField === 'string') {
 					aVal = a[sortField];
 					bVal = b[sortField];
@@ -71,7 +71,7 @@
 					bVal = sortField!(b);
 				}
 
-				// If both are numeric‐looking strings, compare numerically
+				// If both values look like numeric strings, compare numerically
 				if (typeof aVal === 'string' && typeof bVal === 'string') {
 					const na = parseFloat(aVal.replace(/[^0-9.\-]/g, ''));
 					const nb = parseFloat(bVal.replace(/[^0-9.\-]/g, ''));
@@ -87,17 +87,20 @@
 			})
 		: items;
 
-	// 2️⃣ Slice out the current page
+	// 2) Slice out only the rows for the current page
 	$: paginatedItems = sortedItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
-	/** Change the page number, clamped to [1..totalPages] */
+	/** Change pages (clamp to 1..totalPages). */
 	function selectPage(page: number) {
 		if (page < 1 || page > totalPages) return;
 		currentPage = page;
 	}
 
-	/** Handle a row‐click by computing its global index and calling onRowClick,
-	 * unless that index is in `disabledKeys`. */
+	/**
+	 * When a row is clicked:
+	 * • compute its global index, then
+	 * • call `onRowClick(globalIndex)` unless that index is disabled.
+	 */
 	function handleRowClick(_item: any, localIdx: number) {
 		const globalIndex = (currentPage - 1) * pageSize + localIdx;
 		if (disabledKeys.includes(globalIndex)) return;
@@ -105,8 +108,10 @@
 	}
 
 	/**
-	 * If you click a column header, update sortField / sortAsc and reset to page 1.
-	 * If that field was already sorted, flip the direction.
+	 * When a column header is clicked:
+	 * • if it’s already the current sortField, flip sortAsc;
+	 * • otherwise set sortField = col.field and default to ascending.
+	 * Then reset to page 1.
 	 */
 	function handleHeaderClick(col: Column<any>) {
 		const field = col.field;
@@ -140,7 +145,7 @@
 
 			{#if rowActions.length}
 				{#each rowActions as _action}
-					<!-- One empty header cell for each action column -->
+					<!-- Reserve one empty header cell per action column -->
 					<th class="px-2 py-1 text-left select-none"></th>
 				{/each}
 			{/if}
@@ -170,7 +175,7 @@
 					</td>
 				{/each}
 
-				<!-- Render each row action icon inside a button -->
+				<!-- Render each row action button -->
 				{#each rowActions as action}
 					<td class="px-2 py-1 text-center">
 						<button
@@ -178,6 +183,7 @@
 							title={action.title}
 							on:click={() => action.handler(item)}
 						>
+							<!-- Dynamically render whatever Svelte component is passed to `action.icon` -->
 							<svelte:component this={action.icon} />
 						</button>
 					</td>

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS } from '$env/static/public';
 	import { getOperationDetails } from '$lib/db/operations';
-	import type { Operation } from '$lib/db/operationsTypes';
 	import { abortOperation } from '$lib/privacy/abortOperation';
 	import { confirmOperation } from '$lib/privacy/confirmOperation';
 	import { generateOperation } from '$lib/privacy/generateOperation';
@@ -37,6 +36,7 @@
 	import { fromWei, toWei } from '$lib/utils/toWei';
 	import { Copy, Trash2 } from 'lucide-svelte';
 	import { Contract } from 'starknet';
+	import type { Component } from 'svelte';
 	import { get } from 'svelte/store';
 
 	let viewMode: 'sender' | 'recipient' = 'sender';
@@ -380,29 +380,39 @@
 		isLoading = false;
 	}
 
+	// Define per‐row Copy + Trash icons
 	const actions = [
 		{
-			icon: Copy,
+			icon: Copy as unknown as Component,
 			handler: (row: DisplayPendingEmptyOperation) => {
-				navigator.clipboard.writeText(row.fullHex);
-				toastStore.addToast({ type: 'success', message: 'Hash skopiowany do schowka' });
+				navigator.clipboard.writeText(row.hash);
+				toastStore.addToast({
+					type: 'success',
+					message: 'Full hash copied to clipboard.'
+				});
 			},
 			title: 'Copy full hex'
 		},
 		{
-			icon: Trash2,
+			icon: Trash2 as unknown as Component,
 			handler: async (row: DisplayPendingEmptyOperation) => {
 				try {
 					await abortOperation(row.hash);
-					toastStore.addToast({ type: 'info', message: 'Operation aborted' });
+					toastStore.addToast({
+						type: 'info',
+						message: 'Operation aborted.'
+					});
+					// Refresh the list after aborting:
 					loadPendingEmptyDeposits(
 						$selectedToken,
 						(ops) => (pendingEmptyDeposits = ops),
 						(b) => (isLoading = b)
 					);
-				} catch (e) {
-					console.error('Error while aborting:', e);
-					toastStore.addToast({ type: 'error', message: 'Failed to abort' });
+				} catch {
+					toastStore.addToast({
+						type: 'error',
+						message: 'Failed to abort operation.'
+					});
 				}
 			},
 			title: 'Abort operation'
