@@ -18,6 +18,8 @@
 	import Instructions, { type MergeMode } from '$lib/ui/Instructions.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
 	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
+	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
+	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
 	import SelectionToggle from '$lib/ui/SelectionToggle.svelte';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { fetchMergeFee } from '$lib/utils/fetchFeeForExtension';
@@ -377,132 +379,106 @@
 	}
 </script>
 
-<div class="mx-auto p-6">
-	<Card>
-		{#if !deposits.length}
-			<h2>Please make a deposit first!</h2>
-		{:else}
-			<SelectionToggle
-				options={[
-					{ label: 'First', value: 'merge1', isFirst: true },
-					{ label: 'Second', value: 'merge2' },
-					{ label: 'Fee', value: 'fee', isLast: true }
-				]}
-				selected={selectionMode}
-				onChange={handleSelectionChange}
-				onReset={resetAll}
-			/>
-			<Instructions action="merge" mode={selectionMode} />
-			<TokenSelect
-				tokens={$tokens}
-				bind:value={$selectedToken}
-				placeholder="Filter deposits by token"
-				class_="mb-4 w-64"
-			/>
-			<PaginatedTable
-				columns={defaultDepositColumns}
-				items={deposits}
-				pageSize={5}
-				keyField="index"
-				disabledKeys={undefined}
-				onRowClick={handleRowClick}
-				activeKey={selectionMode === 'merge1'
-					? selectedMerge1Key
-					: selectionMode === 'merge2'
-						? selectedMerge2Key
-						: selectedFeeKey}
-				inactiveKeys={[
-					...(selectionMode !== 'merge1' && selectedMerge1Key !== null ? [selectedMerge1Key] : []),
-					...(selectionMode !== 'merge2' && selectedMerge2Key !== null ? [selectedMerge2Key] : []),
-					...(selectionMode !== 'fee' && selectedFeeKey !== null ? [selectedFeeKey] : [])
-				]}
-				hoverClass="hover:bg-green-600"
-			/>
+<ProtectedRoute>
+	<div class="mx-auto p-6">
+		<Card>
+			{#if !deposits.length}
+				<h2>Please make a deposit first!</h2>
+			{:else}
+				<SelectionToggle
+					options={[
+						{ label: 'First', value: 'merge1', isFirst: true },
+						{ label: 'Second', value: 'merge2' },
+						{ label: 'Fee', value: 'fee', isLast: true }
+					]}
+					selected={selectionMode}
+					onChange={handleSelectionChange}
+					onReset={resetAll}
+				/>
+				<Instructions action="merge" mode={selectionMode} />
+				<TokenSelect
+					tokens={$tokens}
+					bind:value={$selectedToken}
+					placeholder="Filter deposits by token"
+					class_="mb-4 w-64"
+				/>
+				<PaginatedTable
+					columns={defaultDepositColumns}
+					items={deposits}
+					pageSize={5}
+					keyField="index"
+					disabledKeys={undefined}
+					onRowClick={handleRowClick}
+					activeKey={selectionMode === 'merge1'
+						? selectedMerge1Key
+						: selectionMode === 'merge2'
+							? selectedMerge2Key
+							: selectedFeeKey}
+					inactiveKeys={[
+						...(selectionMode !== 'merge1' && selectedMerge1Key !== null
+							? [selectedMerge1Key]
+							: []),
+						...(selectionMode !== 'merge2' && selectedMerge2Key !== null
+							? [selectedMerge2Key]
+							: []),
+						...(selectionMode !== 'fee' && selectedFeeKey !== null ? [selectedFeeKey] : [])
+					]}
+					hoverClass="hover:bg-green-600"
+				/>
 
-			{#if selectedMerge1Deposit || selectedMerge2Deposit || selectedFeeDeposit}
-				<div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-					{#if selectedMerge1Deposit}
-						<Card title="First">
-							<div class="space-y-2 text-sm">
-								<div><strong>Index:</strong> {selectedMerge1Deposit.index}</div>
-								<div>
-									<strong>Amount:</strong>
-									{selectedMerge1Deposit.displayAmount}
-								</div>
-							</div>
+				<SelectedDeposits
+					items={[
+						{ title: '#1 Deposit', deposit: selectedMerge1Deposit },
+						{ title: '#2 Deposit', deposit: selectedMerge2Deposit },
+						{ title: 'Fee Deposit', deposit: selectedFeeDeposit }
+					]}
+				/>
+				{#if selectedMerge1Deposit && selectedMerge2Deposit && selectedFeeDeposit}
+					<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
+						<Card>
+							<form class="mt-6 flex flex-col gap-4">
+								<Button
+									onClick={initiateMerge}
+									text="Merge"
+									class_="mt-2 w-full"
+									loading={isLoading}
+									type="submit"
+								/>
+							</form>
 						</Card>
-					{/if}
-
-					{#if selectedMerge2Deposit}
-						<Card title="Second">
-							<div class="space-y-2 text-sm">
-								<div><strong>Index:</strong> {selectedMerge2Deposit.index}</div>
-								<div>
-									<strong>Amount:</strong>
-									{selectedMerge2Deposit.displayAmount}
-								</div>
-							</div>
-						</Card>
-					{/if}
-
-					{#if selectedFeeDeposit}
-						<Card title="Fee">
-							<div class="space-y-2 text-sm">
-								<div><strong>Index:</strong> {selectedFeeDeposit.index}</div>
-								<div>
-									<strong>Amount:</strong>
-									{selectedFeeDeposit.displayAmount}
-								</div>
-							</div>
-						</Card>
-					{/if}
-				</div>
+					</div>
+				{/if}
 			{/if}
-			{#if selectedMerge1Deposit && selectedMerge2Deposit && selectedFeeDeposit}
-				<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
-					<Card>
-						<form class="mt-6 flex flex-col gap-4">
-							<Button
-								onClick={initiateMerge}
-								text="Merge"
-								class_="mt-2 w-full"
-								loading={isLoading}
-								type="submit"
-							/>
-						</form>
-					</Card>
-				</div>
-			{/if}
-		{/if}
 
-		<!-- Modal Confirm -->
-		<Modal
-			show={showFeeModal}
-			title="Confirm Merge"
-			confirmText="Accept"
-			cancelText="Reject"
-			closeOnOutsideClick={false}
-			onConfirm={confirmMerge}
-			onCancel={() => {
-				showFeeModal = false;
-				isLoading = false;
-			}}
-			onClose={() => {
-				showFeeModal = false;
-				isLoading = false;
-			}}
-		>
-			<p class="text-sm">
-				You’re about to merge
-				<strong class="break-words">
-					{merge1Amount} and {merge2Amount}
-				</strong>
-				tokens, paying a fee of
-				<strong class="break-words">
-					{feeWeiHex}
-				</strong>
-				tokens. Proceed?
-			</p>
-		</Modal>
-	</Card>
-</div>
+			<!-- Modal Confirm -->
+			<Modal
+				show={showFeeModal}
+				title="Confirm Merge"
+				confirmText="Accept"
+				cancelText="Reject"
+				closeOnOutsideClick={false}
+				onConfirm={confirmMerge}
+				onCancel={() => {
+					showFeeModal = false;
+					isLoading = false;
+				}}
+				onClose={() => {
+					showFeeModal = false;
+					isLoading = false;
+				}}
+			>
+				<p class="text-sm">
+					You’re about to merge
+					<strong class="break-words">
+						{merge1Amount} and {merge2Amount}
+					</strong>
+					tokens, paying a fee of
+					<strong class="break-words">
+						{feeWeiHex}
+					</strong>
+					tokens. Proceed?
+				</p>
+			</Modal>
+		</Card>
+	</div>
+</ProtectedRoute>

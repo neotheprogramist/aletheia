@@ -36,6 +36,8 @@
 
 	import SelectionToggle from '$lib/ui/SelectionToggle.svelte';
 	import Instructions, { type WithdrawMode } from '$lib/ui/Instructions.svelte';
+	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
+	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
 
 	let deposits: DisplayOperation[] = [];
 	let selectionMode: WithdrawMode = 'withdraw';
@@ -367,124 +369,105 @@
 	}
 </script>
 
-<div class="mx-auto p-6">
-	<Card>
-		{#if !deposits.length}
-			<h2>Please make a deposit first!</h2>
-		{:else}
-			<SelectionToggle
-				options={[
-					{ label: 'Withdraw', value: 'withdraw', isFirst: true },
-					{ label: 'Fee', value: 'fee', isLast: true }
-				]}
-				selected={selectionMode}
-				onChange={handleSelectionChange}
-				onReset={resetAll}
-			/>
+<ProtectedRoute>
+	<div class="mx-auto p-6">
+		<Card>
+			{#if !deposits.length}
+				<h2>Please make a deposit first!</h2>
+			{:else}
+				<SelectionToggle
+					options={[
+						{ label: 'Withdraw', value: 'withdraw', isFirst: true },
+						{ label: 'Fee', value: 'fee', isLast: true }
+					]}
+					selected={selectionMode}
+					onChange={handleSelectionChange}
+					onReset={resetAll}
+				/>
 
-			<!-- Instructions -->
-			<Instructions action="withdraw" mode={selectionMode} />
+				<!-- Instructions -->
+				<Instructions action="withdraw" mode={selectionMode} />
 
-			<TokenSelect
-				tokens={$tokens}
-				bind:value={$selectedToken}
-				placeholder="Filter deposits by token"
-				class_="mb-4 w-64"
-			/>
-			<!-- Deposits Table -->
-			<PaginatedTable
-				columns={defaultDepositColumns}
-				items={deposits}
-				pageSize={5}
-				keyField="index"
-				disabledKeys={undefined}
-				onRowClick={handleRowClick}
-				activeKey={selectionMode === 'withdraw' ? selectedWithdrawKey : selectedFeeKey}
-				inactiveKeys={selectionMode === 'withdraw' && selectedFeeKey !== null
-					? [selectedFeeKey]
-					: selectionMode === 'fee' && selectedWithdrawKey !== null
-						? [selectedWithdrawKey]
-						: []}
-				hoverClass="hover:bg-green-600"
-			/>
+				<TokenSelect
+					tokens={$tokens}
+					bind:value={$selectedToken}
+					placeholder="Filter deposits by token"
+					class_="mb-4 w-64"
+				/>
+				<!-- Deposits Table -->
+				<PaginatedTable
+					columns={defaultDepositColumns}
+					items={deposits}
+					pageSize={5}
+					keyField="index"
+					disabledKeys={undefined}
+					onRowClick={handleRowClick}
+					activeKey={selectionMode === 'withdraw' ? selectedWithdrawKey : selectedFeeKey}
+					inactiveKeys={selectionMode === 'withdraw' && selectedFeeKey !== null
+						? [selectedFeeKey]
+						: selectionMode === 'fee' && selectedWithdrawKey !== null
+							? [selectedWithdrawKey]
+							: []}
+					hoverClass="hover:bg-green-600"
+				/>
 
-			<!-- Selected‐deposit cards -->
-			{#if selectedWithdrawDeposit || selectedFeeDeposit}
-				<div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-					{#if selectedWithdrawDeposit}
-						<Card title="Withdrawal Deposit">
-							<div class="space-y-2 text-sm">
-								<div><strong>Index:</strong> {selectedWithdrawDeposit.index}</div>
-								<div>
-									<strong>Amount:</strong>
-									{selectedWithdrawDeposit.displayAmount}
-								</div>
-							</div>
+				<!-- Selected‐deposit cards -->
+				<SelectedDeposits
+					items={[
+						{ title: 'Withdrawal Deposit', deposit: selectedWithdrawDeposit },
+						{ title: 'Fee Deposit', deposit: selectedFeeDeposit }
+					]}
+				/>
+
+				<!-- Withdraw Form -->
+				{#if selectedWithdrawDeposit && selectedFeeDeposit}
+					<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
+						<Card>
+							<form on:submit|preventDefault={initiateWithdraw} class="mt-6 flex flex-col gap-4">
+								<Input
+									bind:value={withdrawRecipient}
+									required
+									placeholder="Recipient Address"
+									class_="w-full"
+								/>
+								<Input
+									bind:value={withdrawAmount}
+									required
+									placeholder="Amount to Withdraw"
+									class_="w-full"
+								/>
+								<Button text="Withdraw" class_="mt-2 w-full" loading={isLoading} type="submit" />
+							</form>
 						</Card>
-					{/if}
-
-					{#if selectedFeeDeposit}
-						<Card title="Fee Deposit">
-							<div class="space-y-2 text-sm">
-								<div><strong>Index:</strong> {selectedFeeDeposit.index}</div>
-								<div>
-									<strong>Amount:</strong>
-									{selectedFeeDeposit.displayAmount}
-								</div>
-							</div>
-						</Card>
-					{/if}
-				</div>
+					</div>
+				{/if}
 			{/if}
 
-			<!-- Withdraw Form -->
-			{#if selectedWithdrawDeposit && selectedFeeDeposit}
-				<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
-					<Card>
-						<form on:submit|preventDefault={initiateWithdraw} class="mt-6 flex flex-col gap-4">
-							<Input
-								bind:value={withdrawRecipient}
-								required
-								placeholder="Recipient Address"
-								class_="w-full"
-							/>
-							<Input
-								bind:value={withdrawAmount}
-								required
-								placeholder="Amount to Withdraw"
-								class_="w-full"
-							/>
-							<Button text="Withdraw" class_="mt-2 w-full" loading={isLoading} type="submit" />
-						</form>
-					</Card>
-				</div>
-			{/if}
-		{/if}
-
-		<!-- Modal Confirm -->
-		<Modal
-			show={showFeeModal}
-			title="Confirm Withdraw"
-			confirmText="Accept"
-			cancelText="Reject"
-			closeOnOutsideClick={false}
-			onConfirm={confirmWithdraw}
-			onCancel={() => {
-				showFeeModal = false;
-				isLoading = false;
-			}}
-			onClose={() => {
-				showFeeModal = false;
-				isLoading = false;
-			}}
-		>
-			<p class="text-sm">
-				You’re about to withdraw
-				<strong class="break-words">{withdrawAmount}</strong>
-				tokens, paying a fee of
-				<strong class="break-words">{feeWeiHex}</strong>
-				tokens. Proceed?
-			</p>
-		</Modal>
-	</Card>
-</div>
+			<!-- Modal Confirm -->
+			<Modal
+				show={showFeeModal}
+				title="Confirm Withdraw"
+				confirmText="Accept"
+				cancelText="Reject"
+				closeOnOutsideClick={false}
+				onConfirm={confirmWithdraw}
+				onCancel={() => {
+					showFeeModal = false;
+					isLoading = false;
+				}}
+				onClose={() => {
+					showFeeModal = false;
+					isLoading = false;
+				}}
+			>
+				<p class="text-sm">
+					You’re about to withdraw
+					<strong class="break-words">{withdrawAmount}</strong>
+					tokens, paying a fee of
+					<strong class="break-words">{feeWeiHex}</strong>
+					tokens. Proceed?
+				</p>
+			</Modal>
+		</Card>
+	</div>
+</ProtectedRoute>
