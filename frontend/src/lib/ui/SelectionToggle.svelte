@@ -1,4 +1,3 @@
-<!-- 1. Definicja typu w module’owym kontekście -->
 <script context="module" lang="ts">
 	export type Option = {
 		label: string;
@@ -8,11 +7,9 @@
 	};
 </script>
 
-<!-- 2. Główny skrypt komponentu -->
 <script lang="ts">
 	import { Redo } from 'lucide-svelte';
 
-	// Options to display
 	export let options: Option[] = [];
 	export let selected: string = '';
 	// Callback while selected
@@ -25,10 +22,9 @@
 	}
 </script>
 
-<!-- 3. Szablon komponentu -->
 <div class="mb-6 flex items-center justify-between">
 	<div class="inline-flex">
-		{#each options as opt, i}
+		{#each options as opt, i (opt.value)}
 			<button
 				class="
           px-4 py-2

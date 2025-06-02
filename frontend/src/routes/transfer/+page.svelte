@@ -25,10 +25,7 @@
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { fetchMergeFee } from '$lib/utils/fetchFeeForExtension';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
-	import {
-		getDisplayDepositsForToken,
-		type DisplayOperation
-	} from '$lib/utils/loadDepositsForToken';
+	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
 	import { defaultDepositColumns } from '$lib/utils/sharedColumns';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { fromWei, toWei } from '$lib/utils/toWei';
@@ -62,8 +59,10 @@
 	let feeWei: bigint | null = null;
 
 	$: if ($selectedToken) {
-		getDisplayDepositsForToken($selectedToken, (v) => (isLoading = v)).then(
-			(d) => (deposits = d ?? [])
+		loadDeposits(
+			$selectedToken,
+			(d) => (deposits = d),
+			(b) => (isLoading = b)
 		);
 	}
 
@@ -87,7 +86,7 @@
 	}
 
 	function handleSelectionChange(value: string) {
-		selectionMode = value as 'transfer' | 'fee';
+		selectionMode = value as TransferMode;
 	}
 
 	/** Step 1: Validate*/

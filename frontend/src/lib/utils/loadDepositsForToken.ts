@@ -73,3 +73,13 @@ export async function getDisplayDepositsForToken(
 	if (setIsLoading) setIsLoading(false);
 	return deposits;
 }
+
+export async function loadDeposits(
+	token: string,
+	setDeposits: (d: DisplayOperation[]) => void,
+	setLoading: (b: boolean) => void
+) {
+	setLoading(true);
+	const d = await getDisplayDepositsForToken(token, (v) => setLoading(v));
+	setDeposits(d ?? []);
+}

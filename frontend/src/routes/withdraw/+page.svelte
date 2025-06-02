@@ -28,10 +28,7 @@
 	import { toastStore } from '$lib/stores/toast';
 	import { tokens, selectedToken } from '$lib/stores/tokens';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
-	import {
-		getDisplayDepositsForToken,
-		type DisplayOperation
-	} from '$lib/utils/loadDepositsForToken';
+	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
 	import { defaultDepositColumns } from '$lib/utils/sharedColumns';
 
 	import SelectionToggle from '$lib/ui/SelectionToggle.svelte';
@@ -66,8 +63,10 @@
 	let feeWei: bigint | null = null;
 
 	$: if ($selectedToken) {
-		getDisplayDepositsForToken($selectedToken, (v) => (isLoading = v)).then(
-			(d) => (deposits = d ?? [])
+		loadDeposits(
+			$selectedToken,
+			(d) => (deposits = d),
+			(b) => (isLoading = b)
 		);
 	}
 
@@ -75,7 +74,6 @@
 		if (selectionMode === 'withdraw') {
 			selectedWithdrawKey = deposits[globalIdx].index;
 			selectedWithdrawDeposit = deposits.find((d) => d.index === selectedWithdrawKey) ?? null;
-			// resetujemy pola po wybraniu innego withdraw:
 			withdrawRecipient = '';
 			withdrawAmount = '';
 		} else {
@@ -92,7 +90,7 @@
 	}
 
 	function handleSelectionChange(value: string) {
-		selectionMode = value as 'withdraw' | 'fee';
+		selectionMode = value as WithdrawMode;
 	}
 
 	/** Step 1: Validate */

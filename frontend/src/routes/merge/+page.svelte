@@ -24,10 +24,7 @@
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { fetchMergeFee } from '$lib/utils/fetchFeeForExtension';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
-	import {
-		getDisplayDepositsForToken,
-		type DisplayOperation
-	} from '$lib/utils/loadDepositsForToken';
+	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
 	import { defaultDepositColumns } from '$lib/utils/sharedColumns';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { fromWei } from '$lib/utils/toWei';
@@ -65,8 +62,10 @@
 	let feeWei: bigint | null = null;
 
 	$: if ($selectedToken) {
-		getDisplayDepositsForToken($selectedToken, (v) => (isLoading = v)).then(
-			(d) => (deposits = d ?? [])
+		loadDeposits(
+			$selectedToken,
+			(d) => (deposits = d),
+			(b) => (isLoading = b)
 		);
 	}
 
@@ -96,7 +95,7 @@
 	}
 
 	function handleSelectionChange(value: string) {
-		selectionMode = value as 'merge1' | 'merge2' | 'fee';
+		selectionMode = value as MergeMode;
 	}
 
 	/** Step 1: Validate*/
@@ -123,7 +122,7 @@
 
 				// — Parse second merge note
 				mergeNote2 = NoteDataSchema.parse(selectedMerge2Deposit.data);
-				const { tokenAddress: merge2TokenAddress, amount: merge2NoteBalance } = mergeNote2;
+				const { amount: merge2NoteBalance } = mergeNote2;
 				merge2NoteBalanceWei = BigInt(merge2NoteBalance);
 				merge2Amount = fromWei(merge2NoteBalanceWei, mergeTokenDecimals);
 				if (merge2NoteBalanceWei <= 0n) {
@@ -154,7 +153,7 @@
 				success: '✅ Merge ready!',
 				error: '❌ Merge failed'
 			},
-			async (err) => {
+			async () => {
 				isLoading = false;
 			}
 		);
@@ -328,10 +327,9 @@
 				const receipt = await rpc.waitForTransaction(tx.transaction_hash);
 
 				// 10) Check receipt status and throw on failure
-				if (receipt.isSuccess()) {
-				} else if (receipt.isReverted()) {
+				if (receipt.isReverted()) {
 					throw new Error(`Transaction reverted: ${receipt.value}`);
-				} else {
+				} else if (!receipt.isSuccess()) {
 					throw new Error(`Transaction error: ${receipt.value}`);
 				}
 
