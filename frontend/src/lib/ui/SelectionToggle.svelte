@@ -12,10 +12,8 @@
 
 	export let options: Option[] = [];
 	export let selected: string = '';
-	// Callback while selected
 	export let onChange: (value: string) => void = () => {};
-	// Callback after reset
-	export let onReset: () => void = () => {};
+	export let onReset: (() => void) | undefined = undefined;
 
 	function selectMode(value: string) {
 		onChange(value);
@@ -40,11 +38,13 @@
 		{/each}
 	</div>
 
-	<button
-		on:click={onReset}
-		title="Reset selections"
-		class="rounded-full p-2 text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
-	>
-		<Redo size="20" />
-	</button>
+	{#if onReset}
+		<button
+			on:click={onReset}
+			title="Reset selections"
+			class="rounded-full p-2 text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
+		>
+			<Redo size="20" />
+		</button>
+	{/if}
 </div>

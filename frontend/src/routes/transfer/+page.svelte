@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS } from '$env/static/public';
 	import { getOperationDetails } from '$lib/db/operations';
+	import type { Operation } from '$lib/db/operationsTypes';
 	import { abortOperation } from '$lib/privacy/abortOperation';
 	import { confirmOperation } from '$lib/privacy/confirmOperation';
 	import { generateOperation } from '$lib/privacy/generateOperation';
@@ -32,6 +33,7 @@
 	import { Contract } from 'starknet';
 	import { get } from 'svelte/store';
 
+	let viewMode: 'sender' | 'recipient' = 'sender';
 	let deposits: DisplayOperation[] = [];
 	let selectionMode: TransferMode = 'transfer';
 
@@ -57,6 +59,9 @@
 	let userTransferAmountWei: bigint | null = null;
 	let feeNoteBalanceWei: bigint | null = null;
 	let feeWei: bigint | null = null;
+
+	// Recipient view mode
+	let pendingEmptyDeposits: Operation[] | null = null;
 
 	$: if ($selectedToken) {
 		loadDeposits(
@@ -89,7 +94,7 @@
 		selectionMode = value as TransferMode;
 	}
 
-	/** Step 1: Validate*/
+	/** Step 1: Validate */
 	async function initiateTransfer() {
 		isLoading = true;
 		await wrapWithToast(
@@ -148,12 +153,10 @@
 
 	/** Step 2: Proving & Execution */
 	async function confirmTransfer() {
-		// 1) Close the modal and start the toast
 		showFeeModal = false;
 
 		await wrapWithToast(
 			async () => {
-				// 2) Validate that note balances and calculated amounts are present
 				if (!transferNoteBalanceWei || !userTransferAmountWei) {
 					throw new Error('Cannot calculate refund – missing transfer amounts');
 				}
@@ -337,106 +340,136 @@
 			}
 		);
 	}
+
+	async function generateEmptyOperaition() {
+		isLoading = true;
+
+		await wrapWithToast(
+			async () => {
+				await generateOperation({});
+			},
+			{
+				loading: '⏳ Generating empty operation',
+				success: `✅ Generating finished`,
+				error: '❌ Error while generating'
+			},
+			(err) => {
+				console.error('❌ Error generating operation:', err);
+				isLoading = false;
+			}
+		);
+		isLoading = false;
+	}
 </script>
 
 <ProtectedRoute>
 	<div class="mx-auto p-6">
+		<SelectionToggle
+			options={[
+				{ label: 'Sender', value: 'sender', isFirst: true },
+				{ label: 'Recipient', value: 'recipient', isLast: true }
+			]}
+			selected={viewMode}
+			onChange={(v) => (viewMode = v as 'sender' | 'recipient')}
+		/>
 		<Card>
-			{#if !deposits.length}
-				<h2>Please make a deposit first!</h2>
+			{#if viewMode === 'recipient'}
+				<div class="grid w-full grid-cols-1 justify-items-center">
+					<form on:submit|preventDefault={generateEmptyOperaition} class=" flex flex-col gap-4">
+						<Button text="Generate" class_=" w-full" loading={isLoading} type="submit" />
+					</form>
+				</div>
 			{:else}
-				<SelectionToggle
-					options={[
-						{ label: 'Transfer', value: 'transfer', isFirst: true },
-						{ label: 'Fee', value: 'fee', isLast: true }
-					]}
-					selected={selectionMode}
-					onChange={handleSelectionChange}
-					onReset={resetAll}
-				/>
-				<Instructions action="transfer" mode={selectionMode} />
+				{#if !deposits.length}
+					<h2 class="mt-6">Please make a deposit first!</h2>
+				{:else}
+					<SelectionToggle
+						options={[
+							{ label: 'Transfer', value: 'transfer', isFirst: true },
+							{ label: 'Fee', value: 'fee', isLast: true }
+						]}
+						selected={selectionMode}
+						onChange={handleSelectionChange}
+						onReset={resetAll}
+					/>
+					<Instructions action="transfer" mode={selectionMode} />
 
-				<TokenSelect
-					tokens={$tokens}
-					bind:value={$selectedToken}
-					placeholder="Filter deposits by token"
-					class_="mb-4 w-64"
-				/>
-				<!-- Deposits Table -->
-				<PaginatedTable
-					columns={defaultDepositColumns}
-					items={deposits}
-					pageSize={5}
-					keyField="index"
-					disabledKeys={undefined}
-					onRowClick={handleRowClick}
-					activeKey={selectionMode === 'transfer' ? selectedTransferKey : selectedFeeKey}
-					inactiveKeys={selectionMode === 'transfer' && selectedFeeKey !== null
-						? [selectedFeeKey]
-						: selectionMode === 'fee' && selectedTransferKey !== null
-							? [selectedTransferKey]
-							: []}
-					hoverClass="hover:bg-green-600"
-				/>
+					<TokenSelect
+						tokens={$tokens}
+						bind:value={$selectedToken}
+						placeholder="Filter deposits by token"
+						class_="mb-4 w-64"
+					/>
+					<PaginatedTable
+						columns={defaultDepositColumns}
+						items={deposits}
+						pageSize={5}
+						keyField="index"
+						onRowClick={handleRowClick}
+						activeKey={selectionMode === 'transfer' ? selectedTransferKey : selectedFeeKey}
+						inactiveKeys={selectionMode === 'transfer' && selectedFeeKey !== null
+							? [selectedFeeKey]
+							: selectionMode === 'fee' && selectedTransferKey !== null
+								? [selectedTransferKey]
+								: []}
+						hoverClass="hover:bg-green-600"
+					/>
 
-				<!-- Selected‐deposit cards -->
-				<SelectedDeposits
-					items={[
-						{ title: 'Transfer Deposit', deposit: selectedTransferDeposit },
-						{ title: 'Fee Deposit', deposit: selectedFeeDeposit }
-					]}
-				/>
+					<SelectedDeposits
+						items={[
+							{ title: 'Transfer Deposit', deposit: selectedTransferDeposit },
+							{ title: 'Fee Deposit', deposit: selectedFeeDeposit }
+						]}
+					/>
 
-				{#if selectedTransferDeposit && selectedFeeDeposit}
-					<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
-						<Card>
-							<form on:submit|preventDefault={initiateTransfer} class="mt-6 flex flex-col gap-4">
-								<Input
-									bind:value={transferSecretAndNullifierHash}
-									required
-									placeholder="Recipient Hash"
-									class_="w-full"
-								/>
-								<Input
-									bind:value={transferAmount}
-									required
-									placeholder="Amount to Transfer"
-									class_="w-full"
-								/>
-								<Button text="Transfer" class_="mt-2 w-full" loading={isLoading} type="submit" />
-							</form>
-						</Card>
-					</div>
+					{#if selectedTransferDeposit && selectedFeeDeposit}
+						<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
+							<Card>
+								<form on:submit|preventDefault={initiateTransfer} class="mt-6 flex flex-col gap-4">
+									<Input
+										bind:value={transferSecretAndNullifierHash}
+										required
+										placeholder="Recipient Hash"
+										class_="w-full"
+									/>
+									<Input
+										bind:value={transferAmount}
+										required
+										placeholder="Amount to Transfer"
+										class_="w-full"
+									/>
+									<Button text="Transfer" class_="mt-2 w-full" loading={isLoading} type="submit" />
+								</form>
+							</Card>
+						</div>
+					{/if}
 				{/if}
+
+				<Modal
+					show={showFeeModal}
+					title="Confirm Transfer"
+					confirmText="Accept"
+					cancelText="Reject"
+					closeOnOutsideClick={false}
+					onConfirm={confirmTransfer}
+					onCancel={() => {
+						showFeeModal = false;
+						isLoading = false;
+					}}
+					onClose={() => {
+						showFeeModal = false;
+						isLoading = false;
+					}}
+				>
+					<p class="text-sm">
+						You’re about to transfer
+						<strong class="break-words">{transferAmount}</strong>
+						tokens, paying a fee of
+						<strong class="break-words">{feeWeiHex}</strong>
+						tokens. Proceed?
+					</p>
+				</Modal>
 			{/if}
-			<Modal
-				show={showFeeModal}
-				title="Confirm Transfer"
-				confirmText="Accept"
-				cancelText="Reject"
-				closeOnOutsideClick={false}
-				onConfirm={confirmTransfer}
-				onCancel={() => {
-					showFeeModal = false;
-					isLoading = false;
-				}}
-				onClose={() => {
-					showFeeModal = false;
-					isLoading = false;
-				}}
-			>
-				<p class="text-sm">
-					You’re about to transfer
-					<strong class="break-words">
-						{transferAmount}
-					</strong>
-					tokens, paying a fee of
-					<strong class="break-words">
-						{feeWeiHex}
-					</strong>
-					tokens. Proceed?
-				</p>
-			</Modal>
 		</Card>
 	</div>
 </ProtectedRoute>
