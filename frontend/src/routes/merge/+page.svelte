@@ -52,8 +52,6 @@
 	let feeRefundHash: string | null = null;
 	let feeWeiHex = '';
 
-	let modalFeeToken = '';
-
 	let isLoading = false;
 	let showFeeModal = false;
 
@@ -118,10 +116,8 @@
 
 				// — Parse second merge note
 				mergeNote2 = NoteDataSchema.parse(selectedMerge2Deposit.data);
-
 				const { tokenAddress: merge2TokenAddress, amount: merge2NoteBalance } = mergeNote2;
 				merge2NoteBalanceWei = BigInt(merge2NoteBalance);
-
 				merge2Amount = fromWei(merge2NoteBalanceWei, mergeTokenDecimals);
 				if (merge2NoteBalanceWei <= 0n) {
 					throw new Error('Invalid first deposit balance');
@@ -129,15 +125,10 @@
 
 				// — Parse Fee note
 				feeNote = NoteDataSchema.parse(selectedFeeDeposit.data);
-
 				const { tokenAddress: feeTokenAddress, amount: feeNoteBalance } = feeNote;
-				modalFeeToken = feeTokenAddress;
-
 				const feeNoteDecimals = await fetchTokenDecimals(feeTokenAddress);
 				feeNoteBalanceWei = BigInt(feeNoteBalance);
-
 				feeWei = await fetchMergeFee(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
-
 				feeWeiHex = fromWei(feeWei, feeNoteDecimals);
 
 				if (feeWei > feeNoteBalanceWei) {
