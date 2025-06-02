@@ -519,13 +519,15 @@
 
 		<Card>
 			{#if viewMode === 'recipient'}
-				<PaginatedTable
-					columns={defaultPendingDepositColumns}
-					items={pendingEmptyDeposits ?? []}
-					rowActions={actions}
-					pageSize={5}
-					keyField="index"
-				/>
+				{#if pendingEmptyDeposits?.length}
+					<PaginatedTable
+						columns={defaultPendingDepositColumns}
+						items={pendingEmptyDeposits}
+						rowActions={actions}
+						pageSize={5}
+						keyField="index"
+					/>
+				{/if}
 
 				<div class="mt-4 grid w-full grid-cols-1 justify-items-center">
 					<form
