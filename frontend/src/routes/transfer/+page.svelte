@@ -39,6 +39,9 @@
 	import { Contract } from 'starknet';
 	import type { Component } from 'svelte';
 	import { get } from 'svelte/store';
+	import { supportedTokens } from '$lib/config/tokens';
+
+	const STRK_ADDRESS = supportedTokens[0].address;
 
 	// --- VIEW & TRANSFER STATE ---
 	let viewMode: 'sender' | 'recipient' = 'sender';
@@ -114,6 +117,9 @@
 
 	function handleSelectionChange(value: string) {
 		selectionMode = value as TransferMode;
+		if (value === 'fee') {
+			selectedToken.set(STRK_ADDRESS);
+		}
 	}
 
 	/** Step 1: Validate user inputs for transfer */
@@ -334,6 +340,14 @@
 
 				// Reset state
 				resetAll();
+
+				if (viewMode === 'sender' && $selectedToken) {
+					loadDeposits(
+						$selectedToken,
+						(d) => (deposits = d),
+						(b) => (isLoading = b)
+					);
+				}
 			},
 			{
 				loading: '⏳ Sending Transfer Tx',
@@ -562,6 +576,7 @@
 						bind:value={$selectedToken}
 						placeholder="Filter deposits by token"
 						class_="mb-4 w-64"
+						disabled={selectionMode === 'fee'}
 					/>
 					<PaginatedTable
 						columns={defaultDepositColumns}

@@ -14,7 +14,6 @@
 
 		const unsubscribeZk = zkLibraries.subscribe(async ($lib) => {
 			if ($lib.status === 'ready') {
-				console.log('✅ zkLibraries ready, initializing Merkle tree...');
 				await initMerkleTree();
 				startDepositProcessor();
 				unsubscribeZk();

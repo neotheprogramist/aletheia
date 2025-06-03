@@ -23,7 +23,6 @@ export async function initMerkleTree(): Promise<void> {
 	const leafs = await get_all_leafs();
 	const values = leafs.map((l) => BigInt(l.hash));
 	merkleTree = new HybridMerkleTree(MERKLE_HEIGHT, values);
-	console.log('✅ Initialized MerkleTree from IndexedDB, leaf count:', values.length);
 	initialized = true;
 }
 
@@ -43,16 +42,11 @@ export function startDepositProcessor() {
 			await delete_latest_db_block_number(fromBlock);
 
 			const deposits = await getDepositsFromRange(fromBlock, toBlock);
-			console.log('deposits', deposits);
 
 			for (const { hash, block_number } of deposits) {
-				console.log(`📥 Deposit ${hash} at block ${block_number}`);
 				await db_add_leaf(hash, block_number);
 				merkleTree.addLeaf(BigInt(hash));
-				// console.log('added leaf', BigInt(hash));
 			}
-
-			// console.log('🌿 Current Merkle root:', `0x${merkleTree.getRoot().toString(16)}`);
 		} catch (err) {
 			console.error('❌ Error in fetcher:', err);
 		}

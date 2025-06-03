@@ -5,19 +5,27 @@
 	export let value: string = '';
 	export let placeholder: string = 'Select token';
 	export let class_: string = '';
+	export let disabled: boolean = false;
 
 	let isOpen = false;
 
 	function select(addr: string) {
+		if (disabled) return;
 		value = addr;
 		isOpen = false;
 	}
+
+	function toggleDropdown() {
+		if (disabled) return;
+		isOpen = !isOpen;
+	}
 </script>
 
-<div class={`relative  ${class_}`}>
+<div class={`relative ${class_}`}>
 	<button
 		type="button"
-		on:click={() => (isOpen = !isOpen)}
+		on:click={toggleDropdown}
+		{disabled}
 		class="input flex w-full items-center justify-between rounded p-2"
 	>
 		{#if value}
@@ -39,7 +47,7 @@
 		</svg>
 	</button>
 
-	{#if isOpen}
+	{#if isOpen && !disabled}
 		<div
 			class="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded border border-[var(--color-border)] bg-[var(--color-card)] shadow"
 		>
@@ -63,5 +71,9 @@
 <style>
 	.selected {
 		outline: 2px solid var(--color-primary);
+	}
+	:global(button:disabled) {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 </style>

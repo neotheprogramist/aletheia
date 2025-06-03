@@ -30,11 +30,13 @@
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
 	import { defaultDepositColumns } from '$lib/utils/sharedColumns';
-
 	import SelectionToggle from '$lib/ui/SelectionToggle.svelte';
 	import Instructions, { type WithdrawMode } from '$lib/ui/Instructions.svelte';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
+	import { supportedTokens } from '$lib/config/tokens';
+
+	const STRK_ADDRESS = supportedTokens[0].address;
 
 	let deposits: DisplayOperation[] = [];
 	let selectionMode: WithdrawMode = 'withdraw';
@@ -91,6 +93,10 @@
 
 	function handleSelectionChange(value: string) {
 		selectionMode = value as WithdrawMode;
+
+		if (value === 'fee') {
+			selectedToken.set(STRK_ADDRESS);
+		}
 	}
 
 	/** Step 1: Validate */
@@ -325,7 +331,6 @@
 					console.error('❌ Transaction error:', receipt.value);
 					throw new Error(`Transaction error: ${receipt.value}`);
 				}
-				console.log('receipt', receipt);
 
 				// 11) Confirm and nullify operations in the database
 				await confirmOperation(withdrawRefundHash);
@@ -335,6 +340,14 @@
 
 				// 12) Reset component state after successful withdrawal
 				resetAll();
+
+				if ($selectedToken) {
+					loadDeposits(
+						$selectedToken,
+						(d) => (deposits = d),
+						(b) => (isLoading = b)
+					);
+				}
 			},
 			{
 				loading: '⏳ Sending Withdraw Tx',
@@ -391,6 +404,7 @@
 					bind:value={$selectedToken}
 					placeholder="Filter deposits by token"
 					class_="mb-4 w-64"
+					disabled={selectionMode === 'fee'}
 				/>
 				<!-- Deposits Table -->
 				<PaginatedTable

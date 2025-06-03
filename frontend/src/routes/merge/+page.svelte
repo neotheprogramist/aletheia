@@ -30,6 +30,9 @@
 	import { fromWei } from '$lib/utils/toWei';
 	import { Contract } from 'starknet';
 	import { get } from 'svelte/store';
+	import { supportedTokens } from '$lib/config/tokens';
+
+	const STRK_ADDRESS = supportedTokens[0].address;
 
 	let deposits: DisplayOperation[] = [];
 	let selectionMode: MergeMode = 'merge1';
@@ -96,6 +99,10 @@
 
 	function handleSelectionChange(value: string) {
 		selectionMode = value as MergeMode;
+
+		if (value === 'fee') {
+			selectedToken.set(STRK_ADDRESS);
+		}
 	}
 
 	/** Step 1: Validate*/
@@ -122,11 +129,16 @@
 
 				// — Parse second merge note
 				mergeNote2 = NoteDataSchema.parse(selectedMerge2Deposit.data);
-				const { amount: merge2NoteBalance } = mergeNote2;
+				const { tokenAddress: merge2TokenAddress, amount: merge2NoteBalance } = mergeNote2;
 				merge2NoteBalanceWei = BigInt(merge2NoteBalance);
 				merge2Amount = fromWei(merge2NoteBalanceWei, mergeTokenDecimals);
 				if (merge2NoteBalanceWei <= 0n) {
 					throw new Error('Invalid first deposit balance');
+				}
+
+				// Check if are the same tokens
+				if (merge1TokenAddress !== merge2TokenAddress) {
+					throw new Error('Both merge notes must be for the same token');
 				}
 
 				// — Parse Fee note
@@ -342,6 +354,14 @@
 
 				// 12) Reset component state after successful withdrawal
 				resetAll();
+
+				if ($selectedToken) {
+					loadDeposits(
+						$selectedToken,
+						(d) => (deposits = d),
+						(b) => (isLoading = b)
+					);
+				}
 			},
 			{
 				loading: '⏳ Sending Merge Tx',
@@ -399,6 +419,7 @@
 					bind:value={$selectedToken}
 					placeholder="Filter deposits by token"
 					class_="mb-4 w-64"
+					disabled={selectionMode === 'fee'}
 				/>
 				<PaginatedTable
 					columns={defaultDepositColumns}

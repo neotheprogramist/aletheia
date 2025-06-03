@@ -431,6 +431,7 @@ pub mod PrivacyAccount {
             // Validate gas fee - currently using execute extension fee
             let calculated_fee = self.get_fee_for_merge();
             assert(public_input.gas_fee >= calculated_fee, Errors::INSUFFICIENT_FEE);
+            self.accumulated_fee.write(self.accumulated_fee.read() + public_input.gas_fee);
 
             // Validate if 1st deposit is not nullfied
             assert(
@@ -468,6 +469,17 @@ pub mod PrivacyAccount {
             );
 
             let public_input = PublicInputTransferImpl::from_u256_span(public_input_serialized);
+
+            // check if fee deposit is strk
+            assert(
+                public_input.fee_token_address == self.strk_token_address.read(),
+                Errors::INVALID_FEE_TOKEN,
+            );
+
+            // Validate gas fee - currently using execute extension fee
+            let calculated_fee = self.get_fee_for_merge();
+            assert(public_input.gas_fee >= calculated_fee, Errors::INSUFFICIENT_FEE);
+            self.accumulated_fee.write(self.accumulated_fee.read() + public_input.gas_fee);
 
             // Validate despoit and fee deposit nullifiers
             assert(
