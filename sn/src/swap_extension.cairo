@@ -62,12 +62,12 @@ pub mod SwapExtension {
     #[storage]
     struct Storage {
         core: ICoreDispatcher,
-        tornado_account: ContractAddress,
+        privacy_account: ContractAddress,
     }
 
     pub mod Errors {
         pub const NO_DELTAS_RETURNED: felt252 = 'SwapExtension: No Deltas!';
-        pub const TORNADO_DEPOSIT_FAILED: felt252 = 'SwapExtension: Deposit Fail!';
+        pub const PRIVACY_ACCOUNT_DEPOSIT_FAILED: felt252 = 'SwapExtension: Deposit Fail!';
         pub const U128_TO_U256_FAILED: felt252 = 'SwapExtension: u128 to u256!';
         pub const APPROVE_FAILED: felt252 = 'SwapExtension: Approve failed!';
     }
@@ -104,10 +104,10 @@ pub mod SwapExtension {
 
     #[constructor]
     fn constructor(
-        ref self: ContractState, core: ICoreDispatcher, tornado_account: ContractAddress,
+        ref self: ContractState, core: ICoreDispatcher, privacy_account: ContractAddress,
     ) {
         self.core.write(core);
-        self.tornado_account.write(tornado_account);
+        self.privacy_account.write(privacy_account);
     }
 
     #[abi(embed_v0)]
@@ -123,7 +123,7 @@ pub mod SwapExtension {
             let token = IERC20Dispatcher { contract_address: params.token_amount.token };
             token
                 .transfer_from(
-                    self.tornado_account.read(),
+                    self.privacy_account.read(),
                     get_contract_address(),
                     token_amount.amount.mag.into(),
                 );
@@ -149,14 +149,14 @@ pub mod SwapExtension {
                 );
 
             let token_out = IERC20Dispatcher { contract_address: output_token };
-            let tornado_acct = self.tornado_account.read();
-            let approval = token_out.approve(tornado_acct, output_amount_u128.into());
+            let privacy_acct = self.privacy_account.read();
+            let approval = token_out.approve(privacy_acct, output_amount_u128.into());
             assert(approval, Errors::APPROVE_FAILED);
 
-            let tornado = IPrivacyAccountDispatcher { contract_address: tornado_acct };
-            let deposit = tornado
+            let privacy = IPrivacyAccountDispatcher { contract_address: privacy_acct };
+            let deposit = privacy
                 .deposit(secret_and_nullifier_hash, output_amount_u128.into(), output_token);
-            assert(deposit, Errors::TORNADO_DEPOSIT_FAILED);
+            assert(deposit, Errors::PRIVACY_ACCOUNT_DEPOSIT_FAILED);
 
             self.emit(Deposited { token: output_token, amount: output_amount_u128.into() });
         }
