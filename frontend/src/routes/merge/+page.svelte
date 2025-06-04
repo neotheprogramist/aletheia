@@ -33,6 +33,7 @@
 	import { supportedTokens } from '$lib/config/tokens';
 	import { deflattenFields, RawBuffer, UltraHonkBackend } from '@aztec/bb.js';
 	import { type CompiledCircuit } from '@noir-lang/noir_js';
+	import { flattenFieldsAsArray } from '$lib/utils/flattenFields';
 
 	const STRK_ADDRESS = supportedTokens[0].address;
 
@@ -109,10 +110,6 @@
 
 	/** Step 1: Validate*/
 	async function initiateMerge() {
-		console.log('m1', selectedMerge1Deposit?.hash);
-		console.log('m2', selectedMerge2Deposit?.hash);
-		console.log('fee', selectedFeeDeposit?.hash);
-
 		isLoading = true;
 
 		await wrapWithToast(
@@ -343,8 +340,6 @@
 					{ recursive: true }
 				);
 
-				console.log('merge public inputs', mergePublicInputs);
-
 				const recursiveInputs = {
 					proof: deflattenFields(mergeProofFields),
 					public_inputs: mergePublicInputs,
@@ -353,7 +348,6 @@
 				const { witness: recursiveWitness } = await recursiveCircuitNoir.execute(recursiveInputs);
 				const { proof: recursiveProof, publicInputs: recursivePublicInputs } =
 					await recursiveBackend.generateProof(recursiveWitness, { keccak: true });
-				console.log('recursive public inputs', recursivePublicInputs);
 
 				const binaryData = new Uint8Array(vkBinRecursive);
 				const honkCalldata = garaga.getHonkCallData(
@@ -392,15 +386,6 @@
 
 				const tx = await account.execute(call);
 				const receipt = await rpc.waitForTransaction(tx.transaction_hash);
-
-				const call2 = {
-					contractAddress: '0x00eb23b85f3e8b361d740177f0a981087b9ab60ba346d4b531b64e6a8273f60d',
-					entrypoint: 'verify_ultra_keccak_honk_proof',
-					calldata: honkCalldata
-				};
-				const tx2 = await account.callContract(call2);
-				console.log('call2', tx2);
-
 				// 10) Check receipt status and throw on failure
 				if (receipt.isReverted()) {
 					throw new Error(`Transaction reverted: ${receipt.value}`);
@@ -457,41 +442,6 @@
 			}
 		);
 		isLoading = false;
-	}
-
-	export function flattenFieldsAsArray(fields: any) {
-		const flattenedPublicInputs = fields.map(hexToUint8Array);
-		return flattenUint8Arrays(flattenedPublicInputs);
-	}
-
-	function flattenUint8Arrays(arrays: any) {
-		const totalLength = arrays.reduce((acc: any, val: any) => acc + val.length, 0);
-		const result = new Uint8Array(totalLength);
-
-		let offset = 0;
-		for (const arr of arrays) {
-			result.set(arr, offset);
-			offset += arr.length;
-		}
-
-		return result;
-	}
-
-	function hexToUint8Array(hex: any) {
-		const sanitisedHex = BigInt(hex).toString(16).padStart(64, '0');
-
-		const len = sanitisedHex.length / 2;
-		const u8 = new Uint8Array(len);
-
-		let i = 0;
-		let j = 0;
-		while (i < len) {
-			u8[i] = parseInt(sanitisedHex.slice(j, j + 2), 16);
-			i += 1;
-			j += 2;
-		}
-
-		return u8;
 	}
 </script>
 

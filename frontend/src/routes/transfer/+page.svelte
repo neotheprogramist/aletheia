@@ -40,6 +40,9 @@
 	import type { Component } from 'svelte';
 	import { get } from 'svelte/store';
 	import { supportedTokens } from '$lib/config/tokens';
+	import type { CompiledCircuit } from '@noir-lang/noir_js';
+	import { deflattenFields, RawBuffer, UltraHonkBackend } from '@aztec/bb.js';
+	import { flattenFieldsAsArray } from '$lib/utils/flattenFields';
 
 	const STRK_ADDRESS = supportedTokens[0].address;
 
@@ -248,7 +251,8 @@
 				}
 
 				// Build witness input
-				const witnessInput = {
+				const transferInput = {
+					// Deposit data
 					root_1: `0x${transferProofData.root.toString(16)}`,
 					secret_1: `0x${BigInt(transferOp.secret).toString(16)}`,
 					nullifier_1: `0x${BigInt(transferOp.nullifier).toString(16)}`,
@@ -257,7 +261,7 @@
 					hashpath_1: transferProofData.path[0].map((e) => `0x${e.toString(16)}`),
 					index_1: `0x${BigInt(transferProofData.index).toString(16)}`,
 					amount: `0x${userTransferAmountWei.toString(16)}`,
-
+					// Fee deposit data
 					root_2: `0x${feeProofData.root.toString(16)}`,
 					secret_2: `0x${BigInt(feeOp.secret).toString(16)}`,
 					nullifier_2: `0x${BigInt(feeOp.nullifier).toString(16)}`,
@@ -266,7 +270,7 @@
 					hashpath_2: feeProofData.path[0].map((e) => `0x${e.toString(16)}`),
 					index_2: `0x${BigInt(feeProofData.index).toString(16)}`,
 					gas_fee: `0x${feeWei.toString(16)}`,
-
+					// Refund
 					refund_secret_1: `0x${BigInt(transferRefundOp.secret).toString(16)}`,
 					refund_nullifier_1: `0x${BigInt(transferRefundOp.nullifier).toString(16)}`,
 					refund_amount_1: `0x${transferRefund.toString(16)}`,
@@ -281,19 +285,63 @@
 				};
 
 				// Generate zk proof
-				const proofToastId = toastStore.addToast({
+				toastStore.addToast({
 					type: 'info',
-					message: '⏳ Generating zk proof, this may take ~15 seconds…'
+					message: '🪄 Brewing zk proof potion… hang tight!'
 				});
-				const { honkCalldataHex } = await generateProof(witnessInput, {
-					jsonUrl: 'circuits/transfer.json',
-					vkUrl: 'circuits/vk_transfer.bin'
-				});
-				const honkCalldataWithLen = [
-					`0x${BigInt(honkCalldataHex.length).toString(16)}`,
-					...honkCalldataHex
-				];
-				toastStore.removeToast(proofToastId);
+
+				const zkLibs = get(zkLibraries);
+				if (!zkLibs.noirJs || !zkLibs.bb || !zkLibs.garaga)
+					throw new Error('ZK libraries not initialized');
+				const program = await fetch('circuits/transfer.json').then((r) => r.json());
+				const transferCircuitNoir = new zkLibs.noirJs.Noir(program as CompiledCircuit);
+				const transferBackend = new zkLibs.bb.UltraHonkBackend(
+					program.bytecode,
+					{ threads: 2 },
+					{ recursive: true }
+				);
+
+				const { witness } = await transferCircuitNoir.execute(transferInput);
+				const { proof: transferProofFields, publicInputs: transferPublicInputs } =
+					await transferBackend.generateProof(witness);
+				const innerCircuitVerificationKey = await transferBackend.getVerificationKey();
+				const barretenbergAPI = await zkLibs.bb.Barretenberg.new({ threads: 1 });
+				const vkAsFields = (
+					await barretenbergAPI.acirVkAsFieldsUltraHonk(new RawBuffer(innerCircuitVerificationKey))
+				).map((field) => field.toString());
+
+				// recursive
+				const programRecursive = await fetch('circuits/recursive.json').then((r) => r.json());
+				const vkBinRecursive = await fetch('circuits/vk_recursive.bin').then((r) =>
+					r.arrayBuffer()
+				);
+				const recursiveCircuitNoir = new zkLibs.noirJs.Noir(programRecursive as CompiledCircuit);
+				const recursiveBackend = new UltraHonkBackend(
+					programRecursive.bytecode,
+					{
+						threads: 2
+					},
+					{ recursive: true }
+				);
+
+				const recursiveInputs = {
+					proof: deflattenFields(transferProofFields),
+					public_inputs: transferPublicInputs,
+					verification_key: vkAsFields
+				};
+				const { witness: recursiveWitness } = await recursiveCircuitNoir.execute(recursiveInputs);
+				const { proof: recursiveProof, publicInputs: recursivePublicInputs } =
+					await recursiveBackend.generateProof(recursiveWitness, { keccak: true });
+
+				const binaryData = new Uint8Array(vkBinRecursive);
+				const honkCalldata = garaga.getHonkCallData(
+					recursiveProof,
+					flattenFieldsAsArray(recursivePublicInputs),
+					binaryData,
+					0
+				);
+
+				const honkCalldataHex = [...honkCalldata.map((element) => `0x${element.toString(16)}`)];
 
 				// Prepare StarkNet transaction
 				const rpc = get(provider);
@@ -304,6 +352,11 @@
 				if (!privacyAbi) throw new Error('Missing ABI');
 				const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
 				privacy.connect(account);
+
+				const honkCalldataWithLen = [
+					`0x${BigInt(honkCalldataHex.length).toString(16)}`,
+					...honkCalldataHex
+				];
 
 				const call = {
 					contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
@@ -318,7 +371,6 @@
 					const decimals = await fetchTokenDecimals(transferNote.tokenAddress);
 					const humanAmount = fromWei(userTransferAmountWei!, decimals);
 
-					// Now show a toast that lasts 10 seconds, with both token address and amount:
 					toastStore.addToast({
 						type: 'success',
 						message: `Transfer succeeded: ${humanAmount} tokens of ${transferNote.tokenAddress} \n Transaction hash: ${tx.transaction_hash}`,
