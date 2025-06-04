@@ -17,7 +17,6 @@
 	import { merkleTree } from '$lib/services/depositProcessor';
 	import Input from '$lib/ui/Input.svelte';
 	import { generateOperation } from '$lib/privacy/generateOperation';
-	import { generateProof } from '$lib/privacy/generateProof';
 	import { getOperationDetails } from '$lib/db/operations';
 	import { paymasterWallet } from '$lib/stores/paymaster';
 	import { provider } from '$lib/stores/provider';

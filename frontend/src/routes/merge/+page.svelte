@@ -4,7 +4,6 @@
 	import { abortOperation } from '$lib/privacy/abortOperation';
 	import { confirmOperation } from '$lib/privacy/confirmOperation';
 	import { generateOperation } from '$lib/privacy/generateOperation';
-	import { generateProof } from '$lib/privacy/generateProof';
 	import { nullifyOperation } from '$lib/privacy/nullifyOperation';
 	import { NoteDataSchema, type NoteData } from '$lib/schemas/schemas';
 	import { merkleTree } from '$lib/services/depositProcessor';
