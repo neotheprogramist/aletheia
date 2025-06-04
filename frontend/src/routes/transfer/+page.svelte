@@ -42,6 +42,8 @@
 	import type { CompiledCircuit } from '@noir-lang/noir_js';
 	import { deflattenFields, RawBuffer, UltraHonkBackend } from '@aztec/bb.js';
 	import { flattenFieldsAsArray } from '$lib/utils/flattenFields';
+	import { browser } from '$app/environment';
+	import { generateHonkCalldata } from '$lib/privacy/generateProof';
 
 	const STRK_ADDRESS = supportedTokens[0].address;
 
@@ -81,7 +83,7 @@
 	let editAmount: string = '';
 
 	// Whenever viewMode = 'sender', load all confirmed deposits for selected token
-	$: if (viewMode === 'sender' && $selectedToken) {
+	$: if (browser && viewMode === 'sender' && $selectedToken) {
 		loadDeposits(
 			$selectedToken,
 			(d) => (deposits = d),
@@ -90,7 +92,7 @@
 	}
 
 	// Whenever viewMode = 'recipient', load all pending‐empty deposits for selected token
-	$: if (viewMode === 'recipient' && $selectedToken) {
+	$: if (browser && viewMode === 'recipient' && $selectedToken) {
 		loadPendingEmptyDeposits(
 			$selectedToken,
 			(ops) => (pendingEmptyDeposits = ops),
@@ -284,64 +286,12 @@
 				};
 
 				// Generate zk proof
-				toastStore.addToast({
-					type: 'info',
-					message: '🪄 Brewing zk proof potion… hang tight!'
-				});
-
-				const zkLibs = get(zkLibraries);
-				if (!zkLibs.noirJs || !zkLibs.bb || !zkLibs.garaga)
-					throw new Error('ZK libraries not initialized');
-				const program = await fetch('circuits/transfer.json').then((r) => r.json());
-				const transferCircuitNoir = new zkLibs.noirJs.Noir(program as CompiledCircuit);
-				const transferBackend = new zkLibs.bb.UltraHonkBackend(
-					program.bytecode,
-					{ threads: 2 },
-					{ recursive: true }
+				const honkCalldataHex = await generateHonkCalldata(
+					'circuits/transfer.json',
+					'circuits/recursive.json',
+					'circuits/vk_recursive.bin',
+					transferInput
 				);
-
-				const { witness } = await transferCircuitNoir.execute(transferInput);
-				const { proof: transferProofFields, publicInputs: transferPublicInputs } =
-					await transferBackend.generateProof(witness);
-				const innerCircuitVerificationKey = await transferBackend.getVerificationKey();
-				const barretenbergAPI = await zkLibs.bb.Barretenberg.new({ threads: 1 });
-				const vkAsFields = (
-					await barretenbergAPI.acirVkAsFieldsUltraHonk(new RawBuffer(innerCircuitVerificationKey))
-				).map((field) => field.toString());
-
-				// recursive
-				const programRecursive = await fetch('circuits/recursive.json').then((r) => r.json());
-				const vkBinRecursive = await fetch('circuits/vk_recursive.bin').then((r) =>
-					r.arrayBuffer()
-				);
-				const recursiveCircuitNoir = new zkLibs.noirJs.Noir(programRecursive as CompiledCircuit);
-				const recursiveBackend = new UltraHonkBackend(
-					programRecursive.bytecode,
-					{
-						threads: 2
-					},
-					{ recursive: true }
-				);
-
-				const recursiveInputs = {
-					proof: deflattenFields(transferProofFields),
-					public_inputs: transferPublicInputs,
-					verification_key: vkAsFields
-				};
-				const { witness: recursiveWitness } = await recursiveCircuitNoir.execute(recursiveInputs);
-				const { proof: recursiveProof, publicInputs: recursivePublicInputs } =
-					await recursiveBackend.generateProof(recursiveWitness, { keccak: true });
-
-				const binaryData = new Uint8Array(vkBinRecursive);
-				const honkCalldata = garaga.getHonkCallData(
-					recursiveProof,
-					flattenFieldsAsArray(recursivePublicInputs),
-					binaryData,
-					0
-				);
-
-				const honkCalldataHex = [...honkCalldata.map((element) => `0x${element.toString(16)}`)];
-
 				// Prepare StarkNet transaction
 				const rpc = get(provider);
 				if (!rpc) throw new Error('Missing Provider');

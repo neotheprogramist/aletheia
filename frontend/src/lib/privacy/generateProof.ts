@@ -1,91 +1,76 @@
-import { zkLibraries } from '$lib/stores/zkLibraries';
-import { RawBuffer, type ProofData } from '@aztec/bb.js';
-import type { InputMap } from '@noir-lang/noirc_abi';
 import { get } from 'svelte/store';
+import { zkLibraries } from '$lib/stores/zkLibraries';
+import { deflattenFields, RawBuffer, UltraHonkBackend } from '@aztec/bb.js';
+import type { CompiledCircuit, InputMap } from '@noir-lang/noir_js';
+import { flattenFieldsAsArray } from '$lib/utils/flattenFields';
+import { toastStore } from '$lib/stores/toast';
 
-interface CircuitData {
-	jsonUrl: string;
-	vkUrl: string;
-}
-
-interface GenerateProofResponse {
-	honkCalldataHex: string[];
-	rawProof: ProofData;
-	vkAsFields: string[];
-}
-
-export async function generateProof(
-	witnessInput: InputMap,
-	circuitData: CircuitData,
-	recursive = false
+export async function generateHonkCalldata(
+	circuitPath: string,
+	recursivePath: string,
+	vkRecursiveBin: string,
+	primaryInput: InputMap
 ) {
-	// 1) Circuit artifacts from static
-	const program = await fetch(circuitData.jsonUrl).then((r) => r.json());
-	const vkBin = await fetch(circuitData.vkUrl).then((r) => r.arrayBuffer());
+	toastStore.addToast({
+		type: 'info',
+		message: '🪄 Brewing zk proof potion… hang tight!'
+	});
+
+	// 1) Check zklibs
 	const zkLibs = get(zkLibraries);
-	if (!zkLibs.noirJs || !zkLibs.bb || !zkLibs.garaga)
+	if (!zkLibs.noirJs || !zkLibs.bb || !zkLibs.garaga) {
 		throw new Error('ZK libraries not initialized');
-	const noir = new zkLibs.noirJs.Noir(program);
-	const { witness } = await noir.execute(witnessInput);
-	const backend = new zkLibs.bb.UltraHonkBackend(program.bytecode, { threads: 2 }, { recursive });
-	const verificationKey = await backend.getVerificationKey();
+	}
+
+	// 2) Fetch inner circuit
+	const program = await fetch(circuitPath).then((r) => r.json());
+	const primaryCircuit = new zkLibs.noirJs.Noir(program as CompiledCircuit);
+	const primaryBackend = new zkLibs.bb.UltraHonkBackend(
+		program.bytecode,
+		{ threads: 2 },
+		{ recursive: true }
+	);
+
+	// 3) Inner witness and proof
+	const { witness: primaryWitness } = await primaryCircuit.execute(primaryInput);
+	const { proof: primaryProofFields, publicInputs: primaryPublicInputs } =
+		await primaryBackend.generateProof(primaryWitness);
+
+	// 4) Get and format inner vk
+	const innerVk = await primaryBackend.getVerificationKey();
 	const barretenbergAPI = await zkLibs.bb.Barretenberg.new({ threads: 1 });
-	const vkAsFields = (
-		await barretenbergAPI.acirVkAsFieldsUltraHonk(new RawBuffer(verificationKey))
+	const vkAsFields: string[] = (
+		await barretenbergAPI.acirVkAsFieldsUltraHonk(new RawBuffer(innerVk))
 	).map((field) => field.toString());
-	const proofData = await backend.generateProof(witness, { keccak: true });
 
-	if (!proofData) throw new Error('NO PROOF DATA');
-	console.debug('-->  generate proof finished');
+	// 5) Load recursive circuit and vk
+	const programRecursive = await fetch(recursivePath).then((r) => r.json());
+	const vkBinRecursiveBuffer = new Uint8Array(await (await fetch(vkRecursiveBin)).arrayBuffer());
+	const recursiveCircuit = new zkLibs.noirJs.Noir(programRecursive as CompiledCircuit);
+	const recursiveBackend = new UltraHonkBackend(
+		programRecursive.bytecode,
+		{ threads: 2 },
+		{ recursive: true }
+	);
 
+	// 6) Prepare input for recursive witness generation
+	const recursiveInputs = {
+		proof: deflattenFields(primaryProofFields),
+		public_inputs: primaryPublicInputs,
+		verification_key: vkAsFields
+	};
+	const { witness: recursiveWitness } = await recursiveCircuit.execute(recursiveInputs);
+	const { proof: recursiveProof, publicInputs: recursivePublicInputs } =
+		await recursiveBackend.generateProof(recursiveWitness, { keccak: true });
+
+	// 7) generate honkCalldata
 	const honkCalldata = zkLibs.garaga.getHonkCallData(
-		proofData.proof,
-		flattenFieldsAsArray(proofData.publicInputs),
-		new Uint8Array(vkBin),
+		recursiveProof,
+		flattenFieldsAsArray(recursivePublicInputs),
+		vkBinRecursiveBuffer,
 		0
 	);
-	console.debug('-->  honkCalldata finished');
 
-	const honkCalldataHex = [...honkCalldata.map((element) => `0x${element.toString(16)}`)];
-
-	return {
-		honkCalldataHex,
-		rawProof: proofData,
-		vkAsFields
-	} satisfies GenerateProofResponse;
-}
-
-function flattenFieldsAsArray(fields: string[]) {
-	const flattenedPublicInputs = fields.map(hexToUint8Array);
-	return flattenUint8Arrays(flattenedPublicInputs);
-}
-
-function flattenUint8Arrays(arrays: Uint8Array<ArrayBuffer>[]) {
-	const totalLength = arrays.reduce((acc: number, val: Uint8Array) => acc + val.length, 0);
-	const result = new Uint8Array(totalLength);
-
-	let offset = 0;
-	for (const arr of arrays) {
-		result.set(arr, offset);
-		offset += arr.length;
-	}
-
-	return result;
-}
-
-function hexToUint8Array(hex: string) {
-	const sanitisedHex = BigInt(hex).toString(16).padStart(64, '0');
-
-	const len = sanitisedHex.length / 2;
-	const u8 = new Uint8Array(len);
-
-	let i = 0;
-	let j = 0;
-	while (i < len) {
-		u8[i] = parseInt(sanitisedHex.slice(j, j + 2), 16);
-		i += 1;
-		j += 2;
-	}
-
-	return u8;
+	// 8) Convert Uint8Array to hex
+	return honkCalldata.map((element) => `0x${element.toString(16)}`);
 }
