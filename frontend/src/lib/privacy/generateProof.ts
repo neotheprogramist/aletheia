@@ -1,4 +1,5 @@
 import { zkLibraries } from '$lib/stores/zkLibraries';
+import { RawBuffer, type ProofData } from '@aztec/bb.js';
 import type { InputMap } from '@noir-lang/noirc_abi';
 import { get } from 'svelte/store';
 
@@ -7,7 +8,17 @@ interface CircuitData {
 	vkUrl: string;
 }
 
-export async function generateProof(witnessInput: InputMap, circuitData: CircuitData) {
+interface GenerateProofResponse {
+	honkCalldataHex: string[];
+	rawProof: ProofData;
+	vkAsFields: string[];
+}
+
+export async function generateProof(
+	witnessInput: InputMap,
+	circuitData: CircuitData,
+	recursive = false
+) {
 	// 1) Circuit artifacts from static
 	const program = await fetch(circuitData.jsonUrl).then((r) => r.json());
 	const vkBin = await fetch(circuitData.vkUrl).then((r) => r.arrayBuffer());
@@ -16,8 +27,12 @@ export async function generateProof(witnessInput: InputMap, circuitData: Circuit
 		throw new Error('ZK libraries not initialized');
 	const noir = new zkLibs.noirJs.Noir(program);
 	const { witness } = await noir.execute(witnessInput);
-	const backend = new zkLibs.bb.UltraHonkBackend(program.bytecode);
-
+	const backend = new zkLibs.bb.UltraHonkBackend(program.bytecode, { threads: 2 }, { recursive });
+	const verificationKey = await backend.getVerificationKey();
+	const barretenbergAPI = await zkLibs.bb.Barretenberg.new({ threads: 1 });
+	const vkAsFields = (
+		await barretenbergAPI.acirVkAsFieldsUltraHonk(new RawBuffer(verificationKey))
+	).map((field) => field.toString());
 	const proofData = await backend.generateProof(witness, { keccak: true });
 
 	if (!proofData) throw new Error('NO PROOF DATA');
@@ -31,12 +46,13 @@ export async function generateProof(witnessInput: InputMap, circuitData: Circuit
 	);
 	console.debug('-->  honkCalldata finished');
 
-	const honkCalldataHex = [
-		// `0x` + honkCalldata.length.toString(16),
-		...honkCalldata.map((element) => `0x${element.toString(16)}`)
-	];
+	const honkCalldataHex = [...honkCalldata.map((element) => `0x${element.toString(16)}`)];
 
-	return honkCalldataHex;
+	return {
+		honkCalldataHex,
+		rawProof: proofData,
+		vkAsFields
+	} satisfies GenerateProofResponse;
 }
 
 function flattenFieldsAsArray(fields: string[]) {

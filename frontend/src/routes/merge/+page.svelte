@@ -31,6 +31,8 @@
 	import { Contract } from 'starknet';
 	import { get } from 'svelte/store';
 	import { supportedTokens } from '$lib/config/tokens';
+	import { deflattenFields, RawBuffer, UltraHonkBackend } from '@aztec/bb.js';
+	import { type CompiledCircuit } from '@noir-lang/noir_js';
 
 	const STRK_ADDRESS = supportedTokens[0].address;
 
@@ -107,6 +109,10 @@
 
 	/** Step 1: Validate*/
 	async function initiateMerge() {
+		console.log('m1', selectedMerge1Deposit?.hash);
+		console.log('m2', selectedMerge2Deposit?.hash);
+		console.log('fee', selectedFeeDeposit?.hash);
+
 		isLoading = true;
 
 		await wrapWithToast(
@@ -259,7 +265,7 @@
 				}
 
 				// 7) Build the witness input object for proof
-				const witnessInput = {
+				const mergeInput = {
 					// First deposit
 					secret_1: `0x${BigInt(merge1Op.secret).toString(16)}`,
 					nullifier_1: `0x${BigInt(merge1Op.nullifier).toString(16)}`,
@@ -298,22 +304,66 @@
 				};
 
 				// 8) Generate the zk proof and prepare it as calldata
-				const proofToastId = toastStore.addToast({
+				toastStore.addToast({
 					type: 'info',
-					message: '⏳ Generating zk proof, this may take ~15 seconds…'
+					message: '🪄 Brewing zk proof potion… hang tight!'
 				});
 
-				const honkCalldataHex = await generateProof(witnessInput, {
-					jsonUrl: 'circuits/merge.json',
-					vkUrl: 'circuits/vk_merge.bin'
-				});
+				const zkLibs = get(zkLibraries);
+				if (!zkLibs.noirJs || !zkLibs.bb || !zkLibs.garaga)
+					throw new Error('ZK libraries not initialized');
+				const program = await fetch('circuits/merge.json').then((r) => r.json());
+				const mergeCircuitNoir = new zkLibs.noirJs.Noir(program as CompiledCircuit);
+				const mergeBackend = new zkLibs.bb.UltraHonkBackend(
+					program.bytecode,
+					{ threads: 2 },
+					{ recursive: true }
+				);
 
-				const honkCalldataWithLen = [
-					`0x${BigInt(honkCalldataHex.length).toString(16)}`,
-					...honkCalldataHex
-				];
+				const { witness } = await mergeCircuitNoir.execute(mergeInput);
+				const { proof: mergeProofFields, publicInputs: mergePublicInputs } =
+					await mergeBackend.generateProof(witness);
+				const innerCircuitVerificationKey = await mergeBackend.getVerificationKey();
+				const barretenbergAPI = await zkLibs.bb.Barretenberg.new({ threads: 1 });
+				const vkAsFields = (
+					await barretenbergAPI.acirVkAsFieldsUltraHonk(new RawBuffer(innerCircuitVerificationKey))
+				).map((field) => field.toString());
 
-				toastStore.removeToast(proofToastId);
+				// recursive
+				const programRecursive = await fetch('circuits/recursive.json').then((r) => r.json());
+				const vkBinRecursive = await fetch('circuits/vk_recursive.bin').then((r) =>
+					r.arrayBuffer()
+				);
+				const recursiveCircuitNoir = new zkLibs.noirJs.Noir(programRecursive as CompiledCircuit);
+				const recursiveBackend = new UltraHonkBackend(
+					programRecursive.bytecode,
+					{
+						threads: 2
+					},
+					{ recursive: true }
+				);
+
+				console.log('merge public inputs', mergePublicInputs);
+
+				const recursiveInputs = {
+					proof: deflattenFields(mergeProofFields),
+					public_inputs: mergePublicInputs,
+					verification_key: vkAsFields
+				};
+				const { witness: recursiveWitness } = await recursiveCircuitNoir.execute(recursiveInputs);
+				const { proof: recursiveProof, publicInputs: recursivePublicInputs } =
+					await recursiveBackend.generateProof(recursiveWitness, { keccak: true });
+				console.log('recursive public inputs', recursivePublicInputs);
+
+				const binaryData = new Uint8Array(vkBinRecursive);
+				const honkCalldata = garaga.getHonkCallData(
+					recursiveProof,
+					flattenFieldsAsArray(recursivePublicInputs),
+					binaryData,
+					0
+				);
+
+				const honkCalldataHex = [...honkCalldata.map((element) => `0x${element.toString(16)}`)];
 
 				// 9) Prepare for the StarkNet transaction
 				const rpc = get(provider);
@@ -329,6 +379,11 @@
 				privacy.connect(account);
 
 				// 10) Prepare Starknet call
+
+				const honkCalldataWithLen = [
+					`0x${BigInt(honkCalldataHex.length).toString(16)}`,
+					...honkCalldataHex
+				];
 				const call = {
 					contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
 					entrypoint: 'merge',
@@ -337,6 +392,14 @@
 
 				const tx = await account.execute(call);
 				const receipt = await rpc.waitForTransaction(tx.transaction_hash);
+
+				const call2 = {
+					contractAddress: '0x00eb23b85f3e8b361d740177f0a981087b9ab60ba346d4b531b64e6a8273f60d',
+					entrypoint: 'verify_ultra_keccak_honk_proof',
+					calldata: honkCalldata
+				};
+				const tx2 = await account.callContract(call2);
+				console.log('call2', tx2);
 
 				// 10) Check receipt status and throw on failure
 				if (receipt.isReverted()) {
@@ -394,6 +457,41 @@
 			}
 		);
 		isLoading = false;
+	}
+
+	export function flattenFieldsAsArray(fields: any) {
+		const flattenedPublicInputs = fields.map(hexToUint8Array);
+		return flattenUint8Arrays(flattenedPublicInputs);
+	}
+
+	function flattenUint8Arrays(arrays: any) {
+		const totalLength = arrays.reduce((acc: any, val: any) => acc + val.length, 0);
+		const result = new Uint8Array(totalLength);
+
+		let offset = 0;
+		for (const arr of arrays) {
+			result.set(arr, offset);
+			offset += arr.length;
+		}
+
+		return result;
+	}
+
+	function hexToUint8Array(hex: any) {
+		const sanitisedHex = BigInt(hex).toString(16).padStart(64, '0');
+
+		const len = sanitisedHex.length / 2;
+		const u8 = new Uint8Array(len);
+
+		let i = 0;
+		let j = 0;
+		while (i < len) {
+			u8[i] = parseInt(sanitisedHex.slice(j, j + 2), 16);
+			i += 1;
+			j += 2;
+		}
+
+		return u8;
 	}
 </script>
 

@@ -233,8 +233,7 @@ pub mod PrivacyAccount {
         merkle: MerkleTreeComponent::Storage,
         nullifier_hashes: Map<u256, bool>,
         pub extension_verifier: ClassHash,
-        pub merge_verifier: ClassHash,
-        pub transfer_verifier: ClassHash,
+        pub recursive_verifier: ClassHash,
         strk_token_address: ContractAddress,
         current_gas_price: u256,
         trusted_extensions: Map<ContractAddress, u128>,
@@ -294,8 +293,7 @@ pub mod PrivacyAccount {
         ref self: ContractState,
         owner: ContractAddress,
         extension_verifier: ClassHash,
-        merge_verifier: ClassHash,
-        transfer_verifier: ClassHash,
+        recursive_verifier: ClassHash,
         strk_token_address: ContractAddress,
         initial_fee_buffer: u256,
         current_gas_price: u256,
@@ -308,8 +306,7 @@ pub mod PrivacyAccount {
 
         // 2) Store verifier addresses
         self.extension_verifier.write(extension_verifier);
-        self.merge_verifier.write(merge_verifier);
-        self.transfer_verifier.write(transfer_verifier);
+        self.recursive_verifier.write(recursive_verifier);
 
         // 3) Store STRK token addresses
         self.strk_token_address.write(strk_token_address);
@@ -418,7 +415,7 @@ pub mod PrivacyAccount {
 
         fn merge(ref self: ContractState, proof: Span<felt252>) -> bool {
             let public_input_serialized = verify_ultra_keccak_honk_proof(
-                self.merge_verifier.read(), proof,
+                self.recursive_verifier.read(), proof,
             );
 
             let public_input = PublicInputMergeImpl::from_u256_span(public_input_serialized);
@@ -465,7 +462,7 @@ pub mod PrivacyAccount {
 
         fn transfer(ref self: ContractState, proof: Span<felt252>) -> bool {
             let public_input_serialized = verify_ultra_keccak_honk_proof(
-                self.transfer_verifier.read(), proof,
+                self.recursive_verifier.read(), proof,
             );
 
             let public_input = PublicInputTransferImpl::from_u256_span(public_input_serialized);

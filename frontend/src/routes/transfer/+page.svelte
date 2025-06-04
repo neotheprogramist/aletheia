@@ -285,7 +285,7 @@
 					type: 'info',
 					message: '⏳ Generating zk proof, this may take ~15 seconds…'
 				});
-				const honkCalldataHex = await generateProof(witnessInput, {
+				const { honkCalldataHex } = await generateProof(witnessInput, {
 					jsonUrl: 'circuits/transfer.json',
 					vkUrl: 'circuits/vk_transfer.bin'
 				});

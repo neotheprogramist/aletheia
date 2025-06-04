@@ -10,6 +10,7 @@ const MERGE_VERIFIER_CLASS_HASH: felt252 =
 const TRANSFER_VERIFIER_CLASS_HASH: felt252 =
     0x027288612662383fe0e311911b7eec1db653f75935ea5de9a10f9c69ffdfbafc;
 
+
 #[starknet::interface]
 pub trait IUltraKeccakHonkVerifier<TContractState> {
     fn verify_ultra_keccak_honk_proof(
