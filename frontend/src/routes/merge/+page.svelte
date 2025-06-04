@@ -9,7 +9,6 @@
 	import { merkleTree } from '$lib/services/depositProcessor';
 	import { paymasterWallet } from '$lib/stores/paymaster';
 	import { provider } from '$lib/stores/provider';
-	import { toastStore } from '$lib/stores/toast';
 	import { tokens, selectedToken } from '$lib/stores/tokens';
 	import { zkLibraries } from '$lib/stores/zkLibraries';
 	import Button from '$lib/ui/Button.svelte';
@@ -30,9 +29,6 @@
 	import { Contract } from 'starknet';
 	import { get } from 'svelte/store';
 	import { supportedTokens } from '$lib/config/tokens';
-	import { deflattenFields, RawBuffer, UltraHonkBackend } from '@aztec/bb.js';
-	import { type CompiledCircuit } from '@noir-lang/noir_js';
-	import { flattenFieldsAsArray } from '$lib/utils/flattenFields';
 	import { browser } from '$app/environment';
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
 

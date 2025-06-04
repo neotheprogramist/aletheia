@@ -39,9 +39,6 @@
 	import type { Component } from 'svelte';
 	import { get } from 'svelte/store';
 	import { supportedTokens } from '$lib/config/tokens';
-	import type { CompiledCircuit } from '@noir-lang/noir_js';
-	import { deflattenFields, RawBuffer, UltraHonkBackend } from '@aztec/bb.js';
-	import { flattenFieldsAsArray } from '$lib/utils/flattenFields';
 	import { browser } from '$app/environment';
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
 

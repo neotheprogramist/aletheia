@@ -111,6 +111,12 @@
 			>
 				Transfer
 			</a>
+			<a
+				href="/swap"
+				class={page.url.pathname === '/swap' ? 'font-bold text-sky-500' : 'hover:underline'}
+			>
+				Swap
+			</a>
 			<!-- Export button -->
 			<button
 				class="cursor-pointer rounded p-1 hover:bg-sky-800"

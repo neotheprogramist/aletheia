@@ -1,18 +1,25 @@
 <script context="module" lang="ts">
 	export type WithdrawMode = 'withdraw' | 'fee';
+	export type SwapMode = 'swap' | 'fee';
 	export type TransferMode = 'transfer' | 'fee';
 	export type MergeMode = 'merge1' | 'merge2' | 'fee';
 </script>
 
 <script lang="ts">
-	export let mode: WithdrawMode | TransferMode | MergeMode = 'fee';
-	export let action: 'withdraw' | 'transfer' | 'merge' = 'withdraw';
+	export let mode: WithdrawMode | TransferMode | MergeMode | SwapMode = 'fee';
+	export let action: 'withdraw' | 'transfer' | 'merge' | 'swap' = 'withdraw';
 </script>
 
 <p class="mb-4 font-medium">
 	{#if action === 'withdraw'}
 		{#if mode === 'withdraw'}
 			Select a deposit to <strong>withdraw</strong> from:
+		{:else}
+			Select a deposit to pay <strong>fee</strong>:
+		{/if}
+	{:else if action === 'swap'}
+		{#if mode === 'swap'}
+			Select a deposit to <strong>swap</strong>:
 		{:else}
 			Select a deposit to pay <strong>fee</strong>:
 		{/if}
