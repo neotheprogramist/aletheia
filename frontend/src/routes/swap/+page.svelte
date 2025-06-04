@@ -65,12 +65,34 @@
 	let feeNoteBalanceWei: bigint | null = null;
 	let feeWei: bigint | null = null;
 
+	let targetToken = '';
+
 	$: if (browser && $selectedToken) {
 		loadDeposits(
 			$selectedToken,
 			(d) => (deposits = d),
 			(b) => (isLoading = b)
 		);
+	}
+
+	$: if (selectedSwapDeposit) {
+		const {
+			data: { tokenAddress }
+		} = selectedSwapDeposit;
+
+		// Fetch all supported tokens
+		const allTokens = get(tokens) as { address: string; symbol: string }[];
+
+		//Remove selected swap token (selectedSwapToken -> targetToken)
+		const allowed = allTokens.filter((t) => t.address !== tokenAddress);
+
+		if (allowed.length > 0) {
+			if (!targetToken || !allowed.find((t) => t.address === targetToken)) {
+				targetToken = allowed[0].address;
+			}
+		} else {
+			targetToken = '';
+		}
 	}
 
 	function handleRowClick(globalIdx: number) {
@@ -437,6 +459,18 @@
 									placeholder="Amount to Swap"
 									class_="w-full"
 								/>
+								{#if get(tokens).filter((t) => t.address !== selectedSwapDeposit?.data.tokenAddress).length > 0}
+									<TokenSelect
+										tokens={get(tokens).filter(
+											(t) => t.address !== selectedSwapDeposit?.data.tokenAddress
+										)}
+										bind:value={targetToken}
+										placeholder="Select token to receive"
+										class_="w-full"
+									/>
+								{:else}
+									<p class="text-sm text-red-500">Brak dostępnych tokenów do swapu.</p>
+								{/if}
 								<Button text="Swap" class_="mt-2 w-full" loading={isLoading} type="submit" />
 							</form>
 						</Card>
