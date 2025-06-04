@@ -232,7 +232,6 @@ pub mod PrivacyAccount {
         #[substorage(v0)]
         merkle: MerkleTreeComponent::Storage,
         nullifier_hashes: Map<u256, bool>,
-        pub extension_verifier: ClassHash,
         pub recursive_verifier: ClassHash,
         strk_token_address: ContractAddress,
         current_gas_price: u256,
@@ -292,7 +291,6 @@ pub mod PrivacyAccount {
     fn constructor(
         ref self: ContractState,
         owner: ContractAddress,
-        extension_verifier: ClassHash,
         recursive_verifier: ClassHash,
         strk_token_address: ContractAddress,
         initial_fee_buffer: u256,
@@ -305,7 +303,6 @@ pub mod PrivacyAccount {
         self.merkle.initializer();
 
         // 2) Store verifier addresses
-        self.extension_verifier.write(extension_verifier);
         self.recursive_verifier.write(recursive_verifier);
 
         // 3) Store STRK token addresses
@@ -360,7 +357,7 @@ pub mod PrivacyAccount {
             calldata: Span<felt252>,
         ) -> bool {
             let public_input_serialized = verify_ultra_keccak_honk_proof(
-                self.extension_verifier.read(), proof,
+                self.recursive_verifier.read(), proof,
             );
 
             let public_input = PublicInputWithdrawImpl::from_u256_span(public_input_serialized);

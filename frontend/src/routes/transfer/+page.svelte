@@ -270,17 +270,17 @@
 					hashpath_2: feeProofData.path[0].map((e) => `0x${e.toString(16)}`),
 					index_2: `0x${BigInt(feeProofData.index).toString(16)}`,
 					gas_fee: `0x${feeWei.toString(16)}`,
-					// Refund
+					// Refund for transfer deposit
 					refund_secret_1: `0x${BigInt(transferRefundOp.secret).toString(16)}`,
 					refund_nullifier_1: `0x${BigInt(transferRefundOp.nullifier).toString(16)}`,
 					refund_amount_1: `0x${transferRefund.toString(16)}`,
 					refund_commitment_hash_1: `0x${transferRefundCommitmentHash.toString(16)}`,
-
+					// Refund for fee deposit
 					refund_secret_2: `0x${BigInt(feeRefundOp.secret).toString(16)}`,
 					refund_nullifier_2: `0x${BigInt(feeRefundOp.nullifier).toString(16)}`,
 					refund_amount_2: `0x${feeRefund.toString(16)}`,
 					refund_commitment_hash_2: `0x${feeRefundCommitmentHash.toString(16)}`,
-
+					// recipient hash
 					_recipient_secret_and_nullifier_hash_1: transferSecretAndNullifierHash
 				};
 
