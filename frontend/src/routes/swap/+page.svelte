@@ -11,8 +11,7 @@
 	import {
 		PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
 		PUBLIC_SWAP_EXTENSION_CONTRACT_ADDRESS,
-		PUBLIC_SWAP_EXTENSION_DEPOSITED_SELECTOR,
-		PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS
+		PUBLIC_SWAP_EXTENSION_DEPOSITED_SELECTOR
 	} from '$env/static/public';
 	import { get } from 'svelte/store';
 	import { zkLibraries } from '$lib/stores/zkLibraries';

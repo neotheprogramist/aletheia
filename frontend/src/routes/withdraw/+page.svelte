@@ -24,7 +24,6 @@
 	import { confirmOperation } from '$lib/privacy/confirmOperation';
 	import { nullifyOperation } from '$lib/privacy/nullifyOperation';
 	import { abortOperation } from '$lib/privacy/abortOperation';
-	import { toastStore } from '$lib/stores/toast';
 	import { tokens, selectedToken } from '$lib/stores/tokens';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
@@ -34,9 +33,6 @@
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
 	import { supportedTokens } from '$lib/config/tokens';
-	import type { CompiledCircuit, InputMap } from '@noir-lang/noir_js';
-	import { deflattenFields, RawBuffer, UltraHonkBackend } from '@aztec/bb.js';
-	import { flattenFieldsAsArray } from '$lib/utils/flattenFields';
 	import { browser } from '$app/environment';
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
 
