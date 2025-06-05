@@ -10,6 +10,8 @@
 	import Modal from '$lib/ui/Modal.svelte';
 	import {
 		PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+		PUBLIC_SWAP_EXTENSION_CONTRACT_ADDRESS,
+		PUBLIC_SWAP_EXTENSION_DEPOSITED_SELECTOR,
 		PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS
 	} from '$env/static/public';
 	import { get } from 'svelte/store';
@@ -17,7 +19,7 @@
 	import { merkleTree } from '$lib/services/depositProcessor';
 	import Input from '$lib/ui/Input.svelte';
 	import { generateOperation } from '$lib/privacy/generateOperation';
-	import { getOperationDetails } from '$lib/db/operations';
+	import { getFullOperation, getOperationDetails } from '$lib/db/operations';
 	import { paymasterWallet } from '$lib/stores/paymaster';
 	import { provider } from '$lib/stores/provider';
 	import { Contract } from 'starknet';
@@ -36,6 +38,10 @@
 	import { browser } from '$app/environment';
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
 	import { walletAddress } from '$lib/stores/wallet';
+	import { buildSwapCalldata, fetchEkuboQuote } from '$lib/utils/swap';
+	import { supportedPools } from '$lib/config/swap';
+	import { extractDepositedEventsFromReceipt } from '$lib/utils/extractDepositedEventsFromReceipt';
+	import { updateOperation } from '$lib/db/operationsDb';
 
 	const STRK_ADDRESS = supportedTokens[0].address;
 
@@ -87,7 +93,7 @@
 		const allowed = allTokens.filter((t) => t.address !== tokenAddress);
 
 		if (allowed.length > 0) {
-			if (!targetToken || !allowed.find((t) => t.address === targetToken)) {
+			if (!targetToken || !allowed.find((t) => BigInt(t.address) === BigInt(targetToken))) {
 				targetToken = allowed[0].address;
 			}
 		} else {
@@ -134,6 +140,23 @@
 				swapNote = NoteDataSchema.parse(selectedSwapDeposit.data);
 				const { tokenAddress: swapTokenAddress, amount: swapNoteBalance } = swapNote;
 
+				// If no targetToken has been selected yet, bail out
+				if (!targetToken) {
+					throw new Error('Please select a token to receive');
+				}
+
+				// Check that (swapTokenAddress, targetToken) exists in supportedPools (in either order)
+
+				const pairIsSupported = supportedPools.some(
+					({ token0, token1 }) =>
+						(BigInt(token0) === BigInt(swapTokenAddress) &&
+							BigInt(token1) === BigInt(targetToken)) ||
+						(BigInt(token1) === BigInt(swapTokenAddress) && BigInt(token0) === BigInt(targetToken))
+				);
+				if (!pairIsSupported) {
+					throw new Error('The selected token pair is not supported for swapping');
+				}
+
 				const swapDecimals = await fetchTokenDecimals(swapTokenAddress);
 				swapNoteBalanceWei = BigInt(swapNoteBalance);
 				userSwapAmountWei = toWei(swapAmount, swapDecimals);
@@ -154,7 +177,7 @@
 				feeNoteBalanceWei = BigInt(feeNoteBalance);
 				feeWei = await fetchExtensionFee(
 					PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
-					PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS
+					PUBLIC_SWAP_EXTENSION_CONTRACT_ADDRESS
 				);
 				feeWeiHex = fromWei(feeWei, feeNoteDecimals);
 
@@ -283,7 +306,7 @@
 					refund_amount_2: `0x${feeRefund.toString(16)}`,
 					refund_commitment_hash_2: `0x${feeRefundCommitmentHash.toString(16)}`,
 					// recipient
-					_recipient: '0x0'
+					_recipient: swapRecipient
 				};
 
 				// 8) Generate the zk proof and prepare it as calldata
@@ -308,17 +331,19 @@
 				privacy.connect(account);
 
 				// 10) Prepare calldata and Starknet call
-				const extensionCalldata = [
-					PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
-					swapRecipient,
+				const ekuboResponse = await fetchEkuboQuote(
+					userSwapAmountWei,
 					selectedSwapDeposit.data.tokenAddress,
-					`0x${userSwapAmountWei.toString(16)}`
-				];
+					targetToken
+				);
 
-				const extensionCalldataWithLen = [
-					`0x${BigInt(extensionCalldata.length).toString(16)}`,
-					...extensionCalldata
-				];
+				const { hash: emptyOpHash } = await generateOperation({});
+
+				const extensionCalldata = buildSwapCalldata(
+					ekuboResponse,
+					selectedSwapDeposit.data.tokenAddress,
+					BigInt(emptyOpHash)
+				);
 
 				const honkCalldataWithLen = [
 					`0x${BigInt(honkCalldataHex.length).toString(16)}`,
@@ -330,24 +355,46 @@
 					entrypoint: 'execute_extension',
 					calldata: [
 						...honkCalldataWithLen,
-						PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS,
-						...extensionCalldataWithLen
+						PUBLIC_SWAP_EXTENSION_CONTRACT_ADDRESS,
+						...extensionCalldata
 					]
 				};
 
 				const tx = await account.execute(call);
+
 				const receipt = await rpc.waitForTransaction(tx.transaction_hash);
 
 				// 10) Check receipt status and throw on failure
-				if (receipt.isSuccess()) {
-					console.log('✅ Transaction succeeded:', receipt.value);
-				} else if (receipt.isReverted()) {
-					console.warn('⚠️ Transaction reverted:', receipt.value);
+				if (receipt.isReverted()) {
 					throw new Error(`Transaction reverted: ${receipt.value}`);
-				} else {
-					console.error('❌ Transaction error:', receipt.value);
+				} else if (!receipt.isSuccess()) {
 					throw new Error(`Transaction error: ${receipt.value}`);
 				}
+				const swappedDeposits = extractDepositedEventsFromReceipt(
+					receipt,
+					PUBLIC_SWAP_EXTENSION_DEPOSITED_SELECTOR,
+					targetToken
+				);
+				if (swappedDeposits.length === 0) {
+					throw new Error('No Deposited event for token: ' + targetToken);
+				}
+				const { token: depositedTokenHex, amount: depositedAmountBI } = swappedDeposits[0];
+
+				const opRecord = await getFullOperation(emptyOpHash);
+				if (!opRecord) {
+					throw new Error('Could not find operation with hash: ' + emptyOpHash);
+				}
+
+				const normalizedToken = '0x' + BigInt(depositedTokenHex).toString(16).padStart(64, '0');
+
+				opRecord.data = {
+					tokenAddress: normalizedToken,
+					amount: depositedAmountBI.toString()
+				};
+
+				opRecord.status = 'confirmed';
+
+				await updateOperation(opRecord);
 
 				// 11) Confirm and nullify operations in the database
 				await confirmOperation(swapRefundHash);

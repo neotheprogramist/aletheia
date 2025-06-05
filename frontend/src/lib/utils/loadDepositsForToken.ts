@@ -48,7 +48,7 @@ export async function loadDisplayDeposits(
 	);
 
 	return pricedOps
-		.filter((op) => op.data.tokenAddress === token && BigInt(op.data.amount) > 0n)
+		.filter((op) => BigInt(op.data.tokenAddress) === BigInt(token) && BigInt(op.data.amount) > 0n)
 		.sort((a, b) => a.index - b.index)
 		.map((op) => {
 			const { tokenAddress, amount } = op.data;

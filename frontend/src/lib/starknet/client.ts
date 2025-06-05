@@ -7,7 +7,7 @@ import { fromLowHighHex } from '$lib/utils/toLowHigh';
 import { get } from 'svelte/store';
 
 /**
- * Fetches all "Deposit" events emitted by the Tornado contract in a given block range.
+ * Fetches all "Deposit" events emitted by the Privacy Account contract in a given block range.
  * Logs each raw event for debugging and summary purposes.
  */
 export async function getDepositsFromRange(

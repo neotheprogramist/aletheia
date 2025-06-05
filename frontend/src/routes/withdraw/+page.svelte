@@ -321,13 +321,9 @@
 				const receipt = await rpc.waitForTransaction(tx.transaction_hash);
 
 				// 10) Check receipt status and throw on failure
-				if (receipt.isSuccess()) {
-					console.log('✅ Transaction succeeded:', receipt.value);
-				} else if (receipt.isReverted()) {
-					console.warn('⚠️ Transaction reverted:', receipt.value);
+				if (receipt.isReverted()) {
 					throw new Error(`Transaction reverted: ${receipt.value}`);
-				} else {
-					console.error('❌ Transaction error:', receipt.value);
+				} else if (!receipt.isSuccess()) {
 					throw new Error(`Transaction error: ${receipt.value}`);
 				}
 

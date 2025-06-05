@@ -69,3 +69,8 @@ export async function getOperationDetails(hash: string): Promise<
 		tokenAddress
 	};
 }
+
+export async function getFullOperation(hash: string) {
+	const op = await getOperationByHash(hash);
+	return op ?? undefined;
+}
