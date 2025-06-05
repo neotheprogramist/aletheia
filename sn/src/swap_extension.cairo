@@ -261,12 +261,14 @@ pub mod SwapExtension {
             // 4) Finally: do one approve + deposit of the total aggregated amount
             if let Some(output_token) = aggregate_output_token {
                 let token_out = IERC20Dispatcher { contract_address: output_token };
-                let privacy_acct = self.privacy_account.read();
-                let approval = token_out.approve(privacy_acct, aggregate_amount.into());
+                let privacy_acct_address = self.privacy_account.read();
+                let approval = token_out.approve(privacy_acct_address, aggregate_amount.into());
                 assert(approval, Errors::APPROVE_FAILED);
 
-                let tornado = IPrivacyAccountDispatcher { contract_address: privacy_acct };
-                let deposit = tornado
+                let privacy_account = IPrivacyAccountDispatcher {
+                    contract_address: privacy_acct_address,
+                };
+                let deposit = privacy_account
                     .deposit(secret_and_nullifier_hash, aggregate_amount.into(), output_token);
                 assert(deposit, Errors::PRIVACY_ACCOUNT_DEPOSIT_FAILED);
 
