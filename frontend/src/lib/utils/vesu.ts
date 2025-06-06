@@ -1,5 +1,7 @@
 // vesuUtils.ts
 
+import { PUBLIC_VESU_API } from '$env/static/public';
+
 export type BigNumberString = {
 	value: string;
 	decimals: number;
@@ -55,7 +57,7 @@ export async function calculateRequiredCollateral(
 	collateralTokenSymbol: string
 ): Promise<number> {
 	// 1. Build the Vesu endpoint URL
-	const url = `https://api.vesu.xyz/v1/pools/${poolId}`;
+	const url = `${PUBLIC_VESU_API}/v1/pools/${poolId}`;
 
 	// 2. Fetch data from the API
 	const response = await fetch(url);
