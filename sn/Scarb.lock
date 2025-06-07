@@ -2,6 +2,11 @@
 version = 1
 
 [[package]]
+name = "alexandria_math"
+version = "0.3.0"
+source = "git+https://github.com/keep-starknet-strange/alexandria.git?tag=v0.3.0#e3715428c990665afc495b5428ef08ab9a2089cd"
+
+[[package]]
 name = "ekubo"
 version = "0.1.0"
 source = "git+https://github.com/EkuboProtocol/abis.git?rev=f4a16b95967c5596d5a3cd4e0422bb9a2e3eb017#f4a16b95967c5596d5a3cd4e0422bb9a2e3eb017"
@@ -134,6 +139,7 @@ checksum = "sha256:fd348b31c4a4407add33adc3c2b8f26dca71dbd7431faaf726168f37a91db
 name = "sn"
 version = "0.1.0"
 dependencies = [
+ "alexandria_math",
  "ekubo",
  "garaga",
  "openzeppelin",

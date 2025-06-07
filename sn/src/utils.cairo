@@ -1,5 +1,6 @@
-use starknet::SyscallResultTrait;
+use core::ecdsa::check_ecdsa_signature;
 use starknet::account::Call;
+use starknet::{ClassHash, ContractAddress, SyscallResultTrait};
 
 const EXTENSION_VERIFIER_CLASS_HASH: felt252 =
     0x044fa33e2f08bf5542df3a52cee9e1777093f5240002602a5581550a8ece491f;
@@ -10,12 +11,28 @@ const MERGE_VERIFIER_CLASS_HASH: felt252 =
 const TRANSFER_VERIFIER_CLASS_HASH: felt252 =
     0x027288612662383fe0e311911b7eec1db653f75935ea5de9a10f9c69ffdfbafc;
 
+const UDC_ADDRESS: felt252 = 0x041a78e741e5af2fec34b695679bc6891742439f7afb8484ecd7766661ad02bf;
+
 
 #[starknet::interface]
-pub trait IUltraKeccakHonkVerifier<TContractState> {
-    fn verify_ultra_keccak_honk_proof(
-        self: @TContractState, full_proof_with_hints: Span<felt252>,
-    ) -> Option<Span<u256>>;
+trait IUniversalDeployer<TContractState> {
+    fn deployContract(
+        ref self: TContractState,
+        class_hash: ClassHash,
+        salt: felt252,
+        unique: bool,
+        calldata: Span<felt252>,
+    ) -> ContractAddress;
+}
+
+pub fn deploy(class_hash: ClassHash, calldata: Array<felt252>, salt: felt252) -> ContractAddress {
+    let dispatcher = IUniversalDeployerDispatcher {
+        contract_address: UDC_ADDRESS.try_into().unwrap(),
+    };
+
+    let unique = true;
+    // the UDC returns the deployed contract address
+    dispatcher.deployContract(class_hash, salt, unique, calldata.span())
 }
 
 
@@ -82,3 +99,14 @@ fn execute_single_call(call: @Call) -> Span<felt252> {
     starknet::syscalls::call_contract_syscall(to, selector, calldata).unwrap_syscall()
 }
 
+pub fn is_valid_signature(
+    msg_hash: felt252, public_key: felt252, signature: Span<felt252>,
+) -> bool {
+    let valid_length = signature.len() == 2;
+
+    if valid_length {
+        check_ecdsa_signature(msg_hash, public_key, *signature.at(0_u32), *signature.at(1_u32))
+    } else {
+        false
+    }
+}
