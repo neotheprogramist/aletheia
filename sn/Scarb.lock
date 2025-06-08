@@ -8,8 +8,8 @@ source = "git+https://github.com/EkuboProtocol/abis.git?rev=f4a16b95967c5596d5a3
 
 [[package]]
 name = "garaga"
-version = "0.18.0"
-source = "git+https://github.com/keep-starknet-strange/garaga.git?tag=v0.18.0#1582fded827165532bebccc8a4b312058e5b34ca"
+version = "0.18.1"
+source = "git+https://github.com/keep-starknet-strange/garaga.git?tag=v0.18.1#3adb570fbfb940611e1748341fd246ceb0755969"
 
 [[package]]
 name = "openzeppelin"
