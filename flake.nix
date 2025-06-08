@@ -45,6 +45,8 @@
 
             noir
             cairo
+
+            nodejs_24
           ];
 
           env = {
