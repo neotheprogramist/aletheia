@@ -149,7 +149,11 @@
 					<div
 						class="border-border bg-background absolute right-0 mt-2 w-32 rounded-md border shadow-lg"
 					>
-						<a href="/vesu/borrow" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">
+						<a
+							href="/vesu/borrow"
+							class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+							on:click={closeDropdown}
+						>
 							Borrow
 						</a>
 					</div>
