@@ -6,7 +6,12 @@
 	import SelectionToggle from '$lib/ui/SelectionToggle.svelte';
 	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
 	import { tokens, selectedToken } from '$lib/stores/tokens';
-	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
+	import {
+		loadDeposits,
+		loadEmptyDeposits,
+		loadEmptyDisplayDeposits,
+		type DisplayOperation
+	} from '$lib/utils/loadDepositsForToken';
 	import { defaultDepositColumns } from '$lib/utils/sharedColumns';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import Instructions, { type BorrowMode } from '$lib/ui/Instructions.svelte';
@@ -34,11 +39,19 @@
 	let selectedDebtFeeDeposit: DisplayOperation | null = null;
 
 	$: if (browser && $selectedToken) {
-		loadDeposits(
-			$selectedToken,
-			(d) => (deposits = d),
-			(b) => (isLoading = b)
-		);
+		if (selectionMode === 'debt') {
+			loadEmptyDeposits(
+				$selectedToken,
+				(d) => (deposits = d),
+				(b) => (isLoading = b)
+			);
+		} else {
+			loadDeposits(
+				$selectedToken,
+				(d) => (deposits = d),
+				(b) => (isLoading = b)
+			);
+		}
 	}
 
 	function resetAll() {

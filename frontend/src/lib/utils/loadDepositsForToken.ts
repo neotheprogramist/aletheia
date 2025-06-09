@@ -1,8 +1,8 @@
 import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
 import { fromWei } from '$lib/utils/toWei';
-import type { Operation, OperationStatus } from '$lib/privacy/types';
 import { wrapWithToast } from './toast';
 import { getAllByStatus } from '$lib/db/operationsDb';
+import type { Operation, OperationStatus } from '$lib/privacy/types';
 
 export interface DisplayOperation extends Omit<Operation, 'data'> {
 	data: {
@@ -21,34 +21,40 @@ function isPricedOp(
 	op: Operation
 ): op is Omit<Operation, 'data'> & { data: { tokenAddress: string; amount: string | bigint } } {
 	if (typeof op !== 'object' || op === null) return false;
-	const data = op.data;
-	if (
-		typeof data !== 'object' ||
-		data === null ||
-		typeof (data as { tokenAddress?: unknown }).tokenAddress !== 'string'
-	) {
-		return false;
-	}
-	const amount = (data as { amount?: unknown }).amount;
-	return typeof amount === 'string' || typeof amount === 'bigint';
+	const d = op.data;
+	return (
+		d != null &&
+		typeof d.tokenAddress === 'string' &&
+		(typeof d.amount === 'string' || typeof d.amount === 'bigint')
+	);
 }
 
-export async function loadDisplayDeposits(
-	ops: Operation[],
-	token: string
-): Promise<DisplayOperation[]> {
-	const pricedOps = ops.filter(isPricedOp);
-	const uniqueAddrs = Array.from(new Set(pricedOps.map((o) => o.data.tokenAddress)));
-	const decimalsMap: Record<string, number> = {};
+type AmountPredicate = (wei: bigint) => boolean;
 
+async function loadFilteredDeposits(
+	ops: Operation[],
+	token: string,
+	predicate: AmountPredicate
+): Promise<DisplayOperation[]> {
+	const priced = ops.filter(isPricedOp);
+
+	const unique = Array.from(new Set(priced.map((o) => o.data.tokenAddress)));
+	const decimalsMap: Record<string, number> = {};
 	await Promise.all(
-		uniqueAddrs.map(async (addr) => {
-			decimalsMap[addr] = await fetchTokenDecimals(addr);
-		})
+		unique.map((addr) =>
+			fetchTokenDecimals(addr).then((dec) => {
+				decimalsMap[addr] = dec;
+			})
+		)
 	);
 
-	return pricedOps
-		.filter((op) => BigInt(op.data.tokenAddress) === BigInt(token) && BigInt(op.data.amount) > 0n)
+	return priced
+		.filter((op) => BigInt(op.data.tokenAddress) === BigInt(token))
+		.filter((op) => {
+			const raw = op.data.amount;
+			const wei = typeof raw === 'bigint' ? raw : BigInt(raw);
+			return predicate(wei);
+		})
 		.sort((a, b) => a.index - b.index)
 		.map((op) => {
 			const { tokenAddress, amount } = op.data;
@@ -61,22 +67,54 @@ export async function loadDisplayDeposits(
 		});
 }
 
+export async function loadDisplayDeposits(
+	ops: Operation[],
+	token: string
+): Promise<DisplayOperation[]> {
+	return loadFilteredDeposits(ops, token, (wei) => wei > 0n);
+}
+
+export async function loadEmptyDisplayDeposits(
+	ops: Operation[],
+	token: string
+): Promise<DisplayOperation[]> {
+	return loadFilteredDeposits(ops, token, (wei) => wei === 0n);
+}
+
 export async function getDisplayDepositsForToken(
 	token: string,
 	setIsLoading?: (v: boolean) => void
 ): Promise<DisplayOperation[] | undefined> {
 	if (setIsLoading) setIsLoading(true);
 
-	const deposits = await wrapWithToast(
+	const result = await wrapWithToast(
 		async () => {
 			const ops = await getAllByStatus('confirmed');
-			return await loadDisplayDeposits(ops, token);
+			return loadDisplayDeposits(ops, token);
 		},
 		{ loading: '⏳ Loading…', success: '', error: '❌ Load error' }
 	);
 
 	if (setIsLoading) setIsLoading(false);
-	return deposits;
+	return result;
+}
+
+export async function getEmptyDepositsForToken(
+	token: string,
+	setIsLoading?: (v: boolean) => void
+): Promise<DisplayOperation[] | undefined> {
+	if (setIsLoading) setIsLoading(true);
+
+	const result = await wrapWithToast(
+		async () => {
+			const ops = await getAllByStatus('confirmed');
+			return loadEmptyDisplayDeposits(ops, token);
+		},
+		{ loading: '⏳ Loading empty…', success: '', error: '❌ Load error' }
+	);
+
+	if (setIsLoading) setIsLoading(false);
+	return result;
 }
 
 export async function loadDeposits(
@@ -85,8 +123,18 @@ export async function loadDeposits(
 	setLoading: (b: boolean) => void
 ) {
 	setLoading(true);
-	const d = await getDisplayDepositsForToken(token, (v) => setLoading(v));
-	setDeposits(d ?? []);
+	const data = await getDisplayDepositsForToken(token, setLoading);
+	setDeposits(data ?? []);
+}
+
+export async function loadEmptyDeposits(
+	token: string,
+	setDeposits: (d: DisplayOperation[]) => void,
+	setLoading: (b: boolean) => void
+) {
+	setLoading(true);
+	const data = await getEmptyDepositsForToken(token, setLoading);
+	setDeposits(data ?? []);
 }
 
 export async function getPendingEmptyDepositsForToken(
@@ -95,15 +143,14 @@ export async function getPendingEmptyDepositsForToken(
 ): Promise<DisplayPendingEmptyOperation[]> {
 	if (setIsLoading) setIsLoading(true);
 
-	const pendingOpsRaw = await wrapWithToast(
-		async () => {
-			const allPending: Operation[] = await getAllByStatus('pending');
-			return allPending.filter((op) => op.data == null);
-		},
+	const pendingRaw = await wrapWithToast(
+		async () => (await getAllByStatus('pending')).filter((op) => op.data == null),
 		{ loading: '⏳ Loading pending…', success: '', error: '❌ Error' }
 	);
 
-	const pendingOps: DisplayPendingEmptyOperation[] = (pendingOpsRaw ?? []).map((op) => {
+	if (setIsLoading) setIsLoading(false);
+
+	return (pendingRaw ?? []).map((op) => {
 		const fullHex = `0x${BigInt(op.hash).toString(16)}`;
 		const shortHex = fullHex.length > 10 ? `${fullHex.slice(0, 6)}…${fullHex.slice(-4)}` : fullHex;
 
@@ -117,9 +164,6 @@ export async function getPendingEmptyDepositsForToken(
 			fullHex
 		};
 	});
-
-	if (setIsLoading) setIsLoading(false);
-	return pendingOps;
 }
 
 export async function loadPendingEmptyDeposits(
@@ -128,6 +172,6 @@ export async function loadPendingEmptyDeposits(
 	setLoading: (v: boolean) => void
 ) {
 	setLoading(true);
-	const ops = await getPendingEmptyDepositsForToken(token, (v) => setLoading(v));
+	const ops = await getPendingEmptyDepositsForToken(token, setLoading);
 	setPending(ops);
 }
