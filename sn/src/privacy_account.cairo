@@ -3,6 +3,8 @@
 use starknet::ContractAddress;
 use starknet::account::Call;
 
+pub const VK_SIZE: usize = 112;
+
 #[starknet::interface]
 pub trait IUltraKeccakHonkVerifier<TContractState> {
     fn verify_ultra_keccak_honk_proof(
@@ -61,6 +63,7 @@ struct PublicInputWithdraw {
     refund_commitment_hash: u256,
     refund_commitment_hash_fee: u256,
     recipient: ContractAddress,
+    verification_key: Span<felt252>,
 }
 
 #[generate_trait]
@@ -70,6 +73,13 @@ impl PublicInputWithdrawImpl of PublicInputWithdrawTrait {
         let token_addres_2: felt252 = (*span[6]).try_into().unwrap();
 
         let recipient: felt252 = (*span[10]).try_into().unwrap();
+        let mut vk_array = ArrayTrait::<felt252>::new();
+        for j in 0..VK_SIZE {
+            let idx = 11 + j;
+            let v: felt252 = (*span[idx]).try_into().unwrap();
+            vk_array.append(v);
+        }
+        let vk_span: Span<felt252> = vk_array.span();
 
         PublicInputWithdraw {
             root_1: *span[0],
@@ -83,6 +93,7 @@ impl PublicInputWithdrawImpl of PublicInputWithdrawTrait {
             root_2: *span[4],
             nullifier_2: *span[5],
             refund_commitment_hash_fee: *span[9],
+            verification_key: vk_span,
         }
     }
 }
@@ -100,6 +111,7 @@ struct PublicInputMerge {
     refund_fee_commitment_hash: u256,
     token_address: ContractAddress,
     token_address_fee: ContractAddress,
+    verification_key: Span<felt252>,
 }
 
 #[generate_trait]
@@ -107,6 +119,14 @@ impl PublicInputMergeImpl of PublicInputMergeTrait {
     fn from_u256_span(span: Span<u256>) -> PublicInputMerge {
         let token_address: felt252 = (*span[1]).try_into().unwrap();
         let token_address_fee: felt252 = (*span[6]).try_into().unwrap();
+
+        let mut vk_array = ArrayTrait::<felt252>::new();
+        for j in 0..VK_SIZE {
+            let idx = 11 + j;
+            let v: felt252 = (*span[idx]).try_into().unwrap();
+            vk_array.append(v);
+        }
+        let vk_span: Span<felt252> = vk_array.span();
 
         PublicInputMerge {
             nullifier_hash_1: *span[0],
@@ -120,6 +140,7 @@ impl PublicInputMergeImpl of PublicInputMergeTrait {
             merge_commitment_hash: *span[10],
             token_address: token_address.try_into().unwrap(),
             token_address_fee: token_address_fee.try_into().unwrap(),
+            verification_key: vk_span,
         }
     }
 }
@@ -142,6 +163,7 @@ struct PublicInputTransfer {
     // Fee refund
     refund_commitment_hash_fee: u256,
     recipient_secret_and_nullifier_hash: u256,
+    verification_key: Span<felt252>,
 }
 
 #[generate_trait]
@@ -149,7 +171,13 @@ impl PublicInputTransferImpl of PublicInputTransferTrait {
     fn from_u256_span(span: Span<u256>) -> PublicInputTransfer {
         let token_address: felt252 = (*span[2]).try_into().unwrap();
         let token_address_fee: felt252 = (*span[6]).try_into().unwrap();
-
+        let mut vk_array = ArrayTrait::<felt252>::new();
+        for j in 0..VK_SIZE {
+            let idx = 11 + j;
+            let v: felt252 = (*span[idx]).try_into().unwrap();
+            vk_array.append(v);
+        }
+        let vk_span: Span<felt252> = vk_array.span();
         PublicInputTransfer {
             // Deposit
             root: *span[0],
@@ -167,6 +195,7 @@ impl PublicInputTransferImpl of PublicInputTransferTrait {
             // Refund fee
             refund_commitment_hash_fee: *span[9],
             recipient_secret_and_nullifier_hash: *span[10],
+            verification_key: vk_span,
         }
     }
 }
@@ -174,6 +203,7 @@ impl PublicInputTransferImpl of PublicInputTransferTrait {
 
 #[starknet::contract(account)]
 pub mod PrivacyAccount {
+    pub const VK_SIZE: usize = 112;
     use core::array::{Array, ArrayTrait};
     use core::option::OptionTrait;
     use openzeppelin::access::ownable::OwnableComponent;
@@ -185,8 +215,8 @@ pub mod PrivacyAccount {
     use starknet::class_hash::ClassHash;
     use starknet::event::EventEmitter;
     use starknet::storage::{
-        Map, StorageMapReadAccess, StoragePathEntry, StoragePointerReadAccess,
-        StoragePointerWriteAccess, VecTrait,
+        Map, MutableVecTrait, StorageMapReadAccess, StoragePathEntry, StoragePointerReadAccess,
+        StoragePointerWriteAccess, Vec, VecTrait,
     };
     use starknet::{ContractAddress, get_caller_address, get_contract_address};
     use crate::merkle::MerkleTreeComponent;
@@ -219,6 +249,7 @@ pub mod PrivacyAccount {
     impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
     impl MerkleTreeInternalImpl = MerkleTreeComponent::InternalImpl<ContractState>;
 
+
     #[storage]
     struct Storage {
         #[substorage(v0)]
@@ -241,6 +272,7 @@ pub mod PrivacyAccount {
         initial_fee_buffer: u256,
         merge_gas_consumed: u128,
         transfer_gas_consumed: u128,
+        supported_vks: Map<u16, Vec<felt252>>,
     }
 
     #[derive(Drop, PartialEq, starknet::Event)]
@@ -284,6 +316,8 @@ pub mod PrivacyAccount {
         pub const INVALID_ROOT: felt252 = 'Pool: invalid root';
         pub const INSUFFICIENT_FEE: felt252 = 'Pool: insufficient fee';
         pub const INVALID_FEE_TOKEN: felt252 = 'Pool: invalid fee token';
+        pub const INVALID_VK_SIZE: felt252 = 'Pool: invalid vk size';
+        pub const VK_MISMATCH: felt252 = 'Pool: vk mismatch';
     }
 
 
@@ -297,6 +331,9 @@ pub mod PrivacyAccount {
         current_gas_price: u256,
         merge_gas_consumed: u128,
         transfer_gas_consumed: u128,
+        merge_vk: Span<felt252>,
+        transfer_vk: Span<felt252>,
+        execute_vk: Span<felt252>,
     ) {
         // 1) Standard ownership & merkle init
         self.ownable.initializer(owner);
@@ -327,6 +364,20 @@ pub mod PrivacyAccount {
         // 8) Set gas consumed
         self.merge_gas_consumed.write(merge_gas_consumed);
         self.transfer_gas_consumed.write(transfer_gas_consumed);
+
+        // 9) Set vks
+        // MERGE under key 0
+        for i in 0..merge_vk.len() {
+            self.supported_vks.entry(0).push(*merge_vk[i]);
+        }
+        // TRANSFER under key 1
+        for i in 0..transfer_vk.len() {
+            self.supported_vks.entry(1).push(*transfer_vk[i]);
+        }
+        // EXECUTE under key 2
+        for i in 0..execute_vk.len() {
+            self.supported_vks.entry(2).push(*execute_vk[i]);
+        }
     }
 
     #[abi(embed_v0)]
@@ -361,6 +412,15 @@ pub mod PrivacyAccount {
             );
 
             let public_input = PublicInputWithdrawImpl::from_u256_span(public_input_serialized);
+
+            // Validate if vk is supported
+            let mut stored_vk = self.supported_vks.entry(2);
+            assert(stored_vk.len().try_into().unwrap() == VK_SIZE, Errors::INVALID_VK_SIZE);
+            for i in 0..VK_SIZE {
+                let in_vk_elem: felt252 = *public_input.verification_key.at(i);
+                let stored_elem: felt252 = stored_vk.at(i.try_into().unwrap()).read();
+                assert(in_vk_elem == stored_elem, Errors::VK_MISMATCH);
+            }
 
             // Validate if fee is in strk
             assert(
@@ -416,6 +476,15 @@ pub mod PrivacyAccount {
             );
 
             let public_input = PublicInputMergeImpl::from_u256_span(public_input_serialized);
+
+            // Validate if vk is supported
+            let mut stored_vk = self.supported_vks.entry(0);
+            assert(stored_vk.len().try_into().unwrap() == VK_SIZE, Errors::INVALID_VK_SIZE);
+            for i in 0..VK_SIZE {
+                let in_vk_elem: felt252 = *public_input.verification_key.at(i);
+                let stored_elem: felt252 = stored_vk.at(i.try_into().unwrap()).read();
+                assert(in_vk_elem == stored_elem, Errors::VK_MISMATCH);
+            }
             // Validate if fee is in strk
             assert(
                 public_input.token_address_fee == self.strk_token_address.read(),
@@ -463,6 +532,15 @@ pub mod PrivacyAccount {
             );
 
             let public_input = PublicInputTransferImpl::from_u256_span(public_input_serialized);
+
+            // Validate if vk is supported
+            let mut stored_vk = self.supported_vks.entry(1);
+            assert(stored_vk.len().try_into().unwrap() == VK_SIZE, Errors::INVALID_VK_SIZE);
+            for i in 0..VK_SIZE {
+                let in_vk_elem: felt252 = *public_input.verification_key.at(i);
+                let stored_elem: felt252 = stored_vk.at(i.try_into().unwrap()).read();
+                assert(in_vk_elem == stored_elem, Errors::VK_MISMATCH);
+            }
 
             // check if fee deposit is strk
             assert(
