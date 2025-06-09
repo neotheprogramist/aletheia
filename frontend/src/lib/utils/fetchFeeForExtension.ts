@@ -7,10 +7,7 @@ import { fromLowHigh } from './toLowHigh';
  * Calls `get_fee_for_extension` on the pools contract,
  * which returns [low, high] hex strings, and returns a hex (wei) fee.
  */
-export async function fetchExtensionFee(
-	poolsContract: string,
-	extensionAddress: string
-): Promise<bigint> {
+export async function fetchExtensionFee(poolsContract: string, extensionAddress: string) {
 	const rpc = get(provider);
 
 	const result = await rpc.callContract(
@@ -31,7 +28,7 @@ export async function fetchExtensionFee(
 	return fromLowHigh(lowHex, highHex);
 }
 
-export async function fetchMergeFee(poolsContract: string): Promise<bigint> {
+export async function fetchMergeFee(poolsContract: string) {
 	const rpc = get(provider);
 
 	const result = await rpc.callContract(
@@ -52,7 +49,7 @@ export async function fetchMergeFee(poolsContract: string): Promise<bigint> {
 	return BigInt(hex);
 }
 
-export async function fetchTransferFee(poolsContract: string): Promise<bigint> {
+export async function fetchTransferFee(poolsContract: string) {
 	const rpc = get(provider);
 
 	const result = await rpc.callContract(

@@ -55,7 +55,7 @@ export async function calculateRequiredCollateral(
 	borrowTokenSymbol: string,
 	borrowAmount: bigint,
 	collateralTokenSymbol: string
-): Promise<number> {
+) {
 	// 1. Build the Vesu endpoint URL
 	const url = `${PUBLIC_VESU_API}/v1/pools/${poolId}`;
 

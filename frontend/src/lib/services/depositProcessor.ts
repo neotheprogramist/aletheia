@@ -17,7 +17,7 @@ const MERKLE_HEIGHT = 32;
 /**
  * Initializes the Merkle tree from stored IndexedDB leafs.
  */
-export async function initMerkleTree(): Promise<void> {
+export async function initMerkleTree() {
 	const { garaga } = get(zkLibraries);
 	if (!garaga) throw new Error('Garaga not loaded');
 	const leafs = await get_all_leafs();

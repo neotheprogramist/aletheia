@@ -5,7 +5,7 @@ import type { Operation } from '$lib/db/operationsTypes';
 /**
  * Read every record from the "operations" object store.
  */
-async function getAllOperations(): Promise<Operation[]> {
+async function getAllOperations() {
 	return withStore<Operation[]>('operations', 'readonly', (store) => store.getAll());
 }
 
@@ -13,7 +13,7 @@ async function getAllOperations(): Promise<Operation[]> {
  * Overwrite the entire "operations" store with the given array of Operation records.
  * First clears everything, then bulk‐puts each Operation back.
  */
-async function overwriteOperations(records: Operation[]): Promise<void> {
+async function overwriteOperations(records: Operation[]) {
 	const db = await openDB();
 
 	// 1) Clear the store in a single transaction
@@ -39,7 +39,7 @@ async function overwriteOperations(records: Operation[]): Promise<void> {
 /**
  * Export all operations as a JSON string, converting any BigInt fields into strings.
  */
-export async function exportOperations(): Promise<string> {
+export async function exportOperations() {
 	// 1) Pull everything
 	const ops = await getAllOperations();
 
@@ -66,7 +66,7 @@ export async function exportOperations(): Promise<string> {
  * Import (restore) from a JSON string that was previously created by `exportOperations()`.
  * This will completely replace the "operations" store.
  */
-export async function importOperations(jsonString: string): Promise<void> {
+export async function importOperations(jsonString: string) {
 	let parsed: unknown;
 	try {
 		parsed = JSON.parse(jsonString);

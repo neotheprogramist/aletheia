@@ -10,10 +10,7 @@ import { get } from 'svelte/store';
  * Fetches all "Deposit" events emitted by the Privacy Account contract in a given block range.
  * Logs each raw event for debugging and summary purposes.
  */
-export async function getDepositsFromRange(
-	from: number,
-	to: number
-): Promise<{ hash: string; block_number: number }[]> {
+export async function getDepositsFromRange(from: number, to: number) {
 	const filter = {
 		from_block: { block_number: from },
 		to_block: { block_number: to },

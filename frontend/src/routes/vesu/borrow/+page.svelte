@@ -15,6 +15,17 @@
 	import Instructions, { type BorrowMode } from '$lib/ui/Instructions.svelte';
 	import { supportedTokens } from '$lib/config/tokens';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
+	import { wrapWithToast } from '$lib/utils/toast';
+	import { NoteDataSchema, type NoteData } from '$lib/schemas/schemas';
+	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
+	import Input from '$lib/ui/Input.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import { fromWei, toWei } from '$lib/utils/toWei';
+	import { fetchExtensionFee } from '$lib/utils/fetchFeeForExtension';
+	import {
+		PUBLIC_EKUBO_BORROW_EXTENSION_CONTRACT_ADDRESS,
+		PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS
+	} from '$env/static/public';
 
 	const STRK_ADDRESS = supportedTokens[0].address;
 
@@ -35,6 +46,23 @@
 
 	let selectedDebtFeeKey: number | null = null;
 	let selectedDebtFeeDeposit: DisplayOperation | null = null;
+
+	let collateralNote: NoteData | null = null;
+	let feeCollateralNote: NoteData | null = null;
+	let debtNote: NoteData | null = null;
+	let feeDebtNote: NoteData | null = null;
+	let collateralNoteBalanceWei: bigint | null = null;
+	let feeCollateralNoteBalanceWei: bigint | null = null;
+	let debtNoteBalanceWei: bigint | null = null;
+	let feeDebtNoteBalanceWei: bigint | null = null;
+
+	let feeWei: bigint | null = null;
+	let feeWeiHex = '';
+
+	let collateralAmount = '';
+	let userCollateralAmountWei: bigint | null = null;
+	let debtAmount = '';
+	let userDebtAmountWei: bigint | null = null;
 
 	$: if (browser && $selectedToken) {
 		if (selectionMode === 'debt') {
@@ -92,6 +120,97 @@
 				selectedDebtFeeDeposit = op;
 				break;
 		}
+	}
+
+	async function initiateBorrow() {
+		isLoading = true;
+		await wrapWithToast(
+			async () => {
+				if (!selectedCollateralDeposit || !selectedCollateralFeeDeposit) {
+					throw new Error('Please select both a collateral deposit and a collateral fee deposit');
+				}
+
+				if (!selectedDebtDeposit || !selectedDebtFeeDeposit) {
+					throw new Error('Please select both a debt deposit and a debt fee deposit');
+				}
+
+				// Parse collateral note
+				collateralNote = NoteDataSchema.parse(selectedCollateralDeposit.data);
+				const { tokenAddress: collateralTokenAddress, amount: collateralNoteBalance } =
+					collateralNote;
+				const collateralDecimals = await fetchTokenDecimals(collateralTokenAddress);
+				collateralNoteBalanceWei = BigInt(collateralNoteBalance);
+				userCollateralAmountWei = toWei(collateralAmount, collateralDecimals);
+
+				if (
+					collateralNoteBalanceWei <= 0n ||
+					userCollateralAmountWei <= 0n ||
+					userCollateralAmountWei > collateralNoteBalanceWei
+				) {
+					throw new Error('Invalid collateral amount');
+				}
+
+				// Parse collateral fee note
+				feeCollateralNote = NoteDataSchema.parse(selectedCollateralFeeDeposit.data);
+				const { tokenAddress: feeCollateralTokenAddress, amount: feeCollateralNoteBalance } =
+					feeCollateralNote;
+
+				const feeNoteDecimals = await fetchTokenDecimals(feeCollateralTokenAddress);
+				feeCollateralNoteBalanceWei = BigInt(feeCollateralNoteBalance);
+				feeWei = await fetchExtensionFee(
+					PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+					PUBLIC_EKUBO_BORROW_EXTENSION_CONTRACT_ADDRESS
+				);
+				feeWeiHex = fromWei(feeWei, feeNoteDecimals);
+
+				if (feeWei > feeCollateralNoteBalanceWei) {
+					throw new Error(
+						`Fee (${feeWeiHex}) exceeds your fee note balance (${fromWei(
+							feeCollateralNoteBalanceWei,
+							feeNoteDecimals
+						)})`
+					);
+				}
+
+				// Parse debt note
+				debtNote = NoteDataSchema.parse(selectedDebtDeposit.data);
+				const { tokenAddress: debtTokenAddress, amount: debtNoteBalance } = debtNote;
+				const debtDecimals = await fetchTokenDecimals(debtTokenAddress);
+				debtNoteBalanceWei = BigInt(debtNoteBalance);
+				userDebtAmountWei = toWei(debtAmount, debtDecimals);
+
+				if (
+					debtNoteBalanceWei <= 0n ||
+					userDebtAmountWei <= 0n ||
+					userDebtAmountWei > debtNoteBalanceWei
+				) {
+					throw new Error('Invalid debt amount');
+				}
+
+				// Parse debt fee note
+				feeDebtNote = NoteDataSchema.parse(selectedCollateralFeeDeposit.data);
+				const { amount: feeDebtNoteBalance } = feeDebtNote;
+				feeDebtNoteBalanceWei = BigInt(feeDebtNoteBalance);
+
+				if (feeWei > feeDebtNoteBalanceWei) {
+					throw new Error(
+						`Fee (${feeWeiHex}) exceeds your fee note balance (${fromWei(
+							feeDebtNoteBalanceWei,
+							feeNoteDecimals
+						)})`
+					);
+				}
+			},
+			{
+				loading: '⏳ Executing Borrow',
+				success: '✅ Borrow ready!',
+				error: '❌ Borrow failed'
+			},
+			async (err) => {
+				console.warn('❌ Borrow failed with error:', err);
+				isLoading = false;
+			}
+		);
 	}
 </script>
 
@@ -158,6 +277,29 @@
 					{ title: 'Fee Debt', deposit: selectedDebtFeeDeposit }
 				]}
 			/>
+
+			<!-- Withdraw Form -->
+			{#if selectedCollateralDeposit && selectedCollateralFeeDeposit && selectedDebtDeposit && selectedDebtFeeDeposit}
+				<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
+					<Card>
+						<form on:submit|preventDefault={initiateBorrow} class="mt-6 flex flex-col gap-4">
+							<Input
+								bind:value={debtAmount}
+								required
+								placeholder="Amount to borrow"
+								class_="w-full"
+							/>
+							<Input
+								bind:value={collateralAmount}
+								required
+								placeholder="Collateral amount"
+								class_="w-full"
+							/>
+							<Button text="Withdraw" class_="mt-2 w-full" loading={isLoading} type="submit" />
+						</form>
+					</Card>
+				</div>
+			{/if}
 		</Card>
 	</div>
 </ProtectedRoute>

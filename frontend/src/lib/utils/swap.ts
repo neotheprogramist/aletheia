@@ -4,11 +4,7 @@ import { PUBLIC_EKUBO_QUOTER } from '$env/static/public';
  * Fetches a quote from the ekubo quoter API for a given input amount (amountInWei)
  * and token pair (tokenIn, tokenOut). Returns EkuboQuoteResponse.
  */
-export async function fetchEkuboQuote(
-	amountInWei: bigint,
-	tokenIn: string,
-	tokenOut: string
-): Promise<EkuboQuoteResponse> {
+export async function fetchEkuboQuote(amountInWei: bigint, tokenIn: string, tokenOut: string) {
 	const url = `${PUBLIC_EKUBO_QUOTER}/${amountInWei.toString()}/${tokenIn}/${tokenOut}`;
 	const res = await fetch(url);
 	if (!res.ok) {

@@ -1,7 +1,7 @@
 import { provider } from '$lib/stores/provider';
 import { get } from 'svelte/store';
 
-export async function fetchTokenDecimals(token: string): Promise<number> {
+export async function fetchTokenDecimals(token: string) {
 	const rpc = get(provider);
 	const [decimalsRaw] =
 		(await rpc.callContract({ contractAddress: token, entrypoint: 'decimals' }, 'latest')) ?? [];
@@ -13,7 +13,7 @@ export async function fetchTokenDecimals(token: string): Promise<number> {
 	return decimals;
 }
 
-export async function fetchTokenSymbol(token: string): Promise<string> {
+export async function fetchTokenSymbol(token: string) {
 	const rpc = get(provider);
 	const [feltHex] = await rpc.callContract(
 		{ contractAddress: token, entrypoint: 'symbol' },

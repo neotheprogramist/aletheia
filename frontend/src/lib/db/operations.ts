@@ -42,15 +42,7 @@ export function clearOperations() {
  *
  * @param hash - operation hash
  */
-export async function getOperationDetails(hash: string): Promise<
-	| {
-			secret: string;
-			nullifier: string;
-			amount: string;
-			tokenAddress: string;
-	  }
-	| undefined
-> {
+export async function getOperationDetails(hash: string) {
 	const op = await getOperationByHash(hash);
 	if (!op) return undefined;
 

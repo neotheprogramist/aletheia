@@ -29,7 +29,7 @@ export async function wrapWithToast<T>(
 	fn: () => Promise<T>,
 	messages: { loading: string; success: string; error: string },
 	onError?: (err: unknown) => void | Promise<void>
-): Promise<T | undefined> {
+) {
 	const loadingId = toastStore.addToast({
 		type: 'loading',
 		message: messages.loading
