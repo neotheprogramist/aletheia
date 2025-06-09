@@ -446,30 +446,30 @@
 <ProtectedRoute>
 	<div class="mx-auto p-6">
 		<Card>
+			<SelectionToggle
+				options={[
+					{ label: 'Swap', value: 'swap', isFirst: true },
+					{ label: 'Fee', value: 'fee', isLast: true }
+				]}
+				selected={selectionMode}
+				onChange={handleSelectionChange}
+				onReset={resetAll}
+			/>
+
+			<!-- Instructions -->
+			<Instructions action="swap" mode={selectionMode} />
+
+			<TokenSelect
+				tokens={$tokens}
+				bind:value={$selectedToken}
+				placeholder="Filter deposits by token"
+				class_="mb-4 w-64"
+				disabled={selectionMode === 'fee'}
+			/>
+			<!-- Deposits Table -->
 			{#if !deposits.length}
-				<h2>Please make a deposit first!</h2>
+				<h2 class="text-center">Please make a deposit first!</h2>
 			{:else}
-				<SelectionToggle
-					options={[
-						{ label: 'Swap', value: 'swap', isFirst: true },
-						{ label: 'Fee', value: 'fee', isLast: true }
-					]}
-					selected={selectionMode}
-					onChange={handleSelectionChange}
-					onReset={resetAll}
-				/>
-
-				<!-- Instructions -->
-				<Instructions action="swap" mode={selectionMode} />
-
-				<TokenSelect
-					tokens={$tokens}
-					bind:value={$selectedToken}
-					placeholder="Filter deposits by token"
-					class_="mb-4 w-64"
-					disabled={selectionMode === 'fee'}
-				/>
-				<!-- Deposits Table -->
 				<PaginatedTable
 					columns={defaultDepositColumns}
 					items={deposits}
@@ -485,43 +485,43 @@
 							: []}
 					hoverClass="hover:bg-green-600"
 				/>
+			{/if}
 
-				<!-- Selected‐deposit cards -->
-				<SelectedDeposits
-					items={[
-						{ title: 'Swap Deposit', deposit: selectedSwapDeposit },
-						{ title: 'Fee Deposit', deposit: selectedFeeDeposit }
-					]}
-				/>
+			<!-- Selected‐deposit cards -->
+			<SelectedDeposits
+				items={[
+					{ title: 'Swap Deposit', deposit: selectedSwapDeposit },
+					{ title: 'Fee Deposit', deposit: selectedFeeDeposit }
+				]}
+			/>
 
-				<!-- Swap Form -->
-				{#if selectedSwapDeposit && selectedFeeDeposit}
-					<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
-						<Card>
-							<form on:submit|preventDefault={initiateSwap} class="mt-6 flex flex-col gap-4">
-								<Input
-									bind:value={swapAmount}
-									required
-									placeholder="Amount to Swap"
+			<!-- Swap Form -->
+			{#if selectedSwapDeposit && selectedFeeDeposit}
+				<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
+					<Card>
+						<form on:submit|preventDefault={initiateSwap} class="mt-6 flex flex-col gap-4">
+							<Input
+								bind:value={swapAmount}
+								required
+								placeholder="Amount to Swap"
+								class_="w-full"
+							/>
+							{#if get(tokens).filter((t) => t.address !== selectedSwapDeposit?.data.tokenAddress).length > 0}
+								<TokenSelect
+									tokens={get(tokens).filter(
+										(t) => t.address !== selectedSwapDeposit?.data.tokenAddress
+									)}
+									bind:value={targetToken}
+									placeholder="Select token to receive"
 									class_="w-full"
 								/>
-								{#if get(tokens).filter((t) => t.address !== selectedSwapDeposit?.data.tokenAddress).length > 0}
-									<TokenSelect
-										tokens={get(tokens).filter(
-											(t) => t.address !== selectedSwapDeposit?.data.tokenAddress
-										)}
-										bind:value={targetToken}
-										placeholder="Select token to receive"
-										class_="w-full"
-									/>
-								{:else}
-									<p class="text-sm text-red-500">Brak dostępnych tokenów do swapu.</p>
-								{/if}
-								<Button text="Swap" class_="mt-2 w-full" loading={isLoading} type="submit" />
-							</form>
-						</Card>
-					</div>
-				{/if}
+							{:else}
+								<p class="text-sm text-red-500">Brak dostępnych tokenów do swapu.</p>
+							{/if}
+							<Button text="Swap" class_="mt-2 w-full" loading={isLoading} type="submit" />
+						</form>
+					</Card>
+				</div>
 			{/if}
 
 			<!-- Modal Confirm -->

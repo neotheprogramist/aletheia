@@ -374,30 +374,29 @@
 <ProtectedRoute>
 	<div class="mx-auto p-6">
 		<Card>
+			<SelectionToggle
+				options={[
+					{ label: 'Withdraw', value: 'withdraw', isFirst: true },
+					{ label: 'Fee', value: 'fee', isLast: true }
+				]}
+				selected={selectionMode}
+				onChange={handleSelectionChange}
+				onReset={resetAll}
+			/>
+
+			<!-- Instructions -->
+			<Instructions action="withdraw" mode={selectionMode} />
+
+			<TokenSelect
+				tokens={$tokens}
+				bind:value={$selectedToken}
+				placeholder="Filter deposits by token"
+				class_="mb-4 w-64"
+				disabled={selectionMode === 'fee'}
+			/>
 			{#if !deposits.length}
-				<h2>Please make a deposit first!</h2>
+				<h2 class="text-center">Please make a deposit first!</h2>
 			{:else}
-				<SelectionToggle
-					options={[
-						{ label: 'Withdraw', value: 'withdraw', isFirst: true },
-						{ label: 'Fee', value: 'fee', isLast: true }
-					]}
-					selected={selectionMode}
-					onChange={handleSelectionChange}
-					onReset={resetAll}
-				/>
-
-				<!-- Instructions -->
-				<Instructions action="withdraw" mode={selectionMode} />
-
-				<TokenSelect
-					tokens={$tokens}
-					bind:value={$selectedToken}
-					placeholder="Filter deposits by token"
-					class_="mb-4 w-64"
-					disabled={selectionMode === 'fee'}
-				/>
-				<!-- Deposits Table -->
 				<PaginatedTable
 					columns={defaultDepositColumns}
 					items={deposits}
@@ -413,37 +412,37 @@
 							: []}
 					hoverClass="hover:bg-green-600"
 				/>
+			{/if}
 
-				<!-- Selected‐deposit cards -->
-				<SelectedDeposits
-					items={[
-						{ title: 'Withdrawal Deposit', deposit: selectedWithdrawDeposit },
-						{ title: 'Fee Deposit', deposit: selectedFeeDeposit }
-					]}
-				/>
+			<!-- Selected‐deposit cards -->
+			<SelectedDeposits
+				items={[
+					{ title: 'Withdrawal Deposit', deposit: selectedWithdrawDeposit },
+					{ title: 'Fee Deposit', deposit: selectedFeeDeposit }
+				]}
+			/>
 
-				<!-- Withdraw Form -->
-				{#if selectedWithdrawDeposit && selectedFeeDeposit}
-					<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
-						<Card>
-							<form on:submit|preventDefault={initiateWithdraw} class="mt-6 flex flex-col gap-4">
-								<Input
-									bind:value={withdrawRecipient}
-									required
-									placeholder="Recipient Address"
-									class_="w-full"
-								/>
-								<Input
-									bind:value={withdrawAmount}
-									required
-									placeholder="Amount to Withdraw"
-									class_="w-full"
-								/>
-								<Button text="Withdraw" class_="mt-2 w-full" loading={isLoading} type="submit" />
-							</form>
-						</Card>
-					</div>
-				{/if}
+			<!-- Withdraw Form -->
+			{#if selectedWithdrawDeposit && selectedFeeDeposit}
+				<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
+					<Card>
+						<form on:submit|preventDefault={initiateWithdraw} class="mt-6 flex flex-col gap-4">
+							<Input
+								bind:value={withdrawRecipient}
+								required
+								placeholder="Recipient Address"
+								class_="w-full"
+							/>
+							<Input
+								bind:value={withdrawAmount}
+								required
+								placeholder="Amount to Withdraw"
+								class_="w-full"
+							/>
+							<Button text="Withdraw" class_="mt-2 w-full" loading={isLoading} type="submit" />
+						</form>
+					</Card>
+				</div>
 			{/if}
 
 			<!-- Modal Confirm -->

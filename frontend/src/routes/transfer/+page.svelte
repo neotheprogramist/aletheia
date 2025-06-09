@@ -555,27 +555,27 @@
 					</form>
 				</div>
 			{:else}
-				{#if !deposits.length}
-					<h2 class="mt-6">Please make a deposit first!</h2>
-				{:else}
-					<SelectionToggle
-						options={[
-							{ label: 'Transfer', value: 'transfer', isFirst: true },
-							{ label: 'Fee', value: 'fee', isLast: true }
-						]}
-						selected={selectionMode}
-						onChange={handleSelectionChange}
-						onReset={resetAll}
-					/>
-					<Instructions action="transfer" mode={selectionMode} />
+				<SelectionToggle
+					options={[
+						{ label: 'Transfer', value: 'transfer', isFirst: true },
+						{ label: 'Fee', value: 'fee', isLast: true }
+					]}
+					selected={selectionMode}
+					onChange={handleSelectionChange}
+					onReset={resetAll}
+				/>
+				<Instructions action="transfer" mode={selectionMode} />
 
-					<TokenSelect
-						tokens={$tokens}
-						bind:value={$selectedToken}
-						placeholder="Filter deposits by token"
-						class_="mb-4 w-64"
-						disabled={selectionMode === 'fee'}
-					/>
+				<TokenSelect
+					tokens={$tokens}
+					bind:value={$selectedToken}
+					placeholder="Filter deposits by token"
+					class_="mb-4 w-64"
+					disabled={selectionMode === 'fee'}
+				/>
+				{#if !deposits.length}
+					<h2 class="text-center">Please make a deposit first!</h2>
+				{:else}
 					<PaginatedTable
 						columns={defaultDepositColumns}
 						items={deposits}
@@ -590,62 +590,62 @@
 								: []}
 						hoverClass="hover:bg-green-600"
 					/>
-
-					<SelectedDeposits
-						items={[
-							{ title: 'Transfer Deposit', deposit: selectedTransferDeposit },
-							{ title: 'Fee Deposit', deposit: selectedFeeDeposit }
-						]}
-					/>
-
-					{#if selectedTransferDeposit && selectedFeeDeposit}
-						<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
-							<Card>
-								<form on:submit|preventDefault={initiateTransfer} class="mt-6 flex flex-col gap-4">
-									<Input
-										bind:value={transferSecretAndNullifierHash}
-										required
-										placeholder="Recipient Hash"
-										class_="w-full"
-									/>
-									<Input
-										bind:value={transferAmount}
-										required
-										placeholder="Amount to Transfer"
-										class_="w-full"
-									/>
-									<Button text="Transfer" class_="mt-2 w-full" loading={isLoading} type="submit" />
-								</form>
-							</Card>
-						</div>
-					{/if}
 				{/if}
 
-				<Modal
-					show={showFeeModal}
-					title="Confirm Transfer"
-					confirmText="Accept"
-					cancelText="Reject"
-					closeOnOutsideClick={false}
-					onConfirm={confirmTransfer}
-					onCancel={() => {
-						showFeeModal = false;
-						isLoading = false;
-					}}
-					onClose={() => {
-						showFeeModal = false;
-						isLoading = false;
-					}}
-				>
-					<p class="text-sm">
-						You’re about to transfer
-						<strong class="break-words">{transferAmount}</strong>
-						tokens, paying a fee of
-						<strong class="break-words">{feeWeiHex}</strong>
-						tokens. Proceed?
-					</p>
-				</Modal>
+				<SelectedDeposits
+					items={[
+						{ title: 'Transfer Deposit', deposit: selectedTransferDeposit },
+						{ title: 'Fee Deposit', deposit: selectedFeeDeposit }
+					]}
+				/>
+
+				{#if selectedTransferDeposit && selectedFeeDeposit}
+					<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
+						<Card>
+							<form on:submit|preventDefault={initiateTransfer} class="mt-6 flex flex-col gap-4">
+								<Input
+									bind:value={transferSecretAndNullifierHash}
+									required
+									placeholder="Recipient Hash"
+									class_="w-full"
+								/>
+								<Input
+									bind:value={transferAmount}
+									required
+									placeholder="Amount to Transfer"
+									class_="w-full"
+								/>
+								<Button text="Transfer" class_="mt-2 w-full" loading={isLoading} type="submit" />
+							</form>
+						</Card>
+					</div>
+				{/if}
 			{/if}
+
+			<Modal
+				show={showFeeModal}
+				title="Confirm Transfer"
+				confirmText="Accept"
+				cancelText="Reject"
+				closeOnOutsideClick={false}
+				onConfirm={confirmTransfer}
+				onCancel={() => {
+					showFeeModal = false;
+					isLoading = false;
+				}}
+				onClose={() => {
+					showFeeModal = false;
+					isLoading = false;
+				}}
+			>
+				<p class="text-sm">
+					You’re about to transfer
+					<strong class="break-words">{transferAmount}</strong>
+					tokens, paying a fee of
+					<strong class="break-words">{feeWeiHex}</strong>
+					tokens. Proceed?
+				</p>
+			</Modal>
 		</Card>
 	</div>
 </ProtectedRoute>

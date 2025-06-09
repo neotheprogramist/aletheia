@@ -393,27 +393,27 @@
 <ProtectedRoute>
 	<div class="mx-auto p-6">
 		<Card>
+			<SelectionToggle
+				options={[
+					{ label: 'First', value: 'merge1', isFirst: true },
+					{ label: 'Second', value: 'merge2' },
+					{ label: 'Fee', value: 'fee', isLast: true }
+				]}
+				selected={selectionMode}
+				onChange={handleSelectionChange}
+				onReset={resetAll}
+			/>
+			<Instructions action="merge" mode={selectionMode} />
+			<TokenSelect
+				tokens={$tokens}
+				bind:value={$selectedToken}
+				placeholder="Filter deposits by token"
+				class_="mb-4 w-64"
+				disabled={selectionMode === 'fee'}
+			/>
 			{#if !deposits.length}
-				<h2>Please make a deposit first!</h2>
+				<h2 class="text-center">Please make a deposit first!</h2>
 			{:else}
-				<SelectionToggle
-					options={[
-						{ label: 'First', value: 'merge1', isFirst: true },
-						{ label: 'Second', value: 'merge2' },
-						{ label: 'Fee', value: 'fee', isLast: true }
-					]}
-					selected={selectionMode}
-					onChange={handleSelectionChange}
-					onReset={resetAll}
-				/>
-				<Instructions action="merge" mode={selectionMode} />
-				<TokenSelect
-					tokens={$tokens}
-					bind:value={$selectedToken}
-					placeholder="Filter deposits by token"
-					class_="mb-4 w-64"
-					disabled={selectionMode === 'fee'}
-				/>
 				<PaginatedTable
 					columns={defaultDepositColumns}
 					items={deposits}
@@ -437,29 +437,29 @@
 					]}
 					hoverClass="hover:bg-green-600"
 				/>
+			{/if}
 
-				<SelectedDeposits
-					items={[
-						{ title: '#1 Deposit', deposit: selectedMerge1Deposit },
-						{ title: '#2 Deposit', deposit: selectedMerge2Deposit },
-						{ title: 'Fee Deposit', deposit: selectedFeeDeposit }
-					]}
-				/>
-				{#if selectedMerge1Deposit && selectedMerge2Deposit && selectedFeeDeposit}
-					<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
-						<Card>
-							<form class="mt-6 flex flex-col gap-4">
-								<Button
-									onClick={initiateMerge}
-									text="Merge"
-									class_="mt-2 w-full"
-									loading={isLoading}
-									type="submit"
-								/>
-							</form>
-						</Card>
-					</div>
-				{/if}
+			<SelectedDeposits
+				items={[
+					{ title: '#1 Deposit', deposit: selectedMerge1Deposit },
+					{ title: '#2 Deposit', deposit: selectedMerge2Deposit },
+					{ title: 'Fee Deposit', deposit: selectedFeeDeposit }
+				]}
+			/>
+			{#if selectedMerge1Deposit && selectedMerge2Deposit && selectedFeeDeposit}
+				<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
+					<Card>
+						<form class="mt-6 flex flex-col gap-4">
+							<Button
+								onClick={initiateMerge}
+								text="Merge"
+								class_="mt-2 w-full"
+								loading={isLoading}
+								type="submit"
+							/>
+						</form>
+					</Card>
+				</div>
 			{/if}
 
 			<!-- Modal Confirm -->

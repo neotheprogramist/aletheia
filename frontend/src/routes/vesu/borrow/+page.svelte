@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { get } from 'svelte/store';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import Card from '$lib/ui/Card.svelte';
 	import SelectionToggle from '$lib/ui/SelectionToggle.svelte';
@@ -9,7 +8,6 @@
 	import {
 		loadDeposits,
 		loadEmptyDeposits,
-		loadEmptyDisplayDeposits,
 		type DisplayOperation
 	} from '$lib/utils/loadDepositsForToken';
 	import { defaultDepositColumns } from '$lib/utils/sharedColumns';
@@ -100,29 +98,29 @@
 <ProtectedRoute>
 	<div class="mx-auto p-6">
 		<Card>
+			<SelectionToggle
+				options={[
+					{ label: 'Collateral', value: 'collateral', isFirst: true },
+					{ label: 'Collateral Fee', value: 'fee' },
+					{ label: 'Debt', value: 'debt' },
+					{ label: 'Debt Fee', value: 'debtFee', isLast: true }
+				]}
+				selected={selectionMode}
+				onChange={handleSelectionChange}
+				onReset={resetAll}
+			/>
+			<Instructions action="borrow" mode={selectionMode} />
+
+			<TokenSelect
+				tokens={$tokens}
+				bind:value={$selectedToken}
+				placeholder="Filter deposits by token"
+				class_="mb-4 w-64"
+				disabled={selectionMode === 'fee' || selectionMode == 'debtFee'}
+			/>
 			{#if !deposits.length}
 				<h2 class="text-center">Please make a deposit first!</h2>
 			{:else}
-				<SelectionToggle
-					options={[
-						{ label: 'Collateral', value: 'collateral', isFirst: true },
-						{ label: 'Collateral Fee', value: 'fee' },
-						{ label: 'Debt', value: 'debt' },
-						{ label: 'Debt Fee', value: 'debtFee', isLast: true }
-					]}
-					selected={selectionMode}
-					onChange={handleSelectionChange}
-					onReset={resetAll}
-				/>
-				<Instructions action="borrow" mode={selectionMode} />
-
-				<TokenSelect
-					tokens={$tokens}
-					bind:value={$selectedToken}
-					placeholder="Filter deposits by token"
-					class_="mb-4 w-64"
-					disabled={selectionMode === 'fee' || selectionMode == 'debtFee'}
-				/>
 				<PaginatedTable
 					columns={defaultDepositColumns}
 					items={deposits}
@@ -150,16 +148,16 @@
 					]}
 					hoverClass="hover:bg-green-600"
 				/>
-
-				<SelectedDeposits
-					items={[
-						{ title: 'Collateral Deposit', deposit: selectedCollateralDeposit },
-						{ title: 'Fee Collateral', deposit: selectedCollateralFeeDeposit },
-						{ title: 'Debt Deposit', deposit: selectedDebtDeposit },
-						{ title: 'Fee Debt', deposit: selectedDebtFeeDeposit }
-					]}
-				/>
 			{/if}
+
+			<SelectedDeposits
+				items={[
+					{ title: 'Collateral Deposit', deposit: selectedCollateralDeposit },
+					{ title: 'Fee Collateral', deposit: selectedCollateralFeeDeposit },
+					{ title: 'Debt Deposit', deposit: selectedDebtDeposit },
+					{ title: 'Fee Debt', deposit: selectedDebtFeeDeposit }
+				]}
+			/>
 		</Card>
 	</div>
 </ProtectedRoute>
