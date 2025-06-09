@@ -1,15 +1,17 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import WalletConnector from '$lib/ui/WalletConnector.svelte';
 	import ToggleTheme from './ToggleTheme.svelte';
 	import { isConnected } from '$lib/stores/wallet';
-	import { Download, Upload } from 'lucide-svelte';
+	import { Download, Upload, ChevronDown } from 'lucide-svelte';
 	import { exportOperations, importOperations } from '$lib/utils/operationsBackup';
 	import { toastStore } from '$lib/stores/toast';
 
 	let fileInput: HTMLInputElement;
+	let dropdownRef: HTMLElement | null = null;
+	let showVesuDropdown = false;
 
-	/** Trigger export: read all operations, build a JSON blob, and prompt “Save as…” */
 	async function handleExport() {
 		try {
 			const json = await exportOperations();
@@ -36,12 +38,10 @@
 		}
 	}
 
-	/** Open hidden file input to select a JSON for import */
 	function openFilePicker() {
 		fileInput?.click();
 	}
 
-	/** When a file is selected, read it and call importOperations(...) */
 	function handleFileSelected(event: Event) {
 		const input = event.currentTarget as HTMLInputElement;
 		if (!input.files || input.files.length === 0) return;
@@ -64,7 +64,7 @@
 					message: 'Failed to import operations. Ensure the file is valid JSON.'
 				});
 			} finally {
-				input.value = ''; // reset so user can re-select the same file if needed
+				input.value = '';
 			}
 		};
 
@@ -78,6 +78,35 @@
 
 		reader.readAsText(file);
 	}
+
+	function toggleDropdown() {
+		showVesuDropdown = !showVesuDropdown;
+	}
+
+	function closeDropdown() {
+		showVesuDropdown = false;
+	}
+
+	function onClickOutside(node: HTMLElement, handler: () => void) {
+		const handleClick = (event: MouseEvent) => {
+			if (!node.contains(event.target as Node)) handler();
+		};
+		document.addEventListener('click', handleClick);
+		return {
+			destroy() {
+				document.removeEventListener('click', handleClick);
+			}
+		};
+	}
+
+	let destroyClickOutside: { destroy: () => void } | null = null;
+
+	$: if (dropdownRef) {
+		// Clean up previous listener
+		destroyClickOutside?.destroy?.();
+		// Attach new one
+		destroyClickOutside = onClickOutside(dropdownRef, closeDropdown);
+	}
 </script>
 
 <nav
@@ -90,34 +119,43 @@
 			<a
 				href="/deposit"
 				class={page.url.pathname === '/deposit' ? 'font-bold text-sky-500' : 'hover:underline'}
+				>Deposit</a
 			>
-				Deposit
-			</a>
 			<a
 				href="/withdraw"
 				class={page.url.pathname === '/withdraw' ? 'font-bold text-sky-500' : 'hover:underline'}
+				>Withdraw</a
 			>
-				Withdraw
-			</a>
 			<a
 				href="/merge"
 				class={page.url.pathname === '/merge' ? 'font-bold text-sky-500' : 'hover:underline'}
+				>Merge</a
 			>
-				Merge
-			</a>
 			<a
 				href="/transfer"
 				class={page.url.pathname === '/transfer' ? 'font-bold text-sky-500' : 'hover:underline'}
+				>Transfer</a
 			>
-				Transfer
-			</a>
 			<a
 				href="/swap"
-				class={page.url.pathname === '/swap' ? 'font-bold text-sky-500' : 'hover:underline'}
+				class={page.url.pathname === '/swap' ? 'font-bold text-sky-500' : 'hover:underline'}>Swap</a
 			>
-				Swap
-			</a>
-			<!-- Export button -->
+
+			<div class="relative" bind:this={dropdownRef}>
+				<button class="flex items-center gap-1 hover:underline" on:click={toggleDropdown}>
+					Vesu <ChevronDown size={16} />
+				</button>
+				{#if showVesuDropdown}
+					<div
+						class="border-border bg-background absolute right-0 mt-2 w-32 rounded-md border shadow-lg"
+					>
+						<a href="/vesu/borrow" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">
+							Borrow
+						</a>
+					</div>
+				{/if}
+			</div>
+
 			<button
 				class="cursor-pointer rounded p-1 hover:bg-sky-800"
 				title="Export all operations to JSON"
@@ -126,7 +164,6 @@
 				<Download size={20} />
 			</button>
 
-			<!-- Import button -->
 			<button
 				class="cursor-pointer rounded p-1 hover:bg-sky-800"
 				title="Import operations from JSON"
@@ -135,7 +172,6 @@
 				<Upload size={20} />
 			</button>
 
-			<!-- Hidden file input for JSON import -->
 			<input
 				type="file"
 				accept="application/json"
