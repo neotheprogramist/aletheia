@@ -48,6 +48,12 @@ pub trait IPrivacyAccount<TContractState> {
     fn withdraw_accumulated_fee(
         ref self: TContractState, recipient: ContractAddress, amount: u256,
     ) -> u256;
+    fn set_vk(
+        ref self: TContractState,
+        merge_vk: Span<felt252>,
+        transfer_vk: Span<felt252>,
+        execute_vk: Span<felt252>,
+    ) -> bool;
 }
 
 #[derive(Drop)]
@@ -331,9 +337,6 @@ pub mod PrivacyAccount {
         current_gas_price: u256,
         merge_gas_consumed: u128,
         transfer_gas_consumed: u128,
-        merge_vk: Span<felt252>,
-        transfer_vk: Span<felt252>,
-        execute_vk: Span<felt252>,
     ) {
         // 1) Standard ownership & merkle init
         self.ownable.initializer(owner);
@@ -364,20 +367,6 @@ pub mod PrivacyAccount {
         // 8) Set gas consumed
         self.merge_gas_consumed.write(merge_gas_consumed);
         self.transfer_gas_consumed.write(transfer_gas_consumed);
-
-        // 9) Set vks
-        // MERGE under key 0
-        for i in 0..merge_vk.len() {
-            self.supported_vks.entry(0).push(*merge_vk[i]);
-        }
-        // TRANSFER under key 1
-        for i in 0..transfer_vk.len() {
-            self.supported_vks.entry(1).push(*transfer_vk[i]);
-        }
-        // EXECUTE under key 2
-        for i in 0..execute_vk.len() {
-            self.supported_vks.entry(2).push(*execute_vk[i]);
-        }
     }
 
     #[abi(embed_v0)]
@@ -747,6 +736,27 @@ pub mod PrivacyAccount {
             let gas_consumed_u256: u256 = gas_consumed.try_into().unwrap();
             let total_fee: u256 = gas_consumed_u256 * gas_price;
             total_fee
+        }
+        fn set_vk(
+            ref self: sn::privacy_account::PrivacyAccount::ContractState,
+            merge_vk: core::array::Span<core::felt252>,
+            transfer_vk: core::array::Span<core::felt252>,
+            execute_vk: core::array::Span<core::felt252>,
+        ) -> core::bool {
+            self.ownable.assert_only_owner();
+            // MERGE under key 0
+            for i in 0..merge_vk.len() {
+                self.supported_vks.entry(0).push(*merge_vk[i]);
+            }
+            // TRANSFER under key 1
+            for i in 0..transfer_vk.len() {
+                self.supported_vks.entry(1).push(*transfer_vk[i]);
+            }
+            // EXECUTE under key 2
+            for i in 0..execute_vk.len() {
+                self.supported_vks.entry(2).push(*execute_vk[i]);
+            }
+            true
         }
     }
 }
