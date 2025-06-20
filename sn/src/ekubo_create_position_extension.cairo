@@ -3,9 +3,10 @@ use starknet::ContractAddress;
 #[derive(PartialEq, Copy, Drop, Serde, starknet::Store)]
 #[allow(starknet::store_no_default_variant)]
 enum PositionState {
-    Token0Deposited,
-    Token1Deposited,
-    Completed,
+    Empty, // No deposits
+    Token0Deposited, // Only token0 deposited
+    Token1Deposited, // Only token1 deposited
+    BothDeposited // ready to create position
 }
 
 #[derive(PartialEq, Copy, Drop, Serde, starknet::Store)]
@@ -16,6 +17,9 @@ struct PositionData {
     amount0: u128,
     amount1: u128,
     position_id: u64,
+    pool_key_fee: u128,
+    pool_key_tick_spacing: u128,
+    pool_key_extension: ContractAddress,
 }
 
 #[starknet::interface]
@@ -30,6 +34,7 @@ pub trait IEkuboCreatePositionExtension<TContractState> {
 #[starknet::contract]
 mod EkuboCreatePositionExtension {
     use ekubo::components::clear::{IClearDispatcher, IClearDispatcherTrait};
+    use ekubo::interfaces::erc721::{IERC721Dispatcher, IERC721DispatcherTrait};
     use ekubo::interfaces::positions::{IPositionsDispatcher, IPositionsDispatcherTrait};
     use ekubo::types::bounds::Bounds;
     use ekubo::types::keys::PoolKey;
@@ -79,12 +84,12 @@ mod EkuboCreatePositionExtension {
 
     pub mod Errors {
         pub const TRANSFER_FAILED: felt252 = 'TRANSFER_FAILED';
-        pub const POSITION_ALREADY_COMPLETED: felt252 = 'POSITION_ALREADY_COMPLETED';
         pub const NOT_OWNER: felt252 = 'NOT_OWNER';
         pub const INVALID_STATE: felt252 = 'INVALID_STATE';
         pub const INVALID_TOKEN: felt252 = 'INVALID_TOKEN';
         pub const DEPOSIT_NFT_FAILED: felt252 = 'DEPOSIT_NFT_FAILED';
         pub const POSITION_NOT_FOUND: felt252 = 'POSITION_NOT_FOUND';
+        pub const POOL_KEY_MISMATCH: felt252 = 'POOL_KEY_MISMATCH';
     }
 
     #[event]
@@ -146,11 +151,16 @@ mod EkuboCreatePositionExtension {
             let this = starknet::get_contract_address();
 
             if pub_key_initialized {
-                // Modify existing position
                 let mut position = self.position_data.entry(params.public_key).read();
 
+                // Verify validity pool_key
                 assert(
-                    position.state != PositionState::Completed, Errors::POSITION_ALREADY_COMPLETED,
+                    params.pool_key.token0 == position.token0
+                        && params.pool_key.token1 == position.token1
+                        && params.pool_key.fee == position.pool_key_fee
+                        && params.pool_key.tick_spacing == position.pool_key_tick_spacing
+                        && params.pool_key.extension == position.pool_key_extension,
+                    Errors::POOL_KEY_MISMATCH,
                 );
 
                 // Validate correct token
@@ -158,28 +168,40 @@ mod EkuboCreatePositionExtension {
                 let is_token1 = params.transfer_asset == position.token1;
                 assert(is_token0 || is_token1, Errors::INVALID_TOKEN);
 
-                // Transfer the second token
+                // Transfer token
                 let token = IERC20Dispatcher { contract_address: params.transfer_asset };
                 assert(
                     token.transfer_from(caller, this, params.transfer_amount.into()),
                     Errors::TRANSFER_FAILED,
                 );
 
-                // Update position data with second token
-                if is_token0 && position.state == PositionState::Token1Deposited {
-                    // Case 1: Deposit token0, position already has token1
-                    position.amount0 = params.transfer_amount;
-                    position.state = PositionState::Token0Deposited;
-                } else if is_token1 && position.state == PositionState::Token0Deposited {
-                    // Case 2: Deposit token1, position already has token0
+                // Update position data based on current state
+                if position.state == PositionState::Empty {
+                    // First deposit after reset
+                    if is_token0 {
+                        position.amount0 = params.transfer_amount;
+                        position.state = PositionState::Token0Deposited;
+                    } else {
+                        position.amount1 = params.transfer_amount;
+                        position.state = PositionState::Token1Deposited;
+                    }
+                } else if position.state == PositionState::Token0Deposited {
+                    // Already have token0, has to be token1
+                    assert(is_token1, Errors::INVALID_TOKEN);
                     position.amount1 = params.transfer_amount;
-                    position.state = PositionState::Token1Deposited;
-                } else {
+                    position.state = PositionState::BothDeposited;
+                } else if position.state == PositionState::Token1Deposited {
+                    // Already have token1, has to be token0
+                    assert(is_token0, Errors::INVALID_TOKEN);
+                    position.amount0 = params.transfer_amount;
+                    position.state = PositionState::BothDeposited;
+                } else if position.state == PositionState::BothDeposited {
+                    // Shall not happen - only for security
                     assert(false, Errors::INVALID_STATE);
                 }
 
-                // Execute position creation when we have both tokens
-                if (position.amount0 > 0 && position.amount1 > 0) {
+                // Execute position creation only if both are deposited
+                if position.state == PositionState::BothDeposited {
                     self
                         ._create_ekubo_position(
                             ref position,
@@ -189,6 +211,11 @@ mod EkuboCreatePositionExtension {
                             params.secret_and_nullifier_hash,
                             params.public_key,
                         );
+
+                    // Reset position after creation
+                    position.amount0 = 0;
+                    position.amount1 = 0;
+                    position.state = PositionState::Empty;
                 }
 
                 self.position_data.entry(params.public_key).write(position);
@@ -204,27 +231,22 @@ mod EkuboCreatePositionExtension {
                 );
 
                 // Determine which token was deposited first
-                let state = if params.transfer_asset == params.pool_key.token0 {
-                    PositionState::Token0Deposited
+                let (state, amount0, amount1) = if params.transfer_asset == params.pool_key.token0 {
+                    (PositionState::Token0Deposited, params.transfer_amount, 0)
                 } else {
-                    PositionState::Token1Deposited
+                    (PositionState::Token1Deposited, 0, params.transfer_amount)
                 };
 
                 let position_data = PositionData {
                     state,
                     token0: params.pool_key.token0,
                     token1: params.pool_key.token1,
-                    amount0: if params.transfer_asset == params.pool_key.token0 {
-                        params.transfer_amount
-                    } else {
-                        0
-                    },
-                    amount1: if params.transfer_asset == params.pool_key.token1 {
-                        params.transfer_amount
-                    } else {
-                        0
-                    },
+                    amount0,
+                    amount1,
                     position_id: 0,
+                    pool_key_fee: params.pool_key.fee,
+                    pool_key_tick_spacing: params.pool_key.tick_spacing,
+                    pool_key_extension: params.pool_key.extension,
                 };
 
                 self.position_data.entry(params.public_key).write(position_data);
@@ -271,10 +293,15 @@ mod EkuboCreatePositionExtension {
                     },
                 );
 
+            // Set approval for nft
+            let nft_dispatcher = IERC721Dispatcher { contract_address: self.nft.read() };
+            nft_dispatcher.approve(self.privacy_account.read(), position_id.into());
+
             // Deposit NFT to privacy account
             let privacy = IPrivacyAccountDispatcher {
                 contract_address: self.privacy_account.read(),
             };
+
             assert(
                 privacy.deposit_nft(secret_and_nullifier_hash, position_id, self.nft.read()),
                 Errors::DEPOSIT_NFT_FAILED,
@@ -282,7 +309,6 @@ mod EkuboCreatePositionExtension {
 
             // Update position data
             position.position_id = position_id;
-            position.state = PositionState::Completed;
 
             // Emit event
             self
