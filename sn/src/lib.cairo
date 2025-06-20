@@ -4,6 +4,7 @@ mod merkle;
 mod poseidon;
 mod privacy_account;
 pub mod swap_extension;
+mod ekubo_create_position_extension;
 mod transfer_verifier;
 mod utils;
 mod vesu_borrow_extension;

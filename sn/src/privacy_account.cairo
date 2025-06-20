@@ -20,6 +20,12 @@ pub trait IPrivacyAccount<TContractState> {
         amount: u256,
         token_address: ContractAddress,
     ) -> bool;
+    fn deposit_nft(
+        ref self: TContractState,
+        secret_and_nullifier_hash: u256,
+        token_id: u64,
+        token_address: ContractAddress,
+    ) -> bool;
     fn execute_extension(
         ref self: TContractState,
         proof: Span<felt252>,
@@ -209,6 +215,7 @@ impl PublicInputTransferImpl of PublicInputTransferTrait {
 
 #[starknet::contract(account)]
 pub mod PrivacyAccount {
+    use ekubo::interfaces::erc721::{IERC721Dispatcher, IERC721DispatcherTrait};
     pub const VK_SIZE: usize = 112;
     use core::array::{Array, ArrayTrait};
     use core::option::OptionTrait;
@@ -389,6 +396,31 @@ pub mod PrivacyAccount {
             self.users_balance.write(self.users_balance.read() + amount);
             true
         }
+
+        fn deposit_nft(
+            ref self: ContractState,
+            secret_and_nullifier_hash: u256,
+            token_id: u64,
+            token_address: ContractAddress,
+        ) -> core::bool {
+            // 1. Calculate commitment
+            let token_id_u256: u256 = token_id.try_into().unwrap();
+            let secret_nullifier_token_id_hash = hash(secret_and_nullifier_hash, token_id_u256);
+
+            let token_address_felt: felt252 = token_address.into();
+            let token_address_u256: u256 = token_address_felt.into();
+            let commitment = hash(secret_nullifier_token_id_hash, token_address_u256);
+
+            // 2. Add leaf to the merkle tree
+            self.merkle.add_leaf(commitment);
+
+            // 3. Transfer nft to itself
+            let token = IERC721Dispatcher { contract_address: token_address };
+            token.transfer_from(get_caller_address(), get_contract_address(), token_id_u256);
+
+            true
+        }
+
 
         fn execute_extension(
             ref self: ContractState,
