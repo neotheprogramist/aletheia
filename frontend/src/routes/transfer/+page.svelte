@@ -284,9 +284,9 @@
 
 				// Generate zk proof
 				const honkCalldataHex = await generateHonkCalldata(
-					'circuits/transfer.json',
-					'circuits/recursive.json',
-					'circuits/vk_recursive.bin',
+					'/circuits/transfer.json',
+					'/circuits/recursive.json',
+					'/circuits/vk_recursive.bin',
 					transferInput
 				);
 				// Prepare StarkNet transaction

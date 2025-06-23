@@ -310,9 +310,9 @@
 
 				// 8) Generate the zk proof and prepare it as calldata
 				const honkCalldataHex = await generateHonkCalldata(
-					'circuits/execute.json',
-					'circuits/recursive.json',
-					'circuits/vk_recursive.bin',
+					'/circuits/execute.json',
+					'/circuits/recursive.json',
+					'/circuits/vk_recursive.bin',
 					executeInput
 				);
 
