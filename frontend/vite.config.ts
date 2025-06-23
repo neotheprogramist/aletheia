@@ -8,15 +8,27 @@ import tailwindcss from '@tailwindcss/vite';
 import { svelteTesting } from '@testing-library/svelte/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 import serveStatic from 'vite-plugin-serve-static';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-	// Prevent bb.js from being pre-bundled by Vite’s optimizer
-	optimizeDeps: {
-		exclude: ['@aztec/bb.js']
+	define: {
+		global: 'globalThis'
+	},
+	resolve: {
+		alias: {
+			// Pino error fix
+			pino: 'pino/browser.js'
+		}
 	},
 
-	// Allow Vite dev server to read worker files from node_modules
+	// Prevent bb.js from being pre-bundled by Vite's optimizer
+	optimizeDeps: {
+		exclude: ['@aztec/bb.js', '@noir-lang/noirc_abi', '@noir-lang/acvm_js'],
+		include: ['pino', 'garaga', '@noir-lang/noir_wasm', '@noir-lang/noir_js']
+	},
+
+	// Allow Vite dev server  read worker files from node_modules
 	server: {
 		fs: {
 			allow: ['node_modules/@aztec/bb.js/dest/browser']
@@ -24,6 +36,16 @@ export default defineConfig({
 	},
 
 	plugins: [
+		// Dodaj polyfille Node.js na początku listy pluginów
+		nodePolyfills({
+			globals: {
+				Buffer: true,
+				global: true,
+				process: true
+			},
+			protocolImports: true
+		}),
+
 		tailwindcss(),
 
 		// === bb.js worker fix for dev mode ===
