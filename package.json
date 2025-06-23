@@ -17,7 +17,13 @@
     "test": "npm run test --workspaces"
   },
   "dependencies": {
+    "buffer": "^6.0.3",
     "frontend": "^0.0.1",
     "starknet": "^6.24.1"
+  },
+  "devDependencies": {
+    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
+    "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
+    "vite-plugin-node-polyfills": "^0.23.0"
   }
 }

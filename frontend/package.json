@@ -55,7 +55,7 @@
 		"garaga": "^0.18.1",
 		"lucide-svelte": "^0.511.0",
 		"msgpackr": "^1.11.4",
-		"starknet": "^7.4.0",
+		"starknet": "^7.5.1",
 		"starknetkit": "^2.10.4",
 		"zod": "^3.25.20"
 	}
