@@ -2,7 +2,6 @@
 	import { PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS } from '$env/static/public';
 	import { getOperationDetails } from '$lib/db/operations';
 	import { abortOperation } from '$lib/privacy/abortOperation';
-	import { confirmOperation } from '$lib/privacy/confirmOperation';
 	import { generateOperation } from '$lib/privacy/generateOperation';
 	import { nullifyOperation } from '$lib/privacy/nullifyOperation';
 	import { NoteDataSchema, type NoteData } from '$lib/schemas/schemas';
@@ -339,8 +338,6 @@
 				}
 
 				// 11) Confirm and nullify operations in the database
-				await confirmOperation(mergeRefundHash);
-				await confirmOperation(feeRefundHash);
 				await nullifyOperation(selectedMerge1Deposit.hash);
 				await nullifyOperation(selectedMerge2Deposit.hash);
 				await nullifyOperation(selectedFeeDeposit.hash);

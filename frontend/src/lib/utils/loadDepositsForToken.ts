@@ -131,7 +131,11 @@ export async function getPendingEmptyDepositsForToken(
 	if (setIsLoading) setIsLoading(true);
 
 	const pendingRaw = await wrapWithToast(
-		async () => (await getAllByStatus('pending')).filter((op) => op.data == null),
+		async () =>
+			(await getAllByStatus('pending')).filter(
+				(op) =>
+					op.data == null || (typeof op.data === 'object' && Object.keys(op.data).length === 0)
+			),
 		{ loading: '⏳ Loading pending…', success: '', error: '❌ Error' }
 	);
 
@@ -146,6 +150,7 @@ export async function getPendingEmptyDepositsForToken(
 			secret: op.secret,
 			nullifier: op.nullifier,
 			hash: op.hash,
+			commitment: undefined,
 			status: op.status as OperationStatus,
 			shortHex,
 			fullHex
@@ -160,5 +165,7 @@ export async function loadPendingEmptyDeposits(
 ) {
 	setLoading(true);
 	const ops = await getPendingEmptyDepositsForToken(token, setLoading);
+	console.log('ops', ops);
+
 	setPending(ops);
 }

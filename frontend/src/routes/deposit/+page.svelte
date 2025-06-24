@@ -14,7 +14,6 @@
 	import { toLowHigh } from '$lib/utils/toLowHigh';
 	import { toWei } from '$lib/utils/toWei';
 	import { generateOperation } from '$lib/privacy/generateOperation';
-	import { confirmOperation } from '$lib/privacy/confirmOperation';
 	import { abortOperation } from '$lib/privacy/abortOperation';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
 	import { provider } from '$lib/stores/provider';
@@ -64,8 +63,6 @@
 					params: { calls }
 				});
 
-				console.log(transaction_hash);
-
 				const rpc = get(provider);
 				if (!rpc) throw new Error('Missing Provider');
 
@@ -77,7 +74,6 @@
 					throw new Error('Transaction error: ${receipt.value}');
 				}
 
-				await confirmOperation(hash);
 				amount = '';
 			},
 			{

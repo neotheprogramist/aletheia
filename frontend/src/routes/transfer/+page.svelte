@@ -3,7 +3,6 @@
 	import { getOperationDetails } from '$lib/db/operations';
 	import { updateOperation } from '$lib/db/operationsDb';
 	import { abortOperation } from '$lib/privacy/abortOperation';
-	import { confirmOperation } from '$lib/privacy/confirmOperation';
 	import { generateOperation } from '$lib/privacy/generateOperation';
 	import { nullifyOperation } from '$lib/privacy/nullifyOperation';
 	import { NoteDataSchema, type NoteData } from '$lib/schemas/schemas';
@@ -330,9 +329,7 @@
 					throw new Error(`Transaction error: ${receipt.value}`);
 				}
 
-				// Confirm & nullify in DB
-				await confirmOperation(transferRefundHash);
-				await confirmOperation(feeRefundHash);
+				//  nullify in DB
 				await nullifyOperation(selectedTransferDeposit.hash);
 				await nullifyOperation(selectedFeeDeposit.hash);
 
@@ -469,19 +466,19 @@
 				if (!tree) throw new Error('Merkle tree does not exist');
 
 				// This will throw if proof data is missing
-				tree.getProofData(
-					garaga.poseidonHashBN254(
-						garaga.poseidonHashBN254(BigInt(editRow.hash), amountWei),
-						BigInt(editToken)
-					)
+				const commitment = garaga.poseidonHashBN254(
+					garaga.poseidonHashBN254(BigInt(editRow.hash), amountWei),
+					BigInt(editToken)
 				);
+				tree.getProofData(commitment);
 
 				await updateOperation({
+					commitment: commitment.toString(),
 					index: editRow.index,
 					hash: editRow.hash,
 					secret: editRow.secret,
 					nullifier: editRow.nullifier,
-					status: 'confirmed',
+					status: 'pending',
 					data: {
 						tokenAddress: editToken,
 						amount: amountWei.toString()

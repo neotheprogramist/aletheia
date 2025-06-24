@@ -9,6 +9,8 @@ import { get } from 'svelte/store';
 import { zkLibraries } from '$lib/stores/zkLibraries';
 import { HybridMerkleTree } from '$lib/merkle/hybridMerkleTree';
 import { getDepositsFromRange } from '$lib/starknet/client';
+import { getAllByStatus, updateOperation } from '$lib/db/operationsDb';
+import { confirmOperation } from '$lib/privacy/confirmOperation';
 
 export let merkleTree: HybridMerkleTree;
 let initialized = false;
@@ -41,14 +43,25 @@ export function startDepositProcessor() {
 
 			await delete_latest_db_block_number(fromBlock);
 
-			const deposits = await getDepositsFromRange(fromBlock, toBlock);
-
+			const deposits = await getDepositsFromRange(fromBlock + 1, toBlock);
 			for (const { hash, block_number } of deposits) {
 				await db_add_leaf(hash, block_number);
 				merkleTree.addLeaf(BigInt(hash));
 			}
+
+			const pendingOps = await getAllByStatus('pending');
+
+			const leafs = await get_all_leafs();
+			const leafHashSet = new Set(leafs.map((l) => l.hash));
+
+			for (const op of pendingOps) {
+				if (op.commitment && leafHashSet.has(op.commitment)) {
+					console.log(`✅ Auto-confirming pending op ${op.hash} (commitment ${op.commitment})`);
+					await confirmOperation(op.hash);
+				}
+			}
 		} catch (err) {
-			console.error('❌ Error in fetcher:', err);
+			console.error('❌ Error in depositProcessor:', err);
 		}
 	});
 }

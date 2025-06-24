@@ -16,6 +16,9 @@ export interface GenerateParams {
 export async function generateOperation(params: GenerateParams) {
 	const { data } = params;
 
+	// Sprawdź czy to jest "pełna" operacja czy placeholder
+	const isPlaceholder = !data || !data.tokenAddress || !data.amount;
+
 	// 1 Generate a 256-bit seed
 	const seedBytes = crypto.getRandomValues(new Uint8Array(32));
 	const seedHex = Array.from(seedBytes)
@@ -37,21 +40,31 @@ export async function generateOperation(params: GenerateParams) {
 	// 4 Compute secret, nullifier & hash
 	const secret = garaga.poseidonHashBN254(garaga.poseidonHashBN254(seed, seed), BigInt(index));
 	const nullifier = garaga.poseidonHashBN254(secret, secret);
-	const hash = garaga.poseidonHashBN254(secret, nullifier).toString();
+	const hash = garaga.poseidonHashBN254(secret, nullifier);
 
-	// 5 Build the operation record (using `hash` as the ID)
+	// 5 Compute commitment tylko jeśli mamy dane
+	let commitment: string | undefined;
+	if (!isPlaceholder && data) {
+		const preCommitment = garaga.poseidonHashBN254(hash, data.amount as bigint);
+		commitment = garaga
+			.poseidonHashBN254(preCommitment, BigInt(data.tokenAddress as string))
+			.toString();
+	}
+
+	// 6 Build the operation record
 	const op: Operation = {
 		index,
 		secret: secret.toString(),
 		nullifier: nullifier.toString(),
-		hash,
-		data,
+		hash: hash.toString(),
+		commitment, // Could be undefined if placeholder (e.g. while execuyting swap we don't have this data in the beginning)
+		data: data || {}, // Empty if no data
 		status: 'pending'
 	};
 
-	// 6 Persist into IndexedDB
+	// 7 Persist into IndexedDB
 	await addOperation(op);
 
-	// 7 Return the hash so your UI can submit it on-chain
-	return { hash };
+	// 8 Return the hash so your UI can submit it on-chain
+	return { hash: hash.toString() };
 }
