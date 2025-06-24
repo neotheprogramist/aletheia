@@ -21,7 +21,6 @@
 	import { paymasterWallet } from '$lib/stores/paymaster';
 	import { provider } from '$lib/stores/provider';
 	import { Contract } from 'starknet';
-	import { confirmOperation } from '$lib/privacy/confirmOperation';
 	import { nullifyOperation } from '$lib/privacy/nullifyOperation';
 	import { abortOperation } from '$lib/privacy/abortOperation';
 	import { tokens, selectedToken } from '$lib/stores/tokens';
@@ -324,8 +323,6 @@
 				}
 
 				// 11) Confirm and nullify operations in the database
-				await confirmOperation(withdrawRefundHash);
-				await confirmOperation(feeRefundHash);
 				await nullifyOperation(selectedWithdrawDeposit.hash);
 				await nullifyOperation(selectedFeeDeposit.hash);
 

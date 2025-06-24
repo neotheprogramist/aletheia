@@ -19,6 +19,9 @@ export interface Operation {
 	/** The hash that will be sent on-chain, as a decimal string */
 	hash: string;
 
+	/** The commitment of an operation */
+	commitment: string | undefined;
+
 	/** Optional user-provided data */
 	data?: Record<string, unknown>;
 

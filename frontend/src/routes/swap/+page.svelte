@@ -22,7 +22,6 @@
 	import { paymasterWallet } from '$lib/stores/paymaster';
 	import { provider } from '$lib/stores/provider';
 	import { Contract } from 'starknet';
-	import { confirmOperation } from '$lib/privacy/confirmOperation';
 	import { nullifyOperation } from '$lib/privacy/nullifyOperation';
 	import { abortOperation } from '$lib/privacy/abortOperation';
 	import { tokens, selectedToken } from '$lib/stores/tokens';
@@ -60,6 +59,7 @@
 	let swapRefundHash: string | null = null;
 	let feeRefundHash: string | null = null;
 	let feeWeiHex = '';
+	let emptyOpHash = '';
 
 	let isLoading = false;
 	let showFeeModal = false;
@@ -336,7 +336,7 @@
 					targetToken
 				);
 
-				const { hash: emptyOpHash } = await generateOperation({});
+				emptyOpHash = (await generateOperation({})).hash;
 
 				const extensionCalldata = buildSwapCalldata(
 					ekuboResponse,
@@ -386,18 +386,19 @@
 
 				const normalizedToken = '0x' + BigInt(depositedTokenHex).toString(16).padStart(64, '0');
 
+				const hashBigInt = BigInt(opRecord.hash);
+				const preCommitment = garaga.poseidonHashBN254(hashBigInt, depositedAmountBI);
+				const commitment = garaga.poseidonHashBN254(preCommitment, BigInt(normalizedToken));
+
 				opRecord.data = {
 					tokenAddress: normalizedToken,
 					amount: depositedAmountBI.toString()
 				};
-
-				opRecord.status = 'confirmed';
+				opRecord.commitment = commitment.toString();
 
 				await updateOperation(opRecord);
 
-				// 11) Confirm and nullify operations in the database
-				await confirmOperation(swapRefundHash);
-				await confirmOperation(feeRefundHash);
+				// 11) nullify operations in the database
 				await nullifyOperation(selectedSwapDeposit.hash);
 				await nullifyOperation(selectedFeeDeposit.hash);
 
@@ -420,6 +421,14 @@
 			async (err) => {
 				// 13) On error: abort any created refund operations
 				console.warn('❌ Swap failed with error:', err);
+				if (emptyOpHash) {
+					try {
+						await abortOperation(emptyOpHash);
+						console.warn('🧯 Aborted swap result operation:', emptyOpHash);
+					} catch (abortError) {
+						console.error('🚨 Failed to abort swap result:', abortError);
+					}
+				}
 				if (swapRefundHash) {
 					try {
 						await abortOperation(swapRefundHash);

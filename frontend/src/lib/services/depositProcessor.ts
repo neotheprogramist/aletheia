@@ -9,6 +9,8 @@ import { get } from 'svelte/store';
 import { zkLibraries } from '$lib/stores/zkLibraries';
 import { HybridMerkleTree } from '$lib/merkle/hybridMerkleTree';
 import { getDepositsFromRange } from '$lib/starknet/client';
+import { getAllByStatus, updateOperation } from '$lib/db/operationsDb';
+import { confirmOperation } from '$lib/privacy/confirmOperation';
 
 export let merkleTree: HybridMerkleTree;
 let initialized = false;
@@ -44,6 +46,17 @@ export function startDepositProcessor() {
 			const deposits = await getDepositsFromRange(fromBlock, toBlock);
 
 			for (const { hash, block_number } of deposits) {
+				const pendingOps = await getAllByStatus('pending');
+				const matchingOp = pendingOps.find(
+					(op) => op.commitment && BigInt(op.commitment) === BigInt(hash)
+				);
+
+				if (matchingOp) {
+					console.log(`✅ Found matching operation for deposit ${hash}`);
+					await confirmOperation(matchingOp.hash);
+					console.log(`✅ Confirmed operation ${matchingOp.hash}`);
+				}
+
 				await db_add_leaf(hash, block_number);
 				merkleTree.addLeaf(BigInt(hash));
 			}
