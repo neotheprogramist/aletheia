@@ -43,25 +43,25 @@ export function startDepositProcessor() {
 
 			await delete_latest_db_block_number(fromBlock);
 
-			const deposits = await getDepositsFromRange(fromBlock, toBlock);
-
+			const deposits = await getDepositsFromRange(fromBlock + 1, toBlock);
 			for (const { hash, block_number } of deposits) {
-				const pendingOps = await getAllByStatus('pending');
-				const matchingOp = pendingOps.find(
-					(op) => op.commitment && BigInt(op.commitment) === BigInt(hash)
-				);
-
-				if (matchingOp) {
-					console.log(`✅ Found matching operation for deposit ${hash}`);
-					await confirmOperation(matchingOp.hash);
-					console.log(`✅ Confirmed operation ${matchingOp.hash}`);
-				}
-
 				await db_add_leaf(hash, block_number);
 				merkleTree.addLeaf(BigInt(hash));
 			}
+
+			const pendingOps = await getAllByStatus('pending');
+
+			const leafs = await get_all_leafs();
+			const leafHashSet = new Set(leafs.map((l) => l.hash));
+
+			for (const op of pendingOps) {
+				if (op.commitment && leafHashSet.has(op.commitment)) {
+					console.log(`✅ Auto-confirming pending op ${op.hash} (commitment ${op.commitment})`);
+					await confirmOperation(op.hash);
+				}
+			}
 		} catch (err) {
-			console.error('❌ Error in fetcher:', err);
+			console.error('❌ Error in depositProcessor:', err);
 		}
 	});
 }
