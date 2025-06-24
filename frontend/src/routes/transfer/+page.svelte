@@ -467,15 +467,13 @@
 
 				// This will throw if proof data is missing
 				const commitment = garaga.poseidonHashBN254(
-						garaga.poseidonHashBN254(BigInt(editRow.hash), amountWei),
-						BigInt(editToken)
-					);
-				tree.getProofData(
-					commitment
+					garaga.poseidonHashBN254(BigInt(editRow.hash), amountWei),
+					BigInt(editToken)
 				);
+				tree.getProofData(commitment);
 
 				await updateOperation({
-					commitment: editRow.commitment,
+					commitment: commitment.toString(),
 					index: editRow.index,
 					hash: editRow.hash,
 					secret: editRow.secret,
