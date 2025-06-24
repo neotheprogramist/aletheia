@@ -2,6 +2,10 @@ import { addLeaf, deleteLeafByIndex, getAllLeaves } from './merkleDb';
 
 export async function db_add_leaf(hash: string, block_number: number) {
 	const all = await getAllLeaves();
+	if (all.some((l) => BigInt(l.hash) === BigInt(hash))) {
+		console.log(`⚠️ Leaf with hash ${hash} already exists, skipping.`);
+		return;
+	}
 	const newIndex = all.length > 0 ? Math.max(...all.map((l) => l.index)) + 1 : 1;
 	await addLeaf({ index: newIndex, hash, block_number });
 }

@@ -6,7 +6,7 @@ export interface BlockUpdate {
 	timestamp: number;
 }
 
-const POLL_INTERVAL = 2_000;
+const POLL_INTERVAL = 5_000;
 
 // A readable store that emits only the latest block update
 export const blockUpdates = readable<BlockUpdate | null>(null, (set) => {
