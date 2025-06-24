@@ -17,6 +17,7 @@
 	import { confirmOperation } from '$lib/privacy/confirmOperation';
 	import { abortOperation } from '$lib/privacy/abortOperation';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
+	import { provider } from '$lib/stores/provider';
 
 	let amount = '';
 	let isLoading = false;
@@ -58,10 +59,23 @@
 				const connectedWallet = get(wallet);
 				if (!connectedWallet) throw new Error('Please connect your wallet.');
 
-				await connectedWallet.request({
+				const {transaction_hash} = await connectedWallet.request({
 					type: 'wallet_addInvokeTransaction',
 					params: { calls }
 				});
+
+				console.log(transaction_hash);
+
+				const rpc = get(provider);
+				if (!rpc) throw new Error('Missing Provider');
+
+				const receipt = await rpc.waitForTransaction(BigInt(transaction_hash));
+
+				if (receipt.isReverted()) {
+					throw new Error('Transaction reverted: ${receipt.value}');
+				} else if (!receipt.isSuccess()) {
+					throw new Error('Transaction error: ${receipt.value}');
+				}
 
 				await confirmOperation(hash);
 				amount = '';
