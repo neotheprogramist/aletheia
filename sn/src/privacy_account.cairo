@@ -32,6 +32,12 @@ pub trait IPrivacyAccount<TContractState> {
         external_contract_address: ContractAddress,
         calldata: Span<felt252>,
     ) -> bool;
+    fn execute_extension_nft(
+        ref self: TContractState,
+        proof: Span<felt252>,
+        external_contract_address: ContractAddress,
+        calldata: Span<felt252>,
+    ) -> bool;
     fn merge(ref self: TContractState, proof: Span<felt252>) -> bool;
     fn transfer(ref self: TContractState, proof: Span<felt252>) -> bool;
     fn get_fee_for_extension(self: @TContractState, extension_address: ContractAddress) -> u256;
@@ -59,6 +65,7 @@ pub trait IPrivacyAccount<TContractState> {
         merge_vk: Span<felt252>,
         transfer_vk: Span<felt252>,
         execute_vk: Span<felt252>,
+        execute_nft_vk: Span<felt252>,
     ) -> bool;
 }
 
@@ -109,6 +116,50 @@ impl PublicInputWithdrawImpl of PublicInputWithdrawTrait {
         }
     }
 }
+
+#[derive(Drop)]
+struct PublicInputExecuteNFT {
+    nft_merkle_root: u256,
+    nft_nullifier: u256,
+    nft_token_id: u256,
+    nft_contract_address: ContractAddress,
+    fee_merkle_root: u256,
+    fee_nullifier: u256,
+    fee_token_address: ContractAddress,
+    fee_gas: u256,
+    fee_refund_commitment: u256,
+    verification_key: Span<felt252>,
+}
+
+#[generate_trait]
+impl PublicInputExecuteNFTImpl of PublicInputExecuteNFTTrait {
+    fn from_u256_span(span: Span<u256>) -> PublicInputExecuteNFT {
+        let nft_contract_address: felt252 = (*span[3]).try_into().unwrap();
+        let fee_token_address: felt252 = (*span[6]).try_into().unwrap();
+
+        let mut vk_array = ArrayTrait::<felt252>::new();
+        for j in 0..VK_SIZE {
+            let idx = 11 + j;
+            let v: felt252 = (*span[idx]).try_into().unwrap();
+            vk_array.append(v);
+        }
+        let vk_span: Span<felt252> = vk_array.span();
+
+        PublicInputExecuteNFT {
+            nft_merkle_root: *span[0],
+            nft_nullifier: *span[1],
+            nft_token_id: *span[2],
+            nft_contract_address: nft_contract_address.try_into().unwrap(),
+            fee_merkle_root: *span[4],
+            fee_nullifier: *span[5],
+            fee_token_address: fee_token_address.try_into().unwrap(),
+            fee_gas: *span[7],
+            fee_refund_commitment: *span[8],
+            verification_key: vk_span,
+        }
+    }
+}
+
 
 #[derive(Drop)]
 struct PublicInputMerge {
@@ -238,7 +289,8 @@ pub mod PrivacyAccount {
     use crate::zk_extension::{IZkExtensionDispatcher, IZkExtensionDispatcherTrait};
     use crate::{hash, verify_ultra_keccak_honk_proof};
     use super::{
-        IPrivacyAccount, PublicInputMergeImpl, PublicInputTransferImpl, PublicInputWithdrawImpl,
+        IPrivacyAccount, PublicInputExecuteNFTImpl, PublicInputMergeImpl, PublicInputTransferImpl,
+        PublicInputWithdrawImpl,
     };
 
     #[abi(embed_v0)]
@@ -277,6 +329,7 @@ pub mod PrivacyAccount {
         merkle: MerkleTreeComponent::Storage,
         nullifier_hashes: Map<u256, bool>,
         pub recursive_verifier: ClassHash,
+        pub recursive_verifier_nft: ClassHash,
         strk_token_address: ContractAddress,
         current_gas_price: u256,
         trusted_extensions: Map<ContractAddress, u128>,
@@ -339,6 +392,7 @@ pub mod PrivacyAccount {
         ref self: ContractState,
         owner: ContractAddress,
         recursive_verifier: ClassHash,
+        recursive_verifier_nft: ClassHash,
         strk_token_address: ContractAddress,
         initial_fee_buffer: u256,
         current_gas_price: u256,
@@ -351,6 +405,7 @@ pub mod PrivacyAccount {
 
         // 2) Store verifier addresses
         self.recursive_verifier.write(recursive_verifier);
+        self.recursive_verifier_nft.write(recursive_verifier_nft);
 
         // 3) Store STRK token addresses
         self.strk_token_address.write(strk_token_address);
@@ -774,6 +829,7 @@ pub mod PrivacyAccount {
             merge_vk: core::array::Span<core::felt252>,
             transfer_vk: core::array::Span<core::felt252>,
             execute_vk: core::array::Span<core::felt252>,
+            execute_nft_vk: core::array::Span<core::felt252>,
         ) -> core::bool {
             self.ownable.assert_only_owner();
             // MERGE under key 0
@@ -788,6 +844,77 @@ pub mod PrivacyAccount {
             for i in 0..execute_vk.len() {
                 self.supported_vks.entry(2).push(*execute_vk[i]);
             }
+            // EXECUTE_NFT under key 3
+            for i in 0..execute_vk.len() {
+                self.supported_vks.entry(3).push(*execute_nft_vk[i]);
+            }
+            true
+        }
+        fn execute_extension_nft(
+            ref self: ContractState,
+            proof: Span<felt252>,
+            external_contract_address: ContractAddress,
+            calldata: Span<felt252>,
+        ) -> bool {
+            let public_input_serialized = verify_ultra_keccak_honk_proof(
+                self.recursive_verifier_nft.read(), proof,
+            );
+
+            let public_input = PublicInputExecuteNFTImpl::from_u256_span(public_input_serialized);
+
+            // Validate if vk is supported
+            // TODO: Modify set vk
+            let mut stored_vk = self.supported_vks.entry(4);
+            assert(stored_vk.len().try_into().unwrap() == VK_SIZE, Errors::INVALID_VK_SIZE);
+            for i in 0..VK_SIZE {
+                let in_vk_elem: felt252 = *public_input.verification_key.at(i);
+                let stored_elem: felt252 = stored_vk.at(i.try_into().unwrap()).read();
+                assert(in_vk_elem == stored_elem, Errors::VK_MISMATCH);
+            }
+
+            // Validate if fee is in strk
+            assert(
+                public_input.fee_token_address == self.strk_token_address.read(),
+                Errors::INVALID_FEE_TOKEN,
+            );
+
+            // Validate gas fee
+            let calculated_fee = self.get_fee_for_extension(external_contract_address);
+            assert(public_input.fee_gas >= calculated_fee, Errors::INSUFFICIENT_FEE);
+
+            // Update accumulated fee don't lower users balance -> funds not going out of the
+            // contract
+            self.accumulated_fee.write(self.accumulated_fee.read() + public_input.fee_gas);
+
+            // Nullifier and root checks
+            assert(
+                !self.nullifier_hashes.read(public_input.nft_nullifier),
+                Errors::NULLIFIER_ALREADY_USED,
+            );
+            self.nullifier_hashes.entry(public_input.nft_nullifier).write(true);
+
+            assert(self.merkle.roots.read(public_input.nft_merkle_root), Errors::INVALID_ROOT);
+
+            // Set allowance for extension contract and execute
+            let token = IERC721Dispatcher { contract_address: public_input.nft_contract_address };
+            token.approve(external_contract_address, public_input.nft_token_id);
+
+            let external_contract = IZkExtensionDispatcher {
+                contract_address: external_contract_address,
+            };
+            external_contract.execute(calldata);
+            // Remove allowance from extension contract
+            token.approve(0x0.try_into().unwrap(), public_input.nft_token_id);
+
+            // Fee deposit nullifier and root checks
+            assert(
+                !self.nullifier_hashes.read(public_input.fee_nullifier),
+                Errors::NULLIFIER_ALREADY_USED,
+            );
+            self.nullifier_hashes.entry(public_input.fee_nullifier).write(true);
+
+            assert(self.merkle.roots.read(public_input.fee_merkle_root), Errors::INVALID_ROOT);
+            self.merkle.add_leaf(public_input.fee_refund_commitment);
             true
         }
     }
