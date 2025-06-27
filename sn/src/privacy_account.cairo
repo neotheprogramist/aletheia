@@ -391,7 +391,6 @@ pub mod PrivacyAccount {
         ref self: ContractState,
         owner: ContractAddress,
         recursive_verifier: ClassHash,
-        recursive_verifier_nft: ClassHash,
         strk_token_address: ContractAddress,
         initial_fee_buffer: u256,
         current_gas_price: u256,
