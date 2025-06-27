@@ -22,3 +22,6 @@ Thumbs.db
 # IDE
 .idea/
 .vscode/
+
+# Rust
+Cargo.lock
