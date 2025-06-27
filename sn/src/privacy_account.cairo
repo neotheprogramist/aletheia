@@ -329,7 +329,6 @@ pub mod PrivacyAccount {
         merkle: MerkleTreeComponent::Storage,
         nullifier_hashes: Map<u256, bool>,
         pub recursive_verifier: ClassHash,
-        pub recursive_verifier_nft: ClassHash,
         strk_token_address: ContractAddress,
         current_gas_price: u256,
         trusted_extensions: Map<ContractAddress, u128>,
@@ -405,7 +404,6 @@ pub mod PrivacyAccount {
 
         // 2) Store verifier addresses
         self.recursive_verifier.write(recursive_verifier);
-        self.recursive_verifier_nft.write(recursive_verifier_nft);
 
         // 3) Store STRK token addresses
         self.strk_token_address.write(strk_token_address);
@@ -857,7 +855,7 @@ pub mod PrivacyAccount {
             calldata: Span<felt252>,
         ) -> bool {
             let public_input_serialized = verify_ultra_keccak_honk_proof(
-                self.recursive_verifier_nft.read(), proof,
+                self.recursive_verifier.read(), proof,
             );
 
             let public_input = PublicInputExecuteNFTImpl::from_u256_span(public_input_serialized);
