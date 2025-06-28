@@ -101,7 +101,7 @@ impl SecretNote {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct WitnessExecute {
     pub root_1: Option<String>,
     pub secret_1: Option<String>,
@@ -542,9 +542,8 @@ pub async fn setup_privacy_pool_config(
 }
 
 async fn deploy_recursive_verifier(devnet: &Devnet) -> Felt {
-    let sierra_path = PathBuf::from(
-        "../sn/target/release/sn_UltraKeccakHonkVerifier.contract_class.json",
-    );
+    let sierra_path =
+        PathBuf::from("../sn/target/release/sn_UltraKeccakHonkVerifier.contract_class.json");
     let casm_path = PathBuf::from(
         "../sn/target/release/sn_UltraKeccakHonkVerifier.compiled_contract_class.json",
     );
@@ -747,7 +746,9 @@ pub async fn generate_withdrawal_proof(execute_vk: Vec<Felt>) -> Vec<Felt> {
     };
 
     recursive_witness
-        .save_to_toml_file(Path::new("../frontend/static/circuits/recursive/Prover.toml"))
+        .save_to_toml_file(Path::new(
+            "../frontend/static/circuits/recursive/Prover.toml",
+        ))
         .await
         .unwrap();
 

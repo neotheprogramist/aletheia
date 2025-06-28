@@ -17,8 +17,10 @@ use crate::utils::{
 };
 
 pub async fn withdraw(withdraw_amount: u128) {
-    let sierra_path = PathBuf::from("../sn/target/release/sn_WithdrawExtension.contract_class.json");
-    let casm_path = PathBuf::from("../sn/target/release/sn_WithdrawExtension.compiled_contract_class.json");
+    let sierra_path =
+        PathBuf::from("../sn/target/release/sn_WithdrawExtension.contract_class.json");
+    let casm_path =
+        PathBuf::from("../sn/target/release/sn_WithdrawExtension.compiled_contract_class.json");
 
     let devnet = setup_devnet(None).await;
     let privacy_pool_deployed_contract_address = deploy_privacy_pools(&devnet).await;
@@ -77,7 +79,10 @@ pub async fn withdraw(withdraw_amount: u128) {
 
     witness_execute._recipient = Some(SECOND_FUNDING_ACCOUNT_ADDRESS);
 
-    let _ = witness_execute.save_to_toml_file(Path::new("../frontend/static/circuits/execute/Prover.toml"));
+    println!("Witness execute: {:?}", witness_execute);
+
+    let _ = witness_execute
+        .save_to_toml_file(Path::new("../frontend/static/circuits/execute/Prover.toml")).await.unwrap();
 
     run_nargo_witness("execute").unwrap();
 
