@@ -26,10 +26,6 @@ use crate::utils::{
 };
 
 pub async fn swap(amount_to_swap: u128) {
-    // let _workspace =
-    //     TestWorkspace::with_options(TestWorkspaceOptions::for_privacy_pool().keep_on_failure())
-    //         .await;
-    // Test Setup
     let block_for_testing = get_block_number().await;
     // Official Starknet Sepolia token addresses
     let input_token = "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"; // STRK
@@ -49,6 +45,15 @@ pub async fn swap(amount_to_swap: u128) {
 
     // Swap using only Ekubo contract
     let devnet = setup_devnet(Some(block_for_testing)).await;
+
+    devnet
+        .mint_token(
+            SECOND_FUNDING_ACCOUNT_ADDRESS,
+            amount_to_swap,
+            STRK_ERC20_CONTRACT_ADDRESS,
+        )
+        .await
+        .unwrap();
 
     let mut swap_router_calldata = prepare_swap_router_calldata(
         &user_swap_amount_decimal, // Now passing decimal string
@@ -146,16 +151,21 @@ pub async fn swap(amount_to_swap: u128) {
         ekubo_router_swapped
     );
 
-    // Swap using Privacy Pools Extension
-    // let _workspace =
-    //     TestWorkspace::with_options(TestWorkspaceOptions::for_privacy_pool().keep_on_failure())
-    //         .await;
-
     let second_devnet = setup_devnet(Some(block_for_testing)).await;
+
+    devnet
+        .mint_token(
+            SECOND_FUNDING_ACCOUNT_ADDRESS,
+            amount_to_swap,
+            STRK_ERC20_CONTRACT_ADDRESS,
+        )
+        .await
+        .unwrap();
 
     let privacy_pool_deployed_contract_address = deploy_privacy_pools(&second_devnet).await;
     let sierra_path = PathBuf::from("../sn/target/release/sn_SwapExtension.contract_class.json");
-    let casm_path = PathBuf::from("../sn/target/release/sn_SwapExtension.compiled_contract_class.json");
+    let casm_path =
+        PathBuf::from("../sn/target/release/sn_SwapExtension.compiled_contract_class.json");
     let ekubo_core =
         Felt::from_hex("0x0444a09d96389aa7148f1aada508e30b71299ffe650d9c97fdaae38cb9a23384")
             .unwrap();
@@ -215,7 +225,11 @@ pub async fn swap(amount_to_swap: u128) {
 
     witness_execute._recipient = Some(SECOND_FUNDING_ACCOUNT_ADDRESS);
 
-    let _ = witness_execute.save_to_toml_file(Path::new("../frontend/static/circuits/execute/Prover.toml"));
+    let _ = witness_execute
+        .save_to_toml_file(Path::new("../frontend/static/circuits/execute/Prover.toml"))
+        .await
+        .unwrap();
+
     run_nargo_witness("execute").unwrap();
 
     // Prepare swap calldata - convert U256 hex to decimal string
