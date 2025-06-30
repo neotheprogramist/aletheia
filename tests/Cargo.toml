@@ -1,0 +1,35 @@
+[package]
+name = "tests"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ark-ff = "0.5.0"
+url = "2.4"
+prefix-hex = "0.7.1"
+cainome = { git = "https://github.com/piniom/cainome", features = [
+    "abigen-rs",
+], branch = "U256-improvements" }
+num-bigint = "0.4"
+num-traits = "0.2"
+devnet-lib = { git = "https://github.com/piotr-stec/devnet-lib" }
+garaga_rs = { git = "https://github.com/keep-starknet-strange/garaga.git", tag = "v0.18.1" }
+rand = "0.8.5"
+starknet-devnet-types = { git = "https://github.com/0xSpaceShard/starknet-devnet", rev = "v0.4.2" }
+starknet-rs-accounts = { version = "0.13.0", package = "starknet-accounts" }
+starknet-rs-core = { version = "0.13.0", package = "starknet-core" }
+starknet-rs-signers = { version = "0.11.0", package = "starknet-signers" }
+starknet-rs-providers = { version = "0.13.0", package = "starknet-providers" }
+reqwest = { version = "0.12.20", features = ["blocking"] }
+proptest = "1.0"
+serde = { version = "1.0.197", features = ["derive"] }
+serde_json = { version = "1.0.114" }
+tokio = { version = "1", features = [
+    "time",
+    "macros",
+    "rt-multi-thread",
+    "signal",
+    "sync",
+    "full",
+] }
+toml = "0.8"

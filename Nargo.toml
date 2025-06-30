@@ -3,4 +3,5 @@ members = [
     "frontend/static/circuits/execute",
     "frontend/static/circuits/merge",
     "frontend/static/circuits/transfer",
+    "frontend/static/circuits/recursive",
 ]
