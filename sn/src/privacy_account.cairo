@@ -842,7 +842,7 @@ pub mod PrivacyAccount {
                 self.supported_vks.entry(2).push(*execute_vk[i]);
             }
             // EXECUTE_NFT under key 3
-            for i in 0..execute_vk.len() {
+            for i in 0..execute_nft_vk.len() {
                 self.supported_vks.entry(3).push(*execute_nft_vk[i]);
             }
             true
@@ -860,8 +860,7 @@ pub mod PrivacyAccount {
             let public_input = PublicInputExecuteNFTImpl::from_u256_span(public_input_serialized);
 
             // Validate if vk is supported
-            // TODO: Modify set vk
-            let mut stored_vk = self.supported_vks.entry(4);
+            let mut stored_vk = self.supported_vks.entry(3);
             assert(stored_vk.len().try_into().unwrap() == VK_SIZE, Errors::INVALID_VK_SIZE);
             for i in 0..VK_SIZE {
                 let in_vk_elem: felt252 = *public_input.verification_key.at(i);
@@ -901,7 +900,7 @@ pub mod PrivacyAccount {
             };
             external_contract.execute(calldata);
             // Remove allowance from extension contract
-            token.approve(0x0.try_into().unwrap(), public_input.nft_token_id);
+            // token.approve(0x0.try_into().unwrap(), public_input.nft_token_id);
 
             // Fee deposit nullifier and root checks
             assert(
