@@ -1,4 +1,5 @@
 mod ekubo_create_position_extension;
+pub mod ekubo_withdraw_position_extension;
 mod erc721;
 // mod extension_verifier;
 // mod merge_verifier;

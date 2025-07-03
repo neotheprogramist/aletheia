@@ -59,6 +59,7 @@ export async function generateHonkCalldata(
 		public_inputs: primaryPublicInputs,
 		verification_key: vkAsFields
 	};
+
 	const { witness: recursiveWitness } = await recursiveCircuit.execute(recursiveInputs);
 	const { proof: recursiveProof, publicInputs: recursivePublicInputs } =
 		await recursiveBackend.generateProof(recursiveWitness, { keccak: true });
