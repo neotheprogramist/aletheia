@@ -495,10 +495,9 @@ pub mod PrivacyAccount {
             let public_input_serialized = verify_ultra_keccak_honk_proof(
                 self.recursive_verifier.read(), proof,
             );
-
             let public_input = PublicInputWithdrawImpl::from_u256_span(public_input_serialized);
 
-            // Validate if vk is supported
+            // 1. Check vk
             let mut stored_vk = self.supported_vks.entry(2);
             assert(stored_vk.len().try_into().unwrap() == VK_SIZE, Errors::INVALID_VK_SIZE);
             for i in 0..VK_SIZE {
@@ -507,30 +506,38 @@ pub mod PrivacyAccount {
                 assert(in_vk_elem == stored_elem, Errors::VK_MISMATCH);
             }
 
-            // Validate if fee is in strk
+            // 2. Check fee token
             assert(
                 public_input.token_address_2 == self.strk_token_address.read(),
                 Errors::INVALID_FEE_TOKEN,
             );
 
-            // Validate gas fee
+            // 3. Check fee
             let calculated_fee = self.get_fee_for_extension(external_contract_address);
             assert(public_input.gas_fee >= calculated_fee, Errors::INSUFFICIENT_FEE);
 
-            // Update accumulated fee and lower users balance -> funds going out of the contract
-            self.accumulated_fee.write(self.accumulated_fee.read() + public_input.gas_fee);
-            self.users_balance.write(self.users_balance.read() - public_input.amount);
-
+            // 4. Validate nullifiers and roots
             assert(
                 !self.nullifier_hashes.read(public_input.nullifier_1),
                 Errors::NULLIFIER_ALREADY_USED,
             );
-            self.nullifier_hashes.entry(public_input.nullifier_1).write(true);
-
+            assert(
+                !self.nullifier_hashes.read(public_input.nullifier_2),
+                Errors::NULLIFIER_ALREADY_USED,
+            );
             assert(self.merkle.roots.read(public_input.root_1), Errors::INVALID_ROOT);
+            assert(self.merkle.roots.read(public_input.root_2), Errors::INVALID_ROOT);
 
+            // 5. Storage writes
+            self.nullifier_hashes.entry(public_input.nullifier_1).write(true);
+            self.nullifier_hashes.entry(public_input.nullifier_2).write(true);
+            self.merkle.add_leaf(public_input.refund_commitment_hash);
+            self.merkle.add_leaf(public_input.refund_commitment_hash_fee);
+            self.accumulated_fee.write(self.accumulated_fee.read() + public_input.gas_fee);
+            self.users_balance.write(self.users_balance.read() - public_input.amount);
+
+            // 6. External contract interaction
             let token = IERC20Dispatcher { contract_address: public_input.token_address_1 };
-
             token.approve(external_contract_address, public_input.amount);
 
             let external_contract = IZkExtensionDispatcher {
@@ -540,20 +547,69 @@ pub mod PrivacyAccount {
 
             token.approve(external_contract_address, 0);
 
-            self.merkle.add_leaf(public_input.refund_commitment_hash);
+            true
+        }
 
+        fn execute_extension_nft(
+            ref self: ContractState,
+            proof: Span<felt252>,
+            external_contract_address: ContractAddress,
+            calldata: Span<felt252>,
+        ) -> bool {
+            let public_input_serialized = verify_ultra_keccak_honk_proof(
+                self.recursive_verifier.read(), proof,
+            );
+            let public_input = PublicInputExecuteNFTImpl::from_u256_span(public_input_serialized);
+
+            // 1. Check vk
+            let mut stored_vk = self.supported_vks.entry(3);
+            assert(stored_vk.len().try_into().unwrap() == VK_SIZE, Errors::INVALID_VK_SIZE);
+            for i in 0..VK_SIZE {
+                let in_vk_elem: felt252 = *public_input.verification_key.at(i);
+                let stored_elem: felt252 = stored_vk.at(i.try_into().unwrap()).read();
+                assert(in_vk_elem == stored_elem, Errors::VK_MISMATCH);
+            }
+
+            // 2. Check fee token
             assert(
-                !self.nullifier_hashes.read(public_input.nullifier_2),
+                public_input.fee_token_address == self.strk_token_address.read(),
+                Errors::INVALID_FEE_TOKEN,
+            );
+
+            // 3. Check fee
+            let calculated_fee = self.get_fee_for_extension(external_contract_address);
+            assert(public_input.fee_gas >= calculated_fee, Errors::INSUFFICIENT_FEE);
+
+            // 4. Vlidate nullifiers and roots
+            assert(
+                !self.nullifier_hashes.read(public_input.nft_nullifier),
                 Errors::NULLIFIER_ALREADY_USED,
             );
-            self.nullifier_hashes.entry(public_input.nullifier_2).write(true);
+            assert(
+                !self.nullifier_hashes.read(public_input.fee_nullifier),
+                Errors::NULLIFIER_ALREADY_USED,
+            );
+            assert(self.merkle.roots.read(public_input.nft_merkle_root), Errors::INVALID_ROOT);
+            assert(self.merkle.roots.read(public_input.fee_merkle_root), Errors::INVALID_ROOT);
 
-            assert(self.merkle.roots.read(public_input.root_2), Errors::INVALID_ROOT);
+            // 5. Storage writes
+            self.nullifier_hashes.entry(public_input.nft_nullifier).write(true);
+            self.nullifier_hashes.entry(public_input.fee_nullifier).write(true);
+            self.merkle.add_leaf(public_input.fee_refund_commitment);
+            self.accumulated_fee.write(self.accumulated_fee.read() + public_input.fee_gas);
 
-            self.merkle.add_leaf(public_input.refund_commitment_hash_fee);
+            // 6. External contract interaction
+            let token = IERC721Dispatcher { contract_address: public_input.nft_contract_address };
+            token.approve(external_contract_address, public_input.nft_token_id);
+
+            let external_contract = IZkExtensionDispatcher {
+                contract_address: external_contract_address,
+            };
+            external_contract.execute(calldata);
 
             true
         }
+
 
         fn merge(ref self: ContractState, proof: Span<felt252>) -> bool {
             let public_input_serialized = verify_ultra_keccak_honk_proof(
@@ -859,72 +915,7 @@ pub mod PrivacyAccount {
             }
             true
         }
-        fn execute_extension_nft(
-            ref self: ContractState,
-            proof: Span<felt252>,
-            external_contract_address: ContractAddress,
-            calldata: Span<felt252>,
-        ) -> bool {
-            let public_input_serialized = verify_ultra_keccak_honk_proof(
-                self.recursive_verifier.read(), proof,
-            );
 
-            let public_input = PublicInputExecuteNFTImpl::from_u256_span(public_input_serialized);
-
-            // Validate if vk is supported
-            let mut stored_vk = self.supported_vks.entry(3);
-            assert(stored_vk.len().try_into().unwrap() == VK_SIZE, Errors::INVALID_VK_SIZE);
-            for i in 0..VK_SIZE {
-                let in_vk_elem: felt252 = *public_input.verification_key.at(i);
-                let stored_elem: felt252 = stored_vk.at(i.try_into().unwrap()).read();
-                assert(in_vk_elem == stored_elem, Errors::VK_MISMATCH);
-            }
-
-            // Validate if fee is in strk
-            assert(
-                public_input.fee_token_address == self.strk_token_address.read(),
-                Errors::INVALID_FEE_TOKEN,
-            );
-
-            // Validate gas fee
-            let calculated_fee = self.get_fee_for_extension(external_contract_address);
-            assert(public_input.fee_gas >= calculated_fee, Errors::INSUFFICIENT_FEE);
-
-            // Update accumulated fee don't lower users balance -> funds not going out of the
-            // contract
-            self.accumulated_fee.write(self.accumulated_fee.read() + public_input.fee_gas);
-
-            // Nullifier and root checks
-            assert(
-                !self.nullifier_hashes.read(public_input.nft_nullifier),
-                Errors::NULLIFIER_ALREADY_USED,
-            );
-            self.nullifier_hashes.entry(public_input.nft_nullifier).write(true);
-
-            assert(self.merkle.roots.read(public_input.nft_merkle_root), Errors::INVALID_ROOT);
-
-            // Set allowance for extension contract and execute
-            let token = IERC721Dispatcher { contract_address: public_input.nft_contract_address };
-            token.approve(external_contract_address, public_input.nft_token_id);
-
-            let external_contract = IZkExtensionDispatcher {
-                contract_address: external_contract_address,
-            };
-            external_contract.execute(calldata);
-            // Remove allowance from extension contract
-            // token.approve(0x0.try_into().unwrap(), public_input.nft_token_id);
-
-            // Fee deposit nullifier and root checks
-            assert(
-                !self.nullifier_hashes.read(public_input.fee_nullifier),
-                Errors::NULLIFIER_ALREADY_USED,
-            );
-            self.nullifier_hashes.entry(public_input.fee_nullifier).write(true);
-
-            assert(self.merkle.roots.read(public_input.fee_merkle_root), Errors::INVALID_ROOT);
-            self.merkle.add_leaf(public_input.fee_refund_commitment);
-            true
-        }
         fn set_recursive_verifier(
             ref self: sn::privacy_account::PrivacyAccount::ContractState,
             recursive_verifier: starknet::class_hash::ClassHash,
