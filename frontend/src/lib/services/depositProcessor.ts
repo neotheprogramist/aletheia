@@ -52,10 +52,10 @@ export function startDepositProcessor() {
 			const pendingOps = await getAllByStatus('pending');
 
 			const leafs = await get_all_leafs();
-			const leafHashSet = new Set(leafs.map((l) => l.hash));
+			const leafHashSet = new Set(leafs.map((l) => BigInt(l.hash)));
 
 			for (const op of pendingOps) {
-				if (op.commitment && leafHashSet.has(op.commitment)) {
+				if (op.commitment && leafHashSet.has(BigInt(op.commitment))) {
 					console.log(`✅ Auto-confirming pending op ${op.hash} (commitment ${op.commitment})`);
 					await confirmOperation(op.hash);
 				}
