@@ -77,6 +77,9 @@ pub trait IPrivacyAccount<TContractState> {
     fn revoke_upgrader(ref self: TContractState, upgrader: ContractAddress) -> bool;
     fn is_upgrader(self: @TContractState, account: ContractAddress) -> bool;
     fn is_admin(self: @TContractState, account: ContractAddress) -> bool;
+    fn withdraw_initial_buffer(
+        ref self: TContractState, recipient: ContractAddress, amount: u256,
+    ) -> u256;
 }
 
 #[derive(Drop)]
@@ -351,7 +354,6 @@ pub mod PrivacyAccount {
         current_gas_price: u256,
         trusted_extensions: Map<ContractAddress, u128>,
         users_balance: u256,
-        accumulated_fee: u256,
         initial_fee_buffer: u256,
         merge_gas_consumed: u128,
         transfer_gas_consumed: u128,
@@ -401,6 +403,7 @@ pub mod PrivacyAccount {
         pub const INVALID_FEE_TOKEN: felt252 = 'Pool: invalid fee token';
         pub const INVALID_VK_SIZE: felt252 = 'Pool: invalid vk size';
         pub const VK_MISMATCH: felt252 = 'Pool: vk mismatch';
+        pub const WITHDRAW_FEE: felt252 = 'Cant withdraw null';
     }
 
 
@@ -436,7 +439,6 @@ pub mod PrivacyAccount {
 
         // 5) Seed your fee‐tracking storage
         self.initial_fee_buffer.write(initial_fee_buffer);
-        self.accumulated_fee.write(initial_fee_buffer);
 
         // 6) Initialize users_balance to zero
         self.users_balance.write(0);
@@ -550,8 +552,9 @@ pub mod PrivacyAccount {
             self.nullifier_hashes.entry(public_input.nullifier_2).write(true);
             self.merkle.add_leaf(public_input.refund_commitment_hash);
             self.merkle.add_leaf(public_input.refund_commitment_hash_fee);
-            self.accumulated_fee.write(self.accumulated_fee.read() + public_input.gas_fee);
-            self.users_balance.write(self.users_balance.read() - public_input.amount);
+            self
+                .users_balance
+                .write(self.users_balance.read() - public_input.amount - public_input.gas_fee);
 
             // 6. External contract interaction
             let token = IERC20Dispatcher { contract_address: public_input.token_address_1 };
@@ -596,8 +599,9 @@ pub mod PrivacyAccount {
             // 3. Check fee
             let calculated_fee = self.get_fee_for_extension(external_contract_address);
             assert(public_input.fee_gas >= calculated_fee, Errors::INSUFFICIENT_FEE);
+            self.users_balance.write(self.users_balance.read() - public_input.fee_gas);
 
-            // 4. Vlidate nullifiers and roots
+            // 4. Validate nullifiers and roots
             assert(
                 !self.nullifier_hashes.read(public_input.nft_nullifier),
                 Errors::NULLIFIER_ALREADY_USED,
@@ -613,7 +617,6 @@ pub mod PrivacyAccount {
             self.nullifier_hashes.entry(public_input.nft_nullifier).write(true);
             self.nullifier_hashes.entry(public_input.fee_nullifier).write(true);
             self.merkle.add_leaf(public_input.fee_refund_commitment);
-            self.accumulated_fee.write(self.accumulated_fee.read() + public_input.fee_gas);
 
             // 6. External contract interaction
             let token = IERC721Dispatcher { contract_address: public_input.nft_contract_address };
@@ -652,7 +655,7 @@ pub mod PrivacyAccount {
             // Validate gas fee - currently using execute extension fee
             let calculated_fee = self.get_fee_for_merge();
             assert(public_input.gas_fee >= calculated_fee, Errors::INSUFFICIENT_FEE);
-            self.accumulated_fee.write(self.accumulated_fee.read() + public_input.gas_fee);
+            self.users_balance.write(self.users_balance.read() - public_input.gas_fee);
 
             // Validate if 1st deposit is not nullfied
             assert(
@@ -706,10 +709,10 @@ pub mod PrivacyAccount {
                 Errors::INVALID_FEE_TOKEN,
             );
 
-            // Validate gas fee - currently using execute extension fee
-            let calculated_fee = self.get_fee_for_merge();
+            // Validate gas fee - currently using transfer fee
+            let calculated_fee = self.get_fee_for_transfer();
             assert(public_input.gas_fee >= calculated_fee, Errors::INSUFFICIENT_FEE);
-            self.accumulated_fee.write(self.accumulated_fee.read() + public_input.gas_fee);
+            self.users_balance.write(self.users_balance.read() - public_input.gas_fee);
 
             // Validate despoit and fee deposit nullifiers
             assert(
@@ -806,16 +809,6 @@ pub mod PrivacyAccount {
         fn get_accumulated_fee(
             self: @sn::privacy_account::PrivacyAccount::ContractState,
         ) -> core::integer::u256 {
-            self.accumulated_fee.read()
-        }
-
-        fn withdraw_all_accumulated_fee(
-            ref self: sn::privacy_account::PrivacyAccount::ContractState,
-            recipient: starknet::contract_address::ContractAddress,
-        ) -> core::integer::u256 {
-            // only the owner may call
-            self.accesscontrol.assert_only_role(DEFAULT_ADMIN_ROLE);
-
             // 1) read on‐chain STRK balance of this contract
             let this = get_contract_address();
             let token = IERC20Dispatcher { contract_address: self.strk_token_address.read() };
@@ -831,11 +824,22 @@ pub mod PrivacyAccount {
             } else {
                 0
             };
+            withdrawable
+        }
 
-            // 4) transfer only that amount
-            if withdrawable > 0 {
-                token.transfer(recipient, withdrawable);
-            }
+        fn withdraw_all_accumulated_fee(
+            ref self: sn::privacy_account::PrivacyAccount::ContractState,
+            recipient: starknet::contract_address::ContractAddress,
+        ) -> core::integer::u256 {
+            // only the owner may call
+            self.accesscontrol.assert_only_role(DEFAULT_ADMIN_ROLE);
+            let withdrawable = self.get_accumulated_fee();
+
+            assert(withdrawable > 0, Errors::WITHDRAW_FEE);
+
+            // Transfer tokens
+            let token = IERC20Dispatcher { contract_address: self.strk_token_address.read() };
+            token.transfer(recipient, withdrawable);
 
             // 5) emit the FeeWithdrawal event with the actual amount
             self
@@ -859,24 +863,15 @@ pub mod PrivacyAccount {
         ) -> core::integer::u256 {
             self.accesscontrol.assert_only_role(DEFAULT_ADMIN_ROLE);
 
-            let this = get_contract_address();
+            let withdrawable = self.get_accumulated_fee();
+
+            assert(withdrawable > 0, Errors::WITHDRAW_FEE);
+            assert(amount > 0, Errors::WITHDRAW_FEE);
+
+            assert(amount <= withdrawable, 'Amount exceeds available');
+
             let token = IERC20Dispatcher { contract_address: self.strk_token_address.read() };
-            let contract_balance: u256 = token.balance_of(this);
-
-            let user_balance: u256 = self.users_balance.read();
-            let buffer: u256 = self.initial_fee_buffer.read();
-
-            let withdrawable: u256 = if contract_balance > user_balance + buffer {
-                contract_balance - (user_balance + buffer)
-            } else {
-                0
-            };
-
-            assert!(amount <= withdrawable, "Requested amount exceeds available accumulated fee");
-
-            if amount > 0 {
-                token.transfer(recipient, amount);
-            }
+            token.transfer(recipient, amount);
 
             self
                 .emit(
@@ -1016,6 +1011,18 @@ pub mod PrivacyAccount {
             self: @sn::privacy_account::PrivacyAccount::ContractState, account: ContractAddress,
         ) -> bool {
             self.accesscontrol.has_role(DEFAULT_ADMIN_ROLE, account)
+        }
+
+        fn withdraw_initial_buffer(
+            ref self: sn::privacy_account::PrivacyAccount::ContractState,
+            recipient: starknet::contract_address::ContractAddress,
+            amount: core::integer::u256,
+        ) -> core::integer::u256 {
+            self.accesscontrol.assert_only_role(DEFAULT_ADMIN_ROLE);
+            assert(self.initial_fee_buffer.read() >= amount, Errors::WITHDRAW_FEE);
+            let token = IERC20Dispatcher { contract_address: self.strk_token_address.read() };
+            token.transfer(recipient, amount);
+            amount
         }
     }
 }

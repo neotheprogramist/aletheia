@@ -2,6 +2,7 @@ import { get } from 'svelte/store';
 import { zkLibraries } from '$lib/stores/zkLibraries';
 import type { Operation, OperationStatus } from './types';
 import { addOperation, getAllByStatus } from '$lib/db/operationsDb';
+import { getOrCreateMasterSeed } from '$lib/stores/masterSeed';
 
 export interface GenerateParams {
 	/** Any application-specific data to attach */
@@ -19,12 +20,8 @@ export async function generateOperation(params: GenerateParams) {
 	// Sprawdź czy to jest "pełna" operacja czy placeholder
 	const isPlaceholder = !data || !data.tokenAddress || !data.amount;
 
-	// 1 Generate a 256-bit seed
-	const seedBytes = crypto.getRandomValues(new Uint8Array(32));
-	const seedHex = Array.from(seedBytes)
-		.map((b) => b.toString(16).padStart(2, '0'))
-		.join('');
-	const seed = BigInt(`0x${seedHex}`);
+	// 1 Get or create master seed (deterministic)
+	const masterNonce = getOrCreateMasterSeed();
 
 	// 2 Get Garaga instance
 	const { garaga } = get(zkLibraries);
@@ -37,8 +34,8 @@ export async function generateOperation(params: GenerateParams) {
 	);
 	const index = counts.reduce((sum, n) => sum + n, 0);
 
-	// 4 Compute secret, nullifier & hash
-	const secret = garaga.poseidonHashBN254(garaga.poseidonHashBN254(seed, seed), BigInt(index));
+	// 4 Compute secret, nullifier & hash (deterministic based on index + master nonce)
+	const secret = garaga.poseidonHashBN254(BigInt(index), masterNonce);
 	const nullifier = garaga.poseidonHashBN254(secret, secret);
 	const hash = garaga.poseidonHashBN254(secret, nullifier);
 

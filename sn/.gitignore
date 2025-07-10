@@ -1,4 +1,5 @@
 target
 .snfoundry_cache/
 account-file.json
+account-file-mainnet.json
 *.lock
