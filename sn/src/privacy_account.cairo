@@ -70,6 +70,9 @@ pub trait IPrivacyAccount<TContractState> {
     ) -> bool;
     fn set_recursive_verifier(ref self: TContractState, recursive_verifier: ClassHash) -> bool;
     fn get_recursive_verifier(self: @TContractState) -> ClassHash;
+    fn add_supported_vk(ref self: TContractState, vk: Span<felt252>, vk_index: u16) -> bool;
+    fn modify_supported_vk(ref self: TContractState, vk: Span<felt252>, vk_index: u16) -> bool;
+    fn get_last_supported_vk_index(self: @TContractState) -> u16;
 }
 
 #[derive(Drop)]
@@ -342,6 +345,7 @@ pub mod PrivacyAccount {
         merge_gas_consumed: u128,
         transfer_gas_consumed: u128,
         supported_vks: Map<u16, Vec<felt252>>,
+        last_supported_vk_index: u16,
     }
 
     #[derive(Drop, PartialEq, starknet::Event)]
@@ -857,6 +861,7 @@ pub mod PrivacyAccount {
             for i in 0..execute_nft_vk.len() {
                 self.supported_vks.entry(3).push(*execute_nft_vk[i]);
             }
+            self.last_supported_vk_index.write(4);
             true
         }
         fn execute_extension_nft(
@@ -938,6 +943,42 @@ pub mod PrivacyAccount {
             self: @sn::privacy_account::PrivacyAccount::ContractState,
         ) -> starknet::class_hash::ClassHash {
             self.recursive_verifier.read()
+        }
+
+        fn add_supported_vk(
+            ref self: sn::privacy_account::PrivacyAccount::ContractState,
+            vk: core::array::Span<core::felt252>,
+            vk_index: core::integer::u16,
+        ) -> core::bool {
+            self.ownable.assert_only_owner();
+
+            // Store the new vk
+            for i in 0..vk.len() {
+                self.supported_vks.entry(vk_index).push(*vk[i]);
+            }
+
+            self.last_supported_vk_index.write(vk_index + 1);
+            true
+        }
+
+        fn modify_supported_vk(
+            ref self: sn::privacy_account::PrivacyAccount::ContractState,
+            vk: core::array::Span<core::felt252>,
+            vk_index: core::integer::u16,
+        ) -> core::bool {
+            self.ownable.assert_only_owner();
+
+            for i in 0..vk.len() {
+                self.supported_vks.entry(vk_index).at(i.into()).write(*vk[i]);
+            }
+
+            true
+        }
+
+        fn get_last_supported_vk_index(
+            self: @sn::privacy_account::PrivacyAccount::ContractState,
+        ) -> core::integer::u16 {
+            self.last_supported_vk_index.read()
         }
     }
 }
