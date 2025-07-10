@@ -1,3 +1,4 @@
+use starknet::ClassHash;
 // SPDX-License-Identifier: MIT
 // Compatible with OpenZeppelin Contracts for Cairo ^0.20.0
 use starknet::ContractAddress;
@@ -67,6 +68,8 @@ pub trait IPrivacyAccount<TContractState> {
         execute_vk: Span<felt252>,
         execute_nft_vk: Span<felt252>,
     ) -> bool;
+    fn set_recursive_verifier(ref self: TContractState, recursive_verifier: ClassHash) -> bool;
+    fn get_recursive_verifier(self: @TContractState) -> ClassHash;
 }
 
 #[derive(Drop)]
@@ -921,6 +924,20 @@ pub mod PrivacyAccount {
             assert(self.merkle.roots.read(public_input.fee_merkle_root), Errors::INVALID_ROOT);
             self.merkle.add_leaf(public_input.fee_refund_commitment);
             true
+        }
+        fn set_recursive_verifier(
+            ref self: sn::privacy_account::PrivacyAccount::ContractState,
+            recursive_verifier: starknet::class_hash::ClassHash,
+        ) -> core::bool {
+            self.ownable.assert_only_owner();
+            self.recursive_verifier.write(recursive_verifier);
+            true
+        }
+
+        fn get_recursive_verifier(
+            self: @sn::privacy_account::PrivacyAccount::ContractState,
+        ) -> starknet::class_hash::ClassHash {
+            self.recursive_verifier.read()
         }
     }
 }
