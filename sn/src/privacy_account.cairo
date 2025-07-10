@@ -275,6 +275,7 @@ pub mod PrivacyAccount {
     use openzeppelin::introspection::src5::SRC5Component;
     use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
     use openzeppelin::upgrades::UpgradeableComponent;
+    use openzeppelin::upgrades::interface::IUpgradeable;
     use starknet::account::Call;
     use starknet::class_hash::ClassHash;
     use starknet::event::EventEmitter;
@@ -426,6 +427,14 @@ pub mod PrivacyAccount {
         // 8) Set gas consumed
         self.merge_gas_consumed.write(merge_gas_consumed);
         self.transfer_gas_consumed.write(transfer_gas_consumed);
+    }
+
+    #[abi(embed_v0)]
+    impl UpgradeableImpl of IUpgradeable<ContractState> {
+        fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
+            self.ownable.assert_only_owner();
+            self.upgradeable.upgrade(new_class_hash);
+        }
     }
 
     #[abi(embed_v0)]
