@@ -73,6 +73,10 @@ pub trait IPrivacyAccount<TContractState> {
     fn add_supported_vk(ref self: TContractState, vk: Span<felt252>, vk_index: u16) -> bool;
     fn modify_supported_vk(ref self: TContractState, vk: Span<felt252>, vk_index: u16) -> bool;
     fn get_last_supported_vk_index(self: @TContractState) -> u16;
+    fn set_upgrader(ref self: TContractState, upgrader: ContractAddress) -> bool;
+    fn revoke_upgrader(ref self: TContractState, upgrader: ContractAddress) -> bool;
+    fn is_upgrader(self: @TContractState, account: ContractAddress) -> bool;
+    fn is_admin(self: @TContractState, account: ContractAddress) -> bool;
 }
 
 #[derive(Drop)]
@@ -269,14 +273,15 @@ impl PublicInputTransferImpl of PublicInputTransferTrait {
     }
 }
 
-
+const UPGRADER_ROLE: felt252 = selector!("UPGRADER_ROLE");
 #[starknet::contract(account)]
 pub mod PrivacyAccount {
     use ekubo::interfaces::erc721::{IERC721Dispatcher, IERC721DispatcherTrait};
+    use openzeppelin::access::accesscontrol::{AccessControlComponent, DEFAULT_ADMIN_ROLE};
     pub const VK_SIZE: usize = 112;
+    use AccessControlComponent::InternalTrait as AccessControlInternalTrait;
     use core::array::{Array, ArrayTrait};
     use core::option::OptionTrait;
-    use openzeppelin::access::ownable::OwnableComponent;
     use openzeppelin::account::extensions::SRC9Component;
     use openzeppelin::introspection::src5::SRC5Component;
     use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
@@ -297,41 +302,47 @@ pub mod PrivacyAccount {
     use crate::{hash, verify_ultra_keccak_honk_proof};
     use super::{
         IPrivacyAccount, PublicInputExecuteNFTImpl, PublicInputMergeImpl, PublicInputTransferImpl,
-        PublicInputWithdrawImpl,
+        PublicInputWithdrawImpl, UPGRADER_ROLE,
     };
 
-    #[abi(embed_v0)]
-    impl Clear = ekubo::components::clear::ClearImpl<ContractState>;
 
     component!(path: SRC5Component, storage: src5, event: SRC5Event);
     component!(path: SRC9Component, storage: src9, event: SRC9Event);
     component!(path: UpgradeableComponent, storage: upgradeable, event: UpgradeableEvent);
-    component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
     component!(path: MerkleTreeComponent, storage: merkle, event: MerkleEvent);
+    component!(path: AccessControlComponent, storage: accesscontrol, event: AccessControlEvent);
 
     // External
     #[abi(embed_v0)]
     impl OutsideExecutionV2Impl =
         SRC9Component::OutsideExecutionV2Impl<ContractState>;
+    #[abi(embed_v0)]
+    impl AccessControlMixinImpl =
+        AccessControlComponent::AccessControlCamelImpl<ContractState>;
+    #[abi(embed_v0)]
+    impl Clear = ekubo::components::clear::ClearImpl<ContractState>;
+    #[abi(embed_v0)]
+    impl AccessControlImpl =
+        AccessControlComponent::AccessControlImpl<ContractState>;
 
 
     // Internal
     impl OutsideExecutionInternalImpl = SRC9Component::InternalImpl<ContractState>;
     impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
-    impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
     impl MerkleTreeInternalImpl = MerkleTreeComponent::InternalImpl<ContractState>;
+    impl AccessControlInternalImpl = AccessControlComponent::InternalImpl<ContractState>;
 
 
     #[storage]
     struct Storage {
+        #[substorage(v0)]
+        accesscontrol: AccessControlComponent::Storage,
         #[substorage(v0)]
         src5: SRC5Component::Storage,
         #[substorage(v0)]
         src9: SRC9Component::Storage,
         #[substorage(v0)]
         upgradeable: UpgradeableComponent::Storage,
-        #[substorage(v0)]
-        ownable: OwnableComponent::Storage,
         #[substorage(v0)]
         merkle: MerkleTreeComponent::Storage,
         nullifier_hashes: Map<u256, bool>,
@@ -348,17 +359,11 @@ pub mod PrivacyAccount {
         last_supported_vk_index: u16,
     }
 
-    #[derive(Drop, PartialEq, starknet::Event)]
-    pub struct Deposit {
-        #[key]
-        secret_and_nullifier_hash: u256,
-        amount: u256,
-        token_address: ContractAddress,
-    }
-
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
+        #[flat]
+        AccessControlEvent: AccessControlComponent::Event,
         #[flat]
         SRC5Event: SRC5Component::Event,
         #[flat]
@@ -366,13 +371,18 @@ pub mod PrivacyAccount {
         #[flat]
         UpgradeableEvent: UpgradeableComponent::Event,
         #[flat]
-        OwnableEvent: OwnableComponent::Event,
-        #[flat]
         MerkleEvent: MerkleTreeComponent::Event,
         FeeWithdrawal: FeeWithdrawal,
         Deposit: Deposit,
     }
 
+    #[derive(Drop, PartialEq, starknet::Event)]
+    pub struct Deposit {
+        #[key]
+        secret_and_nullifier_hash: u256,
+        amount: u256,
+        token_address: ContractAddress,
+    }
 
     #[derive(Drop, PartialEq, starknet::Event)]
     pub struct FeeWithdrawal {
@@ -397,7 +407,8 @@ pub mod PrivacyAccount {
     #[constructor]
     fn constructor(
         ref self: ContractState,
-        owner: ContractAddress,
+        default_admin: ContractAddress,
+        upgrader: ContractAddress,
         recursive_verifier: ClassHash,
         strk_token_address: ContractAddress,
         initial_fee_buffer: u256,
@@ -405,8 +416,10 @@ pub mod PrivacyAccount {
         merge_gas_consumed: u128,
         transfer_gas_consumed: u128,
     ) {
-        // 1) Standard ownership & merkle init
-        self.ownable.initializer(owner);
+        // 1) Standard roles & merkle init
+
+        self.accesscontrol._grant_role(DEFAULT_ADMIN_ROLE, default_admin);
+        self.accesscontrol._grant_role(UPGRADER_ROLE, upgrader);
         self.merkle.initializer();
 
         // 2) Store verifier addresses
@@ -419,7 +432,7 @@ pub mod PrivacyAccount {
         //    Deployer MUST have done: IERC20Dispatcher.approve(<this_contract>, initial_fee_buffer)
         let this = get_contract_address();
         let token = IERC20Dispatcher { contract_address: strk_token_address };
-        token.transfer_from(owner, this, initial_fee_buffer);
+        token.transfer_from(default_admin, this, initial_fee_buffer);
 
         // 5) Seed your fee‐tracking storage
         self.initial_fee_buffer.write(initial_fee_buffer);
@@ -439,7 +452,7 @@ pub mod PrivacyAccount {
     #[abi(embed_v0)]
     impl UpgradeableImpl of IUpgradeable<ContractState> {
         fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
-            self.ownable.assert_only_owner();
+            self.accesscontrol.assert_only_role(UPGRADER_ROLE);
             self.upgradeable.upgrade(new_class_hash);
         }
     }
@@ -765,7 +778,7 @@ pub mod PrivacyAccount {
             ref self: sn::privacy_account::PrivacyAccount::ContractState,
             gas_price: core::integer::u256,
         ) -> core::bool {
-            self.ownable.assert_only_owner();
+            self.accesscontrol.assert_only_role(DEFAULT_ADMIN_ROLE);
             self.current_gas_price.write(gas_price);
             true
         }
@@ -774,7 +787,8 @@ pub mod PrivacyAccount {
             contract_address: starknet::contract_address::ContractAddress,
             gas_consumed: core::integer::u128,
         ) -> core::bool {
-            self.ownable.assert_only_owner();
+            self.accesscontrol.assert_only_role(DEFAULT_ADMIN_ROLE);
+
             self.trusted_extensions.entry(contract_address).write(gas_consumed);
             true
         }
@@ -800,7 +814,7 @@ pub mod PrivacyAccount {
             recipient: starknet::contract_address::ContractAddress,
         ) -> core::integer::u256 {
             // only the owner may call
-            self.ownable.assert_only_owner();
+            self.accesscontrol.assert_only_role(DEFAULT_ADMIN_ROLE);
 
             // 1) read on‐chain STRK balance of this contract
             let this = get_contract_address();
@@ -843,7 +857,7 @@ pub mod PrivacyAccount {
             recipient: starknet::contract_address::ContractAddress,
             amount: core::integer::u256,
         ) -> core::integer::u256 {
-            self.ownable.assert_only_owner();
+            self.accesscontrol.assert_only_role(DEFAULT_ADMIN_ROLE);
 
             let this = get_contract_address();
             let token = IERC20Dispatcher { contract_address: self.strk_token_address.read() };
@@ -900,7 +914,8 @@ pub mod PrivacyAccount {
             execute_vk: core::array::Span<core::felt252>,
             execute_nft_vk: core::array::Span<core::felt252>,
         ) -> core::bool {
-            self.ownable.assert_only_owner();
+            self.accesscontrol.assert_only_role(DEFAULT_ADMIN_ROLE);
+
             // MERGE under key 0
             for i in 0..merge_vk.len() {
                 self.supported_vks.entry(0).push(*merge_vk[i]);
@@ -925,7 +940,8 @@ pub mod PrivacyAccount {
             ref self: sn::privacy_account::PrivacyAccount::ContractState,
             recursive_verifier: starknet::class_hash::ClassHash,
         ) -> core::bool {
-            self.ownable.assert_only_owner();
+            self.accesscontrol.assert_only_role(DEFAULT_ADMIN_ROLE);
+
             self.recursive_verifier.write(recursive_verifier);
             true
         }
@@ -941,7 +957,7 @@ pub mod PrivacyAccount {
             vk: core::array::Span<core::felt252>,
             vk_index: core::integer::u16,
         ) -> core::bool {
-            self.ownable.assert_only_owner();
+            self.accesscontrol.assert_only_role(DEFAULT_ADMIN_ROLE);
 
             // Store the new vk
             for i in 0..vk.len() {
@@ -957,7 +973,7 @@ pub mod PrivacyAccount {
             vk: core::array::Span<core::felt252>,
             vk_index: core::integer::u16,
         ) -> core::bool {
-            self.ownable.assert_only_owner();
+            self.accesscontrol.assert_only_role(DEFAULT_ADMIN_ROLE);
 
             for i in 0..vk.len() {
                 self.supported_vks.entry(vk_index).at(i.into()).write(*vk[i]);
@@ -970,6 +986,36 @@ pub mod PrivacyAccount {
             self: @sn::privacy_account::PrivacyAccount::ContractState,
         ) -> core::integer::u16 {
             self.last_supported_vk_index.read()
+        }
+
+        fn set_upgrader(
+            ref self: sn::privacy_account::PrivacyAccount::ContractState,
+            upgrader: starknet::contract_address::ContractAddress,
+        ) -> core::bool {
+            self.accesscontrol.assert_only_role(DEFAULT_ADMIN_ROLE);
+            self.accesscontrol._grant_role(UPGRADER_ROLE, upgrader);
+            true
+        }
+
+        fn revoke_upgrader(
+            ref self: sn::privacy_account::PrivacyAccount::ContractState,
+            upgrader: starknet::contract_address::ContractAddress,
+        ) -> core::bool {
+            self.accesscontrol.assert_only_role(DEFAULT_ADMIN_ROLE);
+            self.accesscontrol._revoke_role(UPGRADER_ROLE, upgrader);
+            true
+        }
+
+        fn is_upgrader(
+            self: @sn::privacy_account::PrivacyAccount::ContractState, account: ContractAddress,
+        ) -> bool {
+            self.accesscontrol.has_role(UPGRADER_ROLE, account)
+        }
+
+        fn is_admin(
+            self: @sn::privacy_account::PrivacyAccount::ContractState, account: ContractAddress,
+        ) -> bool {
+            self.accesscontrol.has_role(DEFAULT_ADMIN_ROLE, account)
         }
     }
 }
