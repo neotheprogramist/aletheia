@@ -276,7 +276,6 @@ pub mod PrivacyAccount {
     use openzeppelin::access::ownable::OwnableComponent;
     use openzeppelin::account::extensions::SRC9Component;
     use openzeppelin::introspection::src5::SRC5Component;
-    use openzeppelin::security::pausable::PausableComponent;
     use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
     use openzeppelin::upgrades::UpgradeableComponent;
     use openzeppelin::upgrades::interface::IUpgradeable;
@@ -304,7 +303,6 @@ pub mod PrivacyAccount {
     component!(path: SRC5Component, storage: src5, event: SRC5Event);
     component!(path: SRC9Component, storage: src9, event: SRC9Event);
     component!(path: UpgradeableComponent, storage: upgradeable, event: UpgradeableEvent);
-    component!(path: PausableComponent, storage: pausable, event: PausableEvent);
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
     component!(path: MerkleTreeComponent, storage: merkle, event: MerkleEvent);
 
@@ -312,21 +310,17 @@ pub mod PrivacyAccount {
     #[abi(embed_v0)]
     impl OutsideExecutionV2Impl =
         SRC9Component::OutsideExecutionV2Impl<ContractState>;
-    #[abi(embed_v0)]
-    impl PausableImpl = PausableComponent::PausableImpl<ContractState>;
+
 
     // Internal
     impl OutsideExecutionInternalImpl = SRC9Component::InternalImpl<ContractState>;
     impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
     impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
     impl MerkleTreeInternalImpl = MerkleTreeComponent::InternalImpl<ContractState>;
-    impl PausableInternalImpl = PausableComponent::InternalImpl<ContractState>;
 
 
     #[storage]
     struct Storage {
-        #[substorage(v0)]
-        pausable: PausableComponent::Storage,
         #[substorage(v0)]
         src5: SRC5Component::Storage,
         #[substorage(v0)]
@@ -365,8 +359,6 @@ pub mod PrivacyAccount {
         SRC5Event: SRC5Component::Event,
         #[flat]
         SRC9Event: SRC9Component::Event,
-        #[flat]
-        PausableEvent: PausableComponent::Event,
         #[flat]
         UpgradeableEvent: UpgradeableComponent::Event,
         #[flat]
@@ -500,7 +492,6 @@ pub mod PrivacyAccount {
             external_contract_address: ContractAddress,
             calldata: Span<felt252>,
         ) -> bool {
-            self.pausable.assert_not_paused();
             let public_input_serialized = verify_ultra_keccak_honk_proof(
                 self.recursive_verifier.read(), proof,
             );
@@ -874,7 +865,6 @@ pub mod PrivacyAccount {
             external_contract_address: ContractAddress,
             calldata: Span<felt252>,
         ) -> bool {
-            self.pausable.assert_not_paused();
             let public_input_serialized = verify_ultra_keccak_honk_proof(
                 self.recursive_verifier.read(), proof,
             );
