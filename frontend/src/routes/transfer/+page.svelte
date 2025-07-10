@@ -22,7 +22,7 @@
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
 	import SelectionToggle from '$lib/ui/SelectionToggle.svelte';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
-	import { fetchMergeFee } from '$lib/utils/fetchFeeForExtension';
+	import { fetchTransferFee } from '$lib/utils/fetchFeeForExtension';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
 	import {
 		loadDeposits,
@@ -153,7 +153,7 @@
 
 				const feeNoteDecimals = await fetchTokenDecimals(feeTokenAddress);
 				feeNoteBalanceWei = BigInt(feeNoteBalance);
-				feeWei = await fetchMergeFee(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
+				feeWei = await fetchTransferFee(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
 				feeWeiHex = fromWei(feeWei, feeNoteDecimals);
 
 				if (feeWei > feeNoteBalanceWei) {

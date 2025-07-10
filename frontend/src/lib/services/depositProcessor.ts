@@ -43,7 +43,7 @@ export function startDepositProcessor() {
 
 			await delete_latest_db_block_number(fromBlock);
 
-			const deposits = await getDepositsFromRange(fromBlock + 1, toBlock);
+			const deposits = await getDepositsFromRange(fromBlock, toBlock);
 			for (const { hash, block_number } of deposits) {
 				await db_add_leaf(hash, block_number);
 				merkleTree.addLeaf(BigInt(hash));
