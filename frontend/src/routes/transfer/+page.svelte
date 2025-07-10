@@ -40,6 +40,7 @@
 	import { supportedTokens } from '$lib/config/tokens';
 	import { browser } from '$app/environment';
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
+	import { autoSelectCompleteProcess, type AutoSelectedFee } from '$lib/utils/autoSelectFeeDeposit';
 
 	const STRK_ADDRESS = supportedTokens[0].address;
 
@@ -52,6 +53,10 @@
 	let selectedTransferDeposit: DisplayOperation | null = null;
 	let selectedFeeKey: number | null = null;
 	let selectedFeeDeposit: DisplayOperation | null = null;
+
+	// Auto-selected fee information
+	let autoSelectedFeeInfo: AutoSelectedFee | null = null;
+	let feePreloadError: string | null = null;
 
 	let transferNote: NoteData | null = null;
 	let feeNote: NoteData | null = null;
@@ -102,6 +107,11 @@
 			selectedTransferDeposit = deposits.find((d) => d.index === selectedTransferKey) ?? null;
 			transferSecretAndNullifierHash = '';
 			transferAmount = '';
+
+			// Auto-select fee deposit when transfer deposit is selected
+			if (selectedTransferDeposit) {
+				autoSelectFeeDeposit();
+			}
 		} else {
 			selectedFeeKey = deposits[globalIdx].index;
 			selectedFeeDeposit = deposits.find((d) => d.index === selectedFeeKey) ?? null;
@@ -113,6 +123,45 @@
 		selectedTransferDeposit = null;
 		selectedFeeKey = null;
 		selectedFeeDeposit = null;
+		autoSelectedFeeInfo = null;
+		feePreloadError = null;
+	}
+
+	/** Auto-select fee deposit when transfer deposit is chosen */
+	async function autoSelectFeeDeposit() {
+		if (!selectedTransferDeposit) return;
+
+		feePreloadError = null;
+
+		try {
+			// Get fee info and auto-select the best STRK deposit
+			const excludeDeposits = [selectedTransferDeposit];
+			autoSelectedFeeInfo = await autoSelectCompleteProcess(
+				'transfer',
+				PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				undefined, // transfer doesn't need extension address
+				excludeDeposits
+			);
+
+			// Set the auto-selected fee deposit
+			if (autoSelectedFeeInfo.feeDeposit) {
+				selectedFeeDeposit = autoSelectedFeeInfo.feeDeposit;
+				selectedFeeKey = autoSelectedFeeInfo.feeDeposit.index;
+			} else {
+				selectedFeeDeposit = null;
+				selectedFeeKey = null;
+
+				if (!autoSelectedFeeInfo.hasEnoughBalance) {
+					feePreloadError = `Insufficient STRK balance. Required: ${autoSelectedFeeInfo.feeInfo.formatted} STRK`;
+				} else {
+					feePreloadError = 'No available STRK deposits for fee payment';
+				}
+			}
+		} catch (error) {
+			console.error('Error auto-selecting fee deposit:', error);
+			feePreloadError = 'Failed to load fee information';
+			autoSelectedFeeInfo = null;
+		}
 	}
 
 	function handleSelectionChange(value: string) {
@@ -127,8 +176,8 @@
 		isLoading = true;
 		await wrapWithToast(
 			async () => {
-				if (!selectedTransferDeposit || !selectedFeeDeposit) {
-					throw new Error('Please select both a transfer note and a fee note');
+				if (!selectedTransferDeposit || !selectedFeeDeposit || !autoSelectedFeeInfo) {
+					throw new Error('Please select a transfer deposit first');
 				}
 
 				// Parse transfer note details
@@ -147,14 +196,16 @@
 					throw new Error('Invalid transfer amount');
 				}
 
-				// Parse fee note details
+				// Parse fee note details (auto-selected)
 				feeNote = NoteDataSchema.parse(selectedFeeDeposit.data);
 				const { tokenAddress: feeTokenAddress, amount: feeNoteBalance } = feeNote;
 
 				const feeNoteDecimals = await fetchTokenDecimals(feeTokenAddress);
 				feeNoteBalanceWei = BigInt(feeNoteBalance);
-				feeWei = await fetchTransferFee(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
-				feeWeiHex = fromWei(feeWei, feeNoteDecimals);
+
+				// Use pre-loaded fee info
+				feeWei = autoSelectedFeeInfo.feeInfo.amount;
+				feeWeiHex = autoSelectedFeeInfo.feeInfo.formatted;
 
 				if (feeWei > feeNoteBalanceWei) {
 					throw new Error(

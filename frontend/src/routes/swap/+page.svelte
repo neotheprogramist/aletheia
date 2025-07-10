@@ -28,13 +28,12 @@
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
 	import { defaultDepositColumns } from '$lib/utils/sharedColumns';
-	import SelectionToggle from '$lib/ui/SelectionToggle.svelte';
-	import Instructions, { type SwapMode } from '$lib/ui/Instructions.svelte';
-	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
+		import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
 	import { supportedTokens } from '$lib/config/tokens';
 	import { browser } from '$app/environment';
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
+	import { autoSelectCompleteProcess, type AutoSelectedFee } from '$lib/utils/autoSelectFeeDeposit';
 	import { walletAddress } from '$lib/stores/wallet';
 	import { buildSwapCalldata, fetchEkuboQuote } from '$lib/utils/swap';
 	import { supportedPools } from '$lib/config/swap';
@@ -44,12 +43,15 @@
 	const STRK_ADDRESS = supportedTokens[0].address;
 
 	let deposits: DisplayOperation[] = [];
-	let selectionMode: SwapMode = 'swap';
 
 	let selectedSwapKey: number | null = null;
 	let selectedSwapDeposit: DisplayOperation | null = null;
 	let selectedFeeKey: number | null = null;
 	let selectedFeeDeposit: DisplayOperation | null = null;
+
+	// Auto-selected fee information
+	let autoSelectedFeeInfo: AutoSelectedFee | null = null;
+	let feePreloadError: string | null = null;
 
 	let swapNote: NoteData | null = null;
 	let feeNote: NoteData | null = null;
@@ -101,13 +103,13 @@
 	}
 
 	function handleRowClick(globalIdx: number) {
-		if (selectionMode === 'swap') {
-			selectedSwapKey = deposits[globalIdx].index;
-			selectedSwapDeposit = deposits.find((d) => d.index === selectedSwapKey) ?? null;
-			swapAmount = '';
-		} else {
-			selectedFeeKey = deposits[globalIdx].index;
-			selectedFeeDeposit = deposits.find((d) => d.index === selectedFeeKey) ?? null;
+		selectedSwapKey = deposits[globalIdx].index;
+		selectedSwapDeposit = deposits.find((d) => d.index === selectedSwapKey) ?? null;
+		swapAmount = '';
+		
+		// Auto-select fee deposit when swap deposit is selected
+		if (selectedSwapDeposit) {
+			autoSelectFeeDeposit();
 		}
 	}
 
@@ -116,13 +118,44 @@
 		selectedSwapDeposit = null;
 		selectedFeeKey = null;
 		selectedFeeDeposit = null;
+		autoSelectedFeeInfo = null;
+		feePreloadError = null;
 	}
 
-	function handleSelectionChange(value: string) {
-		selectionMode = value as SwapMode;
-
-		if (value === 'fee') {
-			selectedToken.set(STRK_ADDRESS);
+	/** Auto-select fee deposit when swap deposit is chosen */
+	async function autoSelectFeeDeposit() {
+		if (!selectedSwapDeposit) return;
+		
+		feePreloadError = null;
+		
+		try {
+			// Get fee info and auto-select the best STRK deposit
+			const excludeDeposits = [selectedSwapDeposit];
+			autoSelectedFeeInfo = await autoSelectCompleteProcess(
+				'swap',
+				PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				PUBLIC_SWAP_EXTENSION_CONTRACT_ADDRESS,
+				excludeDeposits
+			);
+			
+			// Set the auto-selected fee deposit
+			if (autoSelectedFeeInfo.feeDeposit) {
+				selectedFeeDeposit = autoSelectedFeeInfo.feeDeposit;
+				selectedFeeKey = autoSelectedFeeInfo.feeDeposit.index;
+			} else {
+				selectedFeeDeposit = null;
+				selectedFeeKey = null;
+				
+				if (!autoSelectedFeeInfo.hasEnoughBalance) {
+					feePreloadError = `Insufficient STRK balance. Required: ${autoSelectedFeeInfo.feeInfo.formatted} STRK`;
+				} else {
+					feePreloadError = 'No available STRK deposits for fee payment';
+				}
+			}
+		} catch (error) {
+			console.error('Error auto-selecting fee deposit:', error);
+			feePreloadError = 'Failed to load fee information';
+			autoSelectedFeeInfo = null;
 		}
 	}
 
@@ -131,8 +164,8 @@
 		isLoading = true;
 		await wrapWithToast(
 			async () => {
-				if (!selectedSwapDeposit || !selectedFeeDeposit) {
-					throw new Error('Please select both a swap note and a fee note');
+				if (!selectedSwapDeposit || !selectedFeeDeposit || !autoSelectedFeeInfo) {
+					throw new Error('Please select a swap deposit first');
 				}
 
 				// — Parse Swap note
@@ -168,17 +201,16 @@
 					throw new Error('Invalid swap amount');
 				}
 
-				// — Parse Fee note
+				// — Parse Fee note (auto-selected)
 				feeNote = NoteDataSchema.parse(selectedFeeDeposit.data);
 				const { tokenAddress: feeTokenAddress, amount: feeNoteBalance } = feeNote;
 
 				const feeNoteDecimals = await fetchTokenDecimals(feeTokenAddress);
 				feeNoteBalanceWei = BigInt(feeNoteBalance);
-				feeWei = await fetchExtensionFee(
-					PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
-					PUBLIC_SWAP_EXTENSION_CONTRACT_ADDRESS
-				);
-				feeWeiHex = fromWei(feeWei, feeNoteDecimals);
+				
+				// Use pre-loaded fee info
+				feeWei = autoSelectedFeeInfo.feeInfo.amount;
+				feeWeiHex = autoSelectedFeeInfo.feeInfo.formatted;
 
 				if (feeWei > feeNoteBalanceWei) {
 					throw new Error(
@@ -455,25 +487,16 @@
 <ProtectedRoute>
 	<div class="mx-auto p-6">
 		<Card>
-			<SelectionToggle
-				options={[
-					{ label: 'Swap', value: 'swap', isFirst: true },
-					{ label: 'Fee', value: 'fee', isLast: true }
-				]}
-				selected={selectionMode}
-				onChange={handleSelectionChange}
-				onReset={resetAll}
-			/>
-
-			<!-- Instructions -->
-			<Instructions action="swap" mode={selectionMode} />
+			<h2 class="text-2xl font-bold mb-4">Swap</h2>
+			<p class="text-gray-600 mb-6">
+				Select a deposit to swap from. Fee deposit will be automatically selected.
+			</p>
 
 			<TokenSelect
 				tokens={$tokens}
 				bind:value={$selectedToken}
 				placeholder="Filter deposits by token"
 				class_="mb-4 w-64"
-				disabled={selectionMode === 'fee'}
 			/>
 			<!-- Deposits Table -->
 			{#if !deposits.length}
@@ -486,26 +509,42 @@
 					keyField="index"
 					disabledKeys={undefined}
 					onRowClick={handleRowClick}
-					activeKey={selectionMode === 'swap' ? selectedSwapKey : selectedFeeKey}
-					inactiveKeys={selectionMode === 'swap' && selectedFeeKey !== null
-						? [selectedFeeKey]
-						: selectionMode === 'fee' && selectedSwapKey !== null
-							? [selectedSwapKey]
-							: []}
+					activeKey={selectedSwapKey}
+					inactiveKeys={selectedFeeKey !== null ? [selectedFeeKey] : []}
 					hoverClass="hover:bg-green-600"
 				/>
+			{/if}
+
+			<!-- Auto-selected fee information -->
+			{#if autoSelectedFeeInfo}
+				<div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+					<h3 class="font-semibold text-blue-800 mb-2">Fee Information</h3>
+					<p class="text-sm text-blue-700">
+						Fee: <strong>{autoSelectedFeeInfo.feeInfo.formatted} STRK</strong>
+						{#if autoSelectedFeeInfo.feeDeposit}
+							• Auto-selected fee deposit: <strong>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong>
+						{/if}
+					</p>
+				</div>
+			{/if}
+
+			<!-- Error message -->
+			{#if feePreloadError}
+				<div class="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
+					<p class="text-sm text-red-700">{feePreloadError}</p>
+				</div>
 			{/if}
 
 			<!-- Selected‐deposit cards -->
 			<SelectedDeposits
 				items={[
 					{ title: 'Swap Deposit', deposit: selectedSwapDeposit },
-					{ title: 'Fee Deposit', deposit: selectedFeeDeposit }
+					{ title: 'Fee Deposit (Auto-selected)', deposit: selectedFeeDeposit }
 				]}
 			/>
 
 			<!-- Swap Form -->
-			{#if selectedSwapDeposit && selectedFeeDeposit}
+			{#if selectedSwapDeposit && selectedFeeDeposit && !feePreloadError}
 				<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
 					<Card>
 						<form on:submit|preventDefault={initiateSwap} class="mt-6 flex flex-col gap-4">

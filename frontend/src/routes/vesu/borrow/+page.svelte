@@ -12,8 +12,7 @@
 	} from '$lib/utils/loadDepositsForToken';
 	import { defaultDepositColumns } from '$lib/utils/sharedColumns';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
-	import Instructions, { type BorrowMode } from '$lib/ui/Instructions.svelte';
-	import { supportedTokens } from '$lib/config/tokens';
+		import { supportedTokens } from '$lib/config/tokens';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { NoteDataSchema, type NoteData } from '$lib/schemas/schemas';
@@ -26,6 +25,7 @@
 		PUBLIC_EKUBO_BORROW_EXTENSION_CONTRACT_ADDRESS,
 		PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS
 	} from '$env/static/public';
+import { autoSelectCompleteProcess, type AutoSelectedFee } from '$lib/utils/autoSelectFeeDeposit';
 
 	const STRK_ADDRESS = supportedTokens[0].address;
 
@@ -33,7 +33,7 @@
 	let isLoading = false;
 
 	// Selection
-	let selectionMode: BorrowMode = 'collateral';
+	let selectionMode: 'collateral' | 'debt' = 'collateral';
 
 	let selectedCollateralKey: number | null = null;
 	let selectedCollateralDeposit: DisplayOperation | null = null;
@@ -46,6 +46,12 @@
 
 	let selectedDebtFeeKey: number | null = null;
 	let selectedDebtFeeDeposit: DisplayOperation | null = null;
+
+	// Auto-selected fee information
+	let autoSelectedCollateralFeeInfo: AutoSelectedFee | null = null;
+	let autoSelectedDebtFeeInfo: AutoSelectedFee | null = null;
+	let collateralFeePreloadError: string | null = null;
+	let debtFeePreloadError: string | null = null;
 
 	let collateralNote: NoteData | null = null;
 	let feeCollateralNote: NoteData | null = null;
@@ -89,13 +95,97 @@
 		selectedDebtDeposit = null;
 		selectedDebtFeeKey = null;
 		selectedDebtFeeDeposit = null;
+		autoSelectedCollateralFeeInfo = null;
+		autoSelectedDebtFeeInfo = null;
+		collateralFeePreloadError = null;
+		debtFeePreloadError = null;
 	}
 
 	function handleSelectionChange(value: string) {
-		selectionMode = value as BorrowMode;
+		selectionMode = value as 'collateral' | 'debt';
+	}
 
-		if (value === 'fee' || value == 'debtFee') {
-			selectedToken.set(STRK_ADDRESS);
+	/** Auto-select collateral fee deposit when collateral deposit is chosen */
+	async function autoSelectCollateralFeeDeposit() {
+		if (!selectedCollateralDeposit) return;
+		
+		collateralFeePreloadError = null;
+		
+		try {
+			// Get fee info and auto-select the best STRK deposit
+			const excludeDeposits = [selectedCollateralDeposit];
+			if (selectedDebtDeposit) excludeDeposits.push(selectedDebtDeposit);
+			
+			autoSelectedCollateralFeeInfo = await autoSelectCompleteProcess(
+				'borrow',
+				PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				PUBLIC_EKUBO_BORROW_EXTENSION_CONTRACT_ADDRESS,
+				excludeDeposits
+			);
+			
+			// Set the auto-selected collateral fee deposit
+			if (autoSelectedCollateralFeeInfo.feeDeposit) {
+				selectedCollateralFeeDeposit = autoSelectedCollateralFeeInfo.feeDeposit;
+				selectedCollateralFeeKey = autoSelectedCollateralFeeInfo.feeDeposit.index;
+			} else {
+				selectedCollateralFeeDeposit = null;
+				selectedCollateralFeeKey = null;
+				
+				if (!autoSelectedCollateralFeeInfo.hasEnoughBalance) {
+					collateralFeePreloadError = `Insufficient STRK balance. Required: ${autoSelectedCollateralFeeInfo.feeInfo.formatted} STRK`;
+				} else {
+					collateralFeePreloadError = 'No available STRK deposits for collateral fee payment';
+				}
+			}
+			
+			// Also try to auto-select debt fee if debt deposit exists
+			if (selectedDebtDeposit) {
+				autoSelectDebtFeeDeposit();
+			}
+		} catch (error) {
+			console.error('Error auto-selecting collateral fee deposit:', error);
+			collateralFeePreloadError = 'Failed to load collateral fee information';
+			autoSelectedCollateralFeeInfo = null;
+		}
+	}
+
+	/** Auto-select debt fee deposit when debt deposit is chosen */
+	async function autoSelectDebtFeeDeposit() {
+		if (!selectedDebtDeposit) return;
+		
+		debtFeePreloadError = null;
+		
+		try {
+			// Get fee info and auto-select the best STRK deposit
+			const excludeDeposits = [selectedDebtDeposit];
+			if (selectedCollateralDeposit) excludeDeposits.push(selectedCollateralDeposit);
+			if (selectedCollateralFeeDeposit) excludeDeposits.push(selectedCollateralFeeDeposit);
+			
+			autoSelectedDebtFeeInfo = await autoSelectCompleteProcess(
+				'borrow',
+				PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				PUBLIC_EKUBO_BORROW_EXTENSION_CONTRACT_ADDRESS,
+				excludeDeposits
+			);
+			
+			// Set the auto-selected debt fee deposit
+			if (autoSelectedDebtFeeInfo.feeDeposit) {
+				selectedDebtFeeDeposit = autoSelectedDebtFeeInfo.feeDeposit;
+				selectedDebtFeeKey = autoSelectedDebtFeeInfo.feeDeposit.index;
+			} else {
+				selectedDebtFeeDeposit = null;
+				selectedDebtFeeKey = null;
+				
+				if (!autoSelectedDebtFeeInfo.hasEnoughBalance) {
+					debtFeePreloadError = `Insufficient STRK balance. Required: ${autoSelectedDebtFeeInfo.feeInfo.formatted} STRK`;
+				} else {
+					debtFeePreloadError = 'No available STRK deposits for debt fee payment';
+				}
+			}
+		} catch (error) {
+			console.error('Error auto-selecting debt fee deposit:', error);
+			debtFeePreloadError = 'Failed to load debt fee information';
+			autoSelectedDebtFeeInfo = null;
 		}
 	}
 
@@ -106,18 +196,14 @@
 			case 'collateral':
 				selectedCollateralKey = op.index;
 				selectedCollateralDeposit = op;
-				break;
-			case 'fee':
-				selectedCollateralFeeKey = op.index;
-				selectedCollateralFeeDeposit = op;
+				// Auto-select collateral fee deposit
+				autoSelectCollateralFeeDeposit();
 				break;
 			case 'debt':
 				selectedDebtKey = op.index;
 				selectedDebtDeposit = op;
-				break;
-			case 'debtFee':
-				selectedDebtFeeKey = op.index;
-				selectedDebtFeeDeposit = op;
+				// Auto-select debt fee deposit
+				autoSelectDebtFeeDeposit();
 				break;
 		}
 	}
@@ -126,12 +212,12 @@
 		isLoading = true;
 		await wrapWithToast(
 			async () => {
-				if (!selectedCollateralDeposit || !selectedCollateralFeeDeposit) {
-					throw new Error('Please select both a collateral deposit and a collateral fee deposit');
+				if (!selectedCollateralDeposit || !selectedCollateralFeeDeposit || !autoSelectedCollateralFeeInfo) {
+					throw new Error('Please select a collateral deposit first');
 				}
 
-				if (!selectedDebtDeposit || !selectedDebtFeeDeposit) {
-					throw new Error('Please select both a debt deposit and a debt fee deposit');
+				if (!selectedDebtDeposit || !selectedDebtFeeDeposit || !autoSelectedDebtFeeInfo) {
+					throw new Error('Please select a debt deposit first');
 				}
 
 				// Parse collateral note
@@ -150,18 +236,17 @@
 					throw new Error('Invalid collateral amount');
 				}
 
-				// Parse collateral fee note
+				// Parse collateral fee note (auto-selected)
 				feeCollateralNote = NoteDataSchema.parse(selectedCollateralFeeDeposit.data);
 				const { tokenAddress: feeCollateralTokenAddress, amount: feeCollateralNoteBalance } =
 					feeCollateralNote;
 
 				const feeNoteDecimals = await fetchTokenDecimals(feeCollateralTokenAddress);
 				feeCollateralNoteBalanceWei = BigInt(feeCollateralNoteBalance);
-				feeWei = await fetchExtensionFee(
-					PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
-					PUBLIC_EKUBO_BORROW_EXTENSION_CONTRACT_ADDRESS
-				);
-				feeWeiHex = fromWei(feeWei, feeNoteDecimals);
+				
+				// Use pre-loaded fee info
+				feeWei = autoSelectedCollateralFeeInfo.feeInfo.amount;
+				feeWeiHex = autoSelectedCollateralFeeInfo.feeInfo.formatted;
 
 				if (feeWei > feeCollateralNoteBalanceWei) {
 					throw new Error(
@@ -187,14 +272,15 @@
 					throw new Error('Invalid debt amount');
 				}
 
-				// Parse debt fee note
-				feeDebtNote = NoteDataSchema.parse(selectedCollateralFeeDeposit.data);
+				// Parse debt fee note (auto-selected)
+				feeDebtNote = NoteDataSchema.parse(selectedDebtFeeDeposit.data);
 				const { amount: feeDebtNoteBalance } = feeDebtNote;
 				feeDebtNoteBalanceWei = BigInt(feeDebtNoteBalance);
 
+				// Debt fee uses the same fee amount as collateral fee
 				if (feeWei > feeDebtNoteBalanceWei) {
 					throw new Error(
-						`Fee (${feeWeiHex}) exceeds your fee note balance (${fromWei(
+						`Fee (${feeWeiHex}) exceeds your debt fee note balance (${fromWei(
 							feeDebtNoteBalanceWei,
 							feeNoteDecimals
 						)})`
@@ -217,25 +303,26 @@
 <ProtectedRoute>
 	<div class="mx-auto p-6">
 		<Card>
+			<h2 class="text-2xl font-bold mb-4">Borrow</h2>
+			<p class="text-gray-600 mb-6">
+				Select collateral and debt deposits. Fee deposits will be automatically selected.
+			</p>
+			
 			<SelectionToggle
 				options={[
 					{ label: 'Collateral', value: 'collateral', isFirst: true },
-					{ label: 'Collateral Fee', value: 'fee' },
-					{ label: 'Debt', value: 'debt' },
-					{ label: 'Debt Fee', value: 'debtFee', isLast: true }
+					{ label: 'Debt', value: 'debt', isLast: true }
 				]}
 				selected={selectionMode}
 				onChange={handleSelectionChange}
 				onReset={resetAll}
 			/>
-			<Instructions action="borrow" mode={selectionMode} />
 
 			<TokenSelect
 				tokens={$tokens}
 				bind:value={$selectedToken}
 				placeholder="Filter deposits by token"
 				class_="mb-4 w-64"
-				disabled={selectionMode === 'fee' || selectionMode == 'debtFee'}
 			/>
 			{#if !deposits.length}
 				<h2 class="text-center">Please make a deposit first!</h2>
@@ -246,40 +333,63 @@
 					pageSize={5}
 					keyField="index"
 					onRowClick={handleRowClick}
-					activeKey={selectionMode === 'collateral'
-						? selectedCollateralKey
-						: selectionMode === 'fee'
-							? selectedCollateralFeeKey
-							: selectionMode === 'debt'
-								? selectedDebtKey
-								: selectedDebtFeeKey}
+					activeKey={selectionMode === 'collateral' ? selectedCollateralKey : selectedDebtKey}
 					inactiveKeys={[
-						...(selectedCollateralKey != null && selectionMode !== 'collateral'
-							? [selectedCollateralKey]
-							: []),
-						...(selectedCollateralFeeKey != null && selectionMode !== 'fee'
-							? [selectedCollateralFeeKey]
-							: []),
+						...(selectedCollateralKey != null && selectionMode !== 'collateral' ? [selectedCollateralKey] : []),
+						...(selectedCollateralFeeKey != null ? [selectedCollateralFeeKey] : []),
 						...(selectedDebtKey != null && selectionMode !== 'debt' ? [selectedDebtKey] : []),
-						...(selectedDebtFeeKey != null && selectionMode !== 'debtFee'
-							? [selectedDebtFeeKey]
-							: [])
+						...(selectedDebtFeeKey != null ? [selectedDebtFeeKey] : [])
 					]}
 					hoverClass="hover:bg-green-600"
 				/>
 			{/if}
 
+			<!-- Auto-selected fee information -->
+			{#if autoSelectedCollateralFeeInfo || autoSelectedDebtFeeInfo}
+				<div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+					<h3 class="font-semibold text-blue-800 mb-2">Fee Information</h3>
+					{#if autoSelectedCollateralFeeInfo}
+						<p class="text-sm text-blue-700 mb-1">
+							Collateral Fee: <strong>{autoSelectedCollateralFeeInfo.feeInfo.formatted} STRK</strong>
+							{#if autoSelectedCollateralFeeInfo.feeDeposit}
+								• Auto-selected: <strong>{autoSelectedCollateralFeeInfo.feeDeposit.displayAmount}</strong>
+							{/if}
+						</p>
+					{/if}
+					{#if autoSelectedDebtFeeInfo}
+						<p class="text-sm text-blue-700">
+							Debt Fee: <strong>{autoSelectedDebtFeeInfo.feeInfo.formatted} STRK</strong>
+							{#if autoSelectedDebtFeeInfo.feeDeposit}
+								• Auto-selected: <strong>{autoSelectedDebtFeeInfo.feeDeposit.displayAmount}</strong>
+							{/if}
+						</p>
+					{/if}
+				</div>
+			{/if}
+
+			<!-- Error messages -->
+			{#if collateralFeePreloadError || debtFeePreloadError}
+				<div class="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
+					{#if collateralFeePreloadError}
+						<p class="text-sm text-red-700 mb-1">Collateral Fee: {collateralFeePreloadError}</p>
+					{/if}
+					{#if debtFeePreloadError}
+						<p class="text-sm text-red-700">Debt Fee: {debtFeePreloadError}</p>
+					{/if}
+				</div>
+			{/if}
+
 			<SelectedDeposits
 				items={[
 					{ title: 'Collateral Deposit', deposit: selectedCollateralDeposit },
-					{ title: 'Fee Collateral', deposit: selectedCollateralFeeDeposit },
+					{ title: 'Collateral Fee (Auto-selected)', deposit: selectedCollateralFeeDeposit },
 					{ title: 'Debt Deposit', deposit: selectedDebtDeposit },
-					{ title: 'Fee Debt', deposit: selectedDebtFeeDeposit }
+					{ title: 'Debt Fee (Auto-selected)', deposit: selectedDebtFeeDeposit }
 				]}
 			/>
 
 			<!-- Withdraw Form -->
-			{#if selectedCollateralDeposit && selectedCollateralFeeDeposit && selectedDebtDeposit && selectedDebtFeeDeposit}
+			{#if selectedCollateralDeposit && selectedCollateralFeeDeposit && selectedDebtDeposit && selectedDebtFeeDeposit && !collateralFeePreloadError && !debtFeePreloadError}
 				<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
 					<Card>
 						<form on:submit|preventDefault={initiateBorrow} class="mt-6 flex flex-col gap-4">

@@ -12,8 +12,7 @@
 	import { zkLibraries } from '$lib/stores/zkLibraries';
 	import Button from '$lib/ui/Button.svelte';
 	import Card from '$lib/ui/Card.svelte';
-	import Instructions, { type MergeMode } from '$lib/ui/Instructions.svelte';
-	import Modal from '$lib/ui/Modal.svelte';
+		import Modal from '$lib/ui/Modal.svelte';
 	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
@@ -30,11 +29,12 @@
 	import { supportedTokens } from '$lib/config/tokens';
 	import { browser } from '$app/environment';
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
+	import { autoSelectCompleteProcess, type AutoSelectedFee } from '$lib/utils/autoSelectFeeDeposit';
 
 	const STRK_ADDRESS = supportedTokens[0].address;
 
 	let deposits: DisplayOperation[] = [];
-	let selectionMode: MergeMode = 'merge1';
+	let selectionMode: 'merge1' | 'merge2' = 'merge1';
 
 	let selectedMerge1Key: number | null = null;
 	let selectedMerge1Deposit: DisplayOperation | null = null;
@@ -42,6 +42,10 @@
 	let selectedMerge2Deposit: DisplayOperation | null = null;
 	let selectedFeeKey: number | null = null;
 	let selectedFeeDeposit: DisplayOperation | null = null;
+
+	// Auto-selected fee information
+	let autoSelectedFeeInfo: AutoSelectedFee | null = null;
+	let feePreloadError: string | null = null;
 
 	let mergeNote1: NoteData | null = null;
 	let mergeNote2: NoteData | null = null;
@@ -81,9 +85,11 @@
 		} else if (selectionMode === 'merge2') {
 			selectedMerge2Key = selectedKey;
 			selectedMerge2Deposit = selectedDeposit;
-		} else {
-			selectedFeeKey = selectedKey;
-			selectedFeeDeposit = selectedDeposit;
+		}
+		
+		// Auto-select fee deposit when both merge deposits are selected
+		if (selectedMerge1Deposit && selectedMerge2Deposit) {
+			autoSelectFeeDeposit();
 		}
 	}
 
@@ -94,13 +100,48 @@
 		selectedMerge2Deposit = null;
 		selectedFeeKey = null;
 		selectedFeeDeposit = null;
+		autoSelectedFeeInfo = null;
+		feePreloadError = null;
 	}
 
 	function handleSelectionChange(value: string) {
-		selectionMode = value as MergeMode;
+		selectionMode = value as 'merge1' | 'merge2';
+	}
 
-		if (value === 'fee') {
-			selectedToken.set(STRK_ADDRESS);
+	/** Auto-select fee deposit when both merge deposits are chosen */
+	async function autoSelectFeeDeposit() {
+		if (!selectedMerge1Deposit || !selectedMerge2Deposit) return;
+		
+		feePreloadError = null;
+		
+		try {
+			// Get fee info and auto-select the best STRK deposit
+			const excludeDeposits = [selectedMerge1Deposit, selectedMerge2Deposit];
+			autoSelectedFeeInfo = await autoSelectCompleteProcess(
+				'merge',
+				PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				undefined, // merge doesn't need extension address
+				excludeDeposits
+			);
+			
+			// Set the auto-selected fee deposit
+			if (autoSelectedFeeInfo.feeDeposit) {
+				selectedFeeDeposit = autoSelectedFeeInfo.feeDeposit;
+				selectedFeeKey = autoSelectedFeeInfo.feeDeposit.index;
+			} else {
+				selectedFeeDeposit = null;
+				selectedFeeKey = null;
+				
+				if (!autoSelectedFeeInfo.hasEnoughBalance) {
+					feePreloadError = `Insufficient STRK balance. Required: ${autoSelectedFeeInfo.feeInfo.formatted} STRK`;
+				} else {
+					feePreloadError = 'No available STRK deposits for fee payment';
+				}
+			}
+		} catch (error) {
+			console.error('Error auto-selecting fee deposit:', error);
+			feePreloadError = 'Failed to load fee information';
+			autoSelectedFeeInfo = null;
 		}
 	}
 
@@ -110,8 +151,8 @@
 
 		await wrapWithToast(
 			async () => {
-				if (!selectedMerge1Deposit || !selectedMerge2Deposit || !selectedFeeDeposit) {
-					throw new Error('Please select both merge notes and a fee note');
+				if (!selectedMerge1Deposit || !selectedMerge2Deposit || !selectedFeeDeposit || !autoSelectedFeeInfo) {
+					throw new Error('Please select both merge deposits first');
 				}
 
 				// — Parse first merge note
@@ -140,13 +181,15 @@
 					throw new Error('Both merge notes must be for the same token');
 				}
 
-				// — Parse Fee note
+				// — Parse Fee note (auto-selected)
 				feeNote = NoteDataSchema.parse(selectedFeeDeposit.data);
 				const { tokenAddress: feeTokenAddress, amount: feeNoteBalance } = feeNote;
 				const feeNoteDecimals = await fetchTokenDecimals(feeTokenAddress);
 				feeNoteBalanceWei = BigInt(feeNoteBalance);
-				feeWei = await fetchMergeFee(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
-				feeWeiHex = fromWei(feeWei, feeNoteDecimals);
+				
+				// Use pre-loaded fee info
+				feeWei = autoSelectedFeeInfo.feeInfo.amount;
+				feeWeiHex = autoSelectedFeeInfo.feeInfo.formatted;
 
 				if (feeWei > feeNoteBalanceWei) {
 					throw new Error(
@@ -390,23 +433,25 @@
 <ProtectedRoute>
 	<div class="mx-auto p-6">
 		<Card>
+			<h2 class="text-2xl font-bold mb-4">Merge Deposits</h2>
+			<p class="text-gray-600 mb-6">
+				Select two deposits of the same token to merge. Fee deposit will be automatically selected.
+			</p>
+			
 			<SelectionToggle
 				options={[
-					{ label: 'First', value: 'merge1', isFirst: true },
-					{ label: 'Second', value: 'merge2' },
-					{ label: 'Fee', value: 'fee', isLast: true }
+					{ label: 'First Deposit', value: 'merge1', isFirst: true },
+					{ label: 'Second Deposit', value: 'merge2', isLast: true }
 				]}
 				selected={selectionMode}
 				onChange={handleSelectionChange}
 				onReset={resetAll}
 			/>
-			<Instructions action="merge" mode={selectionMode} />
 			<TokenSelect
 				tokens={$tokens}
 				bind:value={$selectedToken}
 				placeholder="Filter deposits by token"
 				class_="mb-4 w-64"
-				disabled={selectionMode === 'fee'}
 			/>
 			{#if !deposits.length}
 				<h2 class="text-center">Please make a deposit first!</h2>
@@ -418,32 +463,44 @@
 					keyField="index"
 					disabledKeys={undefined}
 					onRowClick={handleRowClick}
-					activeKey={selectionMode === 'merge1'
-						? selectedMerge1Key
-						: selectionMode === 'merge2'
-							? selectedMerge2Key
-							: selectedFeeKey}
+					activeKey={selectionMode === 'merge1' ? selectedMerge1Key : selectedMerge2Key}
 					inactiveKeys={[
-						...(selectionMode !== 'merge1' && selectedMerge1Key !== null
-							? [selectedMerge1Key]
-							: []),
-						...(selectionMode !== 'merge2' && selectedMerge2Key !== null
-							? [selectedMerge2Key]
-							: []),
-						...(selectionMode !== 'fee' && selectedFeeKey !== null ? [selectedFeeKey] : [])
+						...(selectionMode !== 'merge1' && selectedMerge1Key !== null ? [selectedMerge1Key] : []),
+						...(selectionMode !== 'merge2' && selectedMerge2Key !== null ? [selectedMerge2Key] : []),
+						...(selectedFeeKey !== null ? [selectedFeeKey] : [])
 					]}
 					hoverClass="hover:bg-green-600"
 				/>
 			{/if}
 
+			<!-- Auto-selected fee information -->
+			{#if autoSelectedFeeInfo}
+				<div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+					<h3 class="font-semibold text-blue-800 mb-2">Fee Information</h3>
+					<p class="text-sm text-blue-700">
+						Fee: <strong>{autoSelectedFeeInfo.feeInfo.formatted} STRK</strong>
+						{#if autoSelectedFeeInfo.feeDeposit}
+							• Auto-selected fee deposit: <strong>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong>
+						{/if}
+					</p>
+				</div>
+			{/if}
+
+			<!-- Error message -->
+			{#if feePreloadError}
+				<div class="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
+					<p class="text-sm text-red-700">{feePreloadError}</p>
+				</div>
+			{/if}
+
 			<SelectedDeposits
 				items={[
-					{ title: '#1 Deposit', deposit: selectedMerge1Deposit },
-					{ title: '#2 Deposit', deposit: selectedMerge2Deposit },
-					{ title: 'Fee Deposit', deposit: selectedFeeDeposit }
+					{ title: 'First Deposit', deposit: selectedMerge1Deposit },
+					{ title: 'Second Deposit', deposit: selectedMerge2Deposit },
+					{ title: 'Fee Deposit (Auto-selected)', deposit: selectedFeeDeposit }
 				]}
 			/>
-			{#if selectedMerge1Deposit && selectedMerge2Deposit && selectedFeeDeposit}
+			{#if selectedMerge1Deposit && selectedMerge2Deposit && selectedFeeDeposit && !feePreloadError}
 				<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
 					<Card>
 						<form class="mt-6 flex flex-col gap-4">
