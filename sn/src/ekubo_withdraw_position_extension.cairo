@@ -1,5 +1,6 @@
 #[starknet::contract]
 mod EkuboWithdrawPositionExtension {
+    use ekubo::interfaces::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
     use ekubo::interfaces::positions::{IPositionsDispatcher, IPositionsDispatcherTrait};
     use ekubo::types::bounds::Bounds;
     use ekubo::types::keys::PoolKey;
@@ -79,6 +80,10 @@ mod EkuboWithdrawPositionExtension {
 
             // Deposit token0 to privacy account if amount > 0
             if token0_amount > 0 {
+                let token_out = IERC20Dispatcher { contract_address: params.pool_key.token0 };
+                let privacy_acct_address = self.privacy_account.read();
+                token_out.approve(privacy_acct_address, token0_amount.into());
+
                 let deposit0 = privacy_account
                     .deposit(
                         secret_and_nullifier_hash: params.secret_and_nullifier_hash_0,
@@ -94,6 +99,10 @@ mod EkuboWithdrawPositionExtension {
 
             // Deposit token1 to privacy account if amount > 0
             if token1_amount > 0 {
+                let token_out = IERC20Dispatcher { contract_address: params.pool_key.token1 };
+                let privacy_acct_address = self.privacy_account.read();
+                token_out.approve(privacy_acct_address, token1_amount.into());
+
                 let deposit1 = privacy_account
                     .deposit(
                         params.secret_and_nullifier_hash_1,
