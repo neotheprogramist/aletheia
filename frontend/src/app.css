@@ -150,6 +150,16 @@ main {
 	overflow-x: hidden;
 }
 
+/* Extra small screens */
+@media (min-width: 375px) {
+	.xs\:block {
+		display: block;
+	}
+	.xs\:hidden {
+		display: none;
+	}
+}
+
 /* Responsive design */
 @media (min-width: 640px) {
 	.content {

@@ -94,14 +94,14 @@
 		<div class="flex h-16 items-center justify-between">
 			<!-- Logo -->
 			<div class="flex items-center">
-				<a href="/" class="text-primary text-xl font-bold tracking-tight flex items-center gap-2">
-					<img src="/logo.svg" alt="Privacy Pools" class="w-8 h-8" />
-					Privacy Pools
+				<a href="/" class="text-primary text-lg sm:text-xl font-bold tracking-tight flex items-center gap-2">
+					<img src="/logo.svg" alt="Privacy Pools" class="w-6 h-6 sm:w-8 sm:h-8" />
+					<span class="hidden md:block">Privacy Pools</span>
 				</a>
 			</div>
 
 			<!-- Desktop Navigation -->
-			<div class="hidden md:flex items-center space-x-8 nav-links">
+			<div class="hidden xl:flex items-center space-x-8 nav-links">
 				{#if $isConnected}
 					<a
 						href="/deposit"
@@ -155,78 +155,82 @@
 			</div>
 
 			<!-- Mobile menu button -->
-			<div class="md:hidden flex items-center gap-3">
-				<WalletConnector />
-				<ToggleTheme />
-				{#if $isConnected}
-					<button
-						class="mobile-menu-button rounded-lg p-2 text-text hover:bg-surface transition-colors duration-200"
-						on:click={toggleMobileMenu}
-						aria-label="Toggle mobile menu"
-					>
-						{#if showMobileMenu}
-							<X size={20} />
-						{:else}
-							<Menu size={20} />
-						{/if}
-					</button>
-				{/if}
+			<div class="xl:hidden flex items-center">
+				<button
+					class="mobile-menu-button rounded-lg p-2 text-text hover:bg-surface transition-colors duration-200"
+					on:click={toggleMobileMenu}
+					aria-label="Toggle mobile menu"
+				>
+					{#if showMobileMenu}
+						<X size={18} />
+					{:else}
+						<Menu size={18} />
+					{/if}
+				</button>
 			</div>
 		</div>
 
 		<!-- Mobile Navigation Menu -->
-		{#if showMobileMenu && $isConnected}
-			<div class="md:hidden border-t border-border bg-card">
+		{#if showMobileMenu}
+			<div class="xl:hidden border-t border-border bg-card">
 				<div class="px-2 pt-2 pb-3 space-y-1">
-					<a
-						href="/deposit"
-						class="{page.url.pathname === '/deposit' ? 'bg-primary text-white' : 'text-text hover:bg-surface'} block px-3 py-2 rounded-lg text-base font-medium transition-colors duration-200"
-						on:click={closeMobileMenu}
-						>Deposit</a
-					>
-					<a
-						href="/withdraw"
-						class="{page.url.pathname === '/withdraw' ? 'bg-primary text-white' : 'text-text hover:bg-surface'} block px-3 py-2 rounded-lg text-base font-medium transition-colors duration-200"
-						on:click={closeMobileMenu}
-						>Withdraw</a
-					>
-					<a
-						href="/merge"
-						class="{page.url.pathname === '/merge' ? 'bg-primary text-white' : 'text-text hover:bg-surface'} block px-3 py-2 rounded-lg text-base font-medium transition-colors duration-200"
-						on:click={closeMobileMenu}
-						>Merge</a
-					>
-					<a
-						href="/transfer"
-						class="{page.url.pathname === '/transfer' ? 'bg-primary text-white' : 'text-text hover:bg-surface'} block px-3 py-2 rounded-lg text-base font-medium transition-colors duration-200"
-						on:click={closeMobileMenu}
-						>Transfer</a
-					>
-					<a
-						href="/swap"
-						class="{page.url.pathname === '/swap' ? 'bg-primary text-white' : 'text-text hover:bg-surface'} block px-3 py-2 rounded-lg text-base font-medium transition-colors duration-200"
-						on:click={closeMobileMenu}
-						>Swap</a
-					>
-					
-					<div class="border-t border-border pt-3 mt-3">
-						<div class="flex justify-center gap-4">
-							<button
-								class="rounded-lg p-3 text-text hover:bg-surface transition-colors duration-200"
-								title="Export operations"
-								on:click={handleExport}
-							>
-								<Download size={20} />
-							</button>
-							<button
-								class="rounded-lg p-3 text-text hover:bg-surface transition-colors duration-200"
-								title="Import operations"
-								on:click={openFilePicker}
-							>
-								<Upload size={20} />
-							</button>
-						</div>
+					<!-- Wallet and Theme Controls -->
+					<div class="flex items-center justify-between px-3 py-2 border-b border-border mb-3">
+						<WalletConnector />
+						<ToggleTheme />
 					</div>
+					
+					{#if $isConnected}
+						<a
+							href="/deposit"
+							class="{page.url.pathname === '/deposit' ? 'bg-primary text-white' : 'text-text hover:bg-surface'} block px-3 py-2 rounded-lg text-base font-medium transition-colors duration-200"
+							on:click={closeMobileMenu}
+							>Deposit</a
+						>
+						<a
+							href="/withdraw"
+							class="{page.url.pathname === '/withdraw' ? 'bg-primary text-white' : 'text-text hover:bg-surface'} block px-3 py-2 rounded-lg text-base font-medium transition-colors duration-200"
+							on:click={closeMobileMenu}
+							>Withdraw</a
+						>
+						<a
+							href="/merge"
+							class="{page.url.pathname === '/merge' ? 'bg-primary text-white' : 'text-text hover:bg-surface'} block px-3 py-2 rounded-lg text-base font-medium transition-colors duration-200"
+							on:click={closeMobileMenu}
+							>Merge</a
+						>
+						<a
+							href="/transfer"
+							class="{page.url.pathname === '/transfer' ? 'bg-primary text-white' : 'text-text hover:bg-surface'} block px-3 py-2 rounded-lg text-base font-medium transition-colors duration-200"
+							on:click={closeMobileMenu}
+							>Transfer</a
+						>
+						<a
+							href="/swap"
+							class="{page.url.pathname === '/swap' ? 'bg-primary text-white' : 'text-text hover:bg-surface'} block px-3 py-2 rounded-lg text-base font-medium transition-colors duration-200"
+							on:click={closeMobileMenu}
+							>Swap</a
+						>
+						
+						<div class="border-t border-border pt-3 mt-3">
+							<div class="flex justify-center gap-4">
+								<button
+									class="rounded-lg p-3 text-text hover:bg-surface transition-colors duration-200"
+									title="Export operations"
+									on:click={handleExport}
+								>
+									<Download size={20} />
+								</button>
+								<button
+									class="rounded-lg p-3 text-text hover:bg-surface transition-colors duration-200"
+									title="Import operations"
+									on:click={openFilePicker}
+								>
+									<Upload size={20} />
+								</button>
+							</div>
+						</div>
+					{/if}
 				</div>
 			</div>
 		{/if}

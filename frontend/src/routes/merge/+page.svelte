@@ -454,10 +454,10 @@
 </script>
 
 <ProtectedRoute>
-	<div class="mx-auto p-6">
+	<div class="mx-auto p-3 sm:p-6">
 		<Card>
-			<h2 class="text-2xl font-bold mb-4">Merge Deposits</h2>
-			<p class="text-gray-600 mb-6">
+			<h2 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Merge Deposits</h2>
+			<p class="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
 				Select two deposits of the same token to merge. Fee deposit will be automatically selected.
 			</p>
 			
@@ -474,7 +474,7 @@
 				tokens={$tokens}
 				bind:value={$selectedToken}
 				placeholder="Filter deposits by token"
-				class_="mb-4 w-64"
+				class_="mb-3 sm:mb-4 w-full sm:w-64"
 			/>
 			{#if !deposits.length}
 				<h2 class="text-center">Please make a deposit first!</h2>
@@ -498,8 +498,8 @@
 
 			<!-- Auto-selected fee information -->
 			{#if autoSelectedFeeInfo}
-				<div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-					<h3 class="font-semibold text-blue-800 mb-2">Fee Information</h3>
+				<div class="mt-3 sm:mt-4 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
+					<h3 class="text-sm sm:text-base font-semibold text-blue-800 mb-2">Fee Information</h3>
 					<p class="text-sm text-blue-700">
 						Fee: <strong>{autoSelectedFeeInfo.feeInfo.formatted} STRK</strong>
 						{#if autoSelectedFeeInfo.feeDeposit}
@@ -511,7 +511,7 @@
 
 			<!-- Error message -->
 			{#if feePreloadError}
-				<div class="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
+				<div class="mt-3 sm:mt-4 p-3 sm:p-4 bg-red-50 rounded-lg border border-red-200">
 					<p class="text-sm text-red-700">{feePreloadError}</p>
 				</div>
 			{/if}
@@ -524,9 +524,9 @@
 				]}
 			/>
 			{#if selectedMerge1Deposit && selectedMerge2Deposit && selectedFeeDeposit && !feePreloadError}
-				<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
+				<div class="mt-4 sm:mt-6 grid w-full grid-cols-1 justify-items-center">
 					<Card>
-						<form class="mt-6 flex flex-col gap-4">
+						<form class="mt-4 sm:mt-6 flex flex-col gap-3 sm:gap-4">
 							<Button
 								onClick={initiateMerge}
 								text="Merge"

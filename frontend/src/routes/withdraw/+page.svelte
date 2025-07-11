@@ -417,10 +417,10 @@
 </script>
 
 <ProtectedRoute>
-	<div class="mx-auto p-6">
+	<div class="mx-auto p-3 sm:p-6">
 		<Card>
-			<h2 class="text-2xl font-bold mb-4">Withdraw</h2>
-			<p class="text-gray-600 mb-6">
+			<h2 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Withdraw</h2>
+			<p class="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
 				Select a deposit to withdraw from. Fee deposit will be automatically selected.
 			</p>
 
@@ -428,10 +428,10 @@
 				tokens={$tokens}
 				bind:value={$selectedToken}
 				placeholder="Filter deposits by token"
-				class_="mb-4 w-64"
+				class_="mb-3 sm:mb-4 w-full sm:w-64"
 			/>
 			{#if !deposits.length}
-				<h2 class="text-center">Please make a deposit first!</h2>
+				<h2 class="text-center text-sm sm:text-base">Please make a deposit first!</h2>
 			{:else}
 				<PaginatedTable
 					columns={defaultDepositColumns}
@@ -476,9 +476,9 @@
 
 			<!-- Withdraw Form -->
 			{#if selectedWithdrawDeposit && selectedFeeDeposit && !feePreloadError}
-				<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
+				<div class="mt-4 sm:mt-6 grid w-full grid-cols-1 justify-items-center">
 					<Card>
-						<form on:submit|preventDefault={initiateWithdraw} class="mt-6 flex flex-col gap-4">
+						<form on:submit|preventDefault={initiateWithdraw} class="mt-4 sm:mt-6 flex flex-col gap-3 sm:gap-4">
 							<Input
 								bind:value={withdrawRecipient}
 								required

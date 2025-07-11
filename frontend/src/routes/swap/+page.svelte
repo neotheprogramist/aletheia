@@ -513,10 +513,10 @@
 </script>
 
 <ProtectedRoute>
-	<div class="mx-auto p-6">
+	<div class="mx-auto p-3 sm:p-6">
 		<Card>
-			<h2 class="mb-4 text-2xl font-bold">Swap</h2>
-			<p class="mb-6 text-gray-600">
+			<h2 class="mb-3 sm:mb-4 text-xl sm:text-2xl font-bold">Swap</h2>
+			<p class="mb-4 sm:mb-6 text-sm sm:text-base text-gray-600">
 				Select a deposit to swap from. Fee deposit will be automatically selected.
 			</p>
 
@@ -524,7 +524,7 @@
 				tokens={$tokens}
 				bind:value={$selectedToken}
 				placeholder="Filter deposits by token"
-				class_="mb-4 w-64"
+				class_="mb-3 sm:mb-4 w-full sm:w-64"
 			/>
 			<!-- Deposits Table -->
 			{#if !deposits.length}
@@ -545,8 +545,8 @@
 
 			<!-- Auto-selected fee information -->
 			{#if autoSelectedFeeInfo}
-				<div class="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
-					<h3 class="mb-2 font-semibold text-blue-800">Fee Information</h3>
+				<div class="mt-3 sm:mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3 sm:p-4">
+					<h3 class="mb-2 text-sm sm:text-base font-semibold text-blue-800">Fee Information</h3>
 					<p class="text-sm text-blue-700">
 						Fee: <strong>{autoSelectedFeeInfo.feeInfo.formatted} STRK</strong>
 						{#if autoSelectedFeeInfo.feeDeposit}
@@ -560,7 +560,7 @@
 
 			<!-- Error message -->
 			{#if feePreloadError}
-				<div class="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
+				<div class="mt-3 sm:mt-4 rounded-lg border border-red-200 bg-red-50 p-3 sm:p-4">
 					<p class="text-sm text-red-700">{feePreloadError}</p>
 				</div>
 			{/if}
@@ -575,9 +575,9 @@
 
 			<!-- Swap Form -->
 			{#if selectedSwapDeposit && selectedFeeDeposit && !feePreloadError}
-				<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
+				<div class="mt-4 sm:mt-6 grid w-full grid-cols-1 justify-items-center">
 					<Card>
-						<form on:submit|preventDefault={initiateSwap} class="mt-6 flex flex-col gap-4">
+						<form on:submit|preventDefault={initiateSwap} class="mt-4 sm:mt-6 flex flex-col gap-3 sm:gap-4">
 							<div class="flex gap-2">
 								<Input
 									bind:value={swapAmount}
@@ -587,7 +587,7 @@
 								/>
 								<button
 									type="button"
-									class="rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
+									class="rounded bg-blue-500 px-3 sm:px-4 py-2 text-xs sm:text-sm text-white hover:bg-blue-600"
 									on:click={() => {
 										if (selectedFeeDeposit) {
 											swapAmount = selectedFeeDeposit.displayAmount;

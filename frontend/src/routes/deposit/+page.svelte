@@ -118,9 +118,9 @@
 </script>
 
 <ProtectedRoute>
-	<div class="mx-auto p-6">
+	<div class="mx-auto p-3 sm:p-6">
 		<Card>
-			<form on:submit|preventDefault={depositHandler} class="flex flex-col gap-4">
+			<form on:submit|preventDefault={depositHandler} class="flex flex-col gap-3 sm:gap-4">
 				<TokenSelect
 					tokens={$tokens}
 					bind:value={$selectedToken}
