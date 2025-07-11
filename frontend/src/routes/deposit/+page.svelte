@@ -10,6 +10,7 @@
 	import Button from '$lib/ui/Button.svelte';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
+	import WalletBalance from '$lib/ui/WalletBalance.svelte';
 	import ProgressModal from '$lib/ui/ProgressModal.svelte';
 
 	import { toLowHigh } from '$lib/utils/toLowHigh';
@@ -125,6 +126,11 @@
 					bind:value={$selectedToken}
 					placeholder="Select token"
 					class_="w-full"
+				/>
+
+				<WalletBalance 
+					tokenAddress={$selectedToken}
+					tokenSymbol={$tokens.find(t => t.address === $selectedToken)?.symbol || ''}
 				/>
 
 				<Input placeholder="Amount" bind:value={amount} required class_="w-full" />
