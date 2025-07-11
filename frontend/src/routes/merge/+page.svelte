@@ -12,7 +12,7 @@
 	import { zkLibraries } from '$lib/stores/zkLibraries';
 	import Button from '$lib/ui/Button.svelte';
 	import Card from '$lib/ui/Card.svelte';
-		import Modal from '$lib/ui/Modal.svelte';
+	import Modal from '$lib/ui/Modal.svelte';
 	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
@@ -31,7 +31,23 @@
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
 	import { autoSelectCompleteProcess, type AutoSelectedFee } from '$lib/utils/autoSelectFeeDeposit';
 	import ProgressModal from '$lib/ui/ProgressModal.svelte';
-	import { progressModalStore, progressModalActions, mergeProgressSteps } from '$lib/stores/progressModal';
+	import {
+		progressModalStore,
+		progressModalActions,
+		mergeProgressSteps
+	} from '$lib/stores/progressModal';
+	import {
+		Merge,
+		Layers,
+		Combine,
+		DollarSign,
+		AlertTriangle,
+		CheckCircle,
+		Shield,
+		Zap,
+		Target,
+		Users
+	} from 'lucide-svelte';
 
 	const STRK_ADDRESS = supportedTokens[0].address;
 
@@ -88,7 +104,7 @@
 			selectedMerge2Key = selectedKey;
 			selectedMerge2Deposit = selectedDeposit;
 		}
-		
+
 		// Auto-select fee deposit when both merge deposits are selected
 		if (selectedMerge1Deposit && selectedMerge2Deposit) {
 			autoSelectFeeDeposit();
@@ -113,9 +129,9 @@
 	/** Auto-select fee deposit when both merge deposits are chosen */
 	async function autoSelectFeeDeposit() {
 		if (!selectedMerge1Deposit || !selectedMerge2Deposit) return;
-		
+
 		feePreloadError = null;
-		
+
 		try {
 			// Get fee info and auto-select the best STRK deposit
 			const excludeDeposits = [selectedMerge1Deposit, selectedMerge2Deposit];
@@ -125,7 +141,7 @@
 				undefined, // merge doesn't need extension address
 				excludeDeposits
 			);
-			
+
 			// Set the auto-selected fee deposit
 			if (autoSelectedFeeInfo.feeDeposit) {
 				selectedFeeDeposit = autoSelectedFeeInfo.feeDeposit;
@@ -133,7 +149,7 @@
 			} else {
 				selectedFeeDeposit = null;
 				selectedFeeKey = null;
-				
+
 				if (!autoSelectedFeeInfo.hasEnoughBalance) {
 					feePreloadError = `Insufficient STRK balance. Required: ${autoSelectedFeeInfo.feeInfo.formatted} STRK`;
 				} else {
@@ -153,7 +169,12 @@
 
 		await wrapWithToast(
 			async () => {
-				if (!selectedMerge1Deposit || !selectedMerge2Deposit || !selectedFeeDeposit || !autoSelectedFeeInfo) {
+				if (
+					!selectedMerge1Deposit ||
+					!selectedMerge2Deposit ||
+					!selectedFeeDeposit ||
+					!autoSelectedFeeInfo
+				) {
 					throw new Error('Please select both merge deposits first');
 				}
 
@@ -188,7 +209,7 @@
 				const { tokenAddress: feeTokenAddress, amount: feeNoteBalance } = feeNote;
 				const feeNoteDecimals = await fetchTokenDecimals(feeTokenAddress);
 				feeNoteBalanceWei = BigInt(feeNoteBalance);
-				
+
 				// Use pre-loaded fee info
 				feeWei = autoSelectedFeeInfo.feeInfo.amount;
 				feeWeiHex = autoSelectedFeeInfo.feeInfo.formatted;
@@ -415,13 +436,12 @@
 			setTimeout(() => {
 				progressModalActions.hide();
 			}, 2000);
-
 		} catch (err) {
 			// 13) On error: abort any created refund operations
 			console.warn('❌ Merge failed with error:', err);
-			
+
 			const currentSteps = $progressModalStore.steps;
-			const currentStepIndex = currentSteps.findIndex(step => step.status === 'loading');
+			const currentStepIndex = currentSteps.findIndex((step) => step.status === 'loading');
 			if (currentStepIndex !== -1) {
 				progressModalActions.updateStep(currentSteps[currentStepIndex].id, 'error');
 			}
@@ -443,7 +463,7 @@
 					console.error('🚨 Failed to abort fee refund:', abortError);
 				}
 			}
-			
+
 			setTimeout(() => {
 				progressModalActions.hide();
 			}, 3000);
@@ -454,124 +474,417 @@
 </script>
 
 <ProtectedRoute>
-	<div class="mx-auto p-6">
-		<Card>
-			<h2 class="text-2xl font-bold mb-4">Merge Deposits</h2>
-			<p class="text-gray-600 mb-6">
-				Select two deposits of the same token to merge. Fee deposit will be automatically selected.
-			</p>
-			
-			<SelectionToggle
-				options={[
-					{ label: 'First Deposit', value: 'merge1', isFirst: true },
-					{ label: 'Second Deposit', value: 'merge2', isLast: true }
-				]}
-				selected={selectionMode}
-				onChange={handleSelectionChange}
-				onReset={resetAll}
-			/>
-			<TokenSelect
-				tokens={$tokens}
-				bind:value={$selectedToken}
-				placeholder="Filter deposits by token"
-				class_="mb-4 w-64"
-			/>
-			{#if !deposits.length}
-				<h2 class="text-center">Please make a deposit first!</h2>
-			{:else}
-				<PaginatedTable
-					columns={defaultDepositColumns}
-					items={deposits}
-					pageSize={5}
-					keyField="index"
-					disabledKeys={undefined}
-					onRowClick={handleRowClick}
-					activeKey={selectionMode === 'merge1' ? selectedMerge1Key : selectedMerge2Key}
-					inactiveKeys={[
-						...(selectionMode !== 'merge1' && selectedMerge1Key !== null ? [selectedMerge1Key] : []),
-						...(selectionMode !== 'merge2' && selectedMerge2Key !== null ? [selectedMerge2Key] : []),
-						...(selectedFeeKey !== null ? [selectedFeeKey] : [])
-					]}
-					hoverClass="hover:bg-green-600"
-				/>
-			{/if}
-
-			<!-- Auto-selected fee information -->
-			{#if autoSelectedFeeInfo}
-				<div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-					<h3 class="font-semibold text-blue-800 mb-2">Fee Information</h3>
-					<p class="text-sm text-blue-700">
-						Fee: <strong>{autoSelectedFeeInfo.feeInfo.formatted} STRK</strong>
-						{#if autoSelectedFeeInfo.feeDeposit}
-							• Auto-selected fee deposit: <strong>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong>
-						{/if}
-					</p>
+	<div
+		class="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
+	>
+		<div class="mx-auto max-w-6xl p-6 pt-8">
+			<!-- Header Section -->
+			<div class="mb-8 text-center">
+				<div class="mb-4 flex items-center justify-center gap-3">
+					<div
+						class="rounded-xl bg-gradient-to-br from-orange-400 to-red-500 p-3 text-white shadow-lg"
+					>
+						<Combine class="h-8 w-8" />
+					</div>
+					<h1
+						class="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl"
+					>
+						Private Merge
+					</h1>
 				</div>
-			{/if}
+				<p class="text-text-secondary mx-auto max-w-2xl text-lg">
+					Combine multiple deposits into a single private note for enhanced management
+				</p>
+			</div>
 
-			<!-- Error message -->
-			{#if feePreloadError}
-				<div class="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
-					<p class="text-sm text-red-700">{feePreloadError}</p>
+			<div class="grid gap-6 lg:grid-cols-4">
+				<!-- Main Merge Form -->
+				<div class="space-y-6 lg:col-span-2">
+					<!-- Selection Mode and Token Filter -->
+					<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+						<div class="space-y-6">
+							<div class="flex items-center justify-between">
+								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+									<Target class="h-5 w-5 text-orange-500" />
+									Select Deposits to Merge
+								</h3>
+							</div>
+
+							<div class="space-y-4">
+								<!-- Selection Toggle -->
+								<div class="space-y-3">
+									<label class="text-text flex items-center gap-2 text-sm font-semibold">
+										<Layers class="h-4 w-4" />
+										Selection Mode
+									</label>
+									<SelectionToggle
+										options={[
+											{ label: 'First Deposit', value: 'merge1', isFirst: true },
+											{ label: 'Second Deposit', value: 'merge2', isLast: true }
+										]}
+										selected={selectionMode}
+										onChange={handleSelectionChange}
+										onReset={resetAll}
+									/>
+								</div>
+
+								<!-- Token Selection -->
+								<div class="space-y-3">
+									<label class="text-text flex items-center gap-2 text-sm font-semibold">
+										<DollarSign class="h-4 w-4" />
+										Filter by Token
+									</label>
+									<TokenSelect
+										tokens={$tokens}
+										bind:value={$selectedToken}
+										placeholder="Choose token to filter deposits"
+										class_="w-full sm:w-80"
+									/>
+								</div>
+
+								<!-- Deposits Table -->
+								{#if !deposits.length}
+									<div class="py-12 text-center">
+										<div
+											class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700"
+										>
+											<Layers class="h-8 w-8 text-gray-400" />
+										</div>
+										<h3 class="text-text mb-2 text-lg font-medium">No Deposits Found</h3>
+										<p class="text-text-secondary">Make a deposit first to start merging!</p>
+									</div>
+								{:else}
+									<div
+										class="rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 p-1 dark:from-gray-700 dark:to-gray-600"
+									>
+										<PaginatedTable
+											columns={defaultDepositColumns}
+											items={deposits}
+											pageSize={5}
+											keyField="index"
+											disabledKeys={undefined}
+											onRowClick={handleRowClick}
+											activeKey={selectionMode === 'merge1' ? selectedMerge1Key : selectedMerge2Key}
+											inactiveKeys={[
+												...(selectionMode !== 'merge1' && selectedMerge1Key !== null
+													? [selectedMerge1Key]
+													: []),
+												...(selectionMode !== 'merge2' && selectedMerge2Key !== null
+													? [selectedMerge2Key]
+													: []),
+												...(selectedFeeKey !== null ? [selectedFeeKey] : [])
+											]}
+											hoverClass="hover:bg-orange-600"
+										/>
+									</div>
+								{/if}
+							</div>
+						</div>
+					</Card>
+
+					<!-- Auto-selected fee information -->
+					{#if autoSelectedFeeInfo}
+						<Card
+							class_="border-0 shadow-xl bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20"
+						>
+							<div class="space-y-3">
+								<h3
+									class="flex items-center gap-2 font-semibold text-orange-800 dark:text-orange-300"
+								>
+									<Zap class="h-5 w-5" />
+									Fee Information
+								</h3>
+								<div class="space-y-2">
+									<div class="flex items-center justify-between">
+										<span class="text-sm text-orange-700 dark:text-orange-300">Network Fee:</span>
+										<span class="font-bold text-orange-800 dark:text-orange-200"
+											>{autoSelectedFeeInfo.feeInfo.formatted} STRK</span
+										>
+									</div>
+									{#if autoSelectedFeeInfo.feeDeposit}
+										<div class="flex items-center justify-between">
+											<span class="text-sm text-orange-700 dark:text-orange-300">Fee Deposit:</span>
+											<span class="font-medium text-orange-800 dark:text-orange-200"
+												>{autoSelectedFeeInfo.feeDeposit.displayAmount}</span
+											>
+										</div>
+									{/if}
+								</div>
+							</div>
+						</Card>
+					{/if}
+
+					<!-- Error message -->
+					{#if feePreloadError}
+						<Card
+							class_="border-0 shadow-xl bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20"
+						>
+							<div class="flex items-start gap-3">
+								<AlertTriangle class="mt-0.5 h-5 w-5 text-red-500" />
+								<div>
+									<h3 class="mb-1 font-semibold text-red-800 dark:text-red-300">
+										Fee Payment Issue
+									</h3>
+									<p class="text-sm text-red-700 dark:text-red-300">{feePreloadError}</p>
+								</div>
+							</div>
+						</Card>
+					{/if}
+
+					<!-- Selected Deposits Display -->
+					<SelectedDeposits
+						items={[
+							{ title: 'First Deposit', deposit: selectedMerge1Deposit },
+							{ title: 'Second Deposit', deposit: selectedMerge2Deposit },
+							{ title: 'Fee Deposit (Auto-selected)', deposit: selectedFeeDeposit }
+						]}
+					/>
+
+					<!-- Merge Button -->
+					{#if selectedMerge1Deposit && selectedMerge2Deposit && selectedFeeDeposit && !feePreloadError}
+						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+							<div class="space-y-6">
+								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+									<Merge class="h-5 w-5 text-orange-500" />
+									Execute Merge
+								</h3>
+
+								<div
+									class="rounded-lg bg-gradient-to-r from-orange-50 to-red-50 p-4 dark:from-orange-900/20 dark:to-red-900/20"
+								>
+									<h4 class="text-text mb-3 font-semibold">Merge Summary</h4>
+									<div class="space-y-2 text-sm">
+										<div class="flex justify-between">
+											<span class="text-text-secondary">First Deposit:</span>
+											<span class="text-text font-semibold"
+												>{selectedMerge1Deposit.displayAmount}</span
+											>
+										</div>
+										<div class="flex justify-between">
+											<span class="text-text-secondary">Second Deposit:</span>
+											<span class="text-text font-semibold"
+												>{selectedMerge2Deposit.displayAmount}</span
+											>
+										</div>
+										{#if autoSelectedFeeInfo}
+											<div class="flex justify-between">
+												<span class="text-text-secondary">Network Fee:</span>
+												<span class="text-text font-semibold"
+													>{autoSelectedFeeInfo.feeInfo.formatted} STRK</span
+												>
+											</div>
+										{/if}
+									</div>
+								</div>
+
+								<Button
+									text="Combine Deposits"
+									loading={isLoading}
+									onClick={initiateMerge}
+									class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+								/>
+							</div>
+						</Card>
+					{/if}
 				</div>
-			{/if}
 
-			<SelectedDeposits
-				items={[
-					{ title: 'First Deposit', deposit: selectedMerge1Deposit },
-					{ title: 'Second Deposit', deposit: selectedMerge2Deposit },
-					{ title: 'Fee Deposit (Auto-selected)', deposit: selectedFeeDeposit }
-				]}
-			/>
-			{#if selectedMerge1Deposit && selectedMerge2Deposit && selectedFeeDeposit && !feePreloadError}
-				<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
-					<Card>
-						<form class="mt-6 flex flex-col gap-4">
-							<Button
-								onClick={initiateMerge}
-								text="Merge"
-								class_="mt-2 w-full"
-								loading={isLoading}
-								type="submit"
-							/>
-						</form>
+				<!-- Information Panel -->
+				<div class="space-y-6 lg:col-span-2">
+					<!-- How Merging Works -->
+					<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+						<div class="space-y-4">
+							<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+								<Combine class="h-5 w-5 text-orange-500" />
+								How Private Merging Works
+							</h3>
+							<div class="space-y-4">
+								<div class="flex items-start gap-3">
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-orange-500 text-sm font-bold text-white"
+									>
+										1
+									</div>
+									<div>
+										<p class="text-text font-medium">Select Two Deposits</p>
+										<p class="text-text-secondary text-sm">
+											Choose two deposits of the same token to combine
+										</p>
+									</div>
+								</div>
+								<div class="flex items-start gap-3">
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-orange-500 text-sm font-bold text-white"
+									>
+										2
+									</div>
+									<div>
+										<p class="text-text font-medium">Automatic Fee Selection</p>
+										<p class="text-text-secondary text-sm">
+											System auto-selects optimal STRK deposit for fees
+										</p>
+									</div>
+								</div>
+								<div class="flex items-start gap-3">
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-orange-500 text-sm font-bold text-white"
+									>
+										3
+									</div>
+									<div>
+										<p class="text-text font-medium">Zero-Knowledge Proof</p>
+										<p class="text-text-secondary text-sm">
+											Generate cryptographic proof of valid merge
+										</p>
+									</div>
+								</div>
+								<div class="flex items-start gap-3">
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-sm font-bold text-white"
+									>
+										4
+									</div>
+									<div>
+										<p class="text-text font-medium">Combined Note</p>
+										<p class="text-text-secondary text-sm">
+											Receive single note with total combined amount
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</Card>
+
+					<!-- Security Features -->
+					<Card
+						class_="border-0 shadow-xl bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20"
+					>
+						<div class="space-y-4">
+							<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+								<Shield class="h-5 w-5 text-orange-500" />
+								Privacy Benefits
+							</h3>
+							<div class="space-y-3">
+								<div class="flex items-center gap-3">
+									<CheckCircle class="h-5 w-5 text-orange-500" />
+									<span class="text-text text-sm font-medium"
+										>Consolidate multiple notes privately</span
+									>
+								</div>
+								<div class="flex items-center gap-3">
+									<CheckCircle class="h-5 w-5 text-orange-500" />
+									<span class="text-text text-sm font-medium"
+										>Maintain transaction unlinkability</span
+									>
+								</div>
+								<div class="flex items-center gap-3">
+									<CheckCircle class="h-5 w-5 text-orange-500" />
+									<span class="text-text text-sm font-medium">Optimize note management</span>
+								</div>
+								<div class="flex items-center gap-3">
+									<CheckCircle class="h-5 w-5 text-orange-500" />
+									<span class="text-text text-sm font-medium">Zero-knowledge validation</span>
+								</div>
+							</div>
+						</div>
+					</Card>
+
+					<!-- Quick Stats -->
+					<div class="grid grid-cols-2 gap-4">
+						<Card
+							class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
+						>
+							<div class="space-y-2">
+								<div class="text-2xl font-bold text-orange-500">2→1</div>
+								<div class="text-text-secondary text-sm">Consolidation</div>
+							</div>
+						</Card>
+						<Card
+							class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
+						>
+							<div class="space-y-2">
+								<div class="text-2xl font-bold text-red-500">🔒</div>
+								<div class="text-text-secondary text-sm">Private</div>
+							</div>
+						</Card>
+					</div>
+
+					<!-- Important Note -->
+					<Card
+						class_="border-0 shadow-lg bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20"
+					>
+						<div class="flex items-start gap-3">
+							<AlertTriangle class="mt-0.5 h-5 w-5 text-yellow-500" />
+							<div>
+								<h4 class="mb-1 font-semibold text-yellow-800 dark:text-yellow-300">
+									Requirements
+								</h4>
+								<p class="text-sm text-yellow-700 dark:text-yellow-300">
+									Both deposits must be of the same token type. You'll need STRK deposits for
+									transaction fees.
+								</p>
+							</div>
+						</div>
 					</Card>
 				</div>
-			{/if}
-
-			<!-- Modal Confirm -->
-			<Modal
-				show={showFeeModal}
-				title="Confirm Merge"
-				confirmText="Accept"
-				cancelText="Reject"
-				closeOnOutsideClick={false}
-				onConfirm={confirmMerge}
-				onCancel={() => {
-					showFeeModal = false;
-					isLoading = false;
-				}}
-				onClose={() => {
-					showFeeModal = false;
-					isLoading = false;
-				}}
-			>
-				<p class="text-sm">
-					You’re about to merge
-					<strong class="break-words">
-						{merge1Amount} and {merge2Amount}
-					</strong>
-					tokens, paying a fee of
-					<strong class="break-words">
-						{feeWeiHex}
-					</strong>
-					tokens. Proceed?
-				</p>
-			</Modal>
-		</Card>
+			</div>
+		</div>
 	</div>
-	
-	<ProgressModal 
+
+	<!-- Modal Confirm -->
+	<Modal
+		show={showFeeModal}
+		title="Confirm Private Merge"
+		confirmText="Execute Merge"
+		cancelText="Cancel"
+		closeOnOutsideClick={false}
+		onConfirm={confirmMerge}
+		onCancel={() => {
+			showFeeModal = false;
+			isLoading = false;
+		}}
+		onClose={() => {
+			showFeeModal = false;
+			isLoading = false;
+		}}
+	>
+		<div class="space-y-4">
+			<div
+				class="rounded-lg bg-gradient-to-r from-orange-50 to-red-50 p-4 dark:from-orange-900/20 dark:to-red-900/20"
+			>
+				<h4 class="text-text mb-3 font-semibold">Merge Summary</h4>
+				<div class="space-y-2 text-sm">
+					<div class="flex justify-between">
+						<span class="text-text-secondary">First Amount:</span>
+						<span class="text-text font-semibold">{merge1Amount}</span>
+					</div>
+					<div class="flex justify-between">
+						<span class="text-text-secondary">Second Amount:</span>
+						<span class="text-text font-semibold">{merge2Amount}</span>
+					</div>
+					<div class="flex justify-between">
+						<span class="text-text-secondary">Network Fee:</span>
+						<span class="text-text font-semibold">{feeWeiHex} STRK</span>
+					</div>
+					<div class="mt-2 border-t pt-2">
+						<div class="flex justify-between">
+							<span class="text-text-secondary">Combined Total:</span>
+							<span class="font-bold text-orange-600"
+								>{merge1Amount && merge2Amount
+									? (parseFloat(merge1Amount) + parseFloat(merge2Amount)).toFixed(6)
+									: '0'}</span
+							>
+						</div>
+					</div>
+				</div>
+			</div>
+			<p class="text-text-secondary text-sm">
+				This merge operation will combine your two deposits into a single private note and cannot be
+				reversed.
+			</p>
+		</div>
+	</Modal>
+
+	<ProgressModal
 		show={$progressModalStore.show}
 		title={$progressModalStore.title}
 		steps={$progressModalStore.steps}

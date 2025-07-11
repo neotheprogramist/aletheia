@@ -31,7 +31,24 @@
 	import { defaultDepositColumns, defaultPendingDepositColumns } from '$lib/utils/sharedColumns';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { fromWei, toWei } from '$lib/utils/toWei';
-	import { Copy, Trash2, Pen } from 'lucide-svelte';
+	import {
+		Copy,
+		Trash2,
+		Pen,
+		ArrowRightLeft,
+		Send,
+		Users,
+		Shield,
+		Zap,
+		Lock,
+		CheckCircle,
+		ArrowRight,
+		Hash,
+		CreditCard,
+		Eye,
+		UserCheck,
+		ArrowUpDown
+	} from 'lucide-svelte';
 	import { Contract } from 'starknet';
 	import type { Component } from 'svelte';
 	import { get } from 'svelte/store';
@@ -39,8 +56,11 @@
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
 	import { autoSelectCompleteProcess, type AutoSelectedFee } from '$lib/utils/autoSelectFeeDeposit';
 	import ProgressModal from '$lib/ui/ProgressModal.svelte';
-	import { progressModalStore, progressModalActions, transferProgressSteps } from '$lib/stores/progressModal';
-
+	import {
+		progressModalStore,
+		progressModalActions,
+		transferProgressSteps
+	} from '$lib/stores/progressModal';
 
 	// --- VIEW & TRANSFER STATE ---
 	let viewMode: 'sender' | 'recipient' = 'sender';
@@ -155,7 +175,6 @@
 			autoSelectedFeeInfo = null;
 		}
 	}
-
 
 	/** Step 1: Validate user inputs for transfer */
 	async function initiateTransfer() {
@@ -400,13 +419,12 @@
 			setTimeout(() => {
 				progressModalActions.hide();
 			}, 2000);
-
 		} catch (err) {
 			// On error: abort any created refund operations
 			console.warn('❌ Transfer failed with error:', err);
-			
+
 			const currentSteps = $progressModalStore.steps;
-			const currentStepIndex = currentSteps.findIndex(step => step.status === 'loading');
+			const currentStepIndex = currentSteps.findIndex((step) => step.status === 'loading');
 			if (currentStepIndex !== -1) {
 				progressModalActions.updateStep(currentSteps[currentStepIndex].id, 'error');
 			}
@@ -427,7 +445,7 @@
 					console.error('🚨 Failed to abort fee refund:', abortError);
 				}
 			}
-			
+
 			setTimeout(() => {
 				progressModalActions.hide();
 			}, 3000);
@@ -580,146 +598,520 @@
 </script>
 
 <ProtectedRoute>
-	<div class="mx-auto p-6">
-		<SelectionToggle
-			options={[
-				{ label: 'Sender', value: 'sender', isFirst: true },
-				{ label: 'Recipient', value: 'recipient', isLast: true }
-			]}
-			selected={viewMode}
-			onChange={(v) => (viewMode = v as 'sender' | 'recipient')}
-		/>
-
-		<Card>
-			{#if viewMode === 'recipient'}
-				{#if pendingEmptyDeposits?.length}
-					<PaginatedTable
-						columns={defaultPendingDepositColumns}
-						items={pendingEmptyDeposits}
-						rowActions={actions}
-						pageSize={5}
-						keyField="index"
-					/>
-				{/if}
-
-				<div class="mt-4 grid w-full grid-cols-1 justify-items-center">
-					<form
-						on:submit|preventDefault={generateEmptyOperaition}
-						class="flex w-full flex-col gap-4"
+	<div
+		class="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-indigo-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20"
+	>
+		<div class="mx-auto max-w-6xl p-6 pt-8">
+			<!-- Header Section -->
+			<div class="mb-8 text-center">
+				<div class="mb-4 flex items-center justify-center gap-3">
+					<div
+						class="rounded-xl bg-gradient-to-br from-blue-400 to-cyan-500 p-3 text-white shadow-lg"
 					>
-						<Button
-							text="Generate Empty Deposit"
-							class_="w-full"
-							loading={isLoading}
-							type="submit"
-						/>
-					</form>
+						<ArrowRightLeft class="h-8 w-8" />
+					</div>
+					<h1
+						class="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl"
+					>
+						Private Transfers
+					</h1>
 				</div>
-			{:else}
-				<h2 class="text-2xl font-bold mb-4">Transfer</h2>
-				<p class="text-gray-600 mb-6">
-					Select a deposit to transfer from. Fee deposit will be automatically selected.
+				<p class="text-text-secondary mx-auto max-w-3xl text-lg">
+					Transfer funds between private notes within the privacy pool with complete anonymity
 				</p>
+			</div>
 
-				<TokenSelect
-					tokens={$tokens}
-					bind:value={$selectedToken}
-					placeholder="Filter deposits by token"
-					class_="mb-4 w-64"
-				/>
-				{#if !deposits.length}
-					<h2 class="text-center">Please make a deposit first!</h2>
-				{:else}
-					<PaginatedTable
-						columns={defaultDepositColumns}
-						items={deposits}
-						pageSize={5}
-						keyField="index"
-						onRowClick={handleRowClick}
-						activeKey={selectedTransferKey}
-						inactiveKeys={selectedFeeKey !== null ? [selectedFeeKey] : []}
-						hoverClass="hover:bg-green-600"
+			<!-- Mode Toggle -->
+			<div class="mb-8 flex justify-center">
+				<div class="rounded-xl bg-white/80 p-1 shadow-lg backdrop-blur-sm dark:bg-gray-800/80">
+					<SelectionToggle
+						options={[
+							{ label: 'Send Transfer', value: 'sender', isFirst: true },
+							{ label: 'Receive Transfer', value: 'recipient', isLast: true }
+						]}
+						selected={viewMode}
+						onChange={(v) => (viewMode = v as 'sender' | 'recipient')}
 					/>
-				{/if}
+				</div>
+			</div>
 
-				<!-- Auto-selected fee information -->
-				{#if autoSelectedFeeInfo}
-					<div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-						<h3 class="font-semibold text-blue-800 mb-2">Fee Information</h3>
-						<p class="text-sm text-blue-700">
-							Fee: <strong>{autoSelectedFeeInfo.feeInfo.formatted} STRK</strong>
-							{#if autoSelectedFeeInfo.feeDeposit}
-								• Auto-selected fee deposit: <strong>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong>
-							{/if}
-						</p>
-					</div>
-				{/if}
+			{#if viewMode === 'recipient'}
+				<!-- Recipient Mode -->
+				<div class="grid gap-6 lg:grid-cols-4">
+					<!-- Generate Note Section -->
+					<div class="space-y-6 lg:col-span-2">
+						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+							<div class="space-y-6">
+								<div class="text-center">
+									<div
+										class="mx-auto mb-4 w-fit rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 p-4 text-white shadow-lg"
+									>
+										<UserCheck class="h-8 w-8" />
+									</div>
+									<h2 class="text-text mb-2 text-2xl font-bold">Receive Private Transfer</h2>
+									<p class="text-text-secondary">
+										Generate an empty note to receive private transfers from other users
+									</p>
+								</div>
 
-				<!-- Error message -->
-				{#if feePreloadError}
-					<div class="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
-						<p class="text-sm text-red-700">{feePreloadError}</p>
-					</div>
-				{/if}
+								{#if pendingEmptyDeposits?.length}
+									<div class="space-y-4">
+										<h3 class="text-text flex items-center gap-2 text-lg font-semibold">
+											<Hash class="h-5 w-5 text-blue-500" />
+											Your Pending Notes
+										</h3>
+										<PaginatedTable
+											columns={defaultPendingDepositColumns}
+											items={pendingEmptyDeposits}
+											rowActions={actions}
+											pageSize={5}
+											keyField="index"
+										/>
+									</div>
+								{/if}
 
-				<SelectedDeposits
-					items={[
-						{ title: 'Transfer Deposit', deposit: selectedTransferDeposit },
-						{ title: 'Fee Deposit (Auto-selected)', deposit: selectedFeeDeposit }
-					]}
-				/>
-
-				{#if selectedTransferDeposit && selectedFeeDeposit && !feePreloadError}
-					<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
-						<Card>
-							<form on:submit|preventDefault={initiateTransfer} class="mt-6 flex flex-col gap-4">
-								<Input
-									bind:value={transferSecretAndNullifierHash}
-									required
-									placeholder="Recipient Hash"
-									class_="w-full"
-								/>
-								<Input
-									bind:value={transferAmount}
-									required
-									placeholder="Amount to Transfer"
-									class_="w-full"
-								/>
-								<Button text="Transfer" class_="mt-2 w-full" loading={isLoading} type="submit" />
-							</form>
+								<form on:submit|preventDefault={generateEmptyOperaition} class="space-y-4">
+									<Button
+										text="Generate Empty Note"
+										loading={isLoading}
+										type="submit"
+										class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+									/>
+								</form>
+							</div>
 						</Card>
 					</div>
-				{/if}
-			{/if}
 
-			<Modal
-				show={showFeeModal}
-				title="Confirm Transfer"
-				confirmText="Accept"
-				cancelText="Reject"
-				closeOnOutsideClick={false}
-				onConfirm={confirmTransfer}
-				onCancel={() => {
-					showFeeModal = false;
-					isLoading = false;
-				}}
-				onClose={() => {
-					showFeeModal = false;
-					isLoading = false;
-				}}
-			>
-				<p class="text-sm">
-					You’re about to transfer
-					<strong class="break-words">{transferAmount}</strong>
-					tokens, paying a fee of
-					<strong class="break-words">{feeWeiHex}</strong>
-					tokens. Proceed?
-				</p>
-			</Modal>
-		</Card>
+					<!-- Information Panel for Recipients -->
+					<div class="space-y-6 lg:col-span-2">
+						<!-- How to Receive -->
+						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+							<div class="space-y-4">
+								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+									<Users class="h-5 w-5 text-cyan-500" />
+									How to Receive Transfers
+								</h3>
+								<div class="space-y-4">
+									<div class="flex items-start gap-3">
+										<div
+											class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500 text-sm font-bold text-white"
+										>
+											1
+										</div>
+										<div>
+											<p class="text-text font-medium">Generate Empty Note</p>
+											<p class="text-text-secondary text-sm">
+												Create a cryptographic note that can receive transfers
+											</p>
+										</div>
+									</div>
+									<div class="flex items-start gap-3">
+										<div
+											class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500 text-sm font-bold text-white"
+										>
+											2
+										</div>
+										<div>
+											<p class="text-text font-medium">Share Note Hash</p>
+											<p class="text-text-secondary text-sm">
+												Send your note hash to the person transferring funds
+											</p>
+										</div>
+									</div>
+									<div class="flex items-start gap-3">
+										<div
+											class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500 text-sm font-bold text-white"
+										>
+											3
+										</div>
+										<div>
+											<p class="text-text font-medium">Wait for Transfer</p>
+											<p class="text-text-secondary text-sm">
+												Your note will be funded when sender completes transfer
+											</p>
+										</div>
+									</div>
+									<div class="flex items-start gap-3">
+										<div
+											class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm font-bold text-white"
+										>
+											4
+										</div>
+										<div>
+											<p class="text-text font-medium">Claim Your Funds</p>
+											<p class="text-text-secondary text-sm">
+												Use your funded note for withdrawals or other operations
+											</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</Card>
+
+						<!-- Security Features for Recipients -->
+						<Card
+							class_="border-0 shadow-xl bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20"
+						>
+							<div class="space-y-4">
+								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+									<Shield class="h-5 w-5 text-cyan-500" />
+									Privacy Protection
+								</h3>
+								<div class="space-y-3">
+									<div class="flex items-center gap-3">
+										<CheckCircle class="h-5 w-5 text-cyan-500" />
+										<span class="text-text text-sm font-medium">Anonymous note generation</span>
+									</div>
+									<div class="flex items-center gap-3">
+										<CheckCircle class="h-5 w-5 text-cyan-500" />
+										<span class="text-text text-sm font-medium">No connection to your identity</span
+										>
+									</div>
+									<div class="flex items-center gap-3">
+										<CheckCircle class="h-5 w-5 text-cyan-500" />
+										<span class="text-text text-sm font-medium"
+											>Cryptographically secure transfers</span
+										>
+									</div>
+									<div class="flex items-center gap-3">
+										<CheckCircle class="h-5 w-5 text-cyan-500" />
+										<span class="text-text text-sm font-medium"
+											>Zero-knowledge proof validation</span
+										>
+									</div>
+								</div>
+							</div>
+						</Card>
+					</div>
+				</div>
+			{:else}
+				<!-- Sender Mode -->
+				<div class="grid gap-6 lg:grid-cols-4">
+					<!-- Main Transfer Form -->
+					<div class="space-y-6 lg:col-span-2">
+						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+							<div class="space-y-6">
+								<div class="text-center">
+									<div
+										class="mx-auto mb-4 w-fit rounded-xl bg-gradient-to-br from-blue-400 to-cyan-500 p-4 text-white shadow-lg"
+									>
+										<Send class="h-8 w-8" />
+									</div>
+									<h2 class="text-text mb-2 text-2xl font-bold">Send Private Transfer</h2>
+									<p class="text-text-secondary">
+										Select a deposit to transfer from. Fee deposit will be automatically selected.
+									</p>
+								</div>
+
+								<!-- Token Selection -->
+								<div class="space-y-3">
+									<label class="text-text flex items-center gap-2 text-sm font-semibold">
+										<CreditCard class="h-4 w-4" />
+										Filter by Token
+									</label>
+									<TokenSelect
+										tokens={$tokens}
+										bind:value={$selectedToken}
+										placeholder="Choose token to filter deposits"
+										class_="w-full"
+									/>
+								</div>
+
+								<!-- Deposits Table -->
+								{#if !deposits.length}
+									<div class="py-8 text-center">
+										<Eye class="mx-auto mb-4 h-12 w-12 text-gray-400" />
+										<h3 class="text-text mb-2 text-lg font-medium">No Deposits Found</h3>
+										<p class="text-text-secondary">
+											Please make a deposit first to start transferring!
+										</p>
+									</div>
+								{:else}
+									<div class="space-y-4">
+										<h3 class="text-text flex items-center gap-2 text-lg font-semibold">
+											<ArrowUpDown class="h-5 w-5 text-blue-500" />
+											Select Source Deposit
+										</h3>
+										<PaginatedTable
+											columns={defaultDepositColumns}
+											items={deposits}
+											pageSize={5}
+											keyField="index"
+											onRowClick={handleRowClick}
+											activeKey={selectedTransferKey}
+											inactiveKeys={selectedFeeKey !== null ? [selectedFeeKey] : []}
+											hoverClass="hover:bg-blue-50 dark:hover:bg-blue-900/20"
+										/>
+									</div>
+								{/if}
+
+								<!-- Auto-selected Fee Information -->
+								{#if autoSelectedFeeInfo}
+									<div
+										class="rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 p-4 dark:border-blue-800 dark:from-blue-900/20 dark:to-cyan-900/20"
+									>
+										<h3
+											class="mb-2 flex items-center gap-2 text-base font-semibold text-blue-800 dark:text-blue-200"
+										>
+											<Zap class="h-4 w-4" />
+											Fee Information
+										</h3>
+										<p class="text-sm text-blue-700 dark:text-blue-300">
+											Fee: <strong>{autoSelectedFeeInfo.feeInfo.formatted} STRK</strong>
+											{#if autoSelectedFeeInfo.feeDeposit}
+												• Auto-selected fee deposit: <strong
+													>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong
+												>
+											{/if}
+										</p>
+									</div>
+								{/if}
+
+								<!-- Error Message -->
+								{#if feePreloadError}
+									<div
+										class="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20"
+									>
+										<p class="text-sm text-red-700 dark:text-red-300">{feePreloadError}</p>
+									</div>
+								{/if}
+
+								<!-- Selected Deposits Display -->
+								<SelectedDeposits
+									items={[
+										{ title: 'Transfer Deposit', deposit: selectedTransferDeposit },
+										{ title: 'Fee Deposit (Auto-selected)', deposit: selectedFeeDeposit }
+									]}
+								/>
+
+								<!-- Transfer Form -->
+								{#if selectedTransferDeposit && selectedFeeDeposit && !feePreloadError}
+									<Card
+										class_="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10 border border-blue-200 dark:border-blue-800"
+									>
+										<form on:submit|preventDefault={initiateTransfer} class="space-y-4">
+											<h3 class="text-text flex items-center gap-2 text-lg font-semibold">
+												<Hash class="h-5 w-5 text-blue-500" />
+												Transfer Details
+											</h3>
+
+											<div class="space-y-3">
+												<label class="text-text flex items-center gap-2 text-sm font-semibold">
+													<UserCheck class="h-4 w-4" />
+													Recipient Hash
+												</label>
+												<Input
+													bind:value={transferSecretAndNullifierHash}
+													required
+													placeholder="Enter recipient's note hash"
+													class_="w-full"
+												/>
+											</div>
+
+											<div class="space-y-3">
+												<label class="text-text flex items-center gap-2 text-sm font-semibold">
+													<ArrowRight class="h-4 w-4" />
+													Transfer Amount
+												</label>
+												<div class="flex gap-2">
+													<Input
+														bind:value={transferAmount}
+														required
+														placeholder="Amount to transfer"
+														class_="flex-1"
+													/>
+													<button
+														type="button"
+														class="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-blue-600"
+														on:click={() => {
+															if (selectedTransferDeposit) {
+																transferAmount = selectedTransferDeposit.displayAmount;
+															}
+														}}
+													>
+														Max
+													</button>
+												</div>
+											</div>
+
+											<Button
+												text="Execute Transfer"
+												loading={isLoading}
+												type="submit"
+												class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+											/>
+										</form>
+									</Card>
+								{/if}
+							</div>
+						</Card>
+					</div>
+
+					<!-- Information Panel for Senders -->
+					<div class="space-y-6 lg:col-span-2">
+						<!-- How Transfer Works -->
+						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+							<div class="space-y-4">
+								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+									<Zap class="h-5 w-5 text-blue-500" />
+									How Transfers Work
+								</h3>
+								<div class="space-y-4">
+									<div class="flex items-start gap-3">
+										<div
+											class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm font-bold text-white"
+										>
+											1
+										</div>
+										<div>
+											<p class="text-text font-medium">Select Source Note</p>
+											<p class="text-text-secondary text-sm">
+												Choose which private note to transfer from
+											</p>
+										</div>
+									</div>
+									<div class="flex items-start gap-3">
+										<div
+											class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm font-bold text-white"
+										>
+											2
+										</div>
+										<div>
+											<p class="text-text font-medium">Get Recipient Hash</p>
+											<p class="text-text-secondary text-sm">
+												Recipient shares their empty note hash with you
+											</p>
+										</div>
+									</div>
+									<div class="flex items-start gap-3">
+										<div
+											class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm font-bold text-white"
+										>
+											3
+										</div>
+										<div>
+											<p class="text-text font-medium">Set Amount</p>
+											<p class="text-text-secondary text-sm">
+												Specify how much to transfer (partial or full)
+											</p>
+										</div>
+									</div>
+									<div class="flex items-start gap-3">
+										<div
+											class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500 text-sm font-bold text-white"
+										>
+											4
+										</div>
+										<div>
+											<p class="text-text font-medium">Anonymous Transfer</p>
+											<p class="text-text-secondary text-sm">
+												Notes are swapped with zero-knowledge proofs
+											</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</Card>
+
+						<!-- Security Features -->
+						<Card
+							class_="border-0 shadow-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20"
+						>
+							<div class="space-y-4">
+								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+									<Lock class="h-5 w-5 text-blue-500" />
+									Security Features
+								</h3>
+								<div class="space-y-3">
+									<div class="flex items-center gap-3">
+										<CheckCircle class="h-5 w-5 text-blue-500" />
+										<span class="text-text text-sm font-medium">Complete sender anonymity</span>
+									</div>
+									<div class="flex items-center gap-3">
+										<CheckCircle class="h-5 w-5 text-blue-500" />
+										<span class="text-text text-sm font-medium"
+											>No on-chain connection between parties</span
+										>
+									</div>
+									<div class="flex items-center gap-3">
+										<CheckCircle class="h-5 w-5 text-blue-500" />
+										<span class="text-text text-sm font-medium">Cryptographic note validation</span>
+									</div>
+									<div class="flex items-center gap-3">
+										<CheckCircle class="h-5 w-5 text-blue-500" />
+										<span class="text-text text-sm font-medium">Automated fee handling</span>
+									</div>
+								</div>
+							</div>
+						</Card>
+
+						<!-- Quick Stats -->
+						<div class="grid grid-cols-2 gap-4">
+							<Card
+								class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
+							>
+								<div class="space-y-2">
+									<div class="text-2xl font-bold text-blue-500">100%</div>
+									<div class="text-text-secondary text-sm">Private</div>
+								</div>
+							</Card>
+							<Card
+								class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
+							>
+								<div class="space-y-2">
+									<div class="text-2xl font-bold text-cyan-500">⚡</div>
+									<div class="text-text-secondary text-sm">Fast</div>
+								</div>
+							</Card>
+						</div>
+					</div>
+				</div>
+			{/if}
+		</div>
 	</div>
-	
-	<ProgressModal 
+
+	<!-- Confirmation Modal -->
+	<Modal
+		show={showFeeModal}
+		title="Confirm Transfer"
+		confirmText="Execute Transfer"
+		cancelText="Cancel"
+		closeOnOutsideClick={false}
+		onConfirm={confirmTransfer}
+		onCancel={() => {
+			showFeeModal = false;
+			isLoading = false;
+		}}
+		onClose={() => {
+			showFeeModal = false;
+			isLoading = false;
+		}}
+	>
+		<div class="space-y-4">
+			<div
+				class="rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 p-4 dark:from-blue-900/20 dark:to-cyan-900/20"
+			>
+				<h3 class="text-text mb-2 font-semibold">Transfer Summary</h3>
+				<div class="space-y-2 text-sm">
+					<div class="flex justify-between">
+						<span class="text-text-secondary">Amount:</span>
+						<span class="text-text font-medium">{transferAmount} tokens</span>
+					</div>
+					<div class="flex justify-between">
+						<span class="text-text-secondary">Fee:</span>
+						<span class="text-text font-medium">{feeWeiHex} STRK</span>
+					</div>
+				</div>
+			</div>
+			<p class="text-text-secondary text-sm">
+				This transfer will destroy your source note and fund the recipient's note. This action
+				cannot be reversed.
+			</p>
+		</div>
+	</Modal>
+
+	<!-- Progress Modal -->
+	<ProgressModal
 		show={$progressModalStore.show}
 		title={$progressModalStore.title}
 		steps={$progressModalStore.steps}
@@ -727,23 +1119,43 @@
 	/>
 </ProtectedRoute>
 
+<!-- Edit Modal -->
 <Modal
 	show={showEditModal}
-	title="Edit Pending‐Empty Operation"
-	confirmText="Accept"
-	cancelText="Reject"
+	title="Edit Pending Note"
+	confirmText="Confirm Edit"
+	cancelText="Cancel"
 	closeOnOutsideClick={false}
 	onConfirm={onConfirmEdit}
 	onCancel={onCancelEdit}
 	onClose={onCancelEdit}
 >
-	<div class="flex flex-col gap-4">
-		<TokenSelect
-			tokens={$tokens}
-			bind:value={editToken}
-			placeholder="Choose token"
-			class_="w-full"
-		/>
-		<Input bind:value={editAmount} placeholder="Amount" class_="w-full" required />
+	<div class="space-y-4">
+		<div
+			class="rounded-lg bg-gradient-to-r from-cyan-50 to-blue-50 p-4 dark:from-cyan-900/20 dark:to-blue-900/20"
+		>
+			<h3 class="text-text mb-2 flex items-center gap-2 font-semibold">
+				<Pen class="h-4 w-4" />
+				Update Note Details
+			</h3>
+			<p class="text-text-secondary text-sm">Specify the token and amount for this pending note</p>
+		</div>
+
+		<div class="space-y-4">
+			<div class="space-y-2">
+				<label for="edit-token" class="text-text text-sm font-medium">Token</label>
+				<TokenSelect
+					tokens={$tokens}
+					bind:value={editToken}
+					placeholder="Choose token"
+					class_="w-full"
+				/>
+			</div>
+
+			<div class="space-y-2">
+				<label for="edit-amount" class="text-text text-sm font-medium">Amount</label>
+				<Input bind:value={editAmount} placeholder="Enter amount" class_="w-full" required />
+			</div>
+		</div>
 	</div>
 </Modal>

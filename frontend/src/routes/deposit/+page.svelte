@@ -10,6 +10,7 @@
 	import Button from '$lib/ui/Button.svelte';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
+	import WalletBalance from '$lib/ui/WalletBalance.svelte';
 	import ProgressModal from '$lib/ui/ProgressModal.svelte';
 
 	import { toLowHigh } from '$lib/utils/toLowHigh';
@@ -18,7 +19,12 @@
 	import { abortOperation } from '$lib/privacy/abortOperation';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
 	import { provider } from '$lib/stores/provider';
-	import { progressModalStore, progressModalActions, depositProgressSteps } from '$lib/stores/progressModal';
+	import {
+		progressModalStore,
+		progressModalActions,
+		depositProgressSteps
+	} from '$lib/stores/progressModal';
+	import { Shield, Zap, Lock, ArrowRight, DollarSign, CheckCircle } from 'lucide-svelte';
 
 	let amount = '';
 	let isLoading = false;
@@ -64,7 +70,7 @@
 			const connectedWallet = get(wallet);
 			if (!connectedWallet) throw new Error('Please connect your wallet.');
 
-			const {transaction_hash} = await connectedWallet.request({
+			const { transaction_hash } = await connectedWallet.request({
 				type: 'wallet_addInvokeTransaction',
 				params: { calls }
 			});
@@ -84,20 +90,19 @@
 
 			progressModalActions.updateStep('onchain-confirmation', 'completed');
 			amount = '';
-			
+
 			setTimeout(() => {
 				progressModalActions.hide();
 			}, 2000);
-			
 		} catch (err) {
 			console.warn('❌ Deposit failed with error:', err);
-			
+
 			const currentSteps = $progressModalStore.steps;
-			const currentStepIndex = currentSteps.findIndex(step => step.status === 'loading');
+			const currentStepIndex = currentSteps.findIndex((step) => step.status === 'loading');
 			if (currentStepIndex !== -1) {
 				progressModalActions.updateStep(currentSteps[currentStepIndex].id, 'error');
 			}
-			
+
 			if (operationHash) {
 				try {
 					await abortOperation(operationHash);
@@ -106,7 +111,7 @@
 					console.error('🚨 Failed to abort operation:', abortError);
 				}
 			}
-			
+
 			setTimeout(() => {
 				progressModalActions.hide();
 			}, 3000);
@@ -114,26 +119,258 @@
 
 		isLoading = false;
 	}
+
+	function setMaxAmount() {
+		// Wait for next tick to ensure DOM is updated
+		setTimeout(() => {
+			const balanceElement = document.querySelector('[data-wallet-balance]');
+			if (balanceElement?.textContent) {
+				// Extract number from "Wallet Balance: 123.456 STRK" format
+				const match = balanceElement.textContent.match(/Wallet Balance:\s*([\d.]+)/);
+				if (match && match[1] && match[1] !== '0') {
+					amount = match[1];
+				}
+			}
+		}, 0);
+	}
 </script>
 
 <ProtectedRoute>
-	<div class="mx-auto p-6">
-		<Card>
-			<form on:submit|preventDefault={depositHandler} class="flex flex-col gap-4">
-				<TokenSelect
-					tokens={$tokens}
-					bind:value={$selectedToken}
-					placeholder="Select token"
-					class_="w-full"
-				/>
+	<div
+		class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
+	>
+		<div class="mx-auto max-w-6xl p-6 pt-8">
+			<!-- Header Section -->
+			<div class="mb-8 text-center">
+				<div class="mb-4 flex items-center justify-center gap-3">
+					<div
+						class="rounded-xl bg-gradient-to-br from-green-400 to-blue-500 p-3 text-white shadow-lg"
+					>
+						<Shield class="h-8 w-8" />
+					</div>
+					<h1
+						class="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl"
+					>
+						Private Deposit
+					</h1>
+				</div>
+				<p class="text-text-secondary mx-auto max-w-2xl text-lg">
+					Transform your tokens into private notes for enhanced financial privacy
+				</p>
+			</div>
 
-				<Input placeholder="Amount" bind:value={amount} required class_="w-full" />
-				<Button text="Deposit" loading={isLoading} type="submit" class_="mt-2 w-full" />
-			</form>
-		</Card>
+			<div class="grid gap-6 lg:grid-cols-4">
+				<!-- Main Deposit Form -->
+				<div class="space-y-6 lg:col-span-2">
+					<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm w-full">
+						<div class="space-y-6">
+							<!-- Token Selection -->
+							<div class="space-y-3">
+								<label class="text-text flex items-center gap-2 text-sm font-semibold">
+									<DollarSign class="h-4 w-4" />
+									Select Token
+								</label>
+								<TokenSelect
+									tokens={$tokens}
+									bind:value={$selectedToken}
+									placeholder="Choose your token"
+									class_="w-full"
+								/>
+							</div>
+
+							<!-- Wallet Balance Display -->
+							<div
+								class="rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 p-4 dark:from-gray-700 dark:to-gray-600"
+							>
+								<WalletBalance
+									tokenAddress={$selectedToken}
+									tokenSymbol={$tokens.find((t) => t.address === $selectedToken)?.symbol || ''}
+								/>
+							</div>
+
+							<!-- Amount Input -->
+							<div class="space-y-3">
+								<label class="text-text flex items-center gap-2 text-sm font-semibold">
+									<ArrowRight class="h-4 w-4" />
+									Deposit Amount
+								</label>
+								<div class="flex gap-2">
+									<Input
+										placeholder="Enter amount to deposit"
+										bind:value={amount}
+										required
+										class_="flex-1 text-lg font-medium"
+									/>
+								</div>
+							</div>
+
+							<!-- Submit Button -->
+							<Button
+								text="Create Private Deposit"
+								loading={isLoading}
+								onClick={depositHandler}
+								class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+							/>
+						</div>
+					</Card>
+
+					<!-- Selected Token Summary -->
+					{#if $selectedToken && amount}
+						<Card
+							class_="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20"
+						>
+							<div class="space-y-3">
+								<h3 class="flex items-center gap-2 font-semibold text-blue-800 dark:text-blue-300">
+									<DollarSign class="h-5 w-5" />
+									Deposit Summary
+								</h3>
+								<div class="space-y-2">
+									<div class="flex items-center justify-between">
+										<span class="text-sm text-blue-700 dark:text-blue-300">Token:</span>
+										<span class="font-medium text-blue-800 dark:text-blue-200"
+											>{$tokens.find((t) => t.address === $selectedToken)?.symbol ||
+												'Unknown'}</span
+										>
+									</div>
+									<div class="flex items-center justify-between">
+										<span class="text-sm text-blue-700 dark:text-blue-300">Amount:</span>
+										<span class="font-medium text-blue-800 dark:text-blue-200">{amount}</span>
+									</div>
+								</div>
+							</div>
+						</Card>
+					{/if}
+				</div>
+
+				<!-- Information Panel -->
+				<div class="space-y-6 lg:col-span-2">
+					<!-- How It Works -->
+					<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+						<div class="space-y-4">
+							<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+								<Zap class="h-5 w-5 text-blue-500" />
+								How Private Deposits Work
+							</h3>
+							<div class="space-y-4">
+								<div class="flex items-start gap-3">
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm font-bold text-white"
+									>
+										1
+									</div>
+									<div>
+										<p class="text-text font-medium">Choose Your Token</p>
+										<p class="text-text-secondary text-sm">
+											Select from supported tokens in your wallet
+										</p>
+									</div>
+								</div>
+								<div class="flex items-start gap-3">
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm font-bold text-white"
+									>
+										2
+									</div>
+									<div>
+										<p class="text-text font-medium">Set Amount</p>
+										<p class="text-text-secondary text-sm">
+											Enter the amount you want to deposit privately
+										</p>
+									</div>
+								</div>
+								<div class="flex items-start gap-3">
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm font-bold text-white"
+									>
+										3
+									</div>
+									<div>
+										<p class="text-text font-medium">Get Private Note</p>
+										<p class="text-text-secondary text-sm">
+											Receive a cryptographic note representing your deposit
+										</p>
+									</div>
+								</div>
+								<div class="flex items-start gap-3">
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-green-500 text-sm font-bold text-white"
+									>
+										4
+									</div>
+									<div>
+										<p class="text-text font-medium">Anonymous Withdrawals</p>
+										<p class="text-text-secondary text-sm">
+											Later withdraw to any address with complete privacy
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</Card>
+
+					<!-- Security Features -->
+					<Card
+						class_="border-0 shadow-xl bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20"
+					>
+						<div class="space-y-4">
+							<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+								<Lock class="h-5 w-5 text-green-500" />
+								Security Features
+							</h3>
+							<div class="space-y-3">
+								<div class="flex items-center gap-3">
+									<CheckCircle class="h-5 w-5 text-green-500" />
+									<span class="text-text text-sm font-medium"
+										>Zero-knowledge proofs protect your privacy</span
+									>
+								</div>
+								<div class="flex items-center gap-3">
+									<CheckCircle class="h-5 w-5 text-green-500" />
+									<span class="text-text text-sm font-medium"
+										>Cryptographic notes ensure anonymity</span
+									>
+								</div>
+								<div class="flex items-center gap-3">
+									<CheckCircle class="h-5 w-5 text-green-500" />
+									<span class="text-text text-sm font-medium"
+										>Decentralized protocol - no central authority</span
+									>
+								</div>
+								<div class="flex items-center gap-3">
+									<CheckCircle class="h-5 w-5 text-green-500" />
+									<span class="text-text text-sm font-medium"
+										>StarkNet security and fast finality</span
+									>
+								</div>
+							</div>
+						</div>
+					</Card>
+
+					<!-- Quick Stats -->
+					<div class="grid grid-cols-2 gap-4">
+						<Card
+							class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
+						>
+							<div class="space-y-2">
+								<div class="text-2xl font-bold text-green-500">100%</div>
+								<div class="text-text-secondary text-sm">Anonymous</div>
+							</div>
+						</Card>
+						<Card
+							class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
+						>
+							<div class="space-y-2">
+								<div class="text-2xl font-bold text-blue-500">⚡</div>
+								<div class="text-text-secondary text-sm">Instant</div>
+							</div>
+						</Card>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
-	
-	<ProgressModal 
+
+	<ProgressModal
 		show={$progressModalStore.show}
 		title={$progressModalStore.title}
 		steps={$progressModalStore.steps}

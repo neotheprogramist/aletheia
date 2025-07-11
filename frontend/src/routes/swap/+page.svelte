@@ -28,7 +28,7 @@
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
 	import { defaultDepositColumns } from '$lib/utils/sharedColumns';
-		import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
+	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
 	import { supportedTokens } from '$lib/config/tokens';
 	import { browser } from '$app/environment';
@@ -40,7 +40,25 @@
 	import { extractDepositedEventsFromReceipt } from '$lib/utils/extractDepositedEventsFromReceipt';
 	import { updateOperation } from '$lib/db/operationsDb';
 	import ProgressModal from '$lib/ui/ProgressModal.svelte';
-	import { progressModalStore, progressModalActions, swapProgressSteps } from '$lib/stores/progressModal';
+	import {
+		progressModalStore,
+		progressModalActions,
+		swapProgressSteps
+	} from '$lib/stores/progressModal';
+	import {
+		Shuffle,
+		RefreshCw,
+		TrendingUp,
+		ArrowRightLeft,
+		Shield,
+		Zap,
+		Lock,
+		CheckCircle,
+		DollarSign,
+		ArrowRight,
+		Coins,
+		BarChart3
+	} from 'lucide-svelte';
 
 	const STRK_ADDRESS = supportedTokens[0].address;
 
@@ -108,7 +126,7 @@
 		selectedSwapKey = deposits[globalIdx].index;
 		selectedSwapDeposit = deposits.find((d) => d.index === selectedSwapKey) ?? null;
 		swapAmount = '';
-		
+
 		// Auto-select fee deposit when swap deposit is selected
 		if (selectedSwapDeposit) {
 			autoSelectFeeDeposit();
@@ -127,9 +145,9 @@
 	/** Auto-select fee deposit when swap deposit is chosen */
 	async function autoSelectFeeDeposit() {
 		if (!selectedSwapDeposit) return;
-		
+
 		feePreloadError = null;
-		
+
 		try {
 			// Get fee info and auto-select the best STRK deposit
 			const excludeDeposits = [selectedSwapDeposit];
@@ -139,7 +157,7 @@
 				PUBLIC_SWAP_EXTENSION_CONTRACT_ADDRESS,
 				excludeDeposits
 			);
-			
+
 			// Set the auto-selected fee deposit
 			if (autoSelectedFeeInfo.feeDeposit) {
 				selectedFeeDeposit = autoSelectedFeeInfo.feeDeposit;
@@ -147,7 +165,7 @@
 			} else {
 				selectedFeeDeposit = null;
 				selectedFeeKey = null;
-				
+
 				if (!autoSelectedFeeInfo.hasEnoughBalance) {
 					feePreloadError = `Insufficient STRK balance. Required: ${autoSelectedFeeInfo.feeInfo.formatted} STRK`;
 				} else {
@@ -209,7 +227,7 @@
 
 				const feeNoteDecimals = await fetchTokenDecimals(feeTokenAddress);
 				feeNoteBalanceWei = BigInt(feeNoteBalance);
-				
+
 				// Use pre-loaded fee info
 				feeWei = autoSelectedFeeInfo.feeInfo.amount;
 				feeWeiHex = autoSelectedFeeInfo.feeInfo.formatted;
@@ -464,13 +482,12 @@
 			setTimeout(() => {
 				progressModalActions.hide();
 			}, 2000);
-
 		} catch (err) {
 			// 14) On error: abort any created refund operations
 			console.warn('❌ Swap failed with error:', err);
-			
+
 			const currentSteps = $progressModalStore.steps;
-			const currentStepIndex = currentSteps.findIndex(step => step.status === 'loading');
+			const currentStepIndex = currentSteps.findIndex((step) => step.status === 'loading');
 			if (currentStepIndex !== -1) {
 				progressModalActions.updateStep(currentSteps[currentStepIndex].id, 'error');
 			}
@@ -499,7 +516,7 @@
 					console.error('🚨 Failed to abort fee refund:', abortError);
 				}
 			}
-			
+
 			setTimeout(() => {
 				progressModalActions.hide();
 			}, 3000);
@@ -510,122 +527,400 @@
 </script>
 
 <ProtectedRoute>
-	<div class="mx-auto p-6">
-		<Card>
-			<h2 class="text-2xl font-bold mb-4">Swap</h2>
-			<p class="text-gray-600 mb-6">
-				Select a deposit to swap from. Fee deposit will be automatically selected.
-			</p>
-
-			<TokenSelect
-				tokens={$tokens}
-				bind:value={$selectedToken}
-				placeholder="Filter deposits by token"
-				class_="mb-4 w-64"
-			/>
-			<!-- Deposits Table -->
-			{#if !deposits.length}
-				<h2 class="text-center">Please make a deposit first!</h2>
-			{:else}
-				<PaginatedTable
-					columns={defaultDepositColumns}
-					items={deposits}
-					pageSize={5}
-					keyField="index"
-					disabledKeys={undefined}
-					onRowClick={handleRowClick}
-					activeKey={selectedSwapKey}
-					inactiveKeys={selectedFeeKey !== null ? [selectedFeeKey] : []}
-					hoverClass="hover:bg-green-600"
-				/>
-			{/if}
-
-			<!-- Auto-selected fee information -->
-			{#if autoSelectedFeeInfo}
-				<div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-					<h3 class="font-semibold text-blue-800 mb-2">Fee Information</h3>
-					<p class="text-sm text-blue-700">
-						Fee: <strong>{autoSelectedFeeInfo.feeInfo.formatted} STRK</strong>
-						{#if autoSelectedFeeInfo.feeDeposit}
-							• Auto-selected fee deposit: <strong>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong>
-						{/if}
-					</p>
+	<div
+		class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
+	>
+		<div class="mx-auto max-w-6xl p-6 pt-8">
+			<!-- Header Section -->
+			<div class="mb-8 text-center">
+				<div class="mb-4 flex items-center justify-center gap-3">
+					<div
+						class="rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 p-3 text-white shadow-lg"
+					>
+						<ArrowRightLeft class="h-8 w-8" />
+					</div>
+					<h1
+						class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl"
+					>
+						Private Token Swap
+					</h1>
 				</div>
-			{/if}
+				<p class="text-text-secondary mx-auto max-w-2xl text-lg">
+					Exchange your private notes between different tokens while maintaining complete anonymity
+				</p>
+			</div>
 
-			<!-- Error message -->
-			{#if feePreloadError}
-				<div class="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
-					<p class="text-sm text-red-700">{feePreloadError}</p>
-				</div>
-			{/if}
+			<div class="grid gap-6 lg:grid-cols-4">
+				<!-- Main Swap Interface -->
+				<div class="space-y-6 lg:col-span-2">
+					<!-- Token Selection & Deposit Table -->
+					<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+						<div class="space-y-6">
+							<div class="mb-4 flex items-center gap-3">
+								<Coins class="h-5 w-5 text-indigo-500" />
+								<h3 class="text-text text-xl font-bold">Select Deposit to Swap</h3>
+							</div>
 
-			<!-- Selected‐deposit cards -->
-			<SelectedDeposits
-				items={[
-					{ title: 'Swap Deposit', deposit: selectedSwapDeposit },
-					{ title: 'Fee Deposit (Auto-selected)', deposit: selectedFeeDeposit }
-				]}
-			/>
-
-			<!-- Swap Form -->
-			{#if selectedSwapDeposit && selectedFeeDeposit && !feePreloadError}
-				<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
-					<Card>
-						<form on:submit|preventDefault={initiateSwap} class="mt-6 flex flex-col gap-4">
-							<Input
-								bind:value={swapAmount}
-								required
-								placeholder="Amount to Swap"
+							<TokenSelect
+								tokens={$tokens}
+								bind:value={$selectedToken}
+								placeholder="Filter deposits by token"
 								class_="w-full"
 							/>
-							{#if get(tokens).filter((t) => t.address !== selectedSwapDeposit?.data.tokenAddress).length > 0}
-								<TokenSelect
-									tokens={get(tokens).filter(
-										(t) => t.address !== selectedSwapDeposit?.data.tokenAddress
-									)}
-									bind:value={targetToken}
-									placeholder="Select token to receive"
-									class_="w-full"
-								/>
+
+							{#if !deposits.length}
+								<div class="py-12 text-center">
+									<div
+										class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 p-4 dark:bg-indigo-900/20"
+									>
+										<Shuffle class="h-8 w-8 text-indigo-500" />
+									</div>
+									<h3 class="text-text mb-2 text-lg font-semibold">No Deposits Available</h3>
+									<p class="text-text-secondary">Please make a deposit first to enable swapping!</p>
+								</div>
 							{:else}
-								<p class="text-sm text-red-500">Brak dostępnych tokenów do swapu.</p>
+								<div
+									class="rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 p-1 dark:from-gray-700 dark:to-gray-600"
+								>
+									<PaginatedTable
+										columns={defaultDepositColumns}
+										items={deposits}
+										pageSize={5}
+										keyField="index"
+										disabledKeys={undefined}
+										onRowClick={handleRowClick}
+										activeKey={selectedSwapKey}
+										inactiveKeys={selectedFeeKey !== null ? [selectedFeeKey] : []}
+										hoverClass="hover:bg-indigo-600"
+									/>
+								</div>
 							{/if}
-							<Button text="Swap" class_="mt-2 w-full" loading={isLoading} type="submit" />
-						</form>
+						</div>
+					</Card>
+
+					<!-- Auto-selected fee information -->
+					{#if autoSelectedFeeInfo}
+						<Card
+							class_="border-0 shadow-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20"
+						>
+							<div class="flex items-start gap-3">
+								<div class="rounded-lg bg-blue-500 p-2 text-white">
+									<DollarSign class="h-4 w-4" />
+								</div>
+								<div class="flex-1">
+									<h3 class="mb-2 font-semibold text-blue-800 dark:text-blue-300">
+										Fee Information
+									</h3>
+									<p class="text-sm text-blue-700 dark:text-blue-400">
+										Fee: <strong>{autoSelectedFeeInfo.feeInfo.formatted} STRK</strong>
+										{#if autoSelectedFeeInfo.feeDeposit}
+											• Auto-selected fee deposit: <strong
+												>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong
+											>
+										{/if}
+									</p>
+								</div>
+							</div>
+						</Card>
+					{/if}
+
+					<!-- Error message -->
+					{#if feePreloadError}
+						<Card
+							class_="border-0 shadow-lg bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20"
+						>
+							<div class="flex items-start gap-3">
+								<div class="rounded-lg bg-red-500 p-2 text-white">
+									<Shield class="h-4 w-4" />
+								</div>
+								<div class="flex-1">
+									<p class="text-sm text-red-700 dark:text-red-400">{feePreloadError}</p>
+								</div>
+							</div>
+						</Card>
+					{/if}
+
+					<!-- Selected Deposits Display -->
+					{#if selectedSwapDeposit || selectedFeeDeposit}
+						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+							<div class="space-y-4">
+								<div class="mb-4 flex items-center gap-3">
+									<CheckCircle class="h-5 w-5 text-green-500" />
+									<h3 class="text-text text-xl font-bold">Selected Deposits</h3>
+								</div>
+								<SelectedDeposits
+									items={[
+										{ title: 'Swap Deposit', deposit: selectedSwapDeposit },
+										{ title: 'Fee Deposit (Auto-selected)', deposit: selectedFeeDeposit }
+									]}
+								/>
+							</div>
+						</Card>
+					{/if}
+
+					<!-- Swap Form -->
+					{#if selectedSwapDeposit && selectedFeeDeposit && !feePreloadError}
+						<Card
+							class_="border-0 shadow-xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20"
+						>
+							<div class="space-y-6">
+								<div class="mb-4 flex items-center gap-3">
+									<RefreshCw class="h-5 w-5 text-indigo-500" />
+									<h3 class="text-text text-xl font-bold">Configure Your Swap</h3>
+								</div>
+
+								<form on:submit|preventDefault={initiateSwap} class="space-y-6">
+									<!-- Amount Input -->
+									<div class="space-y-3">
+										<label class="text-text flex items-center gap-2 text-sm font-semibold">
+											<ArrowRight class="h-4 w-4" />
+											Swap Amount
+										</label>
+										<div class="flex gap-2">
+											<Input
+												bind:value={swapAmount}
+												required
+												placeholder="Enter amount to swap"
+												class_="flex-1 text-lg font-medium"
+											/>
+											<button
+												type="button"
+												class="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-indigo-600"
+												on:click={() => {
+													if (selectedSwapDeposit) {
+														swapAmount = selectedSwapDeposit.displayAmount;
+													}
+												}}
+											>
+												Max
+											</button>
+										</div>
+									</div>
+
+									<!-- Target Token Selection -->
+									<div class="space-y-3">
+										<label class="text-text flex items-center gap-2 text-sm font-semibold">
+											<TrendingUp class="h-4 w-4" />
+											Receive Token
+										</label>
+										{#if get(tokens).filter((t) => t.address !== selectedSwapDeposit?.data.tokenAddress).length > 0}
+											<TokenSelect
+												tokens={get(tokens).filter(
+													(t) => t.address !== selectedSwapDeposit?.data.tokenAddress
+												)}
+												bind:value={targetToken}
+												placeholder="Select token to receive"
+												class_="w-full"
+											/>
+										{:else}
+											<div class="rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
+												<p class="text-sm text-red-700 dark:text-red-400">
+													No available tokens for swapping
+												</p>
+											</div>
+										{/if}
+									</div>
+
+									<!-- Submit Button -->
+									<Button
+										text="Execute Private Swap"
+										loading={isLoading}
+										type="submit"
+										class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+									/>
+								</form>
+							</div>
+						</Card>
+					{/if}
+				</div>
+
+				<!-- Information Panel -->
+				<div class="space-y-6 lg:col-span-2">
+					<!-- How Private Swaps Work -->
+					<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+						<div class="space-y-4">
+							<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+								<Zap class="h-5 w-5 text-indigo-500" />
+								How Private Swaps Work
+							</h3>
+							<div class="space-y-4">
+								<div class="flex items-start gap-3">
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-indigo-500 text-sm font-bold text-white"
+									>
+										1
+									</div>
+									<div>
+										<p class="text-text font-medium">Select Source Deposit</p>
+										<p class="text-text-secondary text-sm">Choose a private note to swap from</p>
+									</div>
+								</div>
+								<div class="flex items-start gap-3">
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-indigo-500 text-sm font-bold text-white"
+									>
+										2
+									</div>
+									<div>
+										<p class="text-text font-medium">Set Amount & Target</p>
+										<p class="text-text-secondary text-sm">Specify swap amount and desired token</p>
+									</div>
+								</div>
+								<div class="flex items-start gap-3">
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-indigo-500 text-sm font-bold text-white"
+									>
+										3
+									</div>
+									<div>
+										<p class="text-text font-medium">Zero-Knowledge Proof</p>
+										<p class="text-text-secondary text-sm">
+											Generate cryptographic proof of valid swap
+										</p>
+									</div>
+								</div>
+								<div class="flex items-start gap-3">
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-purple-500 text-sm font-bold text-white"
+									>
+										4
+									</div>
+									<div>
+										<p class="text-text font-medium">Receive New Private Note</p>
+										<p class="text-text-secondary text-sm">
+											Get swapped tokens as a new private note
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</Card>
+
+					<!-- Security Features -->
+					<Card
+						class_="border-0 shadow-xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20"
+					>
+						<div class="space-y-4">
+							<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+								<Lock class="h-5 w-5 text-purple-500" />
+								Security Features
+							</h3>
+							<div class="space-y-3">
+								<div class="flex items-center gap-3">
+									<CheckCircle class="h-5 w-5 text-purple-500" />
+									<span class="text-text text-sm font-medium"
+										>Anonymous token exchange via ZK proofs</span
+									>
+								</div>
+								<div class="flex items-center gap-3">
+									<CheckCircle class="h-5 w-5 text-purple-500" />
+									<span class="text-text text-sm font-medium"
+										>No connection between source and target</span
+									>
+								</div>
+								<div class="flex items-center gap-3">
+									<CheckCircle class="h-5 w-5 text-purple-500" />
+									<span class="text-text text-sm font-medium"
+										>Decentralized exchange integration</span
+									>
+								</div>
+								<div class="flex items-center gap-3">
+									<CheckCircle class="h-5 w-5 text-purple-500" />
+									<span class="text-text text-sm font-medium">Automated refund protection</span>
+								</div>
+							</div>
+						</div>
+					</Card>
+
+					<!-- Quick Stats -->
+					<div class="grid grid-cols-2 gap-4">
+						<Card
+							class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
+						>
+							<div class="space-y-2">
+								<div class="text-2xl font-bold text-indigo-500">🔄</div>
+								<div class="text-text-secondary text-sm">Private Exchange</div>
+							</div>
+						</Card>
+						<Card
+							class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
+						>
+							<div class="space-y-2">
+								<div class="text-2xl font-bold text-purple-500">⚡</div>
+								<div class="text-text-secondary text-sm">Instant Quotes</div>
+							</div>
+						</Card>
+					</div>
+
+					<!-- Supported Pairs Info -->
+					<Card
+						class_="border-0 shadow-lg bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20"
+					>
+						<div class="space-y-3">
+							<h4 class="text-text flex items-center gap-2 font-semibold">
+								<BarChart3 class="h-4 w-4 text-indigo-500" />
+								Supported Trading Pairs
+							</h4>
+							<p class="text-text-secondary text-sm">
+								All swaps are powered by Ekubo DEX for optimal rates and deep liquidity. Supported
+								pairs include all major token combinations in the privacy pool.
+							</p>
+						</div>
 					</Card>
 				</div>
-			{/if}
-
-			<!-- Modal Confirm -->
-			<Modal
-				show={showFeeModal}
-				title="Confirm Swap"
-				confirmText="Accept"
-				cancelText="Reject"
-				closeOnOutsideClick={false}
-				onConfirm={confirmSwap}
-				onCancel={() => {
-					showFeeModal = false;
-					isLoading = false;
-				}}
-				onClose={() => {
-					showFeeModal = false;
-					isLoading = false;
-				}}
-			>
-				<p class="text-sm">
-					You’re about to swap
-					<strong class="break-words">{swapAmount}</strong>
-					tokens, paying a fee of
-					<strong class="break-words">{feeWeiHex}</strong>
-					tokens. Proceed?
-				</p>
-			</Modal>
-		</Card>
+			</div>
+		</div>
 	</div>
-	
-	<ProgressModal 
+
+	<!-- Modal Confirm -->
+	<Modal
+		show={showFeeModal}
+		title="Confirm Private Swap"
+		confirmText="Execute Swap"
+		cancelText="Cancel"
+		closeOnOutsideClick={false}
+		onConfirm={confirmSwap}
+		onCancel={() => {
+			showFeeModal = false;
+			isLoading = false;
+		}}
+		onClose={() => {
+			showFeeModal = false;
+			isLoading = false;
+		}}
+	>
+		<div class="space-y-4">
+			<div
+				class="flex items-center gap-3 rounded-lg bg-gradient-to-r from-indigo-50 to-purple-50 p-4 dark:from-indigo-900/20 dark:to-purple-900/20"
+			>
+				<ArrowRightLeft class="h-5 w-5 text-indigo-500" />
+				<div>
+					<p class="text-text font-medium">Swap Details</p>
+					<p class="text-text-secondary text-sm">Review your transaction before proceeding</p>
+				</div>
+			</div>
+			<div class="space-y-2">
+				<p class="text-text text-sm">
+					<strong>Amount to swap:</strong>
+					<span class="font-mono text-indigo-600 dark:text-indigo-400">{swapAmount}</span> tokens
+				</p>
+				<p class="text-text text-sm">
+					<strong>Transaction fee:</strong>
+					<span class="font-mono text-purple-600 dark:text-purple-400">{feeWeiHex}</span> STRK
+				</p>
+			</div>
+			<div
+				class="rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-800 dark:bg-yellow-900/20"
+			>
+				<p class="text-sm text-yellow-800 dark:text-yellow-400">
+					This transaction will consume your selected private notes and create new ones with the
+					swapped tokens.
+				</p>
+			</div>
+		</div>
+	</Modal>
+
+	<ProgressModal
 		show={$progressModalStore.show}
 		title={$progressModalStore.title}
 		steps={$progressModalStore.steps}
