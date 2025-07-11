@@ -149,7 +149,9 @@
 				{/if}
 
 				<div class="flex items-center gap-3">
-					<WalletConnector />
+					{#if $isConnected}
+						<WalletConnector />
+					{/if}
 					<ToggleTheme />
 				</div>
 			</div>
@@ -176,7 +178,11 @@
 				<div class="px-2 pt-2 pb-3 space-y-1">
 					<!-- Wallet and Theme Controls -->
 					<div class="flex items-center justify-between px-3 py-2 border-b border-border mb-3">
-						<WalletConnector />
+						{#if $isConnected}
+							<WalletConnector />
+						{:else}
+							<div></div>
+						{/if}
 						<ToggleTheme />
 					</div>
 					

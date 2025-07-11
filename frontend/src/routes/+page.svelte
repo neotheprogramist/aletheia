@@ -237,7 +237,15 @@
 				</p>
 				<div class="flex flex-col sm:flex-row gap-3 justify-center">
 					<Button text="Show Tutorial" onClick={showOnboardingAgain} variant="outline" />
-					<Button text="Connect Wallet" onClick={() => window.location.href = '/deposit'} />
+					<button
+						on:click={async () => {
+							const { connectWallet } = await import('$lib/stores/wallet');
+							await connectWallet();
+						}}
+						class="button rounded bg-blue-600 px-6 py-3 text-white hover:bg-blue-700 font-semibold"
+					>
+						Connect Wallet
+					</button>
 				</div>
 			</div>
 		{:else}
@@ -321,8 +329,7 @@
 		show={showFeatureModal}
 		title={selectedFeature.details.title}
 		onClose={closeFeatureModal}
-		singleButton={true}
-		confirmText="Close"
+		showButtons={false}
 	>
 		<div class="max-h-[70vh] overflow-y-auto space-y-6 pr-2">
 			<!-- Header -->
@@ -385,13 +392,19 @@
 				</div>
 			</div>
 			
-			<!-- Action Button -->
-			<div class="flex justify-center pt-4">
+			<!-- Action Buttons -->
+			<div class="flex flex-col sm:flex-row gap-3 justify-center pt-4">
 				<Button 
 					text="Start Using {selectedFeature.title}"
 					onClick={() => goToFeature(selectedFeature.href)}
 					class_="bg-gradient-to-r {selectedFeature.gradient} text-white px-8 py-3 text-lg font-semibold"
 				/>
+				<button
+					class="rounded bg-gray-200 px-6 py-3 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 font-semibold"
+					on:click={closeFeatureModal}
+				>
+					Close
+				</button>
 			</div>
 		</div>
 	</Modal>
