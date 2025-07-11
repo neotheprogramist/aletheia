@@ -39,6 +39,8 @@
 	import { supportedPools } from '$lib/config/swap';
 	import { extractDepositedEventsFromReceipt } from '$lib/utils/extractDepositedEventsFromReceipt';
 	import { updateOperation } from '$lib/db/operationsDb';
+	import ProgressModal from '$lib/ui/ProgressModal.svelte';
+	import { progressModalStore, progressModalActions, swapProgressSteps } from '$lib/stores/progressModal';
 
 	const STRK_ADDRESS = supportedTokens[0].address;
 
@@ -237,248 +239,271 @@
 
 	/** Step 2: Proving & Execution */
 	async function confirmSwap() {
-		// 1) Close the modal and start the toast
+		// 1) Close the modal and start progress
 		showFeeModal = false;
+		progressModalActions.show('Swap Progress', [...swapProgressSteps]);
 
-		await wrapWithToast(
-			async () => {
-				// 2) Validate that note balances and calculated amounts are present
-				if (!swapNoteBalanceWei || !userSwapAmountWei) {
-					throw new Error('Cannot calculate refund – missing swap amounts');
-				}
-				if (!feeNoteBalanceWei || !feeWei) {
-					throw new Error('Cannot calculate refund – missing fee amounts');
-				}
+		try {
+			// 2) Validate that note balances and calculated amounts are present
+			progressModalActions.updateStep('preparation', 'loading');
+			if (!swapNoteBalanceWei || !userSwapAmountWei) {
+				throw new Error('Cannot calculate refund – missing swap amounts');
+			}
+			if (!feeNoteBalanceWei || !feeWei) {
+				throw new Error('Cannot calculate refund – missing fee amounts');
+			}
 
-				// 3) Ensure zk library and merkle tree are initialized
-				const { garaga } = get(zkLibraries);
-				if (!garaga) throw new Error('Garaga not initialized');
-				if (!feeNote || !selectedFeeDeposit || !swapNote || !selectedSwapDeposit) {
-					throw new Error('Missing fee or swap deposit');
-				}
-				const tree = merkleTree;
-				if (!tree) throw new Error('Merkle tree does not exist');
+			// 3) Ensure zk library and merkle tree are initialized
+			const { garaga } = get(zkLibraries);
+			if (!garaga) throw new Error('Garaga not initialized');
+			if (!feeNote || !selectedFeeDeposit || !swapNote || !selectedSwapDeposit) {
+				throw new Error('Missing fee or swap deposit');
+			}
+			const tree = merkleTree;
+			if (!tree) throw new Error('Merkle tree does not exist');
 
-				// 4) Compute commitments for the swap and fee deposits
-				// And get the data for proving
-				const swapProofData = tree.getProofData(
-					garaga.poseidonHashBN254(
-						garaga.poseidonHashBN254(BigInt(selectedSwapDeposit.hash), swapNoteBalanceWei),
-						BigInt(swapNote.tokenAddress)
-					)
-				);
-				const feeProofData = tree.getProofData(
-					garaga.poseidonHashBN254(
-						garaga.poseidonHashBN254(BigInt(selectedFeeDeposit.hash), feeNoteBalanceWei),
-						BigInt(feeNote.tokenAddress)
-					)
-				);
-
-				// 5) Generate refund operations and compute their commitment hashes
-				const swapRefund = swapNoteBalanceWei - userSwapAmountWei;
-				const swapOpResult = await generateOperation({
-					data: { tokenAddress: swapNote.tokenAddress, amount: swapRefund }
-				});
-				swapRefundHash = swapOpResult.hash;
-
-				const feeRefund = feeNoteBalanceWei - feeWei;
-				const feeOpResult = await generateOperation({
-					data: { tokenAddress: feeNote.tokenAddress, amount: feeRefund }
-				});
-				feeRefundHash = feeOpResult.hash;
-
-				const swapRefundCommitmentHash = garaga.poseidonHashBN254(
-					garaga.poseidonHashBN254(BigInt(swapRefundHash), swapRefund),
+			// 4) Compute commitments for the swap and fee deposits
+			// And get the data for proving
+			const swapProofData = tree.getProofData(
+				garaga.poseidonHashBN254(
+					garaga.poseidonHashBN254(BigInt(selectedSwapDeposit.hash), swapNoteBalanceWei),
 					BigInt(swapNote.tokenAddress)
-				);
-				const feeRefundCommitmentHash = garaga.poseidonHashBN254(
-					garaga.poseidonHashBN254(BigInt(feeRefundHash), feeRefund),
+				)
+			);
+			const feeProofData = tree.getProofData(
+				garaga.poseidonHashBN254(
+					garaga.poseidonHashBN254(BigInt(selectedFeeDeposit.hash), feeNoteBalanceWei),
 					BigInt(feeNote.tokenAddress)
+				)
+			);
+
+			// 5) Generate refund operations and compute their commitment hashes
+			const swapRefund = swapNoteBalanceWei - userSwapAmountWei;
+			const swapOpResult = await generateOperation({
+				data: { tokenAddress: swapNote.tokenAddress, amount: swapRefund }
+			});
+			swapRefundHash = swapOpResult.hash;
+
+			const feeRefund = feeNoteBalanceWei - feeWei;
+			const feeOpResult = await generateOperation({
+				data: { tokenAddress: feeNote.tokenAddress, amount: feeRefund }
+			});
+			feeRefundHash = feeOpResult.hash;
+
+			const swapRefundCommitmentHash = garaga.poseidonHashBN254(
+				garaga.poseidonHashBN254(BigInt(swapRefundHash), swapRefund),
+				BigInt(swapNote.tokenAddress)
+			);
+			const feeRefundCommitmentHash = garaga.poseidonHashBN254(
+				garaga.poseidonHashBN254(BigInt(feeRefundHash), feeRefund),
+				BigInt(feeNote.tokenAddress)
+			);
+
+			// 6) Fetch details for all operations from the database
+			const swapOp = await getOperationDetails(selectedSwapDeposit.hash);
+			const feeOp = await getOperationDetails(selectedFeeDeposit.hash);
+			const swapRefundOp = await getOperationDetails(swapRefundHash);
+			const feeRefundOp = await getOperationDetails(feeRefundHash);
+
+			if (!swapOp || !feeOp || !swapRefundOp || !feeRefundOp) {
+				throw new Error('One or more operations not found');
+			}
+
+			// 7) Build the witness input object for proof
+			const executeInput = {
+				// Deposit data
+				root_1: `0x${swapProofData.root.toString(16)}`,
+				secret_1: `0x${BigInt(swapOp.secret).toString(16)}`,
+				nullifier_1: `0x${BigInt(swapOp.nullifier).toString(16)}`,
+				commitment_amount_1: `0x${BigInt(swapOp.amount).toString(16)}`,
+				token_address_1: swapOp.tokenAddress,
+				hashpath_1: swapProofData.path[0].map((e) => `0x${e.toString(16)}`),
+				index_1: `0x${BigInt(swapProofData.index).toString(16)}`,
+				amount: `0x${userSwapAmountWei.toString(16)}`,
+				// Fee deposit data
+				root_2: `0x${feeProofData.root.toString(16)}`,
+				secret_2: `0x${BigInt(feeOp.secret).toString(16)}`,
+				nullifier_2: `0x${BigInt(feeOp.nullifier).toString(16)}`,
+				commitment_amount_2: `0x${BigInt(feeOp.amount).toString(16)}`,
+				token_address_2: feeOp.tokenAddress,
+				hashpath_2: feeProofData.path[0].map((e) => `0x${e.toString(16)}`),
+				index_2: `0x${BigInt(feeProofData.index).toString(16)}`,
+				gas_fee: `0x${feeWei.toString(16)}`,
+				// Refund for swap deposit
+				refund_secret_1: `0x${BigInt(swapRefundOp.secret).toString(16)}`,
+				refund_nullifier_1: `0x${BigInt(swapRefundOp.nullifier).toString(16)}`,
+				refund_amount_1: `0x${swapRefund.toString(16)}`,
+				refund_commitment_hash_1: `0x${swapRefundCommitmentHash.toString(16)}`,
+				// Refund for fee deposit
+				refund_secret_2: `0x${BigInt(feeRefundOp.secret).toString(16)}`,
+				refund_nullifier_2: `0x${BigInt(feeRefundOp.nullifier).toString(16)}`,
+				refund_amount_2: `0x${feeRefund.toString(16)}`,
+				refund_commitment_hash_2: `0x${feeRefundCommitmentHash.toString(16)}`,
+				// recipient
+				_recipient: swapRecipient
+			};
+			progressModalActions.updateStep('preparation', 'completed');
+
+			// 8) Generate the zk proof and prepare it as calldata
+			progressModalActions.updateStep('proof-generation', 'loading');
+			const honkCalldataHex = await generateHonkCalldata(
+				'/circuits/execute.json',
+				'/circuits/recursive.json',
+				'/circuits/vk_recursive.bin',
+				executeInput
+			);
+			progressModalActions.updateStep('proof-generation', 'completed');
+
+			// 9) Fetch swap quote from Ekubo
+			progressModalActions.updateStep('quote-fetching', 'loading');
+			const ekuboResponse = await fetchEkuboQuote(
+				userSwapAmountWei,
+				selectedSwapDeposit.data.tokenAddress,
+				targetToken
+			);
+
+			emptyOpHash = (await generateOperation({})).hash;
+
+			const extensionCalldata = buildSwapCalldata(
+				ekuboResponse,
+				selectedSwapDeposit.data.tokenAddress,
+				BigInt(emptyOpHash)
+			);
+			progressModalActions.updateStep('quote-fetching', 'completed');
+
+			// 10) Prepare for the StarkNet transaction
+			progressModalActions.updateStep('transaction-prepare', 'loading');
+			const rpc = get(provider);
+			if (!rpc) throw new Error('Missing Provider');
+
+			const account = get(paymasterWallet);
+			if (!account) throw new Error('Missing Account');
+
+			const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
+			if (!privacyAbi) throw new Error('Missing ABI');
+
+			const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
+			privacy.connect(account);
+
+			const honkCalldataWithLen = [
+				`0x${BigInt(honkCalldataHex.length).toString(16)}`,
+				...honkCalldataHex
+			];
+
+			const call = {
+				contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				entrypoint: 'execute_extension',
+				calldata: [
+					...honkCalldataWithLen,
+					PUBLIC_SWAP_EXTENSION_CONTRACT_ADDRESS,
+					...extensionCalldata
+				]
+			};
+			progressModalActions.updateStep('transaction-prepare', 'completed');
+
+			progressModalActions.updateStep('executing-transaction', 'loading');
+			const tx = await account.execute(call);
+			progressModalActions.updateStep('executing-transaction', 'completed');
+
+			progressModalActions.updateStep('onchain-confirmation', 'loading');
+			const receipt = await rpc.waitForTransaction(tx.transaction_hash);
+
+			// 11) Check receipt status and throw on failure
+			if (receipt.isReverted()) {
+				throw new Error(`Transaction reverted: ${receipt.value}`);
+			} else if (!receipt.isSuccess()) {
+				throw new Error(`Transaction error: ${receipt.value}`);
+			}
+
+			const swappedDeposits = extractDepositedEventsFromReceipt(
+				receipt,
+				PUBLIC_SWAP_EXTENSION_DEPOSITED_SELECTOR,
+				targetToken
+			);
+			if (swappedDeposits.length === 0) {
+				throw new Error('No Deposited event for token: ' + targetToken);
+			}
+			const { token: depositedTokenHex, amount: depositedAmountBI } = swappedDeposits[0];
+
+			const opRecord = await getFullOperation(emptyOpHash);
+			if (!opRecord) {
+				throw new Error('Could not find operation with hash: ' + emptyOpHash);
+			}
+
+			const normalizedToken = '0x' + BigInt(depositedTokenHex).toString(16).padStart(64, '0');
+
+			const hashBigInt = BigInt(opRecord.hash);
+			const preCommitment = garaga.poseidonHashBN254(hashBigInt, depositedAmountBI);
+			const commitment = garaga.poseidonHashBN254(preCommitment, BigInt(normalizedToken));
+
+			opRecord.data = {
+				tokenAddress: normalizedToken,
+				amount: depositedAmountBI.toString()
+			};
+			opRecord.commitment = commitment.toString();
+
+			await updateOperation(opRecord);
+
+			progressModalActions.updateStep('onchain-confirmation', 'completed');
+
+			// 12) nullify operations in the database
+			await nullifyOperation(selectedSwapDeposit.hash);
+			await nullifyOperation(selectedFeeDeposit.hash);
+
+			// 13) Reset component state after successful swap
+			resetAll();
+
+			if ($selectedToken) {
+				loadDeposits(
+					$selectedToken,
+					(d) => (deposits = d),
+					(b) => (isLoading = b)
 				);
+			}
 
-				// 6) Fetch details for all operations from the database
-				const swapOp = await getOperationDetails(selectedSwapDeposit.hash);
-				const feeOp = await getOperationDetails(selectedFeeDeposit.hash);
-				const swapRefundOp = await getOperationDetails(swapRefundHash);
-				const feeRefundOp = await getOperationDetails(feeRefundHash);
+			setTimeout(() => {
+				progressModalActions.hide();
+			}, 2000);
 
-				if (!swapOp || !feeOp || !swapRefundOp || !feeRefundOp) {
-					throw new Error('One or more operations not found');
-				}
+		} catch (err) {
+			// 14) On error: abort any created refund operations
+			console.warn('❌ Swap failed with error:', err);
+			
+			const currentSteps = $progressModalStore.steps;
+			const currentStepIndex = currentSteps.findIndex(step => step.status === 'loading');
+			if (currentStepIndex !== -1) {
+				progressModalActions.updateStep(currentSteps[currentStepIndex].id, 'error');
+			}
 
-				// 7) Build the witness input object for proof
-				const executeInput = {
-					// Deposit data
-					root_1: `0x${swapProofData.root.toString(16)}`,
-					secret_1: `0x${BigInt(swapOp.secret).toString(16)}`,
-					nullifier_1: `0x${BigInt(swapOp.nullifier).toString(16)}`,
-					commitment_amount_1: `0x${BigInt(swapOp.amount).toString(16)}`,
-					token_address_1: swapOp.tokenAddress,
-					hashpath_1: swapProofData.path[0].map((e) => `0x${e.toString(16)}`),
-					index_1: `0x${BigInt(swapProofData.index).toString(16)}`,
-					amount: `0x${userSwapAmountWei.toString(16)}`,
-					// Fee deposit data
-					root_2: `0x${feeProofData.root.toString(16)}`,
-					secret_2: `0x${BigInt(feeOp.secret).toString(16)}`,
-					nullifier_2: `0x${BigInt(feeOp.nullifier).toString(16)}`,
-					commitment_amount_2: `0x${BigInt(feeOp.amount).toString(16)}`,
-					token_address_2: feeOp.tokenAddress,
-					hashpath_2: feeProofData.path[0].map((e) => `0x${e.toString(16)}`),
-					index_2: `0x${BigInt(feeProofData.index).toString(16)}`,
-					gas_fee: `0x${feeWei.toString(16)}`,
-					// Refund for swap deposit
-					refund_secret_1: `0x${BigInt(swapRefundOp.secret).toString(16)}`,
-					refund_nullifier_1: `0x${BigInt(swapRefundOp.nullifier).toString(16)}`,
-					refund_amount_1: `0x${swapRefund.toString(16)}`,
-					refund_commitment_hash_1: `0x${swapRefundCommitmentHash.toString(16)}`,
-					// Refund for fee deposit
-					refund_secret_2: `0x${BigInt(feeRefundOp.secret).toString(16)}`,
-					refund_nullifier_2: `0x${BigInt(feeRefundOp.nullifier).toString(16)}`,
-					refund_amount_2: `0x${feeRefund.toString(16)}`,
-					refund_commitment_hash_2: `0x${feeRefundCommitmentHash.toString(16)}`,
-					// recipient
-					_recipient: swapRecipient
-				};
-
-				// 8) Generate the zk proof and prepare it as calldata
-				const honkCalldataHex = await generateHonkCalldata(
-					'/circuits/execute.json',
-					'/circuits/recursive.json',
-					'/circuits/vk_recursive.bin',
-					executeInput
-				);
-
-				// 9) Prepare for the StarkNet transaction
-				const rpc = get(provider);
-				if (!rpc) throw new Error('Missing Provider');
-
-				const account = get(paymasterWallet);
-				if (!account) throw new Error('Missing Account');
-
-				const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
-				if (!privacyAbi) throw new Error('Missing ABI');
-
-				const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
-				privacy.connect(account);
-
-				// 10) Prepare calldata and Starknet call
-				const ekuboResponse = await fetchEkuboQuote(
-					userSwapAmountWei,
-					selectedSwapDeposit.data.tokenAddress,
-					targetToken
-				);
-
-				emptyOpHash = (await generateOperation({})).hash;
-
-				const extensionCalldata = buildSwapCalldata(
-					ekuboResponse,
-					selectedSwapDeposit.data.tokenAddress,
-					BigInt(emptyOpHash)
-				);
-
-				const honkCalldataWithLen = [
-					`0x${BigInt(honkCalldataHex.length).toString(16)}`,
-					...honkCalldataHex
-				];
-
-				const call = {
-					contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
-					entrypoint: 'execute_extension',
-					calldata: [
-						...honkCalldataWithLen,
-						PUBLIC_SWAP_EXTENSION_CONTRACT_ADDRESS,
-						...extensionCalldata
-					]
-				};
-
-				const tx = await account.execute(call);
-
-				const receipt = await rpc.waitForTransaction(tx.transaction_hash);
-
-				// 10) Check receipt status and throw on failure
-				if (receipt.isReverted()) {
-					throw new Error(`Transaction reverted: ${receipt.value}`);
-				} else if (!receipt.isSuccess()) {
-					throw new Error(`Transaction error: ${receipt.value}`);
-				}
-				const swappedDeposits = extractDepositedEventsFromReceipt(
-					receipt,
-					PUBLIC_SWAP_EXTENSION_DEPOSITED_SELECTOR,
-					targetToken
-				);
-				if (swappedDeposits.length === 0) {
-					throw new Error('No Deposited event for token: ' + targetToken);
-				}
-				const { token: depositedTokenHex, amount: depositedAmountBI } = swappedDeposits[0];
-
-				const opRecord = await getFullOperation(emptyOpHash);
-				if (!opRecord) {
-					throw new Error('Could not find operation with hash: ' + emptyOpHash);
-				}
-
-				const normalizedToken = '0x' + BigInt(depositedTokenHex).toString(16).padStart(64, '0');
-
-				const hashBigInt = BigInt(opRecord.hash);
-				const preCommitment = garaga.poseidonHashBN254(hashBigInt, depositedAmountBI);
-				const commitment = garaga.poseidonHashBN254(preCommitment, BigInt(normalizedToken));
-
-				opRecord.data = {
-					tokenAddress: normalizedToken,
-					amount: depositedAmountBI.toString()
-				};
-				opRecord.commitment = commitment.toString();
-
-				await updateOperation(opRecord);
-
-				// 11) nullify operations in the database
-				await nullifyOperation(selectedSwapDeposit.hash);
-				await nullifyOperation(selectedFeeDeposit.hash);
-
-				// 12) Reset component state after successful swap
-				resetAll();
-
-				if ($selectedToken) {
-					loadDeposits(
-						$selectedToken,
-						(d) => (deposits = d),
-						(b) => (isLoading = b)
-					);
-				}
-			},
-			{
-				loading: '⏳ Sending Swap Tx',
-				success: '✅ Swap sent!',
-				error: '❌ Swap failed'
-			},
-			async (err) => {
-				// 13) On error: abort any created refund operations
-				console.warn('❌ Swap failed with error:', err);
-				if (emptyOpHash) {
-					try {
-						await abortOperation(emptyOpHash);
-						console.warn('🧯 Aborted swap result operation:', emptyOpHash);
-					} catch (abortError) {
-						console.error('🚨 Failed to abort swap result:', abortError);
-					}
-				}
-				if (swapRefundHash) {
-					try {
-						await abortOperation(swapRefundHash);
-						console.warn('🧯 Aborted refund operation:', swapRefundHash);
-					} catch (abortError) {
-						console.error('🚨 Failed to abort Swap refund:', abortError);
-					}
-				}
-				if (feeRefundHash) {
-					try {
-						await abortOperation(feeRefundHash);
-						console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
-					} catch (abortError) {
-						console.error('🚨 Failed to abort fee refund:', abortError);
-					}
+			if (emptyOpHash) {
+				try {
+					await abortOperation(emptyOpHash);
+					console.warn('🧯 Aborted swap result operation:', emptyOpHash);
+				} catch (abortError) {
+					console.error('🚨 Failed to abort swap result:', abortError);
 				}
 			}
-		);
+			if (swapRefundHash) {
+				try {
+					await abortOperation(swapRefundHash);
+					console.warn('🧯 Aborted refund operation:', swapRefundHash);
+				} catch (abortError) {
+					console.error('🚨 Failed to abort Swap refund:', abortError);
+				}
+			}
+			if (feeRefundHash) {
+				try {
+					await abortOperation(feeRefundHash);
+					console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
+				} catch (abortError) {
+					console.error('🚨 Failed to abort fee refund:', abortError);
+				}
+			}
+			
+			setTimeout(() => {
+				progressModalActions.hide();
+			}, 3000);
+		}
 
 		isLoading = false;
 	}
@@ -599,4 +624,11 @@
 			</Modal>
 		</Card>
 	</div>
+	
+	<ProgressModal 
+		show={$progressModalStore.show}
+		title={$progressModalStore.title}
+		steps={$progressModalStore.steps}
+		onClose={progressModalActions.hide}
+	/>
 </ProtectedRoute>

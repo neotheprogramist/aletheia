@@ -139,3 +139,42 @@ export const mergeProgressSteps: ProgressStep[] = [
 		status: 'pending'
 	}
 ];
+
+export const swapProgressSteps: ProgressStep[] = [
+	{
+		id: 'preparation',
+		title: 'Preparation',
+		description: 'Preparing swap transaction data',
+		status: 'pending'
+	},
+	{
+		id: 'proof-generation',
+		title: 'Proof Generation',
+		description: 'Generating zero-knowledge proof for swap',
+		status: 'pending'
+	},
+	{
+		id: 'quote-fetching',
+		title: 'Quote Fetching',
+		description: 'Fetching swap quote from Ekubo',
+		status: 'pending'
+	},
+	{
+		id: 'transaction-prepare',
+		title: 'Transaction Prepare',
+		description: 'Preparing swap transaction for execution',
+		status: 'pending'
+	},
+	{
+		id: 'executing-transaction',
+		title: 'Executing Transaction',
+		description: 'Executing swap transaction',
+		status: 'pending'
+	},
+	{
+		id: 'onchain-confirmation',
+		title: 'Onchain Confirmation',
+		description: 'Waiting for blockchain confirmation',
+		status: 'pending'
+	}
+];
