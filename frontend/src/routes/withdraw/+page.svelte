@@ -33,6 +33,9 @@
 	import { browser } from '$app/environment';
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
 	import { autoSelectCompleteProcess, type AutoSelectedFee } from '$lib/utils/autoSelectFeeDeposit';
+	import BalanceCard from '$lib/ui/BalanceCard.svelte';
+	import ProgressStepper from '$lib/ui/ProgressStepper.svelte';
+	import ErrorDisplay from '$lib/ui/ErrorDisplay.svelte';
 
 	const STRK_ADDRESS = supportedTokens[0].address;
 
@@ -58,6 +61,9 @@
 
 	let isLoading = false;
 	let showFeeModal = false;
+	let currentStep = 0;
+	let withdrawError = null;
+	let steps = ['Przygotowanie', 'Generowanie dowodu', 'Wysłanie transakcji'];
 
 	// Confirmation data
 	let withdrawNoteBalanceWei: bigint | null = null;
@@ -135,69 +141,72 @@
 	/** Step 1: Validate */
 	async function initiateWithdraw() {
 		isLoading = true;
-		await wrapWithToast(
-			async () => {
-				if (!selectedWithdrawDeposit || !selectedFeeDeposit || !autoSelectedFeeInfo) {
-					throw new Error('Please select a withdraw deposit first');
-				}
-
-				// — Parse Withdraw note
-				withdrawNote = NoteDataSchema.parse(selectedWithdrawDeposit.data);
-				const { tokenAddress: withdrawTokenAddress, amount: withdrawNoteBalance } = withdrawNote;
-
-				const withdrawDecimals = await fetchTokenDecimals(withdrawTokenAddress);
-				withdrawNoteBalanceWei = BigInt(withdrawNoteBalance);
-				userWithdrawAmountWei = toWei(withdrawAmount, withdrawDecimals);
-
-				if (
-					withdrawNoteBalanceWei <= 0n ||
-					userWithdrawAmountWei <= 0n ||
-					userWithdrawAmountWei > withdrawNoteBalanceWei
-				) {
-					throw new Error('Invalid withdraw amount');
-				}
-
-				// — Parse Fee note (auto-selected)
-				feeNote = NoteDataSchema.parse(selectedFeeDeposit.data);
-				const { tokenAddress: feeTokenAddress, amount: feeNoteBalance } = feeNote;
-
-				const feeNoteDecimals = await fetchTokenDecimals(feeTokenAddress);
-				feeNoteBalanceWei = BigInt(feeNoteBalance);
-				
-				// Use pre-loaded fee info
-				feeWei = autoSelectedFeeInfo.feeInfo.amount;
-				feeWeiHex = autoSelectedFeeInfo.feeInfo.formatted;
-
-				if (feeWei > feeNoteBalanceWei) {
-					throw new Error(
-						`Fee (${feeWeiHex}) exceeds your fee note balance (${fromWei(
-							feeNoteBalanceWei,
-							feeNoteDecimals
-						)})`
-					);
-				}
-
-				showFeeModal = true;
-			},
-			{
-				loading: '⏳ Executing Withdraw',
-				success: '✅ Withdraw ready!',
-				error: '❌ Withdraw failed'
-			},
-			async (err) => {
-				console.warn('❌ Withdraw failed with error:', err);
-				isLoading = false;
+		withdrawError = null;
+		currentStep = 0;
+		
+		try {
+			// Step 1: Przygotowanie
+			currentStep = 0;
+			await new Promise(resolve => setTimeout(resolve, 500));
+			
+			if (!selectedWithdrawDeposit || !selectedFeeDeposit || !autoSelectedFeeInfo) {
+				throw new Error('Please select a withdraw deposit first');
 			}
-		);
+
+			// — Parse Withdraw note
+			withdrawNote = NoteDataSchema.parse(selectedWithdrawDeposit.data);
+			const { tokenAddress: withdrawTokenAddress, amount: withdrawNoteBalance } = withdrawNote;
+
+			const withdrawDecimals = await fetchTokenDecimals(withdrawTokenAddress);
+			withdrawNoteBalanceWei = BigInt(withdrawNoteBalance);
+			userWithdrawAmountWei = toWei(withdrawAmount, withdrawDecimals);
+
+			if (
+				withdrawNoteBalanceWei <= 0n ||
+				userWithdrawAmountWei <= 0n ||
+				userWithdrawAmountWei > withdrawNoteBalanceWei
+			) {
+				throw new Error('Invalid withdraw amount');
+			}
+
+			// — Parse Fee note (auto-selected)
+			feeNote = NoteDataSchema.parse(selectedFeeDeposit.data);
+			const { tokenAddress: feeTokenAddress, amount: feeNoteBalance } = feeNote;
+
+			const feeNoteDecimals = await fetchTokenDecimals(feeTokenAddress);
+			feeNoteBalanceWei = BigInt(feeNoteBalance);
+			
+			// Use pre-loaded fee info
+			feeWei = autoSelectedFeeInfo.feeInfo.amount;
+			feeWeiHex = autoSelectedFeeInfo.feeInfo.formatted;
+
+			if (feeWei > feeNoteBalanceWei) {
+				throw new Error(
+					`Fee (${feeWeiHex}) exceeds your fee note balance (${fromWei(
+						feeNoteBalanceWei,
+						feeNoteDecimals
+					)})`
+				);
+			}
+
+			showFeeModal = true;
+		} catch (err) {
+			console.warn('❌ Withdraw failed with error:', err);
+			withdrawError = err;
+		} finally {
+			isLoading = false;
+		}
 	}
 
 	/** Step 2: Proving & Execution */
 	async function confirmWithdraw() {
 		// 1) Close the modal and start the toast
 		showFeeModal = false;
+		isLoading = true;
+		withdrawError = null;
+		currentStep = 1;
 
-		await wrapWithToast(
-			async () => {
+		try {
 				// 2) Validate that note balances and calculated amounts are present
 				if (!withdrawNoteBalanceWei || !userWithdrawAmountWei) {
 					throw new Error('Cannot calculate refund – missing withdraw amounts');
@@ -297,6 +306,7 @@
 				};
 
 				// 8) Generate the zk proof and prepare it as calldata
+				currentStep = 1; // Generating proof
 				const honkCalldataHex = await generateHonkCalldata(
 					'/circuits/execute.json',
 					'/circuits/recursive.json',
@@ -305,6 +315,7 @@
 				);
 
 				// 9) Prepare for the StarkNet transaction
+				currentStep = 2; // Sending transaction
 				const rpc = get(provider);
 				if (!rpc) throw new Error('Missing Provider');
 
@@ -415,6 +426,13 @@
 				placeholder="Filter deposits by token"
 				class_="mb-4 w-64"
 			/>
+			
+			{#if $selectedToken}
+				<BalanceCard 
+					token={$tokens.find(t => t.address === $selectedToken)}
+					compact={true}
+				/>
+			{/if}
 			{#if !deposits.length}
 				<h2 class="text-center">Please make a deposit first!</h2>
 			{:else}
@@ -450,6 +468,18 @@
 					<p class="text-sm text-red-700">{feePreloadError}</p>
 				</div>
 			{/if}
+			
+			{#if isLoading}
+				<ProgressStepper 
+					{steps}
+					currentStep={currentStep}
+					loading={true}
+					error={!!withdrawError}
+					errorStep={withdrawError ? currentStep : -1}
+				/>
+			{/if}
+			
+			<ErrorDisplay error={withdrawError} showDetails={true} />
 
 			<!-- Selected‐deposit cards -->
 			<SelectedDeposits
