@@ -135,7 +135,7 @@ body {
 main {
 	display: grid;
 	grid-template-rows: auto 1fr;
-	height: 100vh;
+	min-height: 100vh;
 }
 
 .content {
@@ -145,7 +145,7 @@ main {
 	flex-direction: column;
 	padding: 1rem;
 	padding-top: calc(1rem + 4rem);
-	height: calc(100vh - (4rem + 2rem));
+	min-height: calc(100vh - (4rem + 2rem));
 	max-width: 100%;
 	overflow-x: hidden;
 }
