@@ -435,7 +435,7 @@
 				</p>
 			</div>
 
-			<div class="grid lg:grid-cols-3 gap-8">
+			<div class="grid lg:grid-cols-3 gap-6">
 				<!-- Main Withdrawal Form -->
 				<div class="lg:col-span-2 space-y-6">
 					<!-- Token Filter and Deposits Table -->

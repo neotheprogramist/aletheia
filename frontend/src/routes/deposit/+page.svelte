@@ -159,10 +159,10 @@
 				</p>
 			</div>
 
-			<div class="grid gap-8 lg:grid-cols-3">
+			<div class="grid gap-6 lg:grid-cols-3">
 				<!-- Main Deposit Form -->
 				<div class="space-y-6 lg:col-span-2">
-					<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+					<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm w-full">
 						<div class="space-y-6">
 							<!-- Token Selection -->
 							<div class="space-y-3">
@@ -213,6 +213,33 @@
 							/>
 						</div>
 					</Card>
+
+					<!-- Selected Token Summary -->
+					{#if $selectedToken && amount}
+						<Card
+							class_="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20"
+						>
+							<div class="space-y-3">
+								<h3 class="flex items-center gap-2 font-semibold text-blue-800 dark:text-blue-300">
+									<DollarSign class="h-5 w-5" />
+									Deposit Summary
+								</h3>
+								<div class="space-y-2">
+									<div class="flex items-center justify-between">
+										<span class="text-sm text-blue-700 dark:text-blue-300">Token:</span>
+										<span class="font-medium text-blue-800 dark:text-blue-200"
+											>{$tokens.find((t) => t.address === $selectedToken)?.symbol ||
+												'Unknown'}</span
+										>
+									</div>
+									<div class="flex items-center justify-between">
+										<span class="text-sm text-blue-700 dark:text-blue-300">Amount:</span>
+										<span class="font-medium text-blue-800 dark:text-blue-200">{amount}</span>
+									</div>
+								</div>
+							</div>
+						</Card>
+					{/if}
 				</div>
 
 				<!-- Information Panel -->

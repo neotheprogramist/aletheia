@@ -614,7 +614,7 @@
 
 			{#if viewMode === 'recipient'}
 				<!-- Recipient Mode -->
-				<div class="grid lg:grid-cols-3 gap-8">
+				<div class="grid lg:grid-cols-3 gap-6">
 					<!-- Generate Note Section -->
 					<div class="lg:col-span-2 space-y-6">
 						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
@@ -730,7 +730,7 @@
 				</div>
 			{:else}
 				<!-- Sender Mode -->
-				<div class="grid lg:grid-cols-3 gap-8">
+				<div class="grid lg:grid-cols-3 gap-6">
 					<!-- Main Transfer Form -->
 					<div class="lg:col-span-2 space-y-6">
 						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">

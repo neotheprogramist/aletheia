@@ -6,7 +6,7 @@
 </script>
 
 {#if items.some((item) => item.deposit)}
-	<div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+	<div class="mt-6 space-y-4">
 		{#each items as item (item.title)}
 			{#if item.deposit}
 				<Card title={item.title}>
