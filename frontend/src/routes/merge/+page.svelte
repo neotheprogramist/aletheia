@@ -30,6 +30,8 @@
 	import { browser } from '$app/environment';
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
 	import { autoSelectCompleteProcess, type AutoSelectedFee } from '$lib/utils/autoSelectFeeDeposit';
+	import ProgressModal from '$lib/ui/ProgressModal.svelte';
+	import { progressModalStore, progressModalActions, mergeProgressSteps } from '$lib/stores/progressModal';
 
 	const STRK_ADDRESS = supportedTokens[0].address;
 
@@ -215,217 +217,238 @@
 
 	/** Step 2: Proving & Execution */
 	async function confirmMerge() {
-		// 1) Close the modal and start the toast
+		// 1) Close the modal and start progress
 		showFeeModal = false;
-		await wrapWithToast(
-			async () => {
-				// 2) Validate that note balances and calculated amounts are present
-				if (!merge1NoteBalanceWei || !merge2NoteBalanceWei) {
-					throw new Error('Cannot calculate refund – missing deposits amounts');
-				}
+		progressModalActions.show('Merge Progress', [...mergeProgressSteps]);
 
-				if (!feeNoteBalanceWei || !feeWei) {
-					throw new Error('Cannot calculate refund – missing fee amounts');
-				}
-
-				// 3) Ensure zk library and merkle tree are initialized
-				const { garaga } = get(zkLibraries);
-				if (!garaga) throw new Error('Garaga not initialized');
-				if (
-					!feeNote ||
-					!selectedFeeDeposit ||
-					!selectedMerge1Deposit ||
-					!selectedMerge2Deposit ||
-					!mergeNote1 ||
-					!mergeNote2
-				) {
-					throw new Error('Missing fee or merge deposits');
-				}
-				const tree = merkleTree;
-				if (!tree) throw new Error('Merkle tree does not exist');
-
-				// 4) Compute commitments for the merge and fee deposits
-				// And get the data for proving
-				const merge1ProofData = tree.getProofData(
-					garaga.poseidonHashBN254(
-						garaga.poseidonHashBN254(BigInt(selectedMerge1Deposit.hash), merge1NoteBalanceWei),
-						BigInt(mergeNote1.tokenAddress)
-					)
-				);
-
-				const merge2ProofData = tree.getProofData(
-					garaga.poseidonHashBN254(
-						garaga.poseidonHashBN254(BigInt(selectedMerge2Deposit.hash), merge2NoteBalanceWei),
-						BigInt(mergeNote2.tokenAddress)
-					)
-				);
-
-				const feeProofData = tree.getProofData(
-					garaga.poseidonHashBN254(
-						garaga.poseidonHashBN254(BigInt(selectedFeeDeposit.hash), feeNoteBalanceWei),
-						BigInt(feeNote.tokenAddress)
-					)
-				);
-
-				// 5) Generate fee refund operation commitment hashe
-				const mergeRefund = merge1NoteBalanceWei + merge2NoteBalanceWei;
-				const mergeOpResult = await generateOperation({
-					data: { tokenAddress: mergeNote1.tokenAddress, amount: mergeRefund }
-				});
-				mergeRefundHash = mergeOpResult.hash;
-				const mergeRefundCommitmentHash = garaga.poseidonHashBN254(
-					garaga.poseidonHashBN254(BigInt(mergeRefundHash), mergeRefund),
-					BigInt(mergeNote1.tokenAddress)
-				);
-
-				const feeRefund = feeNoteBalanceWei - feeWei;
-				const feeOpResult = await generateOperation({
-					data: { tokenAddress: feeNote.tokenAddress, amount: feeRefund }
-				});
-				feeRefundHash = feeOpResult.hash;
-
-				const feeRefundCommitmentHash = garaga.poseidonHashBN254(
-					garaga.poseidonHashBN254(BigInt(feeRefundHash), feeRefund),
-					BigInt(feeNote.tokenAddress)
-				);
-
-				// 6) Fetch details for all operations from the database
-				const merge1Op = await getOperationDetails(selectedMerge1Deposit.hash);
-				const merge2Op = await getOperationDetails(selectedMerge2Deposit.hash);
-				const feeOp = await getOperationDetails(selectedFeeDeposit.hash);
-				const mergeRefundOp = await getOperationDetails(mergeRefundHash);
-				const feeRefundOp = await getOperationDetails(feeRefundHash);
-
-				if (!merge1Op || !merge2Op || !feeOp || !mergeRefundOp || !feeRefundOp) {
-					throw new Error('One or more operations not found');
-				}
-
-				// 7) Build the witness input object for proof
-				const mergeInput = {
-					// First deposit
-					secret_1: `0x${BigInt(merge1Op.secret).toString(16)}`,
-					nullifier_1: `0x${BigInt(merge1Op.nullifier).toString(16)}`,
-					commitment_amount_1: `0x${BigInt(merge1Op.amount).toString(16)}`,
-					token_address_1: merge1Op.tokenAddress,
-					hashpath_1: merge1ProofData.path[0].map((e) => `0x${e.toString(16)}`),
-					index_1: `0x${BigInt(merge1ProofData.index).toString(16)}`,
-					root_1: `0x${merge1ProofData.root.toString(16)}`,
-					// Second deposit
-					secret_2: `0x${BigInt(merge2Op.secret).toString(16)}`,
-					nullifier_2: `0x${BigInt(merge2Op.nullifier).toString(16)}`,
-					commitment_amount_2: `0x${BigInt(merge2Op.amount).toString(16)}`,
-					token_address_2: merge2Op.tokenAddress,
-					hashpath_2: merge2ProofData.path[0].map((e) => `0x${e.toString(16)}`),
-					index_2: `0x${BigInt(merge2ProofData.index).toString(16)}`,
-					root_2: `0x${merge2ProofData.root.toString(16)}`,
-					// Fee deposit
-					secret_3: `0x${BigInt(feeOp.secret).toString(16)}`,
-					nullifier_3: `0x${BigInt(feeOp.nullifier).toString(16)}`,
-					commitment_amount_3: `0x${BigInt(feeOp.amount).toString(16)}`,
-					token_address_3: feeOp.tokenAddress,
-					hashpath_3: feeProofData.path[0].map((e) => `0x${e.toString(16)}`),
-					index_3: `0x${BigInt(feeProofData.index).toString(16)}`,
-					root_3: `0x${feeProofData.root.toString(16)}`,
-					gas_fee: `0x${feeWei.toString(16)}`,
-					// Refund fee deposit
-					refund_secret_1: `0x${BigInt(feeRefundOp.secret).toString(16)}`,
-					refund_nullifier_1: `0x${BigInt(feeRefundOp.nullifier).toString(16)}`,
-					refund_amount_1: `0x${feeRefund.toString(16)}`,
-					refund_commitment_hash_1: `0x${feeRefundCommitmentHash.toString(16)}`,
-					// Refund for merge deposits
-					refund_secret_2: `0x${BigInt(mergeRefundOp.secret).toString(16)}`,
-					refund_nullifier_2: `0x${BigInt(mergeRefundOp.nullifier).toString(16)}`,
-					refund_amount_2: `0x${mergeRefund.toString(16)}`,
-					refund_commitment_hash_2: `0x${mergeRefundCommitmentHash.toString(16)}`
-				};
-
-				// 8) Generate the zk proof and prepare it as calldata
-				const honkCalldataHex = await generateHonkCalldata(
-					'/circuits/merge.json',
-					'/circuits/recursive.json',
-					'/circuits/vk_recursive.bin',
-					mergeInput
-				);
-				// 9) Prepare for the StarkNet transaction
-				const rpc = get(provider);
-				if (!rpc) throw new Error('Missing Provider');
-
-				const account = get(paymasterWallet);
-				if (!account) throw new Error('Missing Account');
-
-				const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
-				if (!privacyAbi) throw new Error('Missing ABI');
-
-				const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
-				privacy.connect(account);
-
-				// 10) Prepare Starknet call
-
-				const honkCalldataWithLen = [
-					`0x${BigInt(honkCalldataHex.length).toString(16)}`,
-					...honkCalldataHex
-				];
-				const call = {
-					contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
-					entrypoint: 'merge',
-					calldata: honkCalldataWithLen
-				};
-
-				const tx = await account.execute(call);
-				const receipt = await rpc.waitForTransaction(tx.transaction_hash);
-				// 10) Check receipt status and throw on failure
-				if (receipt.isReverted()) {
-					throw new Error(`Transaction reverted: ${receipt.value}`);
-				} else if (!receipt.isSuccess()) {
-					throw new Error(`Transaction error: ${receipt.value}`);
-				}
-
-				// 11) Confirm and nullify operations in the database
-				await nullifyOperation(selectedMerge1Deposit.hash);
-				await nullifyOperation(selectedMerge2Deposit.hash);
-				await nullifyOperation(selectedFeeDeposit.hash);
-
-				// 12) Reset component state after successful withdrawal
-				resetAll();
-
-				if ($selectedToken) {
-					loadDeposits(
-						$selectedToken,
-						(d) => (deposits = d),
-						(b) => (isLoading = b)
-					);
-				}
-			},
-			{
-				loading: '⏳ Sending Merge Tx',
-				success: '✅ Merge sent!',
-				error: '❌ Merge failed'
-			},
-			async (err) => {
-				// 13) On error: abort any created refund operations
-				console.warn('❌ Merge failed with error:', err);
-
-				if (mergeRefundHash) {
-					try {
-						await abortOperation(mergeRefundHash);
-						console.warn('🧯 Aborted merge refund operation:', mergeRefundHash);
-					} catch (abortError) {
-						console.error('🚨 Failed to abort merge refund:', abortError);
-					}
-				}
-
-				if (feeRefundHash) {
-					try {
-						await abortOperation(feeRefundHash);
-						console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
-					} catch (abortError) {
-						console.error('🚨 Failed to abort fee refund:', abortError);
-					}
-				}
-
-				isLoading = false;
+		try {
+			// 2) Validate that note balances and calculated amounts are present
+			progressModalActions.updateStep('preparation', 'loading');
+			if (!merge1NoteBalanceWei || !merge2NoteBalanceWei) {
+				throw new Error('Cannot calculate refund – missing deposits amounts');
 			}
-		);
+
+			if (!feeNoteBalanceWei || !feeWei) {
+				throw new Error('Cannot calculate refund – missing fee amounts');
+			}
+
+			// 3) Ensure zk library and merkle tree are initialized
+			const { garaga } = get(zkLibraries);
+			if (!garaga) throw new Error('Garaga not initialized');
+			if (
+				!feeNote ||
+				!selectedFeeDeposit ||
+				!selectedMerge1Deposit ||
+				!selectedMerge2Deposit ||
+				!mergeNote1 ||
+				!mergeNote2
+			) {
+				throw new Error('Missing fee or merge deposits');
+			}
+			const tree = merkleTree;
+			if (!tree) throw new Error('Merkle tree does not exist');
+
+			// 4) Compute commitments for the merge and fee deposits
+			// And get the data for proving
+			const merge1ProofData = tree.getProofData(
+				garaga.poseidonHashBN254(
+					garaga.poseidonHashBN254(BigInt(selectedMerge1Deposit.hash), merge1NoteBalanceWei),
+					BigInt(mergeNote1.tokenAddress)
+				)
+			);
+
+			const merge2ProofData = tree.getProofData(
+				garaga.poseidonHashBN254(
+					garaga.poseidonHashBN254(BigInt(selectedMerge2Deposit.hash), merge2NoteBalanceWei),
+					BigInt(mergeNote2.tokenAddress)
+				)
+			);
+
+			const feeProofData = tree.getProofData(
+				garaga.poseidonHashBN254(
+					garaga.poseidonHashBN254(BigInt(selectedFeeDeposit.hash), feeNoteBalanceWei),
+					BigInt(feeNote.tokenAddress)
+				)
+			);
+
+			// 5) Generate fee refund operation commitment hashe
+			const mergeRefund = merge1NoteBalanceWei + merge2NoteBalanceWei;
+			const mergeOpResult = await generateOperation({
+				data: { tokenAddress: mergeNote1.tokenAddress, amount: mergeRefund }
+			});
+			mergeRefundHash = mergeOpResult.hash;
+			const mergeRefundCommitmentHash = garaga.poseidonHashBN254(
+				garaga.poseidonHashBN254(BigInt(mergeRefundHash), mergeRefund),
+				BigInt(mergeNote1.tokenAddress)
+			);
+
+			const feeRefund = feeNoteBalanceWei - feeWei;
+			const feeOpResult = await generateOperation({
+				data: { tokenAddress: feeNote.tokenAddress, amount: feeRefund }
+			});
+			feeRefundHash = feeOpResult.hash;
+
+			const feeRefundCommitmentHash = garaga.poseidonHashBN254(
+				garaga.poseidonHashBN254(BigInt(feeRefundHash), feeRefund),
+				BigInt(feeNote.tokenAddress)
+			);
+
+			// 6) Fetch details for all operations from the database
+			const merge1Op = await getOperationDetails(selectedMerge1Deposit.hash);
+			const merge2Op = await getOperationDetails(selectedMerge2Deposit.hash);
+			const feeOp = await getOperationDetails(selectedFeeDeposit.hash);
+			const mergeRefundOp = await getOperationDetails(mergeRefundHash);
+			const feeRefundOp = await getOperationDetails(feeRefundHash);
+
+			if (!merge1Op || !merge2Op || !feeOp || !mergeRefundOp || !feeRefundOp) {
+				throw new Error('One or more operations not found');
+			}
+
+			// 7) Build the witness input object for proof
+			const mergeInput = {
+				// First deposit
+				secret_1: `0x${BigInt(merge1Op.secret).toString(16)}`,
+				nullifier_1: `0x${BigInt(merge1Op.nullifier).toString(16)}`,
+				commitment_amount_1: `0x${BigInt(merge1Op.amount).toString(16)}`,
+				token_address_1: merge1Op.tokenAddress,
+				hashpath_1: merge1ProofData.path[0].map((e) => `0x${e.toString(16)}`),
+				index_1: `0x${BigInt(merge1ProofData.index).toString(16)}`,
+				root_1: `0x${merge1ProofData.root.toString(16)}`,
+				// Second deposit
+				secret_2: `0x${BigInt(merge2Op.secret).toString(16)}`,
+				nullifier_2: `0x${BigInt(merge2Op.nullifier).toString(16)}`,
+				commitment_amount_2: `0x${BigInt(merge2Op.amount).toString(16)}`,
+				token_address_2: merge2Op.tokenAddress,
+				hashpath_2: merge2ProofData.path[0].map((e) => `0x${e.toString(16)}`),
+				index_2: `0x${BigInt(merge2ProofData.index).toString(16)}`,
+				root_2: `0x${merge2ProofData.root.toString(16)}`,
+				// Fee deposit
+				secret_3: `0x${BigInt(feeOp.secret).toString(16)}`,
+				nullifier_3: `0x${BigInt(feeOp.nullifier).toString(16)}`,
+				commitment_amount_3: `0x${BigInt(feeOp.amount).toString(16)}`,
+				token_address_3: feeOp.tokenAddress,
+				hashpath_3: feeProofData.path[0].map((e) => `0x${e.toString(16)}`),
+				index_3: `0x${BigInt(feeProofData.index).toString(16)}`,
+				root_3: `0x${feeProofData.root.toString(16)}`,
+				gas_fee: `0x${feeWei.toString(16)}`,
+				// Refund fee deposit
+				refund_secret_1: `0x${BigInt(feeRefundOp.secret).toString(16)}`,
+				refund_nullifier_1: `0x${BigInt(feeRefundOp.nullifier).toString(16)}`,
+				refund_amount_1: `0x${feeRefund.toString(16)}`,
+				refund_commitment_hash_1: `0x${feeRefundCommitmentHash.toString(16)}`,
+				// Refund for merge deposits
+				refund_secret_2: `0x${BigInt(mergeRefundOp.secret).toString(16)}`,
+				refund_nullifier_2: `0x${BigInt(mergeRefundOp.nullifier).toString(16)}`,
+				refund_amount_2: `0x${mergeRefund.toString(16)}`,
+				refund_commitment_hash_2: `0x${mergeRefundCommitmentHash.toString(16)}`
+			};
+			progressModalActions.updateStep('preparation', 'completed');
+
+			// 8) Generate the zk proof and prepare it as calldata
+			progressModalActions.updateStep('proof-generation', 'loading');
+			const honkCalldataHex = await generateHonkCalldata(
+				'/circuits/merge.json',
+				'/circuits/recursive.json',
+				'/circuits/vk_recursive.bin',
+				mergeInput
+			);
+			progressModalActions.updateStep('proof-generation', 'completed');
+
+			// 9) Prepare for the StarkNet transaction
+			progressModalActions.updateStep('transaction-prepare', 'loading');
+			const rpc = get(provider);
+			if (!rpc) throw new Error('Missing Provider');
+
+			const account = get(paymasterWallet);
+			if (!account) throw new Error('Missing Account');
+
+			const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
+			if (!privacyAbi) throw new Error('Missing ABI');
+
+			const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
+			privacy.connect(account);
+
+			// 10) Prepare Starknet call
+			const honkCalldataWithLen = [
+				`0x${BigInt(honkCalldataHex.length).toString(16)}`,
+				...honkCalldataHex
+			];
+			const call = {
+				contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				entrypoint: 'merge',
+				calldata: honkCalldataWithLen
+			};
+			progressModalActions.updateStep('transaction-prepare', 'completed');
+
+			progressModalActions.updateStep('executing-transaction', 'loading');
+			const tx = await account.execute(call);
+			progressModalActions.updateStep('executing-transaction', 'completed');
+
+			progressModalActions.updateStep('onchain-confirmation', 'loading');
+			const receipt = await rpc.waitForTransaction(tx.transaction_hash);
+
+			// 10) Check receipt status and throw on failure
+			if (receipt.isReverted()) {
+				throw new Error(`Transaction reverted: ${receipt.value}`);
+			} else if (!receipt.isSuccess()) {
+				throw new Error(`Transaction error: ${receipt.value}`);
+			}
+
+			progressModalActions.updateStep('onchain-confirmation', 'completed');
+
+			// 11) Confirm and nullify operations in the database
+			await nullifyOperation(selectedMerge1Deposit.hash);
+			await nullifyOperation(selectedMerge2Deposit.hash);
+			await nullifyOperation(selectedFeeDeposit.hash);
+
+			// 12) Reset component state after successful merge
+			resetAll();
+
+			if ($selectedToken) {
+				loadDeposits(
+					$selectedToken,
+					(d) => (deposits = d),
+					(b) => (isLoading = b)
+				);
+			}
+
+			setTimeout(() => {
+				progressModalActions.hide();
+			}, 2000);
+
+		} catch (err) {
+			// 13) On error: abort any created refund operations
+			console.warn('❌ Merge failed with error:', err);
+			
+			const currentSteps = $progressModalStore.steps;
+			const currentStepIndex = currentSteps.findIndex(step => step.status === 'loading');
+			if (currentStepIndex !== -1) {
+				progressModalActions.updateStep(currentSteps[currentStepIndex].id, 'error');
+			}
+
+			if (mergeRefundHash) {
+				try {
+					await abortOperation(mergeRefundHash);
+					console.warn('🧯 Aborted merge refund operation:', mergeRefundHash);
+				} catch (abortError) {
+					console.error('🚨 Failed to abort merge refund:', abortError);
+				}
+			}
+
+			if (feeRefundHash) {
+				try {
+					await abortOperation(feeRefundHash);
+					console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
+				} catch (abortError) {
+					console.error('🚨 Failed to abort fee refund:', abortError);
+				}
+			}
+			
+			setTimeout(() => {
+				progressModalActions.hide();
+			}, 3000);
+		}
+
 		isLoading = false;
 	}
 </script>
@@ -547,4 +570,11 @@
 			</Modal>
 		</Card>
 	</div>
+	
+	<ProgressModal 
+		show={$progressModalStore.show}
+		title={$progressModalStore.title}
+		steps={$progressModalStore.steps}
+		onClose={progressModalActions.hide}
+	/>
 </ProtectedRoute>

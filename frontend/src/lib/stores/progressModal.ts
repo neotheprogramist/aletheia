@@ -106,3 +106,36 @@ export const withdrawProgressSteps: ProgressStep[] = [
 		status: 'pending'
 	}
 ];
+
+export const mergeProgressSteps: ProgressStep[] = [
+	{
+		id: 'preparation',
+		title: 'Preparation',
+		description: 'Preparing merge transaction data',
+		status: 'pending'
+	},
+	{
+		id: 'proof-generation',
+		title: 'Proof Generation',
+		description: 'Generating zero-knowledge proof for merge',
+		status: 'pending'
+	},
+	{
+		id: 'transaction-prepare',
+		title: 'Transaction Prepare',
+		description: 'Preparing merge transaction for execution',
+		status: 'pending'
+	},
+	{
+		id: 'executing-transaction',
+		title: 'Executing Transaction',
+		description: 'Executing merge transaction',
+		status: 'pending'
+	},
+	{
+		id: 'onchain-confirmation',
+		title: 'Onchain Confirmation',
+		description: 'Waiting for blockchain confirmation',
+		status: 'pending'
+	}
+];
