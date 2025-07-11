@@ -15,14 +15,12 @@
 	import Button from '$lib/ui/Button.svelte';
 	import Card from '$lib/ui/Card.svelte';
 	import Input from '$lib/ui/Input.svelte';
-	import Instructions, { type TransferMode } from '$lib/ui/Instructions.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
 	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
 	import SelectionToggle from '$lib/ui/SelectionToggle.svelte';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
-	import { fetchTransferFee } from '$lib/utils/fetchFeeForExtension';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
 	import {
 		loadDeposits,
@@ -37,17 +35,14 @@
 	import { Contract } from 'starknet';
 	import type { Component } from 'svelte';
 	import { get } from 'svelte/store';
-	import { supportedTokens } from '$lib/config/tokens';
 	import { browser } from '$app/environment';
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
 	import { autoSelectCompleteProcess, type AutoSelectedFee } from '$lib/utils/autoSelectFeeDeposit';
 
-	const STRK_ADDRESS = supportedTokens[0].address;
 
 	// --- VIEW & TRANSFER STATE ---
 	let viewMode: 'sender' | 'recipient' = 'sender';
 	let deposits: DisplayOperation[] = [];
-	let selectionMode: TransferMode = 'transfer';
 
 	let selectedTransferKey: number | null = null;
 	let selectedTransferDeposit: DisplayOperation | null = null;
@@ -102,19 +97,14 @@
 	}
 
 	function handleRowClick(globalIdx: number) {
-		if (selectionMode === 'transfer') {
-			selectedTransferKey = deposits[globalIdx].index;
-			selectedTransferDeposit = deposits.find((d) => d.index === selectedTransferKey) ?? null;
-			transferSecretAndNullifierHash = '';
-			transferAmount = '';
+		selectedTransferKey = deposits[globalIdx].index;
+		selectedTransferDeposit = deposits.find((d) => d.index === selectedTransferKey) ?? null;
+		transferSecretAndNullifierHash = '';
+		transferAmount = '';
 
-			// Auto-select fee deposit when transfer deposit is selected
-			if (selectedTransferDeposit) {
-				autoSelectFeeDeposit();
-			}
-		} else {
-			selectedFeeKey = deposits[globalIdx].index;
-			selectedFeeDeposit = deposits.find((d) => d.index === selectedFeeKey) ?? null;
+		// Auto-select fee deposit when transfer deposit is selected
+		if (selectedTransferDeposit) {
+			autoSelectFeeDeposit();
 		}
 	}
 
@@ -164,12 +154,6 @@
 		}
 	}
 
-	function handleSelectionChange(value: string) {
-		selectionMode = value as TransferMode;
-		if (value === 'fee') {
-			selectedToken.set(STRK_ADDRESS);
-		}
-	}
 
 	/** Step 1: Validate user inputs for transfer */
 	async function initiateTransfer() {
@@ -603,23 +587,16 @@
 					</form>
 				</div>
 			{:else}
-				<SelectionToggle
-					options={[
-						{ label: 'Transfer', value: 'transfer', isFirst: true },
-						{ label: 'Fee', value: 'fee', isLast: true }
-					]}
-					selected={selectionMode}
-					onChange={handleSelectionChange}
-					onReset={resetAll}
-				/>
-				<Instructions action="transfer" mode={selectionMode} />
+				<h2 class="text-2xl font-bold mb-4">Transfer</h2>
+				<p class="text-gray-600 mb-6">
+					Select a deposit to transfer from. Fee deposit will be automatically selected.
+				</p>
 
 				<TokenSelect
 					tokens={$tokens}
 					bind:value={$selectedToken}
 					placeholder="Filter deposits by token"
 					class_="mb-4 w-64"
-					disabled={selectionMode === 'fee'}
 				/>
 				{#if !deposits.length}
 					<h2 class="text-center">Please make a deposit first!</h2>
@@ -630,24 +607,40 @@
 						pageSize={5}
 						keyField="index"
 						onRowClick={handleRowClick}
-						activeKey={selectionMode === 'transfer' ? selectedTransferKey : selectedFeeKey}
-						inactiveKeys={selectionMode === 'transfer' && selectedFeeKey !== null
-							? [selectedFeeKey]
-							: selectionMode === 'fee' && selectedTransferKey !== null
-								? [selectedTransferKey]
-								: []}
+						activeKey={selectedTransferKey}
+						inactiveKeys={selectedFeeKey !== null ? [selectedFeeKey] : []}
 						hoverClass="hover:bg-green-600"
 					/>
+				{/if}
+
+				<!-- Auto-selected fee information -->
+				{#if autoSelectedFeeInfo}
+					<div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+						<h3 class="font-semibold text-blue-800 mb-2">Fee Information</h3>
+						<p class="text-sm text-blue-700">
+							Fee: <strong>{autoSelectedFeeInfo.feeInfo.formatted} STRK</strong>
+							{#if autoSelectedFeeInfo.feeDeposit}
+								• Auto-selected fee deposit: <strong>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong>
+							{/if}
+						</p>
+					</div>
+				{/if}
+
+				<!-- Error message -->
+				{#if feePreloadError}
+					<div class="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
+						<p class="text-sm text-red-700">{feePreloadError}</p>
+					</div>
 				{/if}
 
 				<SelectedDeposits
 					items={[
 						{ title: 'Transfer Deposit', deposit: selectedTransferDeposit },
-						{ title: 'Fee Deposit', deposit: selectedFeeDeposit }
+						{ title: 'Fee Deposit (Auto-selected)', deposit: selectedFeeDeposit }
 					]}
 				/>
 
-				{#if selectedTransferDeposit && selectedFeeDeposit}
+				{#if selectedTransferDeposit && selectedFeeDeposit && !feePreloadError}
 					<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
 						<Card>
 							<form on:submit|preventDefault={initiateTransfer} class="mt-6 flex flex-col gap-4">
