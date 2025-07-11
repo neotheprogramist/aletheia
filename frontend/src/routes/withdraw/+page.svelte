@@ -485,12 +485,25 @@
 								placeholder="Recipient Address"
 								class_="w-full"
 							/>
-							<Input
-								bind:value={withdrawAmount}
-								required
-								placeholder="Amount to Withdraw"
-								class_="w-full"
-							/>
+							<div class="flex gap-2">
+								<Input
+									bind:value={withdrawAmount}
+									required
+									placeholder="Amount to Withdraw"
+									class_="flex-1"
+								/>
+								<button
+									type="button"
+									class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded"
+									on:click={() => {
+										if (selectedWithdrawDeposit) {
+											withdrawAmount = selectedWithdrawDeposit.displayAmount;
+										}
+									}}
+								>
+									Max
+								</button>
+							</div>
 							<Button text="Withdraw" class_="mt-2 w-full" loading={isLoading} type="submit" />
 						</form>
 					</Card>

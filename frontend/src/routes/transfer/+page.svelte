@@ -39,8 +39,11 @@
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
 	import { autoSelectCompleteProcess, type AutoSelectedFee } from '$lib/utils/autoSelectFeeDeposit';
 	import ProgressModal from '$lib/ui/ProgressModal.svelte';
-	import { progressModalStore, progressModalActions, transferProgressSteps } from '$lib/stores/progressModal';
-
+	import {
+		progressModalStore,
+		progressModalActions,
+		transferProgressSteps
+	} from '$lib/stores/progressModal';
 
 	// --- VIEW & TRANSFER STATE ---
 	let viewMode: 'sender' | 'recipient' = 'sender';
@@ -155,7 +158,6 @@
 			autoSelectedFeeInfo = null;
 		}
 	}
-
 
 	/** Step 1: Validate user inputs for transfer */
 	async function initiateTransfer() {
@@ -400,13 +402,12 @@
 			setTimeout(() => {
 				progressModalActions.hide();
 			}, 2000);
-
 		} catch (err) {
 			// On error: abort any created refund operations
 			console.warn('❌ Transfer failed with error:', err);
-			
+
 			const currentSteps = $progressModalStore.steps;
-			const currentStepIndex = currentSteps.findIndex(step => step.status === 'loading');
+			const currentStepIndex = currentSteps.findIndex((step) => step.status === 'loading');
 			if (currentStepIndex !== -1) {
 				progressModalActions.updateStep(currentSteps[currentStepIndex].id, 'error');
 			}
@@ -427,7 +428,7 @@
 					console.error('🚨 Failed to abort fee refund:', abortError);
 				}
 			}
-			
+
 			setTimeout(() => {
 				progressModalActions.hide();
 			}, 3000);
@@ -616,8 +617,8 @@
 					</form>
 				</div>
 			{:else}
-				<h2 class="text-2xl font-bold mb-4">Transfer</h2>
-				<p class="text-gray-600 mb-6">
+				<h2 class="mb-4 text-2xl font-bold">Transfer</h2>
+				<p class="mb-6 text-gray-600">
 					Select a deposit to transfer from. Fee deposit will be automatically selected.
 				</p>
 
@@ -644,12 +645,14 @@
 
 				<!-- Auto-selected fee information -->
 				{#if autoSelectedFeeInfo}
-					<div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-						<h3 class="font-semibold text-blue-800 mb-2">Fee Information</h3>
+					<div class="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
+						<h3 class="mb-2 font-semibold text-blue-800">Fee Information</h3>
 						<p class="text-sm text-blue-700">
 							Fee: <strong>{autoSelectedFeeInfo.feeInfo.formatted} STRK</strong>
 							{#if autoSelectedFeeInfo.feeDeposit}
-								• Auto-selected fee deposit: <strong>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong>
+								• Auto-selected fee deposit: <strong
+									>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong
+								>
 							{/if}
 						</p>
 					</div>
@@ -657,7 +660,7 @@
 
 				<!-- Error message -->
 				{#if feePreloadError}
-					<div class="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
+					<div class="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
 						<p class="text-sm text-red-700">{feePreloadError}</p>
 					</div>
 				{/if}
@@ -679,12 +682,25 @@
 									placeholder="Recipient Hash"
 									class_="w-full"
 								/>
-								<Input
-									bind:value={transferAmount}
-									required
-									placeholder="Amount to Transfer"
-									class_="w-full"
-								/>
+								<div class="flex gap-2">
+									<Input
+										bind:value={transferAmount}
+										required
+										placeholder="Amount to Transfer"
+										class_="flex-1"
+									/>
+									<button
+										type="button"
+										class="rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
+										on:click={() => {
+											if (selectedTransferDeposit) {
+												transferAmount = selectedTransferDeposit.displayAmount;
+											}
+										}}
+									>
+										Max
+									</button>
+								</div>
 								<Button text="Transfer" class_="mt-2 w-full" loading={isLoading} type="submit" />
 							</form>
 						</Card>
@@ -718,8 +734,8 @@
 			</Modal>
 		</Card>
 	</div>
-	
-	<ProgressModal 
+
+	<ProgressModal
 		show={$progressModalStore.show}
 		title={$progressModalStore.title}
 		steps={$progressModalStore.steps}

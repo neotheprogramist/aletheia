@@ -28,7 +28,7 @@
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
 	import { defaultDepositColumns } from '$lib/utils/sharedColumns';
-		import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
+	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
 	import { supportedTokens } from '$lib/config/tokens';
 	import { browser } from '$app/environment';
@@ -40,7 +40,11 @@
 	import { extractDepositedEventsFromReceipt } from '$lib/utils/extractDepositedEventsFromReceipt';
 	import { updateOperation } from '$lib/db/operationsDb';
 	import ProgressModal from '$lib/ui/ProgressModal.svelte';
-	import { progressModalStore, progressModalActions, swapProgressSteps } from '$lib/stores/progressModal';
+	import {
+		progressModalStore,
+		progressModalActions,
+		swapProgressSteps
+	} from '$lib/stores/progressModal';
 
 	const STRK_ADDRESS = supportedTokens[0].address;
 
@@ -108,7 +112,7 @@
 		selectedSwapKey = deposits[globalIdx].index;
 		selectedSwapDeposit = deposits.find((d) => d.index === selectedSwapKey) ?? null;
 		swapAmount = '';
-		
+
 		// Auto-select fee deposit when swap deposit is selected
 		if (selectedSwapDeposit) {
 			autoSelectFeeDeposit();
@@ -127,9 +131,9 @@
 	/** Auto-select fee deposit when swap deposit is chosen */
 	async function autoSelectFeeDeposit() {
 		if (!selectedSwapDeposit) return;
-		
+
 		feePreloadError = null;
-		
+
 		try {
 			// Get fee info and auto-select the best STRK deposit
 			const excludeDeposits = [selectedSwapDeposit];
@@ -139,7 +143,7 @@
 				PUBLIC_SWAP_EXTENSION_CONTRACT_ADDRESS,
 				excludeDeposits
 			);
-			
+
 			// Set the auto-selected fee deposit
 			if (autoSelectedFeeInfo.feeDeposit) {
 				selectedFeeDeposit = autoSelectedFeeInfo.feeDeposit;
@@ -147,7 +151,7 @@
 			} else {
 				selectedFeeDeposit = null;
 				selectedFeeKey = null;
-				
+
 				if (!autoSelectedFeeInfo.hasEnoughBalance) {
 					feePreloadError = `Insufficient STRK balance. Required: ${autoSelectedFeeInfo.feeInfo.formatted} STRK`;
 				} else {
@@ -209,7 +213,7 @@
 
 				const feeNoteDecimals = await fetchTokenDecimals(feeTokenAddress);
 				feeNoteBalanceWei = BigInt(feeNoteBalance);
-				
+
 				// Use pre-loaded fee info
 				feeWei = autoSelectedFeeInfo.feeInfo.amount;
 				feeWeiHex = autoSelectedFeeInfo.feeInfo.formatted;
@@ -464,13 +468,12 @@
 			setTimeout(() => {
 				progressModalActions.hide();
 			}, 2000);
-
 		} catch (err) {
 			// 14) On error: abort any created refund operations
 			console.warn('❌ Swap failed with error:', err);
-			
+
 			const currentSteps = $progressModalStore.steps;
-			const currentStepIndex = currentSteps.findIndex(step => step.status === 'loading');
+			const currentStepIndex = currentSteps.findIndex((step) => step.status === 'loading');
 			if (currentStepIndex !== -1) {
 				progressModalActions.updateStep(currentSteps[currentStepIndex].id, 'error');
 			}
@@ -499,7 +502,7 @@
 					console.error('🚨 Failed to abort fee refund:', abortError);
 				}
 			}
-			
+
 			setTimeout(() => {
 				progressModalActions.hide();
 			}, 3000);
@@ -512,8 +515,8 @@
 <ProtectedRoute>
 	<div class="mx-auto p-6">
 		<Card>
-			<h2 class="text-2xl font-bold mb-4">Swap</h2>
-			<p class="text-gray-600 mb-6">
+			<h2 class="mb-4 text-2xl font-bold">Swap</h2>
+			<p class="mb-6 text-gray-600">
 				Select a deposit to swap from. Fee deposit will be automatically selected.
 			</p>
 
@@ -542,12 +545,14 @@
 
 			<!-- Auto-selected fee information -->
 			{#if autoSelectedFeeInfo}
-				<div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-					<h3 class="font-semibold text-blue-800 mb-2">Fee Information</h3>
+				<div class="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
+					<h3 class="mb-2 font-semibold text-blue-800">Fee Information</h3>
 					<p class="text-sm text-blue-700">
 						Fee: <strong>{autoSelectedFeeInfo.feeInfo.formatted} STRK</strong>
 						{#if autoSelectedFeeInfo.feeDeposit}
-							• Auto-selected fee deposit: <strong>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong>
+							• Auto-selected fee deposit: <strong
+								>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong
+							>
 						{/if}
 					</p>
 				</div>
@@ -555,7 +560,7 @@
 
 			<!-- Error message -->
 			{#if feePreloadError}
-				<div class="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
+				<div class="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
 					<p class="text-sm text-red-700">{feePreloadError}</p>
 				</div>
 			{/if}
@@ -573,12 +578,26 @@
 				<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
 					<Card>
 						<form on:submit|preventDefault={initiateSwap} class="mt-6 flex flex-col gap-4">
-							<Input
-								bind:value={swapAmount}
-								required
-								placeholder="Amount to Swap"
-								class_="w-full"
-							/>
+							<div class="flex gap-2">
+								<Input
+									bind:value={swapAmount}
+									required
+									placeholder="Amount to Swap"
+									class_="flex-1"
+								/>
+								<button
+									type="button"
+									class="rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
+									on:click={() => {
+										if (selectedFeeDeposit) {
+											swapAmount = selectedFeeDeposit.displayAmount;
+										}
+									}}
+								>
+									Max
+								</button>
+							</div>
+
 							{#if get(tokens).filter((t) => t.address !== selectedSwapDeposit?.data.tokenAddress).length > 0}
 								<TokenSelect
 									tokens={get(tokens).filter(
@@ -624,8 +643,8 @@
 			</Modal>
 		</Card>
 	</div>
-	
-	<ProgressModal 
+
+	<ProgressModal
 		show={$progressModalStore.show}
 		title={$progressModalStore.title}
 		steps={$progressModalStore.steps}
