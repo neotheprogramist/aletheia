@@ -4,13 +4,11 @@
 	import WalletConnector from '$lib/ui/WalletConnector.svelte';
 	import ToggleTheme from './ToggleTheme.svelte';
 	import { isConnected } from '$lib/stores/wallet';
-	import { Download, Upload, ChevronDown, Menu, X } from 'lucide-svelte';
+	import { Download, Upload, Menu, X } from 'lucide-svelte';
 	import { exportOperations, importOperations } from '$lib/utils/operationsBackup';
 	import { toastStore } from '$lib/stores/toast';
 
 	let fileInput: HTMLInputElement;
-	let dropdownRef: HTMLElement | null = null;
-	let showVesuDropdown = false;
 	let showMobileMenu = false;
 
 	function toggleMobileMenu() {
@@ -88,34 +86,7 @@
 		reader.readAsText(file);
 	}
 
-	function toggleDropdown() {
-		showVesuDropdown = !showVesuDropdown;
-	}
 
-	function closeDropdown() {
-		showVesuDropdown = false;
-	}
-
-	function onClickOutside(node: HTMLElement, handler: () => void) {
-		const handleClick = (event: MouseEvent) => {
-			if (!node.contains(event.target as Node)) handler();
-		};
-		document.addEventListener('click', handleClick);
-		return {
-			destroy() {
-				document.removeEventListener('click', handleClick);
-			}
-		};
-	}
-
-	let destroyClickOutside: { destroy: () => void } | null = null;
-
-	$: if (dropdownRef) {
-		// Clean up previous listener
-		destroyClickOutside?.destroy?.();
-		// Attach new one
-		destroyClickOutside = onClickOutside(dropdownRef, closeDropdown);
-	}
 </script>
 
 <nav class="border-border bg-background fixed inset-x-0 top-0 z-10 border-b backdrop-blur-sm">
@@ -157,26 +128,6 @@
 						class="{page.url.pathname === '/swap' ? 'text-primary font-semibold border-b-2 border-primary' : 'text-text-secondary hover:text-primary'} transition-colors duration-200 py-2"
 						>Swap</a
 					>
-
-					<div class="relative" bind:this={dropdownRef}>
-						<button 
-							class="flex items-center gap-1 text-text-secondary hover:text-primary transition-colors duration-200 py-2" 
-							on:click={toggleDropdown}
-						>
-							Vesu <ChevronDown size={16} class="{showVesuDropdown ? 'rotate-180' : ''} transition-transform duration-200" />
-						</button>
-						{#if showVesuDropdown}
-							<div class="absolute right-0 mt-2 w-48 rounded-lg border border-border bg-card shadow-lg">
-								<a
-									href="/vesu/borrow"
-									class="block px-4 py-3 text-sm text-text hover:bg-surface transition-colors duration-200 first:rounded-t-lg last:rounded-b-lg"
-									on:click={closeDropdown}
-								>
-									Borrow
-								</a>
-							</div>
-						{/if}
-					</div>
 
 					<div class="flex items-center gap-2">
 						<button
@@ -256,12 +207,6 @@
 						class="{page.url.pathname === '/swap' ? 'bg-primary text-white' : 'text-text hover:bg-surface'} block px-3 py-2 rounded-lg text-base font-medium transition-colors duration-200"
 						on:click={closeMobileMenu}
 						>Swap</a
-					>
-					<a
-						href="/vesu/borrow"
-						class="{page.url.pathname === '/vesu/borrow' ? 'bg-primary text-white' : 'text-text hover:bg-surface'} block px-3 py-2 rounded-lg text-base font-medium transition-colors duration-200"
-						on:click={closeMobileMenu}
-						>Vesu Borrow</a
 					>
 					
 					<div class="border-t border-border pt-3 mt-3">

@@ -47,10 +47,10 @@
 				<p class="text-blue-700 dark:text-blue-300 mb-4">
 					Connect your wallet to start using Privacy Pools
 				</p>
-				<Button text="Show Guide" onClick={showOnboardingAgain} variant="outline" />
+				<Button text="Show Tutorial" onClick={showOnboardingAgain} variant="outline" />
 			</div>
 		{:else}
-			<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+			<div class="grid md:grid-cols-2 lg:grid-cols-2 gap-6 mb-8">
 				<div class="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-shadow">
 					<div class="text-3xl mb-3">💰</div>
 					<h3 class="font-semibold text-lg mb-2 flex items-center gap-2">
@@ -105,28 +105,8 @@
 						Exchange tokens while maintaining privacy
 					</p>
 				</div>
-				
-				<div class="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-shadow">
-					<div class="text-3xl mb-3">🏦</div>
-					<h3 class="font-semibold text-lg mb-2 flex items-center gap-2">
-						Borrow
-						<HelpIcon text="Use deposits as collateral for borrowing through Vesu" />
-					</h3>
-					<p class="text-text-secondary text-sm">
-						Use your deposits as collateral for DeFi lending
-					</p>
-				</div>
 			</div>
 		{/if}
-		
-		<div class="text-center">
-			<Button 
-				text="Show Tutorial" 
-				onClick={showOnboardingAgain} 
-				variant="outline"
-				size="sm"
-			/>
-		</div>
 	</div>
 </div>
 

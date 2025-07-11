@@ -4,14 +4,13 @@
 	export type SwapMode = 'swap' | 'fee';
 	export type TransferMode = 'transfer' | 'fee';
 	export type MergeMode = 'merge1' | 'merge2' | 'fee';
-	export type BorrowMode = 'collateral' | 'fee' | 'debt' | 'debtFee';
-	export type ActionType = 'withdraw' | 'swap' | 'transfer' | 'merge' | 'borrow';
+	export type ActionType = 'withdraw' | 'swap' | 'transfer' | 'merge';
 </script>
 
 <script lang="ts">
 	// Props: rodzaj akcji i aktualny tryb
 	export let action: ActionType = 'withdraw';
-	export let mode: WithdrawMode | SwapMode | TransferMode | MergeMode | BorrowMode = 'fee';
+	export let mode: WithdrawMode | SwapMode | TransferMode | MergeMode = 'fee';
 </script>
 
 <p class="mb-4 font-medium">
@@ -40,16 +39,6 @@
 			Select the <strong>second</strong> deposit to <strong>merge</strong>:
 		{:else}
 			Select a deposit to pay <strong>fee</strong>:
-		{/if}
-	{:else if action === 'borrow'}
-		{#if mode === 'collateral'}
-			Select a deposit for <strong>collateral</strong>:
-		{:else if mode === 'fee'}
-			Select a deposit to pay <strong>collateral fee</strong>:
-		{:else if mode === 'debt'}
-			Select a deposit for <strong>debt</strong>:
-		{:else}
-			Select a deposit to pay <strong>debt fee</strong>:
 		{/if}
 	{/if}
 </p>

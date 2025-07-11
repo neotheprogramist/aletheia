@@ -12,7 +12,7 @@
 	const steps = [
 		{
 			title: "Welcome to Privacy Pools!",
-			description: "A decentralized privacy protocol that lets you deposit, withdraw, and transfer tokens while maintaining anonymity.",
+			description: "A decentralized privacy protocol that lets you deposit, withdraw, transfer, and swap tokens while maintaining complete anonymity on StarkNet.",
 			image: "🔒"
 		},
 		{
@@ -22,17 +22,17 @@
 		},
 		{
 			title: "Make a Deposit",
-			description: "Deposit tokens into the privacy pool. This creates a private note that only you can access with your secret.",
+			description: "Deposit tokens into the privacy pool. This creates a private note that only you can access with your secret key.",
 			image: "💰"
 		},
 		{
 			title: "Withdraw Anonymously", 
-			description: "Withdraw to any address without revealing the connection to your deposit. Fees are automatically handled.",
+			description: "Withdraw to any address without revealing the connection to your deposit. Fees are automatically selected from your deposits.",
 			image: "🎭"
 		},
 		{
 			title: "Advanced Features",
-			description: "Use Merge to combine deposits, Transfer to send privately, or Swap for DeFi interactions.",
+			description: "Use Transfer to send tokens privately to others, Merge to combine deposits for better privacy, or Swap to exchange tokens through DeFi protocols.",
 			image: "⚡"
 		}
 	];
