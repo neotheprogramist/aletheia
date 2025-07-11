@@ -3,6 +3,7 @@
 	import Button from '$lib/ui/Button.svelte';
 	import Card from '$lib/ui/Card.svelte';
 	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
+	import ProgressModal from '$lib/ui/ProgressModal.svelte';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
 	import { fromWei, toWei } from '$lib/utils/toWei';
 	import { NoteDataSchema, type NoteData } from '$lib/schemas/schemas';
@@ -33,6 +34,7 @@
 	import { browser } from '$app/environment';
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
 	import { autoSelectCompleteProcess, type AutoSelectedFee } from '$lib/utils/autoSelectFeeDeposit';
+	import { progressModalStore, progressModalActions, withdrawProgressSteps } from '$lib/stores/progressModal';
 
 	const STRK_ADDRESS = supportedTokens[0].address;
 
@@ -135,267 +137,280 @@
 	/** Step 1: Validate */
 	async function initiateWithdraw() {
 		isLoading = true;
-		await wrapWithToast(
-			async () => {
-				if (!selectedWithdrawDeposit || !selectedFeeDeposit || !autoSelectedFeeInfo) {
-					throw new Error('Please select a withdraw deposit first');
-				}
-
-				// — Parse Withdraw note
-				withdrawNote = NoteDataSchema.parse(selectedWithdrawDeposit.data);
-				const { tokenAddress: withdrawTokenAddress, amount: withdrawNoteBalance } = withdrawNote;
-
-				const withdrawDecimals = await fetchTokenDecimals(withdrawTokenAddress);
-				withdrawNoteBalanceWei = BigInt(withdrawNoteBalance);
-				userWithdrawAmountWei = toWei(withdrawAmount, withdrawDecimals);
-
-				if (
-					withdrawNoteBalanceWei <= 0n ||
-					userWithdrawAmountWei <= 0n ||
-					userWithdrawAmountWei > withdrawNoteBalanceWei
-				) {
-					throw new Error('Invalid withdraw amount');
-				}
-
-				// — Parse Fee note (auto-selected)
-				feeNote = NoteDataSchema.parse(selectedFeeDeposit.data);
-				const { tokenAddress: feeTokenAddress, amount: feeNoteBalance } = feeNote;
-
-				const feeNoteDecimals = await fetchTokenDecimals(feeTokenAddress);
-				feeNoteBalanceWei = BigInt(feeNoteBalance);
-				
-				// Use pre-loaded fee info
-				feeWei = autoSelectedFeeInfo.feeInfo.amount;
-				feeWeiHex = autoSelectedFeeInfo.feeInfo.formatted;
-
-				if (feeWei > feeNoteBalanceWei) {
-					throw new Error(
-						`Fee (${feeWeiHex}) exceeds your fee note balance (${fromWei(
-							feeNoteBalanceWei,
-							feeNoteDecimals
-						)})`
-					);
-				}
-
-				showFeeModal = true;
-			},
-			{
-				loading: '⏳ Executing Withdraw',
-				success: '✅ Withdraw ready!',
-				error: '❌ Withdraw failed'
-			},
-			async (err) => {
-				console.warn('❌ Withdraw failed with error:', err);
-				isLoading = false;
+		try {
+			if (!selectedWithdrawDeposit || !selectedFeeDeposit || !autoSelectedFeeInfo) {
+				throw new Error('Please select a withdraw deposit first');
 			}
-		);
+
+			// — Parse Withdraw note
+			withdrawNote = NoteDataSchema.parse(selectedWithdrawDeposit.data);
+			const { tokenAddress: withdrawTokenAddress, amount: withdrawNoteBalance } = withdrawNote;
+
+			const withdrawDecimals = await fetchTokenDecimals(withdrawTokenAddress);
+			withdrawNoteBalanceWei = BigInt(withdrawNoteBalance);
+			userWithdrawAmountWei = toWei(withdrawAmount, withdrawDecimals);
+
+			if (
+				withdrawNoteBalanceWei <= 0n ||
+				userWithdrawAmountWei <= 0n ||
+				userWithdrawAmountWei > withdrawNoteBalanceWei
+			) {
+				throw new Error('Invalid withdraw amount');
+			}
+
+			// — Parse Fee note (auto-selected)
+			feeNote = NoteDataSchema.parse(selectedFeeDeposit.data);
+			const { tokenAddress: feeTokenAddress, amount: feeNoteBalance } = feeNote;
+
+			const feeNoteDecimals = await fetchTokenDecimals(feeTokenAddress);
+			feeNoteBalanceWei = BigInt(feeNoteBalance);
+			
+			// Use pre-loaded fee info
+			feeWei = autoSelectedFeeInfo.feeInfo.amount;
+			feeWeiHex = autoSelectedFeeInfo.feeInfo.formatted;
+
+			if (feeWei > feeNoteBalanceWei) {
+				throw new Error(
+					`Fee (${feeWeiHex}) exceeds your fee note balance (${fromWei(
+						feeNoteBalanceWei,
+						feeNoteDecimals
+					)})`
+				);
+			}
+
+			showFeeModal = true;
+		} catch (err) {
+			console.warn('❌ Withdraw failed with error:', err);
+			isLoading = false;
+		}
 	}
 
 	/** Step 2: Proving & Execution */
 	async function confirmWithdraw() {
-		// 1) Close the modal and start the toast
+		// 1) Close the modal and start progress
 		showFeeModal = false;
+		progressModalActions.show('Withdraw Progress', [...withdrawProgressSteps]);
 
-		await wrapWithToast(
-			async () => {
-				// 2) Validate that note balances and calculated amounts are present
-				if (!withdrawNoteBalanceWei || !userWithdrawAmountWei) {
-					throw new Error('Cannot calculate refund – missing withdraw amounts');
-				}
-				if (!feeNoteBalanceWei || !feeWei) {
-					throw new Error('Cannot calculate refund – missing fee amounts');
-				}
+		try {
+			// 2) Validate that note balances and calculated amounts are present
+			progressModalActions.updateStep('preparation', 'loading');
+			if (!withdrawNoteBalanceWei || !userWithdrawAmountWei) {
+				throw new Error('Cannot calculate refund – missing withdraw amounts');
+			}
+			if (!feeNoteBalanceWei || !feeWei) {
+				throw new Error('Cannot calculate refund – missing fee amounts');
+			}
 
-				// 3) Ensure zk library and merkle tree are initialized
-				const { garaga } = get(zkLibraries);
-				if (!garaga) throw new Error('Garaga not initialized');
-				if (!feeNote || !selectedFeeDeposit || !withdrawNote || !selectedWithdrawDeposit) {
-					throw new Error('Missing fee or withdraw deposit');
-				}
-				const tree = merkleTree;
-				if (!tree) throw new Error('Merkle tree does not exist');
+			// 3) Ensure zk library and merkle tree are initialized
+			const { garaga } = get(zkLibraries);
+			if (!garaga) throw new Error('Garaga not initialized');
+			if (!feeNote || !selectedFeeDeposit || !withdrawNote || !selectedWithdrawDeposit) {
+				throw new Error('Missing fee or withdraw deposit');
+			}
+			const tree = merkleTree;
+			if (!tree) throw new Error('Merkle tree does not exist');
 
-				// 4) Compute commitments for the withdraw and fee deposits
-				// And get the data for proving
-				const withdrawProofData = tree.getProofData(
-					garaga.poseidonHashBN254(
-						garaga.poseidonHashBN254(BigInt(selectedWithdrawDeposit.hash), withdrawNoteBalanceWei),
-						BigInt(withdrawNote.tokenAddress)
-					)
-				);
-				const feeProofData = tree.getProofData(
-					garaga.poseidonHashBN254(
-						garaga.poseidonHashBN254(BigInt(selectedFeeDeposit.hash), feeNoteBalanceWei),
-						BigInt(feeNote.tokenAddress)
-					)
-				);
-
-				// 5) Generate refund operations and compute their commitment hashes
-				const withdrawRefund = withdrawNoteBalanceWei - userWithdrawAmountWei;
-				const withdrawOpResult = await generateOperation({
-					data: { tokenAddress: withdrawNote.tokenAddress, amount: withdrawRefund }
-				});
-				withdrawRefundHash = withdrawOpResult.hash;
-
-				const feeRefund = feeNoteBalanceWei - feeWei;
-				const feeOpResult = await generateOperation({
-					data: { tokenAddress: feeNote.tokenAddress, amount: feeRefund }
-				});
-				feeRefundHash = feeOpResult.hash;
-
-				const withdrawRefundCommitmentHash = garaga.poseidonHashBN254(
-					garaga.poseidonHashBN254(BigInt(withdrawRefundHash), withdrawRefund),
+			// 4) Compute commitments for the withdraw and fee deposits
+			// And get the data for proving
+			const withdrawProofData = tree.getProofData(
+				garaga.poseidonHashBN254(
+					garaga.poseidonHashBN254(BigInt(selectedWithdrawDeposit.hash), withdrawNoteBalanceWei),
 					BigInt(withdrawNote.tokenAddress)
-				);
-				const feeRefundCommitmentHash = garaga.poseidonHashBN254(
-					garaga.poseidonHashBN254(BigInt(feeRefundHash), feeRefund),
+				)
+			);
+			const feeProofData = tree.getProofData(
+				garaga.poseidonHashBN254(
+					garaga.poseidonHashBN254(BigInt(selectedFeeDeposit.hash), feeNoteBalanceWei),
 					BigInt(feeNote.tokenAddress)
+				)
+			);
+
+			// 5) Generate refund operations and compute their commitment hashes
+			const withdrawRefund = withdrawNoteBalanceWei - userWithdrawAmountWei;
+			const withdrawOpResult = await generateOperation({
+				data: { tokenAddress: withdrawNote.tokenAddress, amount: withdrawRefund }
+			});
+			withdrawRefundHash = withdrawOpResult.hash;
+
+			const feeRefund = feeNoteBalanceWei - feeWei;
+			const feeOpResult = await generateOperation({
+				data: { tokenAddress: feeNote.tokenAddress, amount: feeRefund }
+			});
+			feeRefundHash = feeOpResult.hash;
+
+			const withdrawRefundCommitmentHash = garaga.poseidonHashBN254(
+				garaga.poseidonHashBN254(BigInt(withdrawRefundHash), withdrawRefund),
+				BigInt(withdrawNote.tokenAddress)
+			);
+			const feeRefundCommitmentHash = garaga.poseidonHashBN254(
+				garaga.poseidonHashBN254(BigInt(feeRefundHash), feeRefund),
+				BigInt(feeNote.tokenAddress)
+			);
+
+			// 6) Fetch details for all operations from the database
+			const withdrawOp = await getOperationDetails(selectedWithdrawDeposit.hash);
+			const feeOp = await getOperationDetails(selectedFeeDeposit.hash);
+			const withdrawRefundOp = await getOperationDetails(withdrawRefundHash);
+			const feeRefundOp = await getOperationDetails(feeRefundHash);
+
+			if (!withdrawOp || !feeOp || !withdrawRefundOp || !feeRefundOp) {
+				throw new Error('One or more operations not found');
+			}
+
+			// 7) Build the witness input object for proof
+			const executeInput = {
+				// Deposit data
+				root_1: `0x${withdrawProofData.root.toString(16)}`,
+				secret_1: `0x${BigInt(withdrawOp.secret).toString(16)}`,
+				nullifier_1: `0x${BigInt(withdrawOp.nullifier).toString(16)}`,
+				commitment_amount_1: `0x${BigInt(withdrawOp.amount).toString(16)}`,
+				token_address_1: withdrawOp.tokenAddress,
+				hashpath_1: withdrawProofData.path[0].map((e) => `0x${e.toString(16)}`),
+				index_1: `0x${BigInt(withdrawProofData.index).toString(16)}`,
+				amount: `0x${userWithdrawAmountWei.toString(16)}`,
+				// Fee deposit data
+				root_2: `0x${feeProofData.root.toString(16)}`,
+				secret_2: `0x${BigInt(feeOp.secret).toString(16)}`,
+				nullifier_2: `0x${BigInt(feeOp.nullifier).toString(16)}`,
+				commitment_amount_2: `0x${BigInt(feeOp.amount).toString(16)}`,
+				token_address_2: feeOp.tokenAddress,
+				hashpath_2: feeProofData.path[0].map((e) => `0x${e.toString(16)}`),
+				index_2: `0x${BigInt(feeProofData.index).toString(16)}`,
+				gas_fee: `0x${feeWei.toString(16)}`,
+				// Refund for withdraw deposit
+				refund_secret_1: `0x${BigInt(withdrawRefundOp.secret).toString(16)}`,
+				refund_nullifier_1: `0x${BigInt(withdrawRefundOp.nullifier).toString(16)}`,
+				refund_amount_1: `0x${withdrawRefund.toString(16)}`,
+				refund_commitment_hash_1: `0x${withdrawRefundCommitmentHash.toString(16)}`,
+				// Refund for fee deposit
+				refund_secret_2: `0x${BigInt(feeRefundOp.secret).toString(16)}`,
+				refund_nullifier_2: `0x${BigInt(feeRefundOp.nullifier).toString(16)}`,
+				refund_amount_2: `0x${feeRefund.toString(16)}`,
+				refund_commitment_hash_2: `0x${feeRefundCommitmentHash.toString(16)}`,
+				// recipient
+				_recipient: withdrawRecipient
+			};
+			progressModalActions.updateStep('preparation', 'completed');
+
+			// 8) Generate the zk proof and prepare it as calldata
+			progressModalActions.updateStep('proof-generation', 'loading');
+			const honkCalldataHex = await generateHonkCalldata(
+				'/circuits/execute.json',
+				'/circuits/recursive.json',
+				'/circuits/vk_recursive.bin',
+				executeInput
+			);
+			progressModalActions.updateStep('proof-generation', 'completed');
+
+			// 9) Prepare for the StarkNet transaction
+			progressModalActions.updateStep('transaction-prepare', 'loading');
+			const rpc = get(provider);
+			if (!rpc) throw new Error('Missing Provider');
+
+			const account = get(paymasterWallet);
+			if (!account) throw new Error('Missing Account');
+
+			const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
+			if (!privacyAbi) throw new Error('Missing ABI');
+
+			const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
+			privacy.connect(account);
+
+			// 10) Prepare calldata and Starknet call
+			const extensionCalldata = [
+				PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				withdrawRecipient,
+				selectedWithdrawDeposit.data.tokenAddress,
+				`0x${userWithdrawAmountWei.toString(16)}`
+			];
+
+			const extensionCalldataWithLen = [
+				`0x${BigInt(extensionCalldata.length).toString(16)}`,
+				...extensionCalldata
+			];
+
+			const honkCalldataWithLen = [
+				`0x${BigInt(honkCalldataHex.length).toString(16)}`,
+				...honkCalldataHex
+			];
+
+			const call = {
+				contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				entrypoint: 'execute_extension',
+				calldata: [
+					...honkCalldataWithLen,
+					PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS,
+					...extensionCalldataWithLen
+				]
+			};
+			progressModalActions.updateStep('transaction-prepare', 'completed');
+
+			progressModalActions.updateStep('executing-transaction', 'loading');
+			const tx = await account.execute(call);
+			progressModalActions.updateStep('executing-transaction', 'completed');
+
+			progressModalActions.updateStep('onchain-confirmation', 'loading');
+			const receipt = await rpc.waitForTransaction(tx.transaction_hash);
+
+			// 10) Check receipt status and throw on failure
+			if (receipt.isReverted()) {
+				throw new Error(`Transaction reverted: ${receipt.value}`);
+			} else if (!receipt.isSuccess()) {
+				throw new Error(`Transaction error: ${receipt.value}`);
+			}
+
+			progressModalActions.updateStep('onchain-confirmation', 'completed');
+
+			// 11) Confirm and nullify operations in the database
+			await nullifyOperation(selectedWithdrawDeposit.hash);
+			await nullifyOperation(selectedFeeDeposit.hash);
+
+			// 12) Reset component state after successful withdrawal
+			resetAll();
+
+			if ($selectedToken) {
+				loadDeposits(
+					$selectedToken,
+					(d) => (deposits = d),
+					(b) => (isLoading = b)
 				);
+			}
 
-				// 6) Fetch details for all operations from the database
-				const withdrawOp = await getOperationDetails(selectedWithdrawDeposit.hash);
-				const feeOp = await getOperationDetails(selectedFeeDeposit.hash);
-				const withdrawRefundOp = await getOperationDetails(withdrawRefundHash);
-				const feeRefundOp = await getOperationDetails(feeRefundHash);
+			setTimeout(() => {
+				progressModalActions.hide();
+			}, 2000);
 
-				if (!withdrawOp || !feeOp || !withdrawRefundOp || !feeRefundOp) {
-					throw new Error('One or more operations not found');
-				}
-
-				// 7) Build the witness input object for proof
-				const executeInput = {
-					// Deposit data
-					root_1: `0x${withdrawProofData.root.toString(16)}`,
-					secret_1: `0x${BigInt(withdrawOp.secret).toString(16)}`,
-					nullifier_1: `0x${BigInt(withdrawOp.nullifier).toString(16)}`,
-					commitment_amount_1: `0x${BigInt(withdrawOp.amount).toString(16)}`,
-					token_address_1: withdrawOp.tokenAddress,
-					hashpath_1: withdrawProofData.path[0].map((e) => `0x${e.toString(16)}`),
-					index_1: `0x${BigInt(withdrawProofData.index).toString(16)}`,
-					amount: `0x${userWithdrawAmountWei.toString(16)}`,
-					// Fee deposit data
-					root_2: `0x${feeProofData.root.toString(16)}`,
-					secret_2: `0x${BigInt(feeOp.secret).toString(16)}`,
-					nullifier_2: `0x${BigInt(feeOp.nullifier).toString(16)}`,
-					commitment_amount_2: `0x${BigInt(feeOp.amount).toString(16)}`,
-					token_address_2: feeOp.tokenAddress,
-					hashpath_2: feeProofData.path[0].map((e) => `0x${e.toString(16)}`),
-					index_2: `0x${BigInt(feeProofData.index).toString(16)}`,
-					gas_fee: `0x${feeWei.toString(16)}`,
-					// Refund for withdraw deposit
-					refund_secret_1: `0x${BigInt(withdrawRefundOp.secret).toString(16)}`,
-					refund_nullifier_1: `0x${BigInt(withdrawRefundOp.nullifier).toString(16)}`,
-					refund_amount_1: `0x${withdrawRefund.toString(16)}`,
-					refund_commitment_hash_1: `0x${withdrawRefundCommitmentHash.toString(16)}`,
-					// Refund for fee deposit
-					refund_secret_2: `0x${BigInt(feeRefundOp.secret).toString(16)}`,
-					refund_nullifier_2: `0x${BigInt(feeRefundOp.nullifier).toString(16)}`,
-					refund_amount_2: `0x${feeRefund.toString(16)}`,
-					refund_commitment_hash_2: `0x${feeRefundCommitmentHash.toString(16)}`,
-					// recipient
-					_recipient: withdrawRecipient
-				};
-
-				// 8) Generate the zk proof and prepare it as calldata
-				const honkCalldataHex = await generateHonkCalldata(
-					'/circuits/execute.json',
-					'/circuits/recursive.json',
-					'/circuits/vk_recursive.bin',
-					executeInput
-				);
-
-				// 9) Prepare for the StarkNet transaction
-				const rpc = get(provider);
-				if (!rpc) throw new Error('Missing Provider');
-
-				const account = get(paymasterWallet);
-				if (!account) throw new Error('Missing Account');
-
-				const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
-				if (!privacyAbi) throw new Error('Missing ABI');
-
-				const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
-				privacy.connect(account);
-
-				// 10) Prepare calldata and Starknet call
-				const extensionCalldata = [
-					PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
-					withdrawRecipient,
-					selectedWithdrawDeposit.data.tokenAddress,
-					`0x${userWithdrawAmountWei.toString(16)}`
-				];
-
-				const extensionCalldataWithLen = [
-					`0x${BigInt(extensionCalldata.length).toString(16)}`,
-					...extensionCalldata
-				];
-
-				const honkCalldataWithLen = [
-					`0x${BigInt(honkCalldataHex.length).toString(16)}`,
-					...honkCalldataHex
-				];
-
-				const call = {
-					contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
-					entrypoint: 'execute_extension',
-					calldata: [
-						...honkCalldataWithLen,
-						PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS,
-						...extensionCalldataWithLen
-					]
-				};
-
-				const tx = await account.execute(call);
-				const receipt = await rpc.waitForTransaction(tx.transaction_hash);
-
-				// 10) Check receipt status and throw on failure
-				if (receipt.isReverted()) {
-					throw new Error(`Transaction reverted: ${receipt.value}`);
-				} else if (!receipt.isSuccess()) {
-					throw new Error(`Transaction error: ${receipt.value}`);
-				}
-
-				// 11) Confirm and nullify operations in the database
-				await nullifyOperation(selectedWithdrawDeposit.hash);
-				await nullifyOperation(selectedFeeDeposit.hash);
-
-				// 12) Reset component state after successful withdrawal
-				resetAll();
-
-				if ($selectedToken) {
-					loadDeposits(
-						$selectedToken,
-						(d) => (deposits = d),
-						(b) => (isLoading = b)
-					);
-				}
-			},
-			{
-				loading: '⏳ Sending Withdraw Tx',
-				success: '✅ Withdraw sent!',
-				error: '❌ Withdraw failed'
-			},
-			async (err) => {
-				// 13) On error: abort any created refund operations
-				console.warn('❌ Withdraw failed with error:', err);
-				if (withdrawRefundHash) {
-					try {
-						await abortOperation(withdrawRefundHash);
-						console.warn('🧯 Aborted refund operation:', withdrawRefundHash);
-					} catch (abortError) {
-						console.error('🚨 Failed to abort withdraw refund:', abortError);
-					}
-				}
-				if (feeRefundHash) {
-					try {
-						await abortOperation(feeRefundHash);
-						console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
-					} catch (abortError) {
-						console.error('🚨 Failed to abort fee refund:', abortError);
-					}
+		} catch (err) {
+			// 13) On error: abort any created refund operations
+			console.warn('❌ Withdraw failed with error:', err);
+			
+			const currentSteps = $progressModalStore.steps;
+			const currentStepIndex = currentSteps.findIndex(step => step.status === 'loading');
+			if (currentStepIndex !== -1) {
+				progressModalActions.updateStep(currentSteps[currentStepIndex].id, 'error');
+			}
+			
+			if (withdrawRefundHash) {
+				try {
+					await abortOperation(withdrawRefundHash);
+					console.warn('🧯 Aborted refund operation:', withdrawRefundHash);
+				} catch (abortError) {
+					console.error('🚨 Failed to abort withdraw refund:', abortError);
 				}
 			}
-		);
+			if (feeRefundHash) {
+				try {
+					await abortOperation(feeRefundHash);
+					console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
+				} catch (abortError) {
+					console.error('🚨 Failed to abort fee refund:', abortError);
+				}
+			}
+			
+			setTimeout(() => {
+				progressModalActions.hide();
+			}, 3000);
+		}
 
 		isLoading = false;
 	}
@@ -509,4 +524,11 @@
 			</Modal>
 		</Card>
 	</div>
+	
+	<ProgressModal 
+		show={$progressModalStore.show}
+		title={$progressModalStore.title}
+		steps={$progressModalStore.steps}
+		onClose={progressModalActions.hide}
+	/>
 </ProtectedRoute>

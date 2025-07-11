@@ -46,6 +46,8 @@
 	on:mouseleave={hide}
 	on:focus={show}
 	on:blur={hide}
+	role="button"
+	tabindex="0"
 >
 	<slot />
 	
