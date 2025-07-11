@@ -178,3 +178,36 @@ export const swapProgressSteps: ProgressStep[] = [
 		status: 'pending'
 	}
 ];
+
+export const transferProgressSteps: ProgressStep[] = [
+	{
+		id: 'preparation',
+		title: 'Preparation',
+		description: 'Preparing transfer transaction data',
+		status: 'pending'
+	},
+	{
+		id: 'proof-generation',
+		title: 'Proof Generation',
+		description: 'Generating zero-knowledge proof for transfer',
+		status: 'pending'
+	},
+	{
+		id: 'transaction-prepare',
+		title: 'Transaction Prepare',
+		description: 'Preparing transfer transaction for execution',
+		status: 'pending'
+	},
+	{
+		id: 'executing-transaction',
+		title: 'Executing Transaction',
+		description: 'Executing transfer transaction',
+		status: 'pending'
+	},
+	{
+		id: 'onchain-confirmation',
+		title: 'Onchain Confirmation',
+		description: 'Waiting for blockchain confirmation',
+		status: 'pending'
+	}
+];

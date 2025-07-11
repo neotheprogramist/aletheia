@@ -38,6 +38,8 @@
 	import { browser } from '$app/environment';
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
 	import { autoSelectCompleteProcess, type AutoSelectedFee } from '$lib/utils/autoSelectFeeDeposit';
+	import ProgressModal from '$lib/ui/ProgressModal.svelte';
+	import { progressModalStore, progressModalActions, transferProgressSteps } from '$lib/stores/progressModal';
 
 
 	// --- VIEW & TRANSFER STATE ---
@@ -216,195 +218,222 @@
 
 	/** Step 2: Build proof & send transfer tx */
 	async function confirmTransfer() {
+		// 1) Close the modal and start progress
 		showFeeModal = false;
+		progressModalActions.show('Transfer Progress', [...transferProgressSteps]);
 
-		await wrapWithToast(
-			async () => {
-				if (!transferNoteBalanceWei || !userTransferAmountWei) {
-					throw new Error('Cannot calculate refund – missing transfer amounts');
-				}
-				if (!feeNoteBalanceWei || !feeWei) {
-					throw new Error('Cannot calculate refund – missing fee amounts');
-				}
+		try {
+			// 2) Validate that note balances and calculated amounts are present
+			progressModalActions.updateStep('preparation', 'loading');
+			if (!transferNoteBalanceWei || !userTransferAmountWei) {
+				throw new Error('Cannot calculate refund – missing transfer amounts');
+			}
+			if (!feeNoteBalanceWei || !feeWei) {
+				throw new Error('Cannot calculate refund – missing fee amounts');
+			}
 
-				// Ensure zk library / merkle tree are ready
-				const { garaga } = get(zkLibraries);
-				if (!garaga) throw new Error('Garaga not initialized');
-				if (!feeNote || !selectedFeeDeposit || !transferNote || !selectedTransferDeposit) {
-					throw new Error('Missing fee or transfer deposit');
-				}
-				const tree = merkleTree;
-				if (!tree) throw new Error('Merkle tree does not exist');
+			// Ensure zk library / merkle tree are ready
+			const { garaga } = get(zkLibraries);
+			if (!garaga) throw new Error('Garaga not initialized');
+			if (!feeNote || !selectedFeeDeposit || !transferNote || !selectedTransferDeposit) {
+				throw new Error('Missing fee or transfer deposit');
+			}
+			const tree = merkleTree;
+			if (!tree) throw new Error('Merkle tree does not exist');
 
-				// Compute proof data for transfer + fee deposits
-				const transferProofData = tree.getProofData(
-					garaga.poseidonHashBN254(
-						garaga.poseidonHashBN254(BigInt(selectedTransferDeposit.hash), transferNoteBalanceWei),
-						BigInt(transferNote.tokenAddress)
-					)
-				);
-				const feeProofData = tree.getProofData(
-					garaga.poseidonHashBN254(
-						garaga.poseidonHashBN254(BigInt(selectedFeeDeposit.hash), feeNoteBalanceWei),
-						BigInt(feeNote.tokenAddress)
-					)
-				);
-
-				// Generate refund operations
-				const transferRefund = transferNoteBalanceWei - userTransferAmountWei;
-				const transferOpResult = await generateOperation({
-					data: { tokenAddress: transferNote.tokenAddress, amount: transferRefund }
-				});
-				transferRefundHash = transferOpResult.hash;
-
-				const feeRefund = feeNoteBalanceWei - feeWei;
-				const feeOpResult = await generateOperation({
-					data: { tokenAddress: feeNote.tokenAddress, amount: feeRefund }
-				});
-				feeRefundHash = feeOpResult.hash;
-
-				const transferRefundCommitmentHash = garaga.poseidonHashBN254(
-					garaga.poseidonHashBN254(BigInt(transferRefundHash), transferRefund),
+			// Compute proof data for transfer + fee deposits
+			const transferProofData = tree.getProofData(
+				garaga.poseidonHashBN254(
+					garaga.poseidonHashBN254(BigInt(selectedTransferDeposit.hash), transferNoteBalanceWei),
 					BigInt(transferNote.tokenAddress)
-				);
-				const feeRefundCommitmentHash = garaga.poseidonHashBN254(
-					garaga.poseidonHashBN254(BigInt(feeRefundHash), feeRefund),
+				)
+			);
+			const feeProofData = tree.getProofData(
+				garaga.poseidonHashBN254(
+					garaga.poseidonHashBN254(BigInt(selectedFeeDeposit.hash), feeNoteBalanceWei),
 					BigInt(feeNote.tokenAddress)
+				)
+			);
+
+			// Generate refund operations
+			const transferRefund = transferNoteBalanceWei - userTransferAmountWei;
+			const transferOpResult = await generateOperation({
+				data: { tokenAddress: transferNote.tokenAddress, amount: transferRefund }
+			});
+			transferRefundHash = transferOpResult.hash;
+
+			const feeRefund = feeNoteBalanceWei - feeWei;
+			const feeOpResult = await generateOperation({
+				data: { tokenAddress: feeNote.tokenAddress, amount: feeRefund }
+			});
+			feeRefundHash = feeOpResult.hash;
+
+			const transferRefundCommitmentHash = garaga.poseidonHashBN254(
+				garaga.poseidonHashBN254(BigInt(transferRefundHash), transferRefund),
+				BigInt(transferNote.tokenAddress)
+			);
+			const feeRefundCommitmentHash = garaga.poseidonHashBN254(
+				garaga.poseidonHashBN254(BigInt(feeRefundHash), feeRefund),
+				BigInt(feeNote.tokenAddress)
+			);
+
+			// Fetch operation details from DB
+			const transferOp = await getOperationDetails(selectedTransferDeposit.hash);
+			const feeOp = await getOperationDetails(selectedFeeDeposit.hash);
+			const transferRefundOp = await getOperationDetails(transferRefundHash);
+			const feeRefundOp = await getOperationDetails(feeRefundHash);
+
+			if (!transferOp || !feeOp || !transferRefundOp || !feeRefundOp) {
+				throw new Error('One or more operations not found');
+			}
+
+			// Build witness input
+			const transferInput = {
+				// Deposit data
+				root_1: `0x${transferProofData.root.toString(16)}`,
+				secret_1: `0x${BigInt(transferOp.secret).toString(16)}`,
+				nullifier_1: `0x${BigInt(transferOp.nullifier).toString(16)}`,
+				commitment_amount_1: `0x${BigInt(transferOp.amount).toString(16)}`,
+				token_address_1: transferOp.tokenAddress,
+				hashpath_1: transferProofData.path[0].map((e) => `0x${e.toString(16)}`),
+				index_1: `0x${BigInt(transferProofData.index).toString(16)}`,
+				amount: `0x${userTransferAmountWei.toString(16)}`,
+				// Fee deposit data
+				root_2: `0x${feeProofData.root.toString(16)}`,
+				secret_2: `0x${BigInt(feeOp.secret).toString(16)}`,
+				nullifier_2: `0x${BigInt(feeOp.nullifier).toString(16)}`,
+				commitment_amount_2: `0x${BigInt(feeOp.amount).toString(16)}`,
+				token_address_2: feeOp.tokenAddress,
+				hashpath_2: feeProofData.path[0].map((e) => `0x${e.toString(16)}`),
+				index_2: `0x${BigInt(feeProofData.index).toString(16)}`,
+				gas_fee: `0x${feeWei.toString(16)}`,
+				// Refund for transfer deposit
+				refund_secret_1: `0x${BigInt(transferRefundOp.secret).toString(16)}`,
+				refund_nullifier_1: `0x${BigInt(transferRefundOp.nullifier).toString(16)}`,
+				refund_amount_1: `0x${transferRefund.toString(16)}`,
+				refund_commitment_hash_1: `0x${transferRefundCommitmentHash.toString(16)}`,
+				// Refund for fee deposit
+				refund_secret_2: `0x${BigInt(feeRefundOp.secret).toString(16)}`,
+				refund_nullifier_2: `0x${BigInt(feeRefundOp.nullifier).toString(16)}`,
+				refund_amount_2: `0x${feeRefund.toString(16)}`,
+				refund_commitment_hash_2: `0x${feeRefundCommitmentHash.toString(16)}`,
+				// recipient hash
+				_recipient_secret_and_nullifier_hash_1: transferSecretAndNullifierHash
+			};
+			progressModalActions.updateStep('preparation', 'completed');
+
+			// Generate zk proof
+			progressModalActions.updateStep('proof-generation', 'loading');
+			const honkCalldataHex = await generateHonkCalldata(
+				'/circuits/transfer.json',
+				'/circuits/recursive.json',
+				'/circuits/vk_recursive.bin',
+				transferInput
+			);
+			progressModalActions.updateStep('proof-generation', 'completed');
+
+			// Prepare StarkNet transaction
+			progressModalActions.updateStep('transaction-prepare', 'loading');
+			const rpc = get(provider);
+			if (!rpc) throw new Error('Missing Provider');
+			const account = get(paymasterWallet);
+			if (!account) throw new Error('Missing Account');
+			const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
+			if (!privacyAbi) throw new Error('Missing ABI');
+			const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
+			privacy.connect(account);
+
+			const honkCalldataWithLen = [
+				`0x${BigInt(honkCalldataHex.length).toString(16)}`,
+				...honkCalldataHex
+			];
+
+			const call = {
+				contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				entrypoint: 'transfer',
+				calldata: honkCalldataWithLen
+			};
+			progressModalActions.updateStep('transaction-prepare', 'completed');
+
+			progressModalActions.updateStep('executing-transaction', 'loading');
+			const tx = await account.execute(call);
+			progressModalActions.updateStep('executing-transaction', 'completed');
+
+			progressModalActions.updateStep('onchain-confirmation', 'loading');
+			const receipt = await rpc.waitForTransaction(tx.transaction_hash);
+
+			// Check receipt
+			if (receipt.isSuccess()) {
+				const decimals = await fetchTokenDecimals(transferNote.tokenAddress);
+				const humanAmount = fromWei(userTransferAmountWei!, decimals);
+
+				toastStore.addToast({
+					type: 'success',
+					message: `Transfer succeeded: ${humanAmount} tokens of ${transferNote.tokenAddress} \n Transaction hash: ${tx.transaction_hash}`,
+					duration: 30000
+				});
+			} else if (receipt.isReverted()) {
+				console.warn('⚠️ Transaction reverted:', receipt.value);
+				throw new Error(`Transaction reverted: ${receipt.value}`);
+			} else {
+				console.error('❌ Transaction error:', receipt.value);
+				throw new Error(`Transaction error: ${receipt.value}`);
+			}
+
+			progressModalActions.updateStep('onchain-confirmation', 'completed');
+
+			//  nullify in DB
+			await nullifyOperation(selectedTransferDeposit.hash);
+			await nullifyOperation(selectedFeeDeposit.hash);
+
+			// Reset state
+			resetAll();
+
+			if (viewMode === 'sender' && $selectedToken) {
+				loadDeposits(
+					$selectedToken,
+					(d) => (deposits = d),
+					(b) => (isLoading = b)
 				);
+			}
 
-				// Fetch operation details from DB
-				const transferOp = await getOperationDetails(selectedTransferDeposit.hash);
-				const feeOp = await getOperationDetails(selectedFeeDeposit.hash);
-				const transferRefundOp = await getOperationDetails(transferRefundHash);
-				const feeRefundOp = await getOperationDetails(feeRefundHash);
+			setTimeout(() => {
+				progressModalActions.hide();
+			}, 2000);
 
-				if (!transferOp || !feeOp || !transferRefundOp || !feeRefundOp) {
-					throw new Error('One or more operations not found');
-				}
+		} catch (err) {
+			// On error: abort any created refund operations
+			console.warn('❌ Transfer failed with error:', err);
+			
+			const currentSteps = $progressModalStore.steps;
+			const currentStepIndex = currentSteps.findIndex(step => step.status === 'loading');
+			if (currentStepIndex !== -1) {
+				progressModalActions.updateStep(currentSteps[currentStepIndex].id, 'error');
+			}
 
-				// Build witness input
-				const transferInput = {
-					// Deposit data
-					root_1: `0x${transferProofData.root.toString(16)}`,
-					secret_1: `0x${BigInt(transferOp.secret).toString(16)}`,
-					nullifier_1: `0x${BigInt(transferOp.nullifier).toString(16)}`,
-					commitment_amount_1: `0x${BigInt(transferOp.amount).toString(16)}`,
-					token_address_1: transferOp.tokenAddress,
-					hashpath_1: transferProofData.path[0].map((e) => `0x${e.toString(16)}`),
-					index_1: `0x${BigInt(transferProofData.index).toString(16)}`,
-					amount: `0x${userTransferAmountWei.toString(16)}`,
-					// Fee deposit data
-					root_2: `0x${feeProofData.root.toString(16)}`,
-					secret_2: `0x${BigInt(feeOp.secret).toString(16)}`,
-					nullifier_2: `0x${BigInt(feeOp.nullifier).toString(16)}`,
-					commitment_amount_2: `0x${BigInt(feeOp.amount).toString(16)}`,
-					token_address_2: feeOp.tokenAddress,
-					hashpath_2: feeProofData.path[0].map((e) => `0x${e.toString(16)}`),
-					index_2: `0x${BigInt(feeProofData.index).toString(16)}`,
-					gas_fee: `0x${feeWei.toString(16)}`,
-					// Refund for transfer deposit
-					refund_secret_1: `0x${BigInt(transferRefundOp.secret).toString(16)}`,
-					refund_nullifier_1: `0x${BigInt(transferRefundOp.nullifier).toString(16)}`,
-					refund_amount_1: `0x${transferRefund.toString(16)}`,
-					refund_commitment_hash_1: `0x${transferRefundCommitmentHash.toString(16)}`,
-					// Refund for fee deposit
-					refund_secret_2: `0x${BigInt(feeRefundOp.secret).toString(16)}`,
-					refund_nullifier_2: `0x${BigInt(feeRefundOp.nullifier).toString(16)}`,
-					refund_amount_2: `0x${feeRefund.toString(16)}`,
-					refund_commitment_hash_2: `0x${feeRefundCommitmentHash.toString(16)}`,
-					// recipient hash
-					_recipient_secret_and_nullifier_hash_1: transferSecretAndNullifierHash
-				};
-
-				// Generate zk proof
-				const honkCalldataHex = await generateHonkCalldata(
-					'/circuits/transfer.json',
-					'/circuits/recursive.json',
-					'/circuits/vk_recursive.bin',
-					transferInput
-				);
-				// Prepare StarkNet transaction
-				const rpc = get(provider);
-				if (!rpc) throw new Error('Missing Provider');
-				const account = get(paymasterWallet);
-				if (!account) throw new Error('Missing Account');
-				const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
-				if (!privacyAbi) throw new Error('Missing ABI');
-				const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
-				privacy.connect(account);
-
-				const honkCalldataWithLen = [
-					`0x${BigInt(honkCalldataHex.length).toString(16)}`,
-					...honkCalldataHex
-				];
-
-				const call = {
-					contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
-					entrypoint: 'transfer',
-					calldata: honkCalldataWithLen
-				};
-				const tx = await account.execute(call);
-				const receipt = await rpc.waitForTransaction(tx.transaction_hash);
-
-				// Check receipt
-				if (receipt.isSuccess()) {
-					const decimals = await fetchTokenDecimals(transferNote.tokenAddress);
-					const humanAmount = fromWei(userTransferAmountWei!, decimals);
-
-					toastStore.addToast({
-						type: 'success',
-						message: `Transfer succeeded: ${humanAmount} tokens of ${transferNote.tokenAddress} \n Transaction hash: ${tx.transaction_hash}`,
-						duration: 30000
-					});
-				} else if (receipt.isReverted()) {
-					console.warn('⚠️ Transaction reverted:', receipt.value);
-					throw new Error(`Transaction reverted: ${receipt.value}`);
-				} else {
-					console.error('❌ Transaction error:', receipt.value);
-					throw new Error(`Transaction error: ${receipt.value}`);
-				}
-
-				//  nullify in DB
-				await nullifyOperation(selectedTransferDeposit.hash);
-				await nullifyOperation(selectedFeeDeposit.hash);
-
-				// Reset state
-				resetAll();
-
-				if (viewMode === 'sender' && $selectedToken) {
-					loadDeposits(
-						$selectedToken,
-						(d) => (deposits = d),
-						(b) => (isLoading = b)
-					);
-				}
-			},
-			{
-				loading: '⏳ Sending Transfer Tx',
-				success: '✅ Transfer sent!',
-				error: '❌ Transfer failed'
-			},
-			async (err) => {
-				isLoading = false;
-				console.warn('❌ Transfer failed with error:', err);
-				if (transferRefundHash) {
-					try {
-						await abortOperation(transferRefundHash);
-						console.warn('🧯 Aborted refund operation:', transferRefundHash);
-					} catch (abortError) {
-						console.error('🚨 Failed to abort withdraw refund:', abortError);
-					}
-				}
-				if (feeRefundHash) {
-					try {
-						await abortOperation(feeRefundHash);
-						console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
-					} catch (abortError) {
-						console.error('🚨 Failed to abort fee refund:', abortError);
-					}
+			if (transferRefundHash) {
+				try {
+					await abortOperation(transferRefundHash);
+					console.warn('🧯 Aborted refund operation:', transferRefundHash);
+				} catch (abortError) {
+					console.error('🚨 Failed to abort transfer refund:', abortError);
 				}
 			}
-		);
+			if (feeRefundHash) {
+				try {
+					await abortOperation(feeRefundHash);
+					console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
+				} catch (abortError) {
+					console.error('🚨 Failed to abort fee refund:', abortError);
+				}
+			}
+			
+			setTimeout(() => {
+				progressModalActions.hide();
+			}, 3000);
+		}
+
+		isLoading = false;
 	}
 
 	/** Generate a new “empty” (pending) deposit operation */
@@ -689,6 +718,13 @@
 			</Modal>
 		</Card>
 	</div>
+	
+	<ProgressModal 
+		show={$progressModalStore.show}
+		title={$progressModalStore.title}
+		steps={$progressModalStore.steps}
+		onClose={progressModalActions.hide}
+	/>
 </ProtectedRoute>
 
 <Modal
