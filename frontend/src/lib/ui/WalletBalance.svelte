@@ -68,8 +68,8 @@
 				<span class="text-sm text-gray-500 dark:text-gray-400">Loading...</span>
 			</div>
 		{:else}
-			<span class="text-sm font-semibold text-gray-900 dark:text-white">
-				{balance} {tokenSymbol}
+			<span class="text-sm font-semibold text-gray-900 dark:text-white" data-wallet-balance>
+				Wallet Balance: {balance} {tokenSymbol}
 			</span>
 		{/if}
 	</div>
