@@ -1,0 +1,33 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer shield -->
+  <path d="M16 2L26 6V14C26 22 20 28 16 30C12 28 6 22 6 14V6L16 2Z" 
+        fill="url(#grad1)" opacity="0.9"/>
+  
+  <!-- Inner shield with lock -->
+  <path d="M16 5L22 8V13C22 19 18 23 16 24C14 23 10 19 10 13V8L16 5Z" 
+        fill="white" opacity="0.2"/>
+  
+  <!-- Lock body -->
+  <rect x="12" y="16" width="8" height="6" rx="1" fill="white"/>
+  
+  <!-- Lock shackle -->
+  <path d="M14 16V13C14 11.9 14.9 11 16 11C17.1 11 18 11.9 18 13V16" 
+        stroke="white" stroke-width="1.5" fill="none"/>
+  
+  <!-- Keyhole -->
+  <circle cx="16" cy="18.5" r="1" fill="url(#grad1)"/>
+  <rect x="15.5" y="19" width="1" height="1.5" fill="url(#grad1)"/>
+  
+  <!-- Privacy dots pattern -->
+  <circle cx="8" cy="10" r="0.5" fill="white" opacity="0.6"/>
+  <circle cx="10" cy="12" r="0.5" fill="white" opacity="0.4"/>
+  <circle cx="22" cy="12" r="0.5" fill="white" opacity="0.4"/>
+  <circle cx="24" cy="10" r="0.5" fill="white" opacity="0.6"/>
+</svg>

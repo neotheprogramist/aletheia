@@ -405,7 +405,7 @@ import { autoSelectCompleteProcess, type AutoSelectedFee } from '$lib/utils/auto
 								placeholder="Collateral amount"
 								class_="w-full"
 							/>
-							<Button text="Withdraw" class_="mt-2 w-full" loading={isLoading} type="submit" />
+							<Button text="Borrow" class_="mt-2 w-full" loading={isLoading} type="submit" />
 						</form>
 					</Card>
 				</div>
