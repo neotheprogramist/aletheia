@@ -13,7 +13,7 @@
 	import Button from '$lib/ui/Button.svelte';
 	import Card from '$lib/ui/Card.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
-	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
+	import DepositsTable from '$lib/ui/DepositsTable.svelte';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
 	import SelectionToggle from '$lib/ui/SelectionToggle.svelte';
@@ -543,41 +543,24 @@
 								</div>
 
 								<!-- Deposits Table -->
-								{#if !deposits.length}
-									<div class="py-12 text-center">
-										<div
-											class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700"
-										>
-											<Layers class="h-8 w-8 text-gray-400" />
-										</div>
-										<h3 class="text-text mb-2 text-lg font-medium">No Deposits Found</h3>
-										<p class="text-text-secondary">Make a deposit first to start merging!</p>
-									</div>
-								{:else}
-									<div
-										class="rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 p-1 dark:from-gray-700 dark:to-gray-600"
-									>
-										<PaginatedTable
-											columns={defaultDepositColumns}
-											items={deposits}
-											pageSize={5}
-											keyField="index"
-											disabledKeys={undefined}
-											onRowClick={handleRowClick}
-											activeKey={selectionMode === 'merge1' ? selectedMerge1Key : selectedMerge2Key}
-											inactiveKeys={[
-												...(selectionMode !== 'merge1' && selectedMerge1Key !== null
-													? [selectedMerge1Key]
-													: []),
-												...(selectionMode !== 'merge2' && selectedMerge2Key !== null
-													? [selectedMerge2Key]
-													: []),
-												...(selectedFeeKey !== null ? [selectedFeeKey] : [])
-											]}
-											hoverClass="hover:bg-orange-600"
-										/>
-									</div>
-								{/if}
+								<DepositsTable
+									{deposits}
+									title="🔗 Select Deposits to Merge"
+									selectedKey={selectionMode === 'merge1' ? selectedMerge1Key : selectedMerge2Key}
+									disabledKeys={[
+										...(selectionMode !== 'merge1' && selectedMerge1Key !== null
+											? [selectedMerge1Key]
+											: []),
+										...(selectionMode !== 'merge2' && selectedMerge2Key !== null
+											? [selectedMerge2Key]
+											: []),
+										...(selectedFeeKey !== null ? [selectedFeeKey] : [])
+									]}
+									onRowClick={handleRowClick}
+									loading={isLoading}
+									pageSize={6}
+									showDetails={false}
+								/>
 							</div>
 						</div>
 					</Card>

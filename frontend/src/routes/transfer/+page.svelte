@@ -16,7 +16,7 @@
 	import Card from '$lib/ui/Card.svelte';
 	import Input from '$lib/ui/Input.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
-	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
+	import DepositsTable from '$lib/ui/DepositsTable.svelte';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
 	import SelectionToggle from '$lib/ui/SelectionToggle.svelte';
@@ -658,15 +658,45 @@
 									<div class="space-y-4">
 										<h3 class="text-text flex items-center gap-2 text-lg font-semibold">
 											<Hash class="h-5 w-5 text-blue-500" />
-											Your Pending Notes
+											Your Pending Notes ({pendingEmptyDeposits.length})
 										</h3>
-										<PaginatedTable
-											columns={defaultPendingDepositColumns}
-											items={pendingEmptyDeposits}
-											rowActions={actions}
-											pageSize={5}
-											keyField="index"
-										/>
+										<div class="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-4">
+											<div class="grid gap-3">
+												{#each pendingEmptyDeposits as deposit}
+													<div class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+														<div class="flex items-center gap-3">
+															<div class="p-2 bg-blue-500 text-white rounded-lg">
+																<Hash class="w-4 h-4" />
+															</div>
+															<div>
+																<div class="font-mono text-sm text-text">
+																	{deposit.hash.slice(0, 20)}...
+																</div>
+																<div class="text-xs text-text-secondary">
+																	{new Date(deposit.date).toLocaleString()}
+																</div>
+															</div>
+														</div>
+														<div class="flex items-center gap-2">
+															<button 
+																class="p-2 text-gray-500 hover:text-blue-500 transition-colors"
+																on:click={() => navigator.clipboard.writeText(deposit.hash)}
+																title="Copy hash"
+															>
+																<Copy class="w-4 h-4" />
+															</button>
+															<button 
+																class="p-2 text-gray-500 hover:text-red-500 transition-colors"
+																on:click={() => actions.find(a => a.label === 'Delete')?.action(deposit)}
+																title="Delete"
+															>
+																<Trash2 class="w-4 h-4" />
+															</button>
+														</div>
+													</div>
+												{/each}
+											</div>
+										</div>
 									</div>
 								{/if}
 
@@ -818,32 +848,16 @@
 								</div>
 
 								<!-- Deposits Table -->
-								{#if !deposits.length}
-									<div class="py-8 text-center">
-										<Eye class="mx-auto mb-4 h-12 w-12 text-gray-400" />
-										<h3 class="text-text mb-2 text-lg font-medium">No Deposits Found</h3>
-										<p class="text-text-secondary">
-											Please make a deposit first to start transferring!
-										</p>
-									</div>
-								{:else}
-									<div class="space-y-4">
-										<h3 class="text-text flex items-center gap-2 text-lg font-semibold">
-											<ArrowUpDown class="h-5 w-5 text-blue-500" />
-											Select Source Deposit
-										</h3>
-										<PaginatedTable
-											columns={defaultDepositColumns}
-											items={deposits}
-											pageSize={5}
-											keyField="index"
-											onRowClick={handleRowClick}
-											activeKey={selectedTransferKey}
-											inactiveKeys={selectedFeeKey !== null ? [selectedFeeKey] : []}
-											hoverClass="hover:bg-blue-50 dark:hover:bg-blue-900/20"
-										/>
-									</div>
-								{/if}
+								<DepositsTable
+									{deposits}
+									title="💸 Select Source Deposit"
+									selectedKey={selectedTransferKey}
+									disabledKeys={selectedFeeKey !== null ? [selectedFeeKey] : []}
+									onRowClick={handleRowClick}
+									loading={isLoading}
+									pageSize={5}
+									showDetails={false}
+								/>
 
 								<!-- Auto-selected Fee Information -->
 								{#if autoSelectedFeeInfo}

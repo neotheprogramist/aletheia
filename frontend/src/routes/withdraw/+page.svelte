@@ -2,7 +2,7 @@
 	import { wrapWithToast } from '$lib/utils/toast';
 	import Button from '$lib/ui/Button.svelte';
 	import Card from '$lib/ui/Card.svelte';
-	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
+	import DepositsTable from '$lib/ui/DepositsTable.svelte';
 	import ProgressModal from '$lib/ui/ProgressModal.svelte';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
 	import { fromWei, toWei } from '$lib/utils/toWei';
@@ -482,35 +482,16 @@
 								</div>
 
 								<!-- Deposits Table -->
-								{#if !deposits.length}
-									<div class="py-12 text-center">
-										<div
-											class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700"
-										>
-											<Wallet class="h-8 w-8 text-gray-400" />
-										</div>
-										<h3 class="text-text mb-2 text-lg font-medium">No Deposits Found</h3>
-										<p class="text-text-secondary">
-											Make a deposit first to start withdrawing privately!
-										</p>
-									</div>
-								{:else}
-									<div
-										class="rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 p-1 dark:from-gray-700 dark:to-gray-600"
-									>
-										<PaginatedTable
-											columns={defaultDepositColumns}
-											items={deposits}
-											pageSize={5}
-											keyField="index"
-											disabledKeys={undefined}
-											onRowClick={handleRowClick}
-											activeKey={selectedWithdrawKey}
-											inactiveKeys={selectedFeeKey !== null ? [selectedFeeKey] : []}
-											hoverClass="hover:bg-purple-600"
-										/>
-									</div>
-								{/if}
+								<DepositsTable
+									{deposits}
+									title="💰 Select Withdrawal Deposit"
+									selectedKey={selectedWithdrawKey}
+									disabledKeys={selectedFeeKey !== null ? [selectedFeeKey] : []}
+									onRowClick={handleRowClick}
+									loading={isLoading}
+									pageSize={6}
+									showDetails={true}
+								/>
 							</div>
 						</div>
 					</Card>
