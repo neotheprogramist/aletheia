@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import WalletConnector from '$lib/ui/WalletConnector.svelte';
-	import ToggleTheme from './ToggleTheme.svelte';
 	import { isConnected } from '$lib/stores/wallet';
 	import { Download, Upload, Menu, X } from 'lucide-svelte';
 	import { exportOperations, importOperations } from '$lib/utils/operationsBackup';
@@ -94,12 +93,15 @@
 		<div class="flex h-16 items-center justify-between">
 			<!-- Logo -->
 			<div class="flex items-center">
-				<a href="/" class="text-primary text-lg sm:text-xl font-bold tracking-tight flex items-center gap-2">
-					<img src="/logo.svg" alt="Privacy Pools" class="w-6 h-6 sm:w-8 sm:h-8" />
-					<span class="hidden md:block">Privacy Pools</span>
+				<a href="/" class="text-primary text-lg sm:text-xl font-bold tracking-tight flex items-center gap-2 group">
+					<div class="relative">
+						<img src="/logo.svg" alt="Privacy Pools" class="w-6 h-6 sm:w-8 sm:h-8 transition-transform duration-200 group-hover:scale-110" />
+						<div class="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+					</div>
+					<span class="hidden md:block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Privacy Pools</span>
 				</a>
 			</div>
-
+			
 			<!-- Desktop Navigation -->
 			<div class="hidden xl:flex items-center space-x-8 nav-links">
 				{#if $isConnected}
@@ -152,7 +154,6 @@
 					{#if $isConnected}
 						<WalletConnector />
 					{/if}
-					<ToggleTheme />
 				</div>
 			</div>
 
@@ -183,7 +184,6 @@
 						{:else}
 							<div></div>
 						{/if}
-						<ToggleTheme />
 					</div>
 					
 					{#if $isConnected}
