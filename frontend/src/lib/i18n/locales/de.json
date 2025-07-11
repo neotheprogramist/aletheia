@@ -1,0 +1,181 @@
+{
+  "nav": {
+    "deposit": "Einzahlung",
+    "withdraw": "Abhebung",
+    "merge": "Zusammenführen",
+    "transfer": "Übertragung",
+    "swap": "Tausch",
+    "settings": "Einstellungen"
+  },
+  "home": {
+    "title": "Privacy Pools",
+    "subtitle": "Die ultimative Datenschutzlösung für Ihre StarkNet-Transaktionen. Handeln, übertragen und transagieren Sie mit völliger Anonymität.",
+    "unlock_privacy": "Datenschutz freischalten",
+    "connect_wallet_description": "Verbinden Sie Ihr Wallet, um echte finanzielle Privatsphäre auf StarkNet zu erleben",
+    "show_tutorial": "Tutorial anzeigen",
+    "connect_wallet": "Wallet verbinden",
+    "features": {
+      "deposit": {
+        "title": "Einzahlung",
+        "description": "Sichern Sie Ihre Vermögenswerte mit Datenschutz"
+      },
+      "withdraw": {
+        "title": "Abhebung",
+        "description": "Anonyme Abhebungen an jede Adresse"
+      },
+      "transfer": {
+        "title": "Übertragung",
+        "description": "Private Peer-to-Peer-Übertragungen"
+      },
+      "merge": {
+        "title": "Zusammenführen",
+        "description": "Einzahlungen für besseren Datenschutz kombinieren"
+      },
+      "swap": {
+        "title": "Tausch",
+        "description": "Private Token-Börsen"
+      }
+    },
+    "stats": {
+      "title": "Datenschutz-zentriertes DeFi",
+      "subtitle": "Treten Sie der Zukunft privater Transaktionen auf StarkNet bei mit Zero-Knowledge-Proofs und vollständiger Anonymität",
+      "anonymous_transactions": "Anonyme Transaktionen",
+      "lightning_fast": "Blitzschnell",
+      "decentralized": "Dezentralisiert"
+    },
+    "how_it_works": {
+      "title": "Wie es funktioniert",
+      "step1": "Verbinden Sie Ihr Wallet und zahlen Sie Token ein",
+      "step2": "Erhalten Sie private Notizen, die Ihre Einzahlungen darstellen",
+      "step3": "Abheben, übertragen oder anonym tauschen"
+    },
+    "why_choose": {
+      "title": "Warum Privacy Pools wählen",
+      "privacy": "Zero-Knowledge-Proofs gewährleisten vollständige Privatsphäre",
+      "starknet": "Auf StarkNet für niedrige Gebühren und schnelle Transaktionen gebaut",
+      "decentralized": "Dezentralisiertes und vertrauensloses Protokoll"
+    },
+    "learn_more": "Mehr erfahren"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache",
+    "theme": "Thema",
+    "close": "Schließen"
+  },
+  "common": {
+    "loading": "Lädt...",
+    "error": "Fehler",
+    "success": "Erfolgreich",
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "finish": "Beenden",
+    "skip": "Überspringen",
+    "retry": "Wiederholen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "copy": "Kopieren",
+    "copied": "Kopiert!",
+    "amount": "Betrag",
+    "balance": "Guthaben",
+    "address": "Adresse",
+    "transaction": "Transaktion",
+    "fee": "Gebühr",
+    "total": "Gesamt",
+    "available": "Verfügbar",
+    "pending": "Ausstehend",
+    "completed": "Abgeschlossen",
+    "failed": "Fehlgeschlagen"
+  },
+  "wallet": {
+    "connect": "Wallet verbinden",
+    "disconnect": "Trennen",
+    "connecting": "Verbinde...",
+    "connected": "Verbunden",
+    "not_connected": "Nicht verbunden",
+    "install_wallet": "Wallet installieren",
+    "wrong_network": "Falsches Netzwerk",
+    "switch_network": "Netzwerk wechseln",
+    "account": "Konto",
+    "balance": "Guthaben"
+  },
+  "deposit": {
+    "title": "Einzahlung",
+    "description": "Zahlen Sie Ihre Token in den Privacy Pool ein, um anonyme Transaktionen zu starten",
+    "select_token": "Token auswählen",
+    "enter_amount": "Betrag eingeben",
+    "max": "Max",
+    "deposit_button": "Einzahlen",
+    "depositing": "Zahlt ein...",
+    "success": "Einzahlung erfolgreich!",
+    "error": "Einzahlung fehlgeschlagen",
+    "min_amount": "Mindestbetrag",
+    "max_amount": "Höchstbetrag",
+    "insufficient_balance": "Unzureichendes Guthaben",
+    "approve_first": "Token zuerst genehmigen",
+    "approving": "Genehmige...",
+    "approved": "Genehmigt"
+  },
+  "withdraw": {
+    "title": "Abhebung",
+    "description": "Heben Sie Ihre Gelder anonym an jede Adresse ab",
+    "select_note": "Private Notiz auswählen",
+    "recipient_address": "Empfängeradresse",
+    "withdraw_amount": "Abhebungsbetrag",
+    "withdraw_button": "Abheben",
+    "withdrawing": "Hebt ab...",
+    "success": "Abhebung erfolgreich!",
+    "error": "Abhebung fehlgeschlagen",
+    "invalid_address": "Ungültige Adresse",
+    "insufficient_note_balance": "Unzureichendes Notiz-Guthaben",
+    "fee_note": "Gebühr wird von der Notiz abgezogen",
+    "anonymity_warning": "Diese Abhebung wird anonym sein"
+  },
+  "transfer": {
+    "title": "Übertragung",
+    "description": "Übertragen Sie Gelder privat zwischen Benutzern innerhalb des Privacy Pools",
+    "select_source": "Quell-Notiz auswählen",
+    "recipient_note": "Empfänger-Notiz-Hash",
+    "transfer_amount": "Übertragungsbetrag",
+    "transfer_button": "Übertragen",
+    "transferring": "Überträgt...",
+    "success": "Übertragung erfolgreich!",
+    "error": "Übertragung fehlgeschlagen",
+    "invalid_note": "Ungültiger Notiz-Hash",
+    "same_note_error": "Kann nicht an dieselbe Notiz übertragen",
+    "note_not_found": "Empfänger-Notiz nicht gefunden"
+  },
+  "merge": {
+    "title": "Zusammenführen",
+    "description": "Kombinieren Sie mehrere Einzahlungen in eine für bessere Privatsphäre und Verwaltung",
+    "select_notes": "Notizen zum Zusammenführen auswählen",
+    "merged_amount": "Zusammengeführter Betrag",
+    "merge_button": "Zusammenführen",
+    "merging": "Führt zusammen...",
+    "success": "Zusammenführung erfolgreich!",
+    "error": "Zusammenführung fehlgeschlagen",
+    "min_notes": "Mindestens 2 Notizen auswählen",
+    "same_token_only": "Alle Notizen müssen denselben Token haben",
+    "merge_fee": "Zusammenführungsgebühr wird abgezogen"
+  },
+  "swap": {
+    "title": "Tausch",
+    "description": "Tauschen Sie Token privat über DeFi-Protokolle",
+    "from_token": "Von Token",
+    "to_token": "Zu Token",
+    "swap_amount": "Tauschbetrag",
+    "estimated_output": "Geschätzte Ausgabe",
+    "price_impact": "Preisauswirkung",
+    "slippage": "Slippage",
+    "swap_button": "Tauschen",
+    "swapping": "Tauscht...",
+    "success": "Tausch erfolgreich!",
+    "error": "Tausch fehlgeschlagen",
+    "high_slippage": "Hohe Slippage-Warnung",
+    "insufficient_liquidity": "Unzureichende Liquidität",
+    "price_updated": "Preis aktualisiert"
+  }
+}

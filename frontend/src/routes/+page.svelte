@@ -5,6 +5,7 @@
 	import Button from '$lib/ui/Button.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
 	import { Shield, Eye, Shuffle, Merge, ArrowRightLeft, ChevronRight, Lock, Zap, Users, Target } from 'lucide-svelte';
+	import { t } from '$lib/i18n';
 	
 	let showOnboarding = false;
 	let showFeatureModal = false;
@@ -13,10 +14,10 @@
 	const features = [
 		{
 			id: 'deposit',
-			title: 'Deposit',
+			titleKey: 'home.features.deposit.title',
 			icon: Shield,
 			gradient: 'from-green-400 to-blue-500',
-			description: 'Secure your assets with privacy',
+			descriptionKey: 'home.features.deposit.description',
 			href: '/deposit',
 			details: {
 				title: 'Private Deposits',
@@ -44,10 +45,10 @@
 		},
 		{
 			id: 'withdraw',
-			title: 'Withdraw',
+			titleKey: 'home.features.withdraw.title',
 			icon: Eye,
 			gradient: 'from-purple-400 to-pink-500',
-			description: 'Anonymous withdrawals to any address',
+			descriptionKey: 'home.features.withdraw.description',
 			href: '/withdraw',
 			details: {
 				title: 'Anonymous Withdrawals',
@@ -76,10 +77,10 @@
 		},
 		{
 			id: 'transfer',
-			title: 'Transfer',
+			titleKey: 'home.features.transfer.title',
 			icon: ArrowRightLeft,
 			gradient: 'from-blue-400 to-cyan-500',
-			description: 'Private peer-to-peer transfers',
+			descriptionKey: 'home.features.transfer.description',
 			href: '/transfer',
 			details: {
 				title: 'Private Note Transfers',
@@ -108,10 +109,10 @@
 		},
 		{
 			id: 'merge',
-			title: 'Merge',
+			titleKey: 'home.features.merge.title',
 			icon: Merge,
 			gradient: 'from-orange-400 to-red-500',
-			description: 'Combine deposits for better privacy',
+			descriptionKey: 'home.features.merge.description',
 			href: '/merge',
 			details: {
 				title: 'Deposit Merging',
@@ -140,10 +141,10 @@
 		},
 		{
 			id: 'swap',
-			title: 'Swap',
+			titleKey: 'home.features.swap.title',
 			icon: Shuffle,
 			gradient: 'from-indigo-400 to-purple-500',
-			description: 'Private token exchanges',
+			descriptionKey: 'home.features.swap.description',
 			href: '/swap',
 			details: {
 				title: 'Private Token Swaps',
@@ -217,11 +218,11 @@
 				<div class="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full animate-pulse"></div>
 			</div>
 			<h1 class="text-primary text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-				Privacy Pools
+				{$t('home.title')}
 			</h1>
 		</div>
 		<p class="text-text-secondary text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 px-4 max-w-2xl mx-auto">
-			The ultimate privacy solution for your StarkNet transactions. Trade, transfer, and transact with complete anonymity.
+			{$t('home.subtitle')}
 		</p>
 		
 		{#if !$isConnected}
@@ -229,14 +230,14 @@
 				<div class="flex items-center justify-center mb-4">
 					<Lock class="w-8 h-8 text-blue-600 dark:text-blue-400 mr-3" />
 					<h2 class="text-blue-800 dark:text-blue-200 text-xl sm:text-2xl font-bold">
-						Unlock Privacy
+						{$t('home.unlock_privacy')}
 					</h2>
 				</div>
 				<p class="text-blue-700 dark:text-blue-300 text-base sm:text-lg mb-6 max-w-md mx-auto">
-					Connect your wallet to start experiencing true financial privacy on StarkNet
+					{$t('home.connect_wallet_description')}
 				</p>
 				<div class="flex flex-col sm:flex-row gap-3 justify-center">
-					<Button text="Show Tutorial" onClick={showOnboardingAgain} variant="outline" />
+					<Button text={$t('home.show_tutorial')} onClick={showOnboardingAgain} variant="outline" />
 					<button
 						on:click={async () => {
 							const { connectWallet } = await import('$lib/stores/wallet');
@@ -244,7 +245,7 @@
 						}}
 						class="button rounded bg-blue-600 px-6 py-3 text-white hover:bg-blue-700 font-semibold"
 					>
-						Connect Wallet
+						{$t('home.connect_wallet')}
 					</button>
 				</div>
 			</div>
@@ -274,15 +275,15 @@
 								</div>
 								
 								<h3 class="font-bold text-xl mb-2 text-text group-hover:text-primary transition-colors duration-200">
-									{feature.title}
+									{$t(feature.titleKey)}
 								</h3>
 								
 								<p class="text-text-secondary text-base mb-4 leading-relaxed">
-									{feature.description}
+									{$t(feature.descriptionKey)}
 								</p>
 								
 								<div class="flex items-center text-primary text-sm font-medium group-hover:text-blue-600 transition-colors duration-200">
-									<span>Learn more</span>
+									<span>{$t('home.learn_more')}</span>
 									<ChevronRight class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
 								</div>
 							</div>
@@ -316,15 +317,15 @@
 								</div>
 								
 								<h3 class="font-bold text-lg mb-2 text-text group-hover:text-primary transition-colors duration-200">
-									{feature.title}
+									{$t(feature.titleKey)}
 								</h3>
 								
 								<p class="text-text-secondary text-sm mb-4 line-clamp-2">
-									{feature.description}
+									{$t(feature.descriptionKey)}
 								</p>
 								
 								<div class="flex items-center text-primary text-sm font-medium group-hover:text-blue-600 transition-colors duration-200">
-									<span>Learn more</span>
+									<span>{$t('home.learn_more')}</span>
 									<ChevronRight class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
 								</div>
 							</div>
@@ -340,10 +341,10 @@
 			<div class="bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-900/10 dark:to-purple-900/10 rounded-xl p-6 sm:p-8 mb-10 border border-border backdrop-blur-sm">
 				<div class="text-center mb-6">
 					<h3 class="text-xl sm:text-2xl font-bold mb-2 text-text">
-						Privacy-First DeFi
+						{$t('home.stats.title')}
 					</h3>
 					<p class="text-text-secondary text-sm sm:text-base max-w-2xl mx-auto">
-						Join the future of private transactions on StarkNet with zero-knowledge proofs and complete anonymity
+						{$t('home.stats.subtitle')}
 					</p>
 				</div>
 				
@@ -355,7 +356,7 @@
 							</div>
 						</div>
 						<span class="text-3xl sm:text-4xl font-bold text-primary block mb-2">100%</span>
-						<p class="text-text-secondary font-medium">Anonymous Transactions</p>
+						<p class="text-text-secondary font-medium">{$t('home.stats.anonymous_transactions')}</p>
 					</div>
 					
 					<div class="text-center group">
@@ -365,7 +366,7 @@
 							</div>
 						</div>
 						<span class="text-3xl sm:text-4xl font-bold text-primary block mb-2">⚡</span>
-						<p class="text-text-secondary font-medium">Lightning Fast</p>
+						<p class="text-text-secondary font-medium">{$t('home.stats.lightning_fast')}</p>
 					</div>
 					
 					<div class="text-center group">
@@ -375,7 +376,7 @@
 							</div>
 						</div>
 						<span class="text-3xl sm:text-4xl font-bold text-primary block mb-2">∞</span>
-						<p class="text-text-secondary font-medium">Decentralized</p>
+						<p class="text-text-secondary font-medium">{$t('home.stats.decentralized')}</p>
 					</div>
 				</div>
 			</div>
@@ -388,20 +389,20 @@
 						<div class="p-2 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 text-white">
 							<Target class="w-5 h-5" />
 						</div>
-						<h3 class="text-lg font-bold text-text ml-3">How It Works</h3>
+						<h3 class="text-lg font-bold text-text ml-3">{$t('home.how_it_works.title')}</h3>
 					</div>
 					<div class="space-y-3">
 						<div class="flex items-start space-x-3">
 							<div class="flex-shrink-0 w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center text-xs font-bold">1</div>
-							<p class="text-text-secondary text-sm">Connect your wallet and deposit tokens</p>
+							<p class="text-text-secondary text-sm">{$t('home.how_it_works.step1')}</p>
 						</div>
 						<div class="flex items-start space-x-3">
 							<div class="flex-shrink-0 w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center text-xs font-bold">2</div>
-							<p class="text-text-secondary text-sm">Receive private notes representing your deposits</p>
+							<p class="text-text-secondary text-sm">{$t('home.how_it_works.step2')}</p>
 						</div>
 						<div class="flex items-start space-x-3">
 							<div class="flex-shrink-0 w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center text-xs font-bold">3</div>
-							<p class="text-text-secondary text-sm">Withdraw, transfer, or swap anonymously</p>
+							<p class="text-text-secondary text-sm">{$t('home.how_it_works.step3')}</p>
 						</div>
 					</div>
 				</div>
@@ -412,20 +413,20 @@
 						<div class="p-2 rounded-lg bg-gradient-to-br from-green-600 to-blue-600 text-white">
 							<Shield class="w-5 h-5" />
 						</div>
-						<h3 class="text-lg font-bold text-text ml-3">Why Choose Privacy Pools</h3>
+						<h3 class="text-lg font-bold text-text ml-3">{$t('home.why_choose.title')}</h3>
 					</div>
 					<div class="space-y-3">
 						<div class="flex items-start space-x-3">
 							<div class="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-							<p class="text-text-secondary text-sm">Zero-knowledge proofs ensure complete privacy</p>
+							<p class="text-text-secondary text-sm">{$t('home.why_choose.privacy')}</p>
 						</div>
 						<div class="flex items-start space-x-3">
 							<div class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-							<p class="text-text-secondary text-sm">Built on StarkNet for low fees and fast transactions</p>
+							<p class="text-text-secondary text-sm">{$t('home.why_choose.starknet')}</p>
 						</div>
 						<div class="flex items-start space-x-3">
 							<div class="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-							<p class="text-text-secondary text-sm">Decentralized and trustless protocol</p>
+							<p class="text-text-secondary text-sm">{$t('home.why_choose.decentralized')}</p>
 						</div>
 					</div>
 				</div>
@@ -506,7 +507,7 @@
 			<!-- Action Buttons -->
 			<div class="flex flex-col sm:flex-row gap-3 justify-center pt-4">
 				<Button 
-					text="Start Using {selectedFeature.title}"
+					text="Start Using {$t(selectedFeature.titleKey)}"
 					onClick={() => goToFeature(selectedFeature.href)}
 					class_="bg-gradient-to-r {selectedFeature.gradient} text-white px-8 py-3 text-lg font-semibold"
 				/>

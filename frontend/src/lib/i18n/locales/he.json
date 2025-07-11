@@ -1,0 +1,181 @@
+{
+  "nav": {
+    "deposit": "הפקדה",
+    "withdraw": "משיכה",
+    "merge": "מיזוג",
+    "transfer": "העברה",
+    "swap": "החלפה",
+    "settings": "הגדרות"
+  },
+  "home": {
+    "title": "Privacy Pools",
+    "subtitle": "פתרון הפרטיות האולטימטיבי לעסקאות StarkNet שלכם. סחרו, העבירו ובצעו עסקאות באנונימיות מלאה.",
+    "unlock_privacy": "פתח פרטיות",
+    "connect_wallet_description": "חברו את הארנק שלכם כדי להתחיל לחוות פרטיות פיננסית אמיתית ב-StarkNet",
+    "show_tutorial": "הצג הדרכה",
+    "connect_wallet": "חבר ארנק",
+    "features": {
+      "deposit": {
+        "title": "הפקדה",
+        "description": "אבטחו את הנכסים שלכם עם פרטיות"
+      },
+      "withdraw": {
+        "title": "משיכה",
+        "description": "משיכות אנונימיות לכל כתובת"
+      },
+      "transfer": {
+        "title": "העברה",
+        "description": "העברות פרטיות בין משתמשים"
+      },
+      "merge": {
+        "title": "מיזוג",
+        "description": "שלבו הפקדות לפרטיות טובה יותר"
+      },
+      "swap": {
+        "title": "החלפה",
+        "description": "החלפות טוקנים פרטיות"
+      }
+    },
+    "stats": {
+      "title": "DeFi מוקד פרטיות",
+      "subtitle": "הצטרפו לעתיד של עסקאות פרטיות ב-StarkNet עם הוכחות אפס ידע ואנונימיות מלאה",
+      "anonymous_transactions": "עסקאות אנונימיות",
+      "lightning_fast": "מהיר כברק",
+      "decentralized": "מבוזר"
+    },
+    "how_it_works": {
+      "title": "איך זה עובד",
+      "step1": "חברו את הארנק שלכם והפקידו טוקנים",
+      "step2": "קבלו הערות פרטיות המייצגות את ההפקדות שלכם",
+      "step3": "משכו, העבירו או החליפו באנונימיות"
+    },
+    "why_choose": {
+      "title": "למה לבחור ב-Privacy Pools",
+      "privacy": "הוכחות אפס ידע מבטיחות פרטיות מלאה",
+      "starknet": "נבנה על StarkNet לעמלות נמוכות ועסקאות מהירות",
+      "decentralized": "פרוטוקול מבוזר וללא אמון"
+    },
+    "learn_more": "למד עוד"
+  },
+  "settings": {
+    "title": "הגדרות",
+    "language": "שפה",
+    "theme": "נושא",
+    "close": "סגור"
+  },
+  "common": {
+    "loading": "טוען...",
+    "error": "שגיאה",
+    "success": "הצלחה",
+    "cancel": "בטל",
+    "confirm": "אשר",
+    "back": "חזור",
+    "next": "הבא",
+    "finish": "סיים",
+    "skip": "דלג",
+    "retry": "נסה שוב",
+    "save": "שמור",
+    "delete": "מחק",
+    "edit": "ערוך",
+    "copy": "העתק",
+    "copied": "הועתק!",
+    "amount": "סכום",
+    "balance": "יתרה",
+    "address": "כתובת",
+    "transaction": "עסקה",
+    "fee": "עמלה",
+    "total": "סה\"כ",
+    "available": "זמין",
+    "pending": "בהמתנה",
+    "completed": "הושלם",
+    "failed": "נכשל"
+  },
+  "wallet": {
+    "connect": "חבר ארנק",
+    "disconnect": "נתק",
+    "connecting": "מתחבר...",
+    "connected": "מחובר",
+    "not_connected": "לא מחובר",
+    "install_wallet": "התקן ארנק",
+    "wrong_network": "רשת שגויה",
+    "switch_network": "החלף רשת",
+    "account": "חשבון",
+    "balance": "יתרה"
+  },
+  "deposit": {
+    "title": "הפקדה",
+    "description": "הפקד את הטוקנים שלך לבריכת הפרטיות כדי להתחיל עסקאות אנונימיות",
+    "select_token": "בחר טוקן",
+    "enter_amount": "הכנס סכום",
+    "max": "מקסימום",
+    "deposit_button": "הפקד",
+    "depositing": "מפקיד...",
+    "success": "הפקדה בוצעה בהצלחה!",
+    "error": "הפקדה נכשלה",
+    "min_amount": "סכום מינימלי",
+    "max_amount": "סכום מקסימלי",
+    "insufficient_balance": "יתרה לא מספקת",
+    "approve_first": "אשר טוקן קודם",
+    "approving": "מאשר...",
+    "approved": "אושר"
+  },
+  "withdraw": {
+    "title": "משיכה",
+    "description": "משוך את הכספים שלך באנונימיות לכל כתובת",
+    "select_note": "בחר הערה פרטית",
+    "recipient_address": "כתובת מקבל",
+    "withdraw_amount": "סכום משיכה",
+    "withdraw_button": "משוך",
+    "withdrawing": "משיב...",
+    "success": "משיכה בוצעה בהצלחה!",
+    "error": "משיכה נכשלה",
+    "invalid_address": "כתובת לא חוקית",
+    "insufficient_note_balance": "יתרת הערה לא מספקת",
+    "fee_note": "עמלה תנוכה מההערה",
+    "anonymity_warning": "משיכה זו תהיה אנונימית"
+  },
+  "transfer": {
+    "title": "העברה",
+    "description": "העבר כספים באופן פרטי בין משתמשים בתוך בריכת הפרטיות",
+    "select_source": "בחר הערת מקור",
+    "recipient_note": "האש הערת מקבל",
+    "transfer_amount": "סכום העברה",
+    "transfer_button": "העבר",
+    "transferring": "מעביר...",
+    "success": "העברה בוצעה בהצלחה!",
+    "error": "העברה נכשלה",
+    "invalid_note": "האש הערה לא חוקי",
+    "same_note_error": "לא ניתן להעביר לאותה הערה",
+    "note_not_found": "הערת מקבל לא נמצאה"
+  },
+  "merge": {
+    "title": "מיזוג",
+    "description": "שלב מספר הפקדות לאחת לפרטיות ולניהול טובים יותר",
+    "select_notes": "בחר הערות למיזוג",
+    "merged_amount": "סכום מאוחד",
+    "merge_button": "מזג",
+    "merging": "מזג...",
+    "success": "מיזוג בוצע בהצלחה!",
+    "error": "מיזוג נכשל",
+    "min_notes": "בחר לפחות 2 הערות",
+    "same_token_only": "כל ההערות חייבות להיות מאותו טוקן",
+    "merge_fee": "עמלת מיזוג תנוכה"
+  },
+  "swap": {
+    "title": "החלפה",
+    "description": "החלף טוקנים באופן פרטי דרך פרוטוקולי DeFi",
+    "from_token": "מטוקן",
+    "to_token": "לטוקן",
+    "swap_amount": "סכום החלפה",
+    "estimated_output": "פלט משוער",
+    "price_impact": "השפעה על מחיר",
+    "slippage": "החלקה",
+    "swap_button": "החלף",
+    "swapping": "מחליף...",
+    "success": "החלפה בוצעה בהצלחה!",
+    "error": "החלפה נכשלה",
+    "high_slippage": "אזהרת החלקה גבוהה",
+    "insufficient_liquidity": "נזילות לא מספקת",
+    "price_updated": "מחיר עודכן"
+  }
+}

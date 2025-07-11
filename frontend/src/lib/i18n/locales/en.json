@@ -1,0 +1,181 @@
+{
+  "nav": {
+    "deposit": "Deposit",
+    "withdraw": "Withdraw",
+    "merge": "Merge",
+    "transfer": "Transfer",
+    "swap": "Swap",
+    "settings": "Settings"
+  },
+  "home": {
+    "title": "Privacy Pools",
+    "subtitle": "The ultimate privacy solution for your StarkNet transactions. Trade, transfer, and transact with complete anonymity.",
+    "unlock_privacy": "Unlock Privacy",
+    "connect_wallet_description": "Connect your wallet to start experiencing true financial privacy on StarkNet",
+    "show_tutorial": "Show Tutorial",
+    "connect_wallet": "Connect Wallet",
+    "features": {
+      "deposit": {
+        "title": "Deposit",
+        "description": "Secure your assets with privacy"
+      },
+      "withdraw": {
+        "title": "Withdraw",
+        "description": "Anonymous withdrawals to any address"
+      },
+      "transfer": {
+        "title": "Transfer",
+        "description": "Private peer-to-peer transfers"
+      },
+      "merge": {
+        "title": "Merge",
+        "description": "Combine deposits for better privacy"
+      },
+      "swap": {
+        "title": "Swap",
+        "description": "Private token exchanges"
+      }
+    },
+    "stats": {
+      "title": "Privacy-First DeFi",
+      "subtitle": "Join the future of private transactions on StarkNet with zero-knowledge proofs and complete anonymity",
+      "anonymous_transactions": "Anonymous Transactions",
+      "lightning_fast": "Lightning Fast",
+      "decentralized": "Decentralized"
+    },
+    "how_it_works": {
+      "title": "How It Works",
+      "step1": "Connect your wallet and deposit tokens",
+      "step2": "Receive private notes representing your deposits",
+      "step3": "Withdraw, transfer, or swap anonymously"
+    },
+    "why_choose": {
+      "title": "Why Choose Privacy Pools",
+      "privacy": "Zero-knowledge proofs ensure complete privacy",
+      "starknet": "Built on StarkNet for low fees and fast transactions",
+      "decentralized": "Decentralized and trustless protocol"
+    },
+    "learn_more": "Learn more"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "close": "Close"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish",
+    "skip": "Skip",
+    "retry": "Retry",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "amount": "Amount",
+    "balance": "Balance",
+    "address": "Address",
+    "transaction": "Transaction",
+    "fee": "Fee",
+    "total": "Total",
+    "available": "Available",
+    "pending": "Pending",
+    "completed": "Completed",
+    "failed": "Failed"
+  },
+  "wallet": {
+    "connect": "Connect Wallet",
+    "disconnect": "Disconnect",
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "not_connected": "Not Connected",
+    "install_wallet": "Install Wallet",
+    "wrong_network": "Wrong Network",
+    "switch_network": "Switch Network",
+    "account": "Account",
+    "balance": "Balance"
+  },
+  "deposit": {
+    "title": "Deposit",
+    "description": "Deposit your tokens into the privacy pool to start anonymous transactions",
+    "select_token": "Select Token",
+    "enter_amount": "Enter Amount",
+    "max": "Max",
+    "deposit_button": "Deposit",
+    "depositing": "Depositing...",
+    "success": "Deposit successful!",
+    "error": "Deposit failed",
+    "min_amount": "Minimum amount",
+    "max_amount": "Maximum amount",
+    "insufficient_balance": "Insufficient balance",
+    "approve_first": "Approve token first",
+    "approving": "Approving...",
+    "approved": "Approved"
+  },
+  "withdraw": {
+    "title": "Withdraw",
+    "description": "Withdraw your funds anonymously to any address",
+    "select_note": "Select Private Note",
+    "recipient_address": "Recipient Address",
+    "withdraw_amount": "Withdraw Amount",
+    "withdraw_button": "Withdraw",
+    "withdrawing": "Withdrawing...",
+    "success": "Withdrawal successful!",
+    "error": "Withdrawal failed",
+    "invalid_address": "Invalid address",
+    "insufficient_note_balance": "Insufficient note balance",
+    "fee_note": "Fee will be deducted from note",
+    "anonymity_warning": "This withdrawal will be anonymous"
+  },
+  "transfer": {
+    "title": "Transfer",
+    "description": "Transfer funds privately between users within the privacy pool",
+    "select_source": "Select Source Note",
+    "recipient_note": "Recipient Note Hash",
+    "transfer_amount": "Transfer Amount",
+    "transfer_button": "Transfer",
+    "transferring": "Transferring...",
+    "success": "Transfer successful!",
+    "error": "Transfer failed",
+    "invalid_note": "Invalid note hash",
+    "same_note_error": "Cannot transfer to same note",
+    "note_not_found": "Recipient note not found"
+  },
+  "merge": {
+    "title": "Merge",
+    "description": "Combine multiple deposits into one for better privacy and management",
+    "select_notes": "Select Notes to Merge",
+    "merged_amount": "Merged Amount",
+    "merge_button": "Merge",
+    "merging": "Merging...",
+    "success": "Merge successful!",
+    "error": "Merge failed",
+    "min_notes": "Select at least 2 notes",
+    "same_token_only": "All notes must be same token",
+    "merge_fee": "Merge fee will be deducted"
+  },
+  "swap": {
+    "title": "Swap",
+    "description": "Exchange tokens privately through DeFi protocols",
+    "from_token": "From Token",
+    "to_token": "To Token",
+    "swap_amount": "Swap Amount",
+    "estimated_output": "Estimated Output",
+    "price_impact": "Price Impact",
+    "slippage": "Slippage",
+    "swap_button": "Swap",
+    "swapping": "Swapping...",
+    "success": "Swap successful!",
+    "error": "Swap failed",
+    "high_slippage": "High slippage warning",
+    "insufficient_liquidity": "Insufficient liquidity",
+    "price_updated": "Price updated"
+  }
+}

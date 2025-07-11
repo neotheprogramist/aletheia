@@ -57,6 +57,7 @@
 		"msgpackr": "^1.11.4",
 		"starknet": "^7.5.1",
 		"starknetkit": "^2.10.4",
+		"svelte-i18n": "^4.0.1",
 		"zod": "^3.25.20"
 	}
 }

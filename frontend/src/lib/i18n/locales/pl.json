@@ -1,0 +1,181 @@
+{
+  "nav": {
+    "deposit": "Wpłata",
+    "withdraw": "Wypłata",
+    "merge": "Połącz",
+    "transfer": "Przelew",
+    "swap": "Zamień",
+    "settings": "Ustawienia"
+  },
+  "home": {
+    "title": "Privacy Pools",
+    "subtitle": "Najlepsze rozwiązanie prywatności dla Twoich transakcji StarkNet. Handluj, przelewaj i dokonuj transakcji z całkowitą anonimowością.",
+    "unlock_privacy": "Odblokuj prywatność",
+    "connect_wallet_description": "Podłącz swój portfel, aby rozpocząć doświadczanie prawdziwej prywatności finansowej w StarkNet",
+    "show_tutorial": "Pokaż samouczek",
+    "connect_wallet": "Podłącz portfel",
+    "features": {
+      "deposit": {
+        "title": "Wpłata",
+        "description": "Zabezpiecz swoje aktywa z prywatnością"
+      },
+      "withdraw": {
+        "title": "Wypłata",
+        "description": "Anonimowe wypłaty na dowolny adres"
+      },
+      "transfer": {
+        "title": "Przelew",
+        "description": "Prywatne przelewy peer-to-peer"
+      },
+      "merge": {
+        "title": "Połącz",
+        "description": "Połącz wpłaty dla lepszej prywatności"
+      },
+      "swap": {
+        "title": "Zamień",
+        "description": "Prywatne wymiany tokenów"
+      }
+    },
+    "stats": {
+      "title": "DeFi skoncentrowane na prywatności",
+      "subtitle": "Dołącz do przyszłości prywatnych transakcji w StarkNet z dowodami zero-knowledge i całkowitą anonimowością",
+      "anonymous_transactions": "Anonimowe transakcje",
+      "lightning_fast": "Błyskawicznie szybkie",
+      "decentralized": "Zdecentralizowane"
+    },
+    "how_it_works": {
+      "title": "Jak to działa",
+      "step1": "Podłącz portfel i wpłać tokeny",
+      "step2": "Otrzymaj prywatne notatki reprezentujące Twoje wpłaty",
+      "step3": "Wypłacaj, przelewaj lub wymieniaj anonimowo"
+    },
+    "why_choose": {
+      "title": "Dlaczego wybrać Privacy Pools",
+      "privacy": "Dowody zero-knowledge zapewniają całkowitą prywatność",
+      "starknet": "Zbudowane na StarkNet dla niskich opłat i szybkich transakcji",
+      "decentralized": "Zdecentralizowany i bezpieczny protokół"
+    },
+    "learn_more": "Dowiedz się więcej"
+  },
+  "settings": {
+    "title": "Ustawienia",
+    "language": "Język",
+    "theme": "Motyw",
+    "close": "Zamknij"
+  },
+  "common": {
+    "loading": "Ładowanie...",
+    "error": "Błąd",
+    "success": "Sukces",
+    "cancel": "Anuluj",
+    "confirm": "Potwierdź",
+    "back": "Wstecz",
+    "next": "Dalej",
+    "finish": "Zakończ",
+    "skip": "Pomiń",
+    "retry": "Spróbuj ponownie",
+    "save": "Zapisz",
+    "delete": "Usuń",
+    "edit": "Edytuj",
+    "copy": "Kopiuj",
+    "copied": "Skopiowano!",
+    "amount": "Kwota",
+    "balance": "Saldo",
+    "address": "Adres",
+    "transaction": "Transakcja",
+    "fee": "Opłata",
+    "total": "Razem",
+    "available": "Dostępne",
+    "pending": "Oczekujące",
+    "completed": "Ukończone",
+    "failed": "Nieudane"
+  },
+  "wallet": {
+    "connect": "Podłącz portfel",
+    "disconnect": "Odłącz",
+    "connecting": "Łączenie...",
+    "connected": "Podłączony",
+    "not_connected": "Nie podłączony",
+    "install_wallet": "Zainstaluj portfel",
+    "wrong_network": "Błędna sieć",
+    "switch_network": "Zmień sieć",
+    "account": "Konto",
+    "balance": "Saldo"
+  },
+  "deposit": {
+    "title": "Wpłata",
+    "description": "Wpłać swoje tokeny do puli prywatności aby rozpocząć anonimowe transakcje",
+    "select_token": "Wybierz token",
+    "enter_amount": "Wprowadź kwotę",
+    "max": "Maksymalnie",
+    "deposit_button": "Wpłać",
+    "depositing": "Wpłacanie...",
+    "success": "Wpłata udana!",
+    "error": "Wpłata nieudana",
+    "min_amount": "Minimalna kwota",
+    "max_amount": "Maksymalna kwota",
+    "insufficient_balance": "Niewystarczające saldo",
+    "approve_first": "Zatwierdź token najpierw",
+    "approving": "Zatwierdzanie...",
+    "approved": "Zatwierdzony"
+  },
+  "withdraw": {
+    "title": "Wypłata",
+    "description": "Wypłacaj swoje środki anonimowo na dowolny adres",
+    "select_note": "Wybierz prywatną notatkę",
+    "recipient_address": "Adres odbiorcy",
+    "withdraw_amount": "Kwota wypłaty",
+    "withdraw_button": "Wypłać",
+    "withdrawing": "Wypłacanie...",
+    "success": "Wypłata udana!",
+    "error": "Wypłata nieudana",
+    "invalid_address": "Nieprawidłowy adres",
+    "insufficient_note_balance": "Niewystarczające saldo notatki",
+    "fee_note": "Opłata zostanie pobrana z notatki",
+    "anonymity_warning": "Ta wypłata będzie anonimowa"
+  },
+  "transfer": {
+    "title": "Przelew",
+    "description": "Przelewaj środki prywatnie między użytkownikami w puli prywatności",
+    "select_source": "Wybierz źródłową notatkę",
+    "recipient_note": "Hash notatki odbiorcy",
+    "transfer_amount": "Kwota przelewu",
+    "transfer_button": "Przelej",
+    "transferring": "Przelewanie...",
+    "success": "Przelew udany!",
+    "error": "Przelew nieudany",
+    "invalid_note": "Nieprawidłowy hash notatki",
+    "same_note_error": "Nie można przelać na tę samą notatkę",
+    "note_not_found": "Notatka odbiorcy nie znaleziona"
+  },
+  "merge": {
+    "title": "Połącz",
+    "description": "Połącz wiele wpłat w jedną dla lepszej prywatności i zarządzania",
+    "select_notes": "Wybierz notatki do połączenia",
+    "merged_amount": "Kwota po połączeniu",
+    "merge_button": "Połącz",
+    "merging": "Łączenie...",
+    "success": "Połączenie udane!",
+    "error": "Połączenie nieudane",
+    "min_notes": "Wybierz co najmniej 2 notatki",
+    "same_token_only": "Wszystkie notatki muszą być tego samego tokena",
+    "merge_fee": "Opłata za połączenie zostanie pobrana"
+  },
+  "swap": {
+    "title": "Zamień",
+    "description": "Wymieniaj tokeny prywatnie przez protokoły DeFi",
+    "from_token": "Z tokena",
+    "to_token": "Na token",
+    "swap_amount": "Kwota wymiany",
+    "estimated_output": "Szacowany wynik",
+    "price_impact": "Wpływ na cenę",
+    "slippage": "Poślizg",
+    "swap_button": "Zamień",
+    "swapping": "Zamienianie...",
+    "success": "Zamiana udana!",
+    "error": "Zamiana nieudana",
+    "high_slippage": "Ostrzeżenie o wysokim poślizgu",
+    "insufficient_liquidity": "Niewystarczająca płynność",
+    "price_updated": "Cena zaktualizowana"
+  }
+}

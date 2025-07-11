@@ -1,14 +1,16 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { page } from '$app/state';
+	import { page } from '$app/stores';
 	import WalletConnector from '$lib/ui/WalletConnector.svelte';
+	import SettingsModal from '$lib/ui/SettingsModal.svelte';
 	import { isConnected } from '$lib/stores/wallet';
-	import { Download, Upload, Menu, X } from 'lucide-svelte';
+	import { Download, Upload, Menu, X, Settings } from 'lucide-svelte';
 	import { exportOperations, importOperations } from '$lib/utils/operationsBackup';
 	import { toastStore } from '$lib/stores/toast';
+	import { t } from '$lib/i18n';
 
 	let fileInput: HTMLInputElement;
 	let showMobileMenu = false;
+	let showSettings = false;
 
 	function toggleMobileMenu() {
 		showMobileMenu = !showMobileMenu;
@@ -16,6 +18,14 @@
 
 	function closeMobileMenu() {
 		showMobileMenu = false;
+	}
+
+	function toggleSettings() {
+		showSettings = !showSettings;
+	}
+
+	function closeSettings() {
+		showSettings = false;
 	}
 
 	async function handleExport() {
@@ -85,55 +95,54 @@
 		reader.readAsText(file);
 	}
 
-
+	function isActive(path: string) {
+		return $page.url.pathname === path;
+	}
 </script>
 
-<nav class="border-border bg-background fixed inset-x-0 top-0 z-10 border-b backdrop-blur-sm">
+<nav class="fixed inset-x-0 top-0 z-10 border-b border-border bg-background backdrop-blur-sm">
 	<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 		<div class="flex h-16 items-center justify-between">
 			<!-- Logo -->
-			<div class="flex items-center">
-				<a href="/" class="text-primary text-lg sm:text-xl font-bold tracking-tight flex items-center gap-2 group">
-					<div class="relative">
-						<img src="/logo.svg" alt="Privacy Pools" class="w-6 h-6 sm:w-8 sm:h-8 transition-transform duration-200 group-hover:scale-110" />
-						<div class="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-					</div>
-					<span class="hidden md:block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Privacy Pools</span>
-				</a>
-			</div>
-			
+			<a
+				href="/"
+				class="group flex items-center gap-2 text-lg font-bold tracking-tight text-primary sm:text-xl"
+			>
+				<div class="relative">
+					<img
+						src="/logo.svg"
+						alt="Privacy Pools"
+						class="h-6 w-6 transition-transform duration-200 group-hover:scale-110 sm:h-8 sm:w-8"
+					/>
+					<div
+						class="absolute -top-1 -right-1 h-2 w-2 animate-pulse rounded-full bg-green-400"
+					></div>
+				</div>
+				<span
+					class="hidden bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent md:block"
+					>Privacy Pools</span
+				>
+			</a>
+
 			<!-- Desktop Navigation -->
-			<div class="hidden xl:flex items-center space-x-8 nav-links">
+			<div class="hidden items-center space-x-6 xl:flex">
 				{#if $isConnected}
-					<a
-						href="/deposit"
-						class="{page.url.pathname === '/deposit' ? 'text-primary font-semibold border-b-2 border-primary' : 'text-text-secondary hover:text-primary'} transition-colors duration-200 py-2"
-						>Deposit</a
-					>
-					<a
-						href="/withdraw"
-						class="{page.url.pathname === '/withdraw' ? 'text-primary font-semibold border-b-2 border-primary' : 'text-text-secondary hover:text-primary'} transition-colors duration-200 py-2"
-						>Withdraw</a
-					>
-					<a
-						href="/merge"
-						class="{page.url.pathname === '/merge' ? 'text-primary font-semibold border-b-2 border-primary' : 'text-text-secondary hover:text-primary'} transition-colors duration-200 py-2"
-						>Merge</a
-					>
-					<a
-						href="/transfer"
-						class="{page.url.pathname === '/transfer' ? 'text-primary font-semibold border-b-2 border-primary' : 'text-text-secondary hover:text-primary'} transition-colors duration-200 py-2"
-						>Transfer</a
-					>
-					<a
-						href="/swap"
-						class="{page.url.pathname === '/swap' ? 'text-primary font-semibold border-b-2 border-primary' : 'text-text-secondary hover:text-primary'} transition-colors duration-200 py-2"
-						>Swap</a
-					>
+					{#each ['/deposit', '/withdraw', '/merge', '/transfer', '/swap'] as route}
+						<a
+							href="{route}"
+							class="transition-all duration-300 ease-in-out px-2 py-2 rounded-lg
+								{isActive(route)
+									? 'text-primary border-primary scale-110 transform border-b-2 font-bold shadow-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20'
+									: 'text-text-secondary hover:text-primary hover:scale-105 hover:font-semibold transform'}"
+							aria-current={isActive(route) ? 'page' : undefined}
+						>
+							{$t(`nav.${route.slice(1)}`)}
+						</a>
+					{/each}
 
 					<div class="flex items-center gap-2">
 						<button
-							class="rounded-lg p-2 text-text-secondary hover:text-primary hover:bg-surface transition-all duration-200"
+							class="rounded-lg p-2 text-text-secondary hover:text-primary hover:bg-surface hover:scale-110 transition-all duration-300 ease-in-out"
 							title="Export all operations to JSON"
 							on:click={handleExport}
 						>
@@ -141,7 +150,7 @@
 						</button>
 
 						<button
-							class="rounded-lg p-2 text-text-secondary hover:text-primary hover:bg-surface transition-all duration-200"
+							class="rounded-lg p-2 text-text-secondary hover:text-primary hover:bg-surface hover:scale-110 transition-all duration-300 ease-in-out"
 							title="Import operations from JSON"
 							on:click={openFilePicker}
 						>
@@ -154,13 +163,20 @@
 					{#if $isConnected}
 						<WalletConnector />
 					{/if}
+					<button
+						class="rounded-lg p-2 text-text-secondary hover:text-primary hover:bg-surface hover:scale-110 transition-all duration-300 ease-in-out"
+						title="Settings"
+						on:click={toggleSettings}
+					>
+						<Settings size={18} />
+					</button>
 				</div>
 			</div>
 
 			<!-- Mobile menu button -->
-			<div class="xl:hidden flex items-center">
+			<div class="flex items-center xl:hidden">
 				<button
-					class="mobile-menu-button rounded-lg p-2 text-text hover:bg-surface transition-colors duration-200"
+					class="mobile-menu-button rounded-lg p-2 text-text hover:bg-surface hover:scale-110 transition-all duration-300 ease-in-out"
 					on:click={toggleMobileMenu}
 					aria-label="Toggle mobile menu"
 				>
@@ -177,64 +193,42 @@
 		{#if showMobileMenu}
 			<div class="xl:hidden border-t border-border bg-card">
 				<div class="px-2 pt-2 pb-3 space-y-1">
-					<!-- Wallet and Theme Controls -->
 					<div class="flex items-center justify-between px-3 py-2 border-b border-border mb-3">
 						{#if $isConnected}
 							<WalletConnector />
-						{:else}
-							<div></div>
 						{/if}
 					</div>
-					
+
 					{#if $isConnected}
-						<a
-							href="/deposit"
-							class="{page.url.pathname === '/deposit' ? 'bg-primary text-white' : 'text-text hover:bg-surface'} block px-3 py-2 rounded-lg text-base font-medium transition-colors duration-200"
-							on:click={closeMobileMenu}
-							>Deposit</a
-						>
-						<a
-							href="/withdraw"
-							class="{page.url.pathname === '/withdraw' ? 'bg-primary text-white' : 'text-text hover:bg-surface'} block px-3 py-2 rounded-lg text-base font-medium transition-colors duration-200"
-							on:click={closeMobileMenu}
-							>Withdraw</a
-						>
-						<a
-							href="/merge"
-							class="{page.url.pathname === '/merge' ? 'bg-primary text-white' : 'text-text hover:bg-surface'} block px-3 py-2 rounded-lg text-base font-medium transition-colors duration-200"
-							on:click={closeMobileMenu}
-							>Merge</a
-						>
-						<a
-							href="/transfer"
-							class="{page.url.pathname === '/transfer' ? 'bg-primary text-white' : 'text-text hover:bg-surface'} block px-3 py-2 rounded-lg text-base font-medium transition-colors duration-200"
-							on:click={closeMobileMenu}
-							>Transfer</a
-						>
-						<a
-							href="/swap"
-							class="{page.url.pathname === '/swap' ? 'bg-primary text-white' : 'text-text hover:bg-surface'} block px-3 py-2 rounded-lg text-base font-medium transition-colors duration-200"
-							on:click={closeMobileMenu}
-							>Swap</a
-						>
-						
-						<div class="border-t border-border pt-3 mt-3">
-							<div class="flex justify-center gap-4">
-								<button
-									class="rounded-lg p-3 text-text hover:bg-surface transition-colors duration-200"
-									title="Export operations"
-									on:click={handleExport}
-								>
-									<Download size={20} />
-								</button>
-								<button
-									class="rounded-lg p-3 text-text hover:bg-surface transition-colors duration-200"
-									title="Import operations"
-									on:click={openFilePicker}
-								>
-									<Upload size={20} />
-								</button>
-							</div>
+						{#each ['/deposit', '/withdraw', '/merge', '/transfer', '/swap'] as route}
+							<a
+								href="{route}"
+								class="block px-3 py-2 rounded-lg text-base font-medium transition-all duration-300 ease-in-out
+									{isActive(route)
+										? 'scale-105 transform bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold shadow-lg'
+										: 'text-text hover:bg-surface hover:scale-105 hover:font-semibold'}"
+								on:click={closeMobileMenu}
+								aria-current={isActive(route) ? 'page' : undefined}
+							>
+								{$t(`nav.${route.slice(1)}`)}
+							</a>
+						{/each}
+
+						<div class="border-t border-border pt-3 mt-3 flex justify-center gap-4">
+							<button
+								class="rounded-lg p-3 text-text hover:bg-surface hover:scale-110 transition-all duration-300 ease-in-out"
+								title="Export operations"
+								on:click={handleExport}
+							>
+								<Download size={20} />
+							</button>
+							<button
+								class="rounded-lg p-3 text-text hover:bg-surface hover:scale-110 transition-all duration-300 ease-in-out"
+								title="Import operations"
+								on:click={openFilePicker}
+							>
+								<Upload size={20} />
+							</button>
 						</div>
 					{/if}
 				</div>
@@ -250,3 +244,5 @@
 		on:change={handleFileSelected}
 	/>
 </nav>
+
+<SettingsModal show={showSettings} onClose={closeSettings} />
