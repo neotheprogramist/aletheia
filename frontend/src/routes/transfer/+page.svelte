@@ -15,14 +15,12 @@
 	import Button from '$lib/ui/Button.svelte';
 	import Card from '$lib/ui/Card.svelte';
 	import Input from '$lib/ui/Input.svelte';
-	import Instructions, { type TransferMode } from '$lib/ui/Instructions.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
 	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
 	import SelectionToggle from '$lib/ui/SelectionToggle.svelte';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
-	import { fetchTransferFee } from '$lib/utils/fetchFeeForExtension';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
 	import {
 		loadDeposits,
@@ -37,17 +35,16 @@
 	import { Contract } from 'starknet';
 	import type { Component } from 'svelte';
 	import { get } from 'svelte/store';
-	import { supportedTokens } from '$lib/config/tokens';
 	import { browser } from '$app/environment';
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
 	import { autoSelectCompleteProcess, type AutoSelectedFee } from '$lib/utils/autoSelectFeeDeposit';
+	import ProgressModal from '$lib/ui/ProgressModal.svelte';
+	import { progressModalStore, progressModalActions, transferProgressSteps } from '$lib/stores/progressModal';
 
-	const STRK_ADDRESS = supportedTokens[0].address;
 
 	// --- VIEW & TRANSFER STATE ---
 	let viewMode: 'sender' | 'recipient' = 'sender';
 	let deposits: DisplayOperation[] = [];
-	let selectionMode: TransferMode = 'transfer';
 
 	let selectedTransferKey: number | null = null;
 	let selectedTransferDeposit: DisplayOperation | null = null;
@@ -102,19 +99,14 @@
 	}
 
 	function handleRowClick(globalIdx: number) {
-		if (selectionMode === 'transfer') {
-			selectedTransferKey = deposits[globalIdx].index;
-			selectedTransferDeposit = deposits.find((d) => d.index === selectedTransferKey) ?? null;
-			transferSecretAndNullifierHash = '';
-			transferAmount = '';
+		selectedTransferKey = deposits[globalIdx].index;
+		selectedTransferDeposit = deposits.find((d) => d.index === selectedTransferKey) ?? null;
+		transferSecretAndNullifierHash = '';
+		transferAmount = '';
 
-			// Auto-select fee deposit when transfer deposit is selected
-			if (selectedTransferDeposit) {
-				autoSelectFeeDeposit();
-			}
-		} else {
-			selectedFeeKey = deposits[globalIdx].index;
-			selectedFeeDeposit = deposits.find((d) => d.index === selectedFeeKey) ?? null;
+		// Auto-select fee deposit when transfer deposit is selected
+		if (selectedTransferDeposit) {
+			autoSelectFeeDeposit();
 		}
 	}
 
@@ -164,12 +156,6 @@
 		}
 	}
 
-	function handleSelectionChange(value: string) {
-		selectionMode = value as TransferMode;
-		if (value === 'fee') {
-			selectedToken.set(STRK_ADDRESS);
-		}
-	}
 
 	/** Step 1: Validate user inputs for transfer */
 	async function initiateTransfer() {
@@ -232,195 +218,222 @@
 
 	/** Step 2: Build proof & send transfer tx */
 	async function confirmTransfer() {
+		// 1) Close the modal and start progress
 		showFeeModal = false;
+		progressModalActions.show('Transfer Progress', [...transferProgressSteps]);
 
-		await wrapWithToast(
-			async () => {
-				if (!transferNoteBalanceWei || !userTransferAmountWei) {
-					throw new Error('Cannot calculate refund – missing transfer amounts');
-				}
-				if (!feeNoteBalanceWei || !feeWei) {
-					throw new Error('Cannot calculate refund – missing fee amounts');
-				}
+		try {
+			// 2) Validate that note balances and calculated amounts are present
+			progressModalActions.updateStep('preparation', 'loading');
+			if (!transferNoteBalanceWei || !userTransferAmountWei) {
+				throw new Error('Cannot calculate refund – missing transfer amounts');
+			}
+			if (!feeNoteBalanceWei || !feeWei) {
+				throw new Error('Cannot calculate refund – missing fee amounts');
+			}
 
-				// Ensure zk library / merkle tree are ready
-				const { garaga } = get(zkLibraries);
-				if (!garaga) throw new Error('Garaga not initialized');
-				if (!feeNote || !selectedFeeDeposit || !transferNote || !selectedTransferDeposit) {
-					throw new Error('Missing fee or transfer deposit');
-				}
-				const tree = merkleTree;
-				if (!tree) throw new Error('Merkle tree does not exist');
+			// Ensure zk library / merkle tree are ready
+			const { garaga } = get(zkLibraries);
+			if (!garaga) throw new Error('Garaga not initialized');
+			if (!feeNote || !selectedFeeDeposit || !transferNote || !selectedTransferDeposit) {
+				throw new Error('Missing fee or transfer deposit');
+			}
+			const tree = merkleTree;
+			if (!tree) throw new Error('Merkle tree does not exist');
 
-				// Compute proof data for transfer + fee deposits
-				const transferProofData = tree.getProofData(
-					garaga.poseidonHashBN254(
-						garaga.poseidonHashBN254(BigInt(selectedTransferDeposit.hash), transferNoteBalanceWei),
-						BigInt(transferNote.tokenAddress)
-					)
-				);
-				const feeProofData = tree.getProofData(
-					garaga.poseidonHashBN254(
-						garaga.poseidonHashBN254(BigInt(selectedFeeDeposit.hash), feeNoteBalanceWei),
-						BigInt(feeNote.tokenAddress)
-					)
-				);
-
-				// Generate refund operations
-				const transferRefund = transferNoteBalanceWei - userTransferAmountWei;
-				const transferOpResult = await generateOperation({
-					data: { tokenAddress: transferNote.tokenAddress, amount: transferRefund }
-				});
-				transferRefundHash = transferOpResult.hash;
-
-				const feeRefund = feeNoteBalanceWei - feeWei;
-				const feeOpResult = await generateOperation({
-					data: { tokenAddress: feeNote.tokenAddress, amount: feeRefund }
-				});
-				feeRefundHash = feeOpResult.hash;
-
-				const transferRefundCommitmentHash = garaga.poseidonHashBN254(
-					garaga.poseidonHashBN254(BigInt(transferRefundHash), transferRefund),
+			// Compute proof data for transfer + fee deposits
+			const transferProofData = tree.getProofData(
+				garaga.poseidonHashBN254(
+					garaga.poseidonHashBN254(BigInt(selectedTransferDeposit.hash), transferNoteBalanceWei),
 					BigInt(transferNote.tokenAddress)
-				);
-				const feeRefundCommitmentHash = garaga.poseidonHashBN254(
-					garaga.poseidonHashBN254(BigInt(feeRefundHash), feeRefund),
+				)
+			);
+			const feeProofData = tree.getProofData(
+				garaga.poseidonHashBN254(
+					garaga.poseidonHashBN254(BigInt(selectedFeeDeposit.hash), feeNoteBalanceWei),
 					BigInt(feeNote.tokenAddress)
+				)
+			);
+
+			// Generate refund operations
+			const transferRefund = transferNoteBalanceWei - userTransferAmountWei;
+			const transferOpResult = await generateOperation({
+				data: { tokenAddress: transferNote.tokenAddress, amount: transferRefund }
+			});
+			transferRefundHash = transferOpResult.hash;
+
+			const feeRefund = feeNoteBalanceWei - feeWei;
+			const feeOpResult = await generateOperation({
+				data: { tokenAddress: feeNote.tokenAddress, amount: feeRefund }
+			});
+			feeRefundHash = feeOpResult.hash;
+
+			const transferRefundCommitmentHash = garaga.poseidonHashBN254(
+				garaga.poseidonHashBN254(BigInt(transferRefundHash), transferRefund),
+				BigInt(transferNote.tokenAddress)
+			);
+			const feeRefundCommitmentHash = garaga.poseidonHashBN254(
+				garaga.poseidonHashBN254(BigInt(feeRefundHash), feeRefund),
+				BigInt(feeNote.tokenAddress)
+			);
+
+			// Fetch operation details from DB
+			const transferOp = await getOperationDetails(selectedTransferDeposit.hash);
+			const feeOp = await getOperationDetails(selectedFeeDeposit.hash);
+			const transferRefundOp = await getOperationDetails(transferRefundHash);
+			const feeRefundOp = await getOperationDetails(feeRefundHash);
+
+			if (!transferOp || !feeOp || !transferRefundOp || !feeRefundOp) {
+				throw new Error('One or more operations not found');
+			}
+
+			// Build witness input
+			const transferInput = {
+				// Deposit data
+				root_1: `0x${transferProofData.root.toString(16)}`,
+				secret_1: `0x${BigInt(transferOp.secret).toString(16)}`,
+				nullifier_1: `0x${BigInt(transferOp.nullifier).toString(16)}`,
+				commitment_amount_1: `0x${BigInt(transferOp.amount).toString(16)}`,
+				token_address_1: transferOp.tokenAddress,
+				hashpath_1: transferProofData.path[0].map((e) => `0x${e.toString(16)}`),
+				index_1: `0x${BigInt(transferProofData.index).toString(16)}`,
+				amount: `0x${userTransferAmountWei.toString(16)}`,
+				// Fee deposit data
+				root_2: `0x${feeProofData.root.toString(16)}`,
+				secret_2: `0x${BigInt(feeOp.secret).toString(16)}`,
+				nullifier_2: `0x${BigInt(feeOp.nullifier).toString(16)}`,
+				commitment_amount_2: `0x${BigInt(feeOp.amount).toString(16)}`,
+				token_address_2: feeOp.tokenAddress,
+				hashpath_2: feeProofData.path[0].map((e) => `0x${e.toString(16)}`),
+				index_2: `0x${BigInt(feeProofData.index).toString(16)}`,
+				gas_fee: `0x${feeWei.toString(16)}`,
+				// Refund for transfer deposit
+				refund_secret_1: `0x${BigInt(transferRefundOp.secret).toString(16)}`,
+				refund_nullifier_1: `0x${BigInt(transferRefundOp.nullifier).toString(16)}`,
+				refund_amount_1: `0x${transferRefund.toString(16)}`,
+				refund_commitment_hash_1: `0x${transferRefundCommitmentHash.toString(16)}`,
+				// Refund for fee deposit
+				refund_secret_2: `0x${BigInt(feeRefundOp.secret).toString(16)}`,
+				refund_nullifier_2: `0x${BigInt(feeRefundOp.nullifier).toString(16)}`,
+				refund_amount_2: `0x${feeRefund.toString(16)}`,
+				refund_commitment_hash_2: `0x${feeRefundCommitmentHash.toString(16)}`,
+				// recipient hash
+				_recipient_secret_and_nullifier_hash_1: transferSecretAndNullifierHash
+			};
+			progressModalActions.updateStep('preparation', 'completed');
+
+			// Generate zk proof
+			progressModalActions.updateStep('proof-generation', 'loading');
+			const honkCalldataHex = await generateHonkCalldata(
+				'/circuits/transfer.json',
+				'/circuits/recursive.json',
+				'/circuits/vk_recursive.bin',
+				transferInput
+			);
+			progressModalActions.updateStep('proof-generation', 'completed');
+
+			// Prepare StarkNet transaction
+			progressModalActions.updateStep('transaction-prepare', 'loading');
+			const rpc = get(provider);
+			if (!rpc) throw new Error('Missing Provider');
+			const account = get(paymasterWallet);
+			if (!account) throw new Error('Missing Account');
+			const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
+			if (!privacyAbi) throw new Error('Missing ABI');
+			const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
+			privacy.connect(account);
+
+			const honkCalldataWithLen = [
+				`0x${BigInt(honkCalldataHex.length).toString(16)}`,
+				...honkCalldataHex
+			];
+
+			const call = {
+				contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				entrypoint: 'transfer',
+				calldata: honkCalldataWithLen
+			};
+			progressModalActions.updateStep('transaction-prepare', 'completed');
+
+			progressModalActions.updateStep('executing-transaction', 'loading');
+			const tx = await account.execute(call);
+			progressModalActions.updateStep('executing-transaction', 'completed');
+
+			progressModalActions.updateStep('onchain-confirmation', 'loading');
+			const receipt = await rpc.waitForTransaction(tx.transaction_hash);
+
+			// Check receipt
+			if (receipt.isSuccess()) {
+				const decimals = await fetchTokenDecimals(transferNote.tokenAddress);
+				const humanAmount = fromWei(userTransferAmountWei!, decimals);
+
+				toastStore.addToast({
+					type: 'success',
+					message: `Transfer succeeded: ${humanAmount} tokens of ${transferNote.tokenAddress} \n Transaction hash: ${tx.transaction_hash}`,
+					duration: 30000
+				});
+			} else if (receipt.isReverted()) {
+				console.warn('⚠️ Transaction reverted:', receipt.value);
+				throw new Error(`Transaction reverted: ${receipt.value}`);
+			} else {
+				console.error('❌ Transaction error:', receipt.value);
+				throw new Error(`Transaction error: ${receipt.value}`);
+			}
+
+			progressModalActions.updateStep('onchain-confirmation', 'completed');
+
+			//  nullify in DB
+			await nullifyOperation(selectedTransferDeposit.hash);
+			await nullifyOperation(selectedFeeDeposit.hash);
+
+			// Reset state
+			resetAll();
+
+			if (viewMode === 'sender' && $selectedToken) {
+				loadDeposits(
+					$selectedToken,
+					(d) => (deposits = d),
+					(b) => (isLoading = b)
 				);
+			}
 
-				// Fetch operation details from DB
-				const transferOp = await getOperationDetails(selectedTransferDeposit.hash);
-				const feeOp = await getOperationDetails(selectedFeeDeposit.hash);
-				const transferRefundOp = await getOperationDetails(transferRefundHash);
-				const feeRefundOp = await getOperationDetails(feeRefundHash);
+			setTimeout(() => {
+				progressModalActions.hide();
+			}, 2000);
 
-				if (!transferOp || !feeOp || !transferRefundOp || !feeRefundOp) {
-					throw new Error('One or more operations not found');
-				}
+		} catch (err) {
+			// On error: abort any created refund operations
+			console.warn('❌ Transfer failed with error:', err);
+			
+			const currentSteps = $progressModalStore.steps;
+			const currentStepIndex = currentSteps.findIndex(step => step.status === 'loading');
+			if (currentStepIndex !== -1) {
+				progressModalActions.updateStep(currentSteps[currentStepIndex].id, 'error');
+			}
 
-				// Build witness input
-				const transferInput = {
-					// Deposit data
-					root_1: `0x${transferProofData.root.toString(16)}`,
-					secret_1: `0x${BigInt(transferOp.secret).toString(16)}`,
-					nullifier_1: `0x${BigInt(transferOp.nullifier).toString(16)}`,
-					commitment_amount_1: `0x${BigInt(transferOp.amount).toString(16)}`,
-					token_address_1: transferOp.tokenAddress,
-					hashpath_1: transferProofData.path[0].map((e) => `0x${e.toString(16)}`),
-					index_1: `0x${BigInt(transferProofData.index).toString(16)}`,
-					amount: `0x${userTransferAmountWei.toString(16)}`,
-					// Fee deposit data
-					root_2: `0x${feeProofData.root.toString(16)}`,
-					secret_2: `0x${BigInt(feeOp.secret).toString(16)}`,
-					nullifier_2: `0x${BigInt(feeOp.nullifier).toString(16)}`,
-					commitment_amount_2: `0x${BigInt(feeOp.amount).toString(16)}`,
-					token_address_2: feeOp.tokenAddress,
-					hashpath_2: feeProofData.path[0].map((e) => `0x${e.toString(16)}`),
-					index_2: `0x${BigInt(feeProofData.index).toString(16)}`,
-					gas_fee: `0x${feeWei.toString(16)}`,
-					// Refund for transfer deposit
-					refund_secret_1: `0x${BigInt(transferRefundOp.secret).toString(16)}`,
-					refund_nullifier_1: `0x${BigInt(transferRefundOp.nullifier).toString(16)}`,
-					refund_amount_1: `0x${transferRefund.toString(16)}`,
-					refund_commitment_hash_1: `0x${transferRefundCommitmentHash.toString(16)}`,
-					// Refund for fee deposit
-					refund_secret_2: `0x${BigInt(feeRefundOp.secret).toString(16)}`,
-					refund_nullifier_2: `0x${BigInt(feeRefundOp.nullifier).toString(16)}`,
-					refund_amount_2: `0x${feeRefund.toString(16)}`,
-					refund_commitment_hash_2: `0x${feeRefundCommitmentHash.toString(16)}`,
-					// recipient hash
-					_recipient_secret_and_nullifier_hash_1: transferSecretAndNullifierHash
-				};
-
-				// Generate zk proof
-				const honkCalldataHex = await generateHonkCalldata(
-					'/circuits/transfer.json',
-					'/circuits/recursive.json',
-					'/circuits/vk_recursive.bin',
-					transferInput
-				);
-				// Prepare StarkNet transaction
-				const rpc = get(provider);
-				if (!rpc) throw new Error('Missing Provider');
-				const account = get(paymasterWallet);
-				if (!account) throw new Error('Missing Account');
-				const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
-				if (!privacyAbi) throw new Error('Missing ABI');
-				const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
-				privacy.connect(account);
-
-				const honkCalldataWithLen = [
-					`0x${BigInt(honkCalldataHex.length).toString(16)}`,
-					...honkCalldataHex
-				];
-
-				const call = {
-					contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
-					entrypoint: 'transfer',
-					calldata: honkCalldataWithLen
-				};
-				const tx = await account.execute(call);
-				const receipt = await rpc.waitForTransaction(tx.transaction_hash);
-
-				// Check receipt
-				if (receipt.isSuccess()) {
-					const decimals = await fetchTokenDecimals(transferNote.tokenAddress);
-					const humanAmount = fromWei(userTransferAmountWei!, decimals);
-
-					toastStore.addToast({
-						type: 'success',
-						message: `Transfer succeeded: ${humanAmount} tokens of ${transferNote.tokenAddress} \n Transaction hash: ${tx.transaction_hash}`,
-						duration: 30000
-					});
-				} else if (receipt.isReverted()) {
-					console.warn('⚠️ Transaction reverted:', receipt.value);
-					throw new Error(`Transaction reverted: ${receipt.value}`);
-				} else {
-					console.error('❌ Transaction error:', receipt.value);
-					throw new Error(`Transaction error: ${receipt.value}`);
-				}
-
-				//  nullify in DB
-				await nullifyOperation(selectedTransferDeposit.hash);
-				await nullifyOperation(selectedFeeDeposit.hash);
-
-				// Reset state
-				resetAll();
-
-				if (viewMode === 'sender' && $selectedToken) {
-					loadDeposits(
-						$selectedToken,
-						(d) => (deposits = d),
-						(b) => (isLoading = b)
-					);
-				}
-			},
-			{
-				loading: '⏳ Sending Transfer Tx',
-				success: '✅ Transfer sent!',
-				error: '❌ Transfer failed'
-			},
-			async (err) => {
-				isLoading = false;
-				console.warn('❌ Transfer failed with error:', err);
-				if (transferRefundHash) {
-					try {
-						await abortOperation(transferRefundHash);
-						console.warn('🧯 Aborted refund operation:', transferRefundHash);
-					} catch (abortError) {
-						console.error('🚨 Failed to abort withdraw refund:', abortError);
-					}
-				}
-				if (feeRefundHash) {
-					try {
-						await abortOperation(feeRefundHash);
-						console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
-					} catch (abortError) {
-						console.error('🚨 Failed to abort fee refund:', abortError);
-					}
+			if (transferRefundHash) {
+				try {
+					await abortOperation(transferRefundHash);
+					console.warn('🧯 Aborted refund operation:', transferRefundHash);
+				} catch (abortError) {
+					console.error('🚨 Failed to abort transfer refund:', abortError);
 				}
 			}
-		);
+			if (feeRefundHash) {
+				try {
+					await abortOperation(feeRefundHash);
+					console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
+				} catch (abortError) {
+					console.error('🚨 Failed to abort fee refund:', abortError);
+				}
+			}
+			
+			setTimeout(() => {
+				progressModalActions.hide();
+			}, 3000);
+		}
+
+		isLoading = false;
 	}
 
 	/** Generate a new “empty” (pending) deposit operation */
@@ -603,23 +616,16 @@
 					</form>
 				</div>
 			{:else}
-				<SelectionToggle
-					options={[
-						{ label: 'Transfer', value: 'transfer', isFirst: true },
-						{ label: 'Fee', value: 'fee', isLast: true }
-					]}
-					selected={selectionMode}
-					onChange={handleSelectionChange}
-					onReset={resetAll}
-				/>
-				<Instructions action="transfer" mode={selectionMode} />
+				<h2 class="text-2xl font-bold mb-4">Transfer</h2>
+				<p class="text-gray-600 mb-6">
+					Select a deposit to transfer from. Fee deposit will be automatically selected.
+				</p>
 
 				<TokenSelect
 					tokens={$tokens}
 					bind:value={$selectedToken}
 					placeholder="Filter deposits by token"
 					class_="mb-4 w-64"
-					disabled={selectionMode === 'fee'}
 				/>
 				{#if !deposits.length}
 					<h2 class="text-center">Please make a deposit first!</h2>
@@ -630,24 +636,40 @@
 						pageSize={5}
 						keyField="index"
 						onRowClick={handleRowClick}
-						activeKey={selectionMode === 'transfer' ? selectedTransferKey : selectedFeeKey}
-						inactiveKeys={selectionMode === 'transfer' && selectedFeeKey !== null
-							? [selectedFeeKey]
-							: selectionMode === 'fee' && selectedTransferKey !== null
-								? [selectedTransferKey]
-								: []}
+						activeKey={selectedTransferKey}
+						inactiveKeys={selectedFeeKey !== null ? [selectedFeeKey] : []}
 						hoverClass="hover:bg-green-600"
 					/>
+				{/if}
+
+				<!-- Auto-selected fee information -->
+				{#if autoSelectedFeeInfo}
+					<div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+						<h3 class="font-semibold text-blue-800 mb-2">Fee Information</h3>
+						<p class="text-sm text-blue-700">
+							Fee: <strong>{autoSelectedFeeInfo.feeInfo.formatted} STRK</strong>
+							{#if autoSelectedFeeInfo.feeDeposit}
+								• Auto-selected fee deposit: <strong>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong>
+							{/if}
+						</p>
+					</div>
+				{/if}
+
+				<!-- Error message -->
+				{#if feePreloadError}
+					<div class="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
+						<p class="text-sm text-red-700">{feePreloadError}</p>
+					</div>
 				{/if}
 
 				<SelectedDeposits
 					items={[
 						{ title: 'Transfer Deposit', deposit: selectedTransferDeposit },
-						{ title: 'Fee Deposit', deposit: selectedFeeDeposit }
+						{ title: 'Fee Deposit (Auto-selected)', deposit: selectedFeeDeposit }
 					]}
 				/>
 
-				{#if selectedTransferDeposit && selectedFeeDeposit}
+				{#if selectedTransferDeposit && selectedFeeDeposit && !feePreloadError}
 					<div class="mt-6 grid w-full grid-cols-1 justify-items-center">
 						<Card>
 							<form on:submit|preventDefault={initiateTransfer} class="mt-6 flex flex-col gap-4">
@@ -696,6 +718,13 @@
 			</Modal>
 		</Card>
 	</div>
+	
+	<ProgressModal 
+		show={$progressModalStore.show}
+		title={$progressModalStore.title}
+		steps={$progressModalStore.steps}
+		onClose={progressModalActions.hide}
+	/>
 </ProtectedRoute>
 
 <Modal

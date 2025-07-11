@@ -54,7 +54,7 @@ export async function autoSelectFeeDeposit(
  * Preload fee information for different operation types
  */
 export async function preloadFeeInfo(
-	operationType: 'withdraw' | 'swap' | 'transfer' | 'merge' | 'borrow',
+	operationType: 'withdraw' | 'swap' | 'transfer' | 'merge',
 	poolsContract: string,
 	extensionAddress?: string
 ): Promise<FeeInfo> {
@@ -63,7 +63,6 @@ export async function preloadFeeInfo(
 	switch (operationType) {
 		case 'withdraw':
 		case 'swap':
-		case 'borrow':
 			if (!extensionAddress) {
 				throw new Error(`Extension address required for ${operationType}`);
 			}
@@ -90,7 +89,7 @@ export async function preloadFeeInfo(
  * Complete auto-selection process: get fee info and select optimal deposit
  */
 export async function autoSelectCompleteProcess(
-	operationType: 'withdraw' | 'swap' | 'transfer' | 'merge' | 'borrow',
+	operationType: 'withdraw' | 'swap' | 'transfer' | 'merge',
 	poolsContract: string,
 	extensionAddress?: string,
 	excludeDeposits: DisplayOperation[] = []

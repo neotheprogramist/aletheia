@@ -10,6 +10,7 @@
 	import Button from '$lib/ui/Button.svelte';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
+	import ProgressModal from '$lib/ui/ProgressModal.svelte';
 
 	import { toLowHigh } from '$lib/utils/toLowHigh';
 	import { toWei } from '$lib/utils/toWei';
@@ -17,6 +18,7 @@
 	import { abortOperation } from '$lib/privacy/abortOperation';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
 	import { provider } from '$lib/stores/provider';
+	import { progressModalStore, progressModalActions, depositProgressSteps } from '$lib/stores/progressModal';
 
 	let amount = '';
 	let isLoading = false;
@@ -44,55 +46,71 @@
 		isLoading = true;
 		let operationHash = '';
 
-		await wrapWithToast(
-			async () => {
-				const decimals = await fetchTokenDecimals($selectedToken);
-				const amountWei = toWei(amount, decimals);
-				const { hash } = await generateOperation({
-					data: { tokenAddress: $selectedToken, amount: amountWei }
-				});
-				operationHash = hash;
+		progressModalActions.show('Deposit Progress', [...depositProgressSteps]);
 
-				const calls = createCalls(hash, amountWei);
+		try {
+			progressModalActions.updateStep('preparation', 'loading');
+			const decimals = await fetchTokenDecimals($selectedToken);
+			const amountWei = toWei(amount, decimals);
+			const { hash } = await generateOperation({
+				data: { tokenAddress: $selectedToken, amount: amountWei }
+			});
+			operationHash = hash;
 
-				const connectedWallet = get(wallet);
-				if (!connectedWallet) throw new Error('Please connect your wallet.');
+			const calls = createCalls(hash, amountWei);
+			progressModalActions.updateStep('preparation', 'completed');
 
-				const {transaction_hash} = await connectedWallet.request({
-					type: 'wallet_addInvokeTransaction',
-					params: { calls }
-				});
+			progressModalActions.updateStep('wallet-approval', 'loading');
+			const connectedWallet = get(wallet);
+			if (!connectedWallet) throw new Error('Please connect your wallet.');
 
-				const rpc = get(provider);
-				if (!rpc) throw new Error('Missing Provider');
+			const {transaction_hash} = await connectedWallet.request({
+				type: 'wallet_addInvokeTransaction',
+				params: { calls }
+			});
+			progressModalActions.updateStep('wallet-approval', 'completed');
 
-				const receipt = await rpc.waitForTransaction(BigInt(transaction_hash));
+			progressModalActions.updateStep('onchain-confirmation', 'loading');
+			const rpc = get(provider);
+			if (!rpc) throw new Error('Missing Provider');
 
-				if (receipt.isReverted()) {
-					throw new Error('Transaction reverted: ${receipt.value}');
-				} else if (!receipt.isSuccess()) {
-					throw new Error('Transaction error: ${receipt.value}');
-				}
+			const receipt = await rpc.waitForTransaction(BigInt(transaction_hash));
 
-				amount = '';
-			},
-			{
-				loading: '⏳ Running deposit',
-				success: '✅ Deposit complete!',
-				error: '❌ Deposit failed'
-			},
-			async (err) => {
-				console.warn('❌ Deposit failed with error:', err);
-				if (operationHash) {
-					try {
-						await abortOperation(operationHash);
-						console.warn('🧯 Aborted failed operation:', operationHash);
-					} catch (abortError) {
-						console.error('🚨 Failed to abort operation:', abortError);
-					}
+			if (receipt.isReverted()) {
+				throw new Error('Transaction reverted: ${receipt.value}');
+			} else if (!receipt.isSuccess()) {
+				throw new Error('Transaction error: ${receipt.value}');
+			}
+
+			progressModalActions.updateStep('onchain-confirmation', 'completed');
+			amount = '';
+			
+			setTimeout(() => {
+				progressModalActions.hide();
+			}, 2000);
+			
+		} catch (err) {
+			console.warn('❌ Deposit failed with error:', err);
+			
+			const currentSteps = $progressModalStore.steps;
+			const currentStepIndex = currentSteps.findIndex(step => step.status === 'loading');
+			if (currentStepIndex !== -1) {
+				progressModalActions.updateStep(currentSteps[currentStepIndex].id, 'error');
+			}
+			
+			if (operationHash) {
+				try {
+					await abortOperation(operationHash);
+					console.warn('🧯 Aborted failed operation:', operationHash);
+				} catch (abortError) {
+					console.error('🚨 Failed to abort operation:', abortError);
 				}
 			}
-		);
+			
+			setTimeout(() => {
+				progressModalActions.hide();
+			}, 3000);
+		}
 
 		isLoading = false;
 	}
@@ -114,4 +132,11 @@
 			</form>
 		</Card>
 	</div>
+	
+	<ProgressModal 
+		show={$progressModalStore.show}
+		title={$progressModalStore.title}
+		steps={$progressModalStore.steps}
+		onClose={progressModalActions.hide}
+	/>
 </ProtectedRoute>
