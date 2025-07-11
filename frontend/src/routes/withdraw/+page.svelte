@@ -34,8 +34,22 @@
 	import { browser } from '$app/environment';
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
 	import { autoSelectCompleteProcess, type AutoSelectedFee } from '$lib/utils/autoSelectFeeDeposit';
-	import { progressModalStore, progressModalActions, withdrawProgressSteps } from '$lib/stores/progressModal';
-	import { Eye, Shield, ArrowDown, Wallet, CheckCircle, AlertTriangle, DollarSign, Users, Zap } from 'lucide-svelte';
+	import {
+		progressModalStore,
+		progressModalActions,
+		withdrawProgressSteps
+	} from '$lib/stores/progressModal';
+	import {
+		Eye,
+		Shield,
+		ArrowDown,
+		Wallet,
+		CheckCircle,
+		AlertTriangle,
+		DollarSign,
+		Users,
+		Zap
+	} from 'lucide-svelte';
 
 	const STRK_ADDRESS = supportedTokens[0].address;
 
@@ -81,7 +95,7 @@
 		selectedWithdrawDeposit = deposits.find((d) => d.index === selectedWithdrawKey) ?? null;
 		withdrawRecipient = '';
 		withdrawAmount = '';
-		
+
 		// Auto-select fee deposit when withdraw deposit is selected
 		if (selectedWithdrawDeposit) {
 			autoSelectFeeDeposit();
@@ -100,9 +114,9 @@
 	/** Auto-select fee deposit when withdraw deposit is chosen */
 	async function autoSelectFeeDeposit() {
 		if (!selectedWithdrawDeposit) return;
-		
+
 		feePreloadError = null;
-		
+
 		try {
 			// Get fee info and auto-select the best STRK deposit
 			const excludeDeposits = [selectedWithdrawDeposit];
@@ -112,7 +126,7 @@
 				PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS,
 				excludeDeposits
 			);
-			
+
 			// Set the auto-selected fee deposit
 			if (autoSelectedFeeInfo.feeDeposit) {
 				selectedFeeDeposit = autoSelectedFeeInfo.feeDeposit;
@@ -120,7 +134,7 @@
 			} else {
 				selectedFeeDeposit = null;
 				selectedFeeKey = null;
-				
+
 				if (!autoSelectedFeeInfo.hasEnoughBalance) {
 					feePreloadError = `Insufficient STRK balance. Required: ${autoSelectedFeeInfo.feeInfo.formatted} STRK`;
 				} else {
@@ -133,7 +147,6 @@
 			autoSelectedFeeInfo = null;
 		}
 	}
-
 
 	/** Step 1: Validate */
 	async function initiateWithdraw() {
@@ -165,7 +178,7 @@
 
 			const feeNoteDecimals = await fetchTokenDecimals(feeTokenAddress);
 			feeNoteBalanceWei = BigInt(feeNoteBalance);
-			
+
 			// Use pre-loaded fee info
 			feeWei = autoSelectedFeeInfo.feeInfo.amount;
 			feeWeiHex = autoSelectedFeeInfo.feeInfo.formatted;
@@ -380,17 +393,16 @@
 			setTimeout(() => {
 				progressModalActions.hide();
 			}, 2000);
-
 		} catch (err) {
 			// 13) On error: abort any created refund operations
 			console.warn('❌ Withdraw failed with error:', err);
-			
+
 			const currentSteps = $progressModalStore.steps;
-			const currentStepIndex = currentSteps.findIndex(step => step.status === 'loading');
+			const currentStepIndex = currentSteps.findIndex((step) => step.status === 'loading');
 			if (currentStepIndex !== -1) {
 				progressModalActions.updateStep(currentSteps[currentStepIndex].id, 'error');
 			}
-			
+
 			if (withdrawRefundHash) {
 				try {
 					await abortOperation(withdrawRefundHash);
@@ -407,7 +419,7 @@
 					console.error('🚨 Failed to abort fee refund:', abortError);
 				}
 			}
-			
+
 			setTimeout(() => {
 				progressModalActions.hide();
 			}, 3000);
@@ -418,41 +430,47 @@
 </script>
 
 <ProtectedRoute>
-	<div class="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-		<div class="max-w-6xl mx-auto p-6 pt-8">
+	<div
+		class="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
+	>
+		<div class="mx-auto max-w-6xl p-6 pt-8">
 			<!-- Header Section -->
-			<div class="text-center mb-8">
-				<div class="flex items-center justify-center gap-3 mb-4">
-					<div class="p-3 rounded-xl bg-gradient-to-br from-purple-400 to-pink-500 text-white shadow-lg">
-						<ArrowDown class="w-8 h-8" />
+			<div class="mb-8 text-center">
+				<div class="mb-4 flex items-center justify-center gap-3">
+					<div
+						class="rounded-xl bg-gradient-to-br from-purple-400 to-pink-500 p-3 text-white shadow-lg"
+					>
+						<ArrowDown class="h-8 w-8" />
 					</div>
-					<h1 class="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+					<h1
+						class="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl"
+					>
 						Private Withdrawal
 					</h1>
 				</div>
-				<p class="text-text-secondary text-lg max-w-2xl mx-auto">
+				<p class="text-text-secondary mx-auto max-w-2xl text-lg">
 					Withdraw your private deposits to any address with complete anonymity
 				</p>
 			</div>
 
-			<div class="grid lg:grid-cols-3 gap-6">
+			<div class="grid gap-6 lg:grid-cols-4">
 				<!-- Main Withdrawal Form -->
-				<div class="lg:col-span-2 space-y-6">
+				<div class="space-y-6 lg:col-span-2">
 					<!-- Token Filter and Deposits Table -->
 					<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
 						<div class="space-y-6">
 							<div class="flex items-center justify-between">
-								<h3 class="text-xl font-bold text-text flex items-center gap-2">
-									<Eye class="w-5 h-5 text-purple-500" />
+								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+									<Eye class="h-5 w-5 text-purple-500" />
 									Select Deposit to Withdraw
 								</h3>
 							</div>
-							
+
 							<div class="space-y-4">
 								<!-- Token Selection -->
 								<div class="space-y-3">
-									<label class="flex items-center gap-2 text-sm font-semibold text-text">
-										<DollarSign class="w-4 h-4" />
+									<label class="text-text flex items-center gap-2 text-sm font-semibold">
+										<DollarSign class="h-4 w-4" />
 										Filter by Token
 									</label>
 									<TokenSelect
@@ -465,15 +483,21 @@
 
 								<!-- Deposits Table -->
 								{#if !deposits.length}
-									<div class="text-center py-12">
-										<div class="mx-auto w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
-											<Wallet class="w-8 h-8 text-gray-400" />
+									<div class="py-12 text-center">
+										<div
+											class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700"
+										>
+											<Wallet class="h-8 w-8 text-gray-400" />
 										</div>
-										<h3 class="text-lg font-medium text-text mb-2">No Deposits Found</h3>
-										<p class="text-text-secondary">Make a deposit first to start withdrawing privately!</p>
+										<h3 class="text-text mb-2 text-lg font-medium">No Deposits Found</h3>
+										<p class="text-text-secondary">
+											Make a deposit first to start withdrawing privately!
+										</p>
 									</div>
 								{:else}
-									<div class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 rounded-lg p-1">
+									<div
+										class="rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 p-1 dark:from-gray-700 dark:to-gray-600"
+									>
 										<PaginatedTable
 											columns={defaultDepositColumns}
 											items={deposits}
@@ -493,21 +517,27 @@
 
 					<!-- Auto-selected fee information -->
 					{#if autoSelectedFeeInfo}
-						<Card class_="border-0 shadow-xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
+						<Card
+							class_="border-0 shadow-xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20"
+						>
 							<div class="space-y-3">
-								<h3 class="font-semibold text-blue-800 dark:text-blue-300 flex items-center gap-2">
-									<Zap class="w-5 h-5" />
+								<h3 class="flex items-center gap-2 font-semibold text-blue-800 dark:text-blue-300">
+									<Zap class="h-5 w-5" />
 									Fee Information
 								</h3>
 								<div class="space-y-2">
 									<div class="flex items-center justify-between">
 										<span class="text-sm text-blue-700 dark:text-blue-300">Network Fee:</span>
-										<span class="font-bold text-blue-800 dark:text-blue-200">{autoSelectedFeeInfo.feeInfo.formatted} STRK</span>
+										<span class="font-bold text-blue-800 dark:text-blue-200"
+											>{autoSelectedFeeInfo.feeInfo.formatted} STRK</span
+										>
 									</div>
 									{#if autoSelectedFeeInfo.feeDeposit}
 										<div class="flex items-center justify-between">
 											<span class="text-sm text-blue-700 dark:text-blue-300">Fee Deposit:</span>
-											<span class="font-medium text-blue-800 dark:text-blue-200">{autoSelectedFeeInfo.feeDeposit.displayAmount}</span>
+											<span class="font-medium text-blue-800 dark:text-blue-200"
+												>{autoSelectedFeeInfo.feeDeposit.displayAmount}</span
+											>
 										</div>
 									{/if}
 								</div>
@@ -517,11 +547,15 @@
 
 					<!-- Error message -->
 					{#if feePreloadError}
-						<Card class_="border-0 shadow-xl bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20">
+						<Card
+							class_="border-0 shadow-xl bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20"
+						>
 							<div class="flex items-start gap-3">
-								<AlertTriangle class="w-5 h-5 text-red-500 mt-0.5" />
+								<AlertTriangle class="mt-0.5 h-5 w-5 text-red-500" />
 								<div>
-									<h3 class="font-semibold text-red-800 dark:text-red-300 mb-1">Fee Payment Issue</h3>
+									<h3 class="mb-1 font-semibold text-red-800 dark:text-red-300">
+										Fee Payment Issue
+									</h3>
 									<p class="text-sm text-red-700 dark:text-red-300">{feePreloadError}</p>
 								</div>
 							</div>
@@ -540,16 +574,16 @@
 					{#if selectedWithdrawDeposit && selectedFeeDeposit && !feePreloadError}
 						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
 							<div class="space-y-6">
-								<h3 class="text-xl font-bold text-text flex items-center gap-2">
-									<Wallet class="w-5 h-5 text-purple-500" />
+								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+									<Wallet class="h-5 w-5 text-purple-500" />
 									Withdrawal Details
 								</h3>
-								
+
 								<form on:submit|preventDefault={initiateWithdraw} class="space-y-6">
 									<!-- Recipient Address -->
 									<div class="space-y-3">
-										<label class="flex items-center gap-2 text-sm font-semibold text-text">
-											<Users class="w-4 h-4" />
+										<label class="text-text flex items-center gap-2 text-sm font-semibold">
+											<Users class="h-4 w-4" />
 											Recipient Address
 										</label>
 										<Input
@@ -562,8 +596,8 @@
 
 									<!-- Amount Input -->
 									<div class="space-y-3">
-										<label class="flex items-center gap-2 text-sm font-semibold text-text">
-											<ArrowDown class="w-4 h-4" />
+										<label class="text-text flex items-center gap-2 text-sm font-semibold">
+											<ArrowDown class="h-4 w-4" />
 											Withdrawal Amount
 										</label>
 										<div class="flex gap-2">
@@ -575,7 +609,7 @@
 											/>
 											<button
 												type="button"
-												class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+												class="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-purple-600"
 												on:click={() => {
 													if (selectedWithdrawDeposit) {
 														withdrawAmount = selectedWithdrawDeposit.displayAmount;
@@ -588,11 +622,11 @@
 									</div>
 
 									<!-- Submit Button -->
-									<Button 
-										text="Execute Private Withdrawal" 
-										loading={isLoading} 
+									<Button
+										text="Execute Private Withdrawal"
+										loading={isLoading}
 										type="submit"
-										class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300" 
+										class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
 									/>
 								</form>
 							</div>
@@ -601,41 +635,65 @@
 				</div>
 
 				<!-- Information Panel -->
-				<div class="space-y-6">
+				<div class="space-y-6 lg:col-span-2">
 					<!-- How Withdrawals Work -->
 					<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
 						<div class="space-y-4">
-							<h3 class="text-xl font-bold text-text flex items-center gap-2">
-								<Shield class="w-5 h-5 text-purple-500" />
+							<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+								<Shield class="h-5 w-5 text-purple-500" />
 								How Private Withdrawals Work
 							</h3>
 							<div class="space-y-4">
 								<div class="flex items-start gap-3">
-									<div class="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">1</div>
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-purple-500 text-sm font-bold text-white"
+									>
+										1
+									</div>
 									<div>
-										<p class="font-medium text-text">Select Your Deposit</p>
-										<p class="text-sm text-text-secondary">Choose which private deposit you want to withdraw from</p>
+										<p class="text-text font-medium">Select Your Deposit</p>
+										<p class="text-text-secondary text-sm">
+											Choose which private deposit you want to withdraw from
+										</p>
 									</div>
 								</div>
 								<div class="flex items-start gap-3">
-									<div class="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">2</div>
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-purple-500 text-sm font-bold text-white"
+									>
+										2
+									</div>
 									<div>
-										<p class="font-medium text-text">Set Recipient & Amount</p>
-										<p class="text-sm text-text-secondary">Specify where to send funds and how much to withdraw</p>
+										<p class="text-text font-medium">Set Recipient & Amount</p>
+										<p class="text-text-secondary text-sm">
+											Specify where to send funds and how much to withdraw
+										</p>
 									</div>
 								</div>
 								<div class="flex items-start gap-3">
-									<div class="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">3</div>
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-purple-500 text-sm font-bold text-white"
+									>
+										3
+									</div>
 									<div>
-										<p class="font-medium text-text">Zero-Knowledge Proof</p>
-										<p class="text-sm text-text-secondary">System generates proof without revealing your identity</p>
+										<p class="text-text font-medium">Zero-Knowledge Proof</p>
+										<p class="text-text-secondary text-sm">
+											System generates proof without revealing your identity
+										</p>
 									</div>
 								</div>
 								<div class="flex items-start gap-3">
-									<div class="w-6 h-6 bg-pink-500 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">4</div>
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-pink-500 text-sm font-bold text-white"
+									>
+										4
+									</div>
 									<div>
-										<p class="font-medium text-text">Anonymous Transfer</p>
-										<p class="text-sm text-text-secondary">Funds sent with complete privacy and unlinkability</p>
+										<p class="text-text font-medium">Anonymous Transfer</p>
+										<p class="text-text-secondary text-sm">
+											Funds sent with complete privacy and unlinkability
+										</p>
 									</div>
 								</div>
 							</div>
@@ -643,28 +701,34 @@
 					</Card>
 
 					<!-- Security Features -->
-					<Card class_="border-0 shadow-xl bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
+					<Card
+						class_="border-0 shadow-xl bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20"
+					>
 						<div class="space-y-4">
-							<h3 class="text-xl font-bold text-text flex items-center gap-2">
-								<Shield class="w-5 h-5 text-purple-500" />
+							<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+								<Shield class="h-5 w-5 text-purple-500" />
 								Privacy Features
 							</h3>
 							<div class="space-y-3">
 								<div class="flex items-center gap-3">
-									<CheckCircle class="w-5 h-5 text-purple-500" />
-									<span class="text-sm font-medium text-text">Break transaction linkability</span>
+									<CheckCircle class="h-5 w-5 text-purple-500" />
+									<span class="text-text text-sm font-medium">Break transaction linkability</span>
 								</div>
 								<div class="flex items-center gap-3">
-									<CheckCircle class="w-5 h-5 text-purple-500" />
-									<span class="text-sm font-medium text-text">Hide withdrawal source and amount</span>
+									<CheckCircle class="h-5 w-5 text-purple-500" />
+									<span class="text-text text-sm font-medium"
+										>Hide withdrawal source and amount</span
+									>
 								</div>
 								<div class="flex items-center gap-3">
-									<CheckCircle class="w-5 h-5 text-purple-500" />
-									<span class="text-sm font-medium text-text">Automatic fee payment handling</span>
+									<CheckCircle class="h-5 w-5 text-purple-500" />
+									<span class="text-text text-sm font-medium">Automatic fee payment handling</span>
 								</div>
 								<div class="flex items-center gap-3">
-									<CheckCircle class="w-5 h-5 text-purple-500" />
-									<span class="text-sm font-medium text-text">Mathematically guaranteed anonymity</span>
+									<CheckCircle class="h-5 w-5 text-purple-500" />
+									<span class="text-text text-sm font-medium"
+										>Mathematically guaranteed anonymity</span
+									>
 								</div>
 							</div>
 						</div>
@@ -672,28 +736,35 @@
 
 					<!-- Quick Stats -->
 					<div class="grid grid-cols-2 gap-4">
-						<Card class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center">
+						<Card
+							class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
+						>
 							<div class="space-y-2">
 								<div class="text-2xl font-bold text-purple-500">🔒</div>
-								<div class="text-sm text-text-secondary">Untraceable</div>
+								<div class="text-text-secondary text-sm">Untraceable</div>
 							</div>
 						</Card>
-						<Card class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center">
+						<Card
+							class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
+						>
 							<div class="space-y-2">
 								<div class="text-2xl font-bold text-pink-500">⚡</div>
-								<div class="text-sm text-text-secondary">Fast</div>
+								<div class="text-text-secondary text-sm">Fast</div>
 							</div>
 						</Card>
 					</div>
 
 					<!-- Important Note -->
-					<Card class_="border-0 shadow-lg bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20">
+					<Card
+						class_="border-0 shadow-lg bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20"
+					>
 						<div class="flex items-start gap-3">
-							<AlertTriangle class="w-5 h-5 text-yellow-500 mt-0.5" />
+							<AlertTriangle class="mt-0.5 h-5 w-5 text-yellow-500" />
 							<div>
-								<h4 class="font-semibold text-yellow-800 dark:text-yellow-300 mb-1">Important</h4>
+								<h4 class="mb-1 font-semibold text-yellow-800 dark:text-yellow-300">Important</h4>
 								<p class="text-sm text-yellow-700 dark:text-yellow-300">
-									Withdrawals are final and cannot be reversed. Double-check recipient address and amount.
+									Withdrawals are final and cannot be reversed. Double-check recipient address and
+									amount.
 								</p>
 							</div>
 						</div>
@@ -721,32 +792,35 @@
 		}}
 	>
 		<div class="space-y-4">
-			<div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg p-4">
-				<h4 class="font-semibold text-text mb-3">Withdrawal Summary</h4>
+			<div
+				class="rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 p-4 dark:from-purple-900/20 dark:to-pink-900/20"
+			>
+				<h4 class="text-text mb-3 font-semibold">Withdrawal Summary</h4>
 				<div class="space-y-2 text-sm">
 					<div class="flex justify-between">
 						<span class="text-text-secondary">Amount:</span>
-						<span class="font-semibold text-text">{withdrawAmount}</span>
+						<span class="text-text font-semibold">{withdrawAmount}</span>
 					</div>
 					<div class="flex justify-between">
 						<span class="text-text-secondary">Network Fee:</span>
-						<span class="font-semibold text-text">{feeWeiHex} STRK</span>
+						<span class="text-text font-semibold">{feeWeiHex} STRK</span>
 					</div>
-					<div class="border-t pt-2 mt-2">
+					<div class="mt-2 border-t pt-2">
 						<div class="flex justify-between">
 							<span class="text-text-secondary">Recipient:</span>
-							<span class="font-mono text-xs text-text break-all">{withdrawRecipient}</span>
+							<span class="text-text font-mono text-xs break-all">{withdrawRecipient}</span>
 						</div>
 					</div>
 				</div>
 			</div>
-			<p class="text-sm text-text-secondary">
-				This withdrawal will be processed anonymously and cannot be reversed. Please verify all details are correct.
+			<p class="text-text-secondary text-sm">
+				This withdrawal will be processed anonymously and cannot be reversed. Please verify all
+				details are correct.
 			</p>
 		</div>
 	</Modal>
-	
-	<ProgressModal 
+
+	<ProgressModal
 		show={$progressModalStore.show}
 		title={$progressModalStore.title}
 		steps={$progressModalStore.steps}

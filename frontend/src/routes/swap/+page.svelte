@@ -45,7 +45,20 @@
 		progressModalActions,
 		swapProgressSteps
 	} from '$lib/stores/progressModal';
-	import { Shuffle, RefreshCw, TrendingUp, ArrowRightLeft, Shield, Zap, Lock, CheckCircle, DollarSign, ArrowRight, Coins, BarChart3 } from 'lucide-svelte';
+	import {
+		Shuffle,
+		RefreshCw,
+		TrendingUp,
+		ArrowRightLeft,
+		Shield,
+		Zap,
+		Lock,
+		CheckCircle,
+		DollarSign,
+		ArrowRight,
+		Coins,
+		BarChart3
+	} from 'lucide-svelte';
 
 	const STRK_ADDRESS = supportedTokens[0].address;
 
@@ -514,51 +527,61 @@
 </script>
 
 <ProtectedRoute>
-	<div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-		<div class="max-w-6xl mx-auto p-6 pt-8">
+	<div
+		class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
+	>
+		<div class="mx-auto max-w-6xl p-6 pt-8">
 			<!-- Header Section -->
-			<div class="text-center mb-8">
-				<div class="flex items-center justify-center gap-3 mb-4">
-					<div class="p-3 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 text-white shadow-lg">
-						<ArrowRightLeft class="w-8 h-8" />
+			<div class="mb-8 text-center">
+				<div class="mb-4 flex items-center justify-center gap-3">
+					<div
+						class="rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 p-3 text-white shadow-lg"
+					>
+						<ArrowRightLeft class="h-8 w-8" />
 					</div>
-					<h1 class="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+					<h1
+						class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl"
+					>
 						Private Token Swap
 					</h1>
 				</div>
-				<p class="text-text-secondary text-lg max-w-2xl mx-auto">
+				<p class="text-text-secondary mx-auto max-w-2xl text-lg">
 					Exchange your private notes between different tokens while maintaining complete anonymity
 				</p>
 			</div>
 
-			<div class="grid lg:grid-cols-3 gap-6">
+			<div class="grid gap-6 lg:grid-cols-4">
 				<!-- Main Swap Interface -->
-				<div class="lg:col-span-2 space-y-6">
+				<div class="space-y-6 lg:col-span-2">
 					<!-- Token Selection & Deposit Table -->
 					<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
 						<div class="space-y-6">
-							<div class="flex items-center gap-3 mb-4">
-								<Coins class="w-5 h-5 text-indigo-500" />
-								<h3 class="text-xl font-bold text-text">Select Deposit to Swap</h3>
+							<div class="mb-4 flex items-center gap-3">
+								<Coins class="h-5 w-5 text-indigo-500" />
+								<h3 class="text-text text-xl font-bold">Select Deposit to Swap</h3>
 							</div>
-							
+
 							<TokenSelect
 								tokens={$tokens}
 								bind:value={$selectedToken}
 								placeholder="Filter deposits by token"
 								class_="w-full"
 							/>
-							
+
 							{#if !deposits.length}
-								<div class="text-center py-12">
-									<div class="p-4 rounded-full bg-indigo-100 dark:bg-indigo-900/20 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-										<Shuffle class="w-8 h-8 text-indigo-500" />
+								<div class="py-12 text-center">
+									<div
+										class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 p-4 dark:bg-indigo-900/20"
+									>
+										<Shuffle class="h-8 w-8 text-indigo-500" />
 									</div>
-									<h3 class="text-lg font-semibold text-text mb-2">No Deposits Available</h3>
+									<h3 class="text-text mb-2 text-lg font-semibold">No Deposits Available</h3>
 									<p class="text-text-secondary">Please make a deposit first to enable swapping!</p>
 								</div>
 							{:else}
-								<div class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 rounded-lg p-1">
+								<div
+									class="rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 p-1 dark:from-gray-700 dark:to-gray-600"
+								>
 									<PaginatedTable
 										columns={defaultDepositColumns}
 										items={deposits}
@@ -577,17 +600,23 @@
 
 					<!-- Auto-selected fee information -->
 					{#if autoSelectedFeeInfo}
-						<Card class_="border-0 shadow-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+						<Card
+							class_="border-0 shadow-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20"
+						>
 							<div class="flex items-start gap-3">
-								<div class="p-2 rounded-lg bg-blue-500 text-white">
-									<DollarSign class="w-4 h-4" />
+								<div class="rounded-lg bg-blue-500 p-2 text-white">
+									<DollarSign class="h-4 w-4" />
 								</div>
 								<div class="flex-1">
-									<h3 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">Fee Information</h3>
+									<h3 class="mb-2 font-semibold text-blue-800 dark:text-blue-300">
+										Fee Information
+									</h3>
 									<p class="text-sm text-blue-700 dark:text-blue-400">
 										Fee: <strong>{autoSelectedFeeInfo.feeInfo.formatted} STRK</strong>
 										{#if autoSelectedFeeInfo.feeDeposit}
-											• Auto-selected fee deposit: <strong>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong>
+											• Auto-selected fee deposit: <strong
+												>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong
+											>
 										{/if}
 									</p>
 								</div>
@@ -597,10 +626,12 @@
 
 					<!-- Error message -->
 					{#if feePreloadError}
-						<Card class_="border-0 shadow-lg bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20">
+						<Card
+							class_="border-0 shadow-lg bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20"
+						>
 							<div class="flex items-start gap-3">
-								<div class="p-2 rounded-lg bg-red-500 text-white">
-									<Shield class="w-4 h-4" />
+								<div class="rounded-lg bg-red-500 p-2 text-white">
+									<Shield class="h-4 w-4" />
 								</div>
 								<div class="flex-1">
 									<p class="text-sm text-red-700 dark:text-red-400">{feePreloadError}</p>
@@ -613,9 +644,9 @@
 					{#if selectedSwapDeposit || selectedFeeDeposit}
 						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
 							<div class="space-y-4">
-								<div class="flex items-center gap-3 mb-4">
-									<CheckCircle class="w-5 h-5 text-green-500" />
-									<h3 class="text-xl font-bold text-text">Selected Deposits</h3>
+								<div class="mb-4 flex items-center gap-3">
+									<CheckCircle class="h-5 w-5 text-green-500" />
+									<h3 class="text-text text-xl font-bold">Selected Deposits</h3>
 								</div>
 								<SelectedDeposits
 									items={[
@@ -629,18 +660,20 @@
 
 					<!-- Swap Form -->
 					{#if selectedSwapDeposit && selectedFeeDeposit && !feePreloadError}
-						<Card class_="border-0 shadow-xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20">
+						<Card
+							class_="border-0 shadow-xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20"
+						>
 							<div class="space-y-6">
-								<div class="flex items-center gap-3 mb-4">
-									<RefreshCw class="w-5 h-5 text-indigo-500" />
-									<h3 class="text-xl font-bold text-text">Configure Your Swap</h3>
+								<div class="mb-4 flex items-center gap-3">
+									<RefreshCw class="h-5 w-5 text-indigo-500" />
+									<h3 class="text-text text-xl font-bold">Configure Your Swap</h3>
 								</div>
-								
+
 								<form on:submit|preventDefault={initiateSwap} class="space-y-6">
 									<!-- Amount Input -->
 									<div class="space-y-3">
-										<label class="flex items-center gap-2 text-sm font-semibold text-text">
-											<ArrowRight class="w-4 h-4" />
+										<label class="text-text flex items-center gap-2 text-sm font-semibold">
+											<ArrowRight class="h-4 w-4" />
 											Swap Amount
 										</label>
 										<div class="flex gap-2">
@@ -652,7 +685,7 @@
 											/>
 											<button
 												type="button"
-												class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+												class="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-indigo-600"
 												on:click={() => {
 													if (selectedSwapDeposit) {
 														swapAmount = selectedSwapDeposit.displayAmount;
@@ -666,8 +699,8 @@
 
 									<!-- Target Token Selection -->
 									<div class="space-y-3">
-										<label class="flex items-center gap-2 text-sm font-semibold text-text">
-											<TrendingUp class="w-4 h-4" />
+										<label class="text-text flex items-center gap-2 text-sm font-semibold">
+											<TrendingUp class="h-4 w-4" />
 											Receive Token
 										</label>
 										{#if get(tokens).filter((t) => t.address !== selectedSwapDeposit?.data.tokenAddress).length > 0}
@@ -680,18 +713,20 @@
 												class_="w-full"
 											/>
 										{:else}
-											<div class="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
-												<p class="text-sm text-red-700 dark:text-red-400">No available tokens for swapping</p>
+											<div class="rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
+												<p class="text-sm text-red-700 dark:text-red-400">
+													No available tokens for swapping
+												</p>
 											</div>
 										{/if}
 									</div>
 
 									<!-- Submit Button -->
-									<Button 
-										text="Execute Private Swap" 
-										loading={isLoading} 
+									<Button
+										text="Execute Private Swap"
+										loading={isLoading}
 										type="submit"
-										class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300" 
+										class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
 									/>
 								</form>
 							</div>
@@ -700,41 +735,61 @@
 				</div>
 
 				<!-- Information Panel -->
-				<div class="space-y-6">
+				<div class="space-y-6 lg:col-span-2">
 					<!-- How Private Swaps Work -->
 					<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
 						<div class="space-y-4">
-							<h3 class="text-xl font-bold text-text flex items-center gap-2">
-								<Zap class="w-5 h-5 text-indigo-500" />
+							<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+								<Zap class="h-5 w-5 text-indigo-500" />
 								How Private Swaps Work
 							</h3>
 							<div class="space-y-4">
 								<div class="flex items-start gap-3">
-									<div class="w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">1</div>
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-indigo-500 text-sm font-bold text-white"
+									>
+										1
+									</div>
 									<div>
-										<p class="font-medium text-text">Select Source Deposit</p>
-										<p class="text-sm text-text-secondary">Choose a private note to swap from</p>
+										<p class="text-text font-medium">Select Source Deposit</p>
+										<p class="text-text-secondary text-sm">Choose a private note to swap from</p>
 									</div>
 								</div>
 								<div class="flex items-start gap-3">
-									<div class="w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">2</div>
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-indigo-500 text-sm font-bold text-white"
+									>
+										2
+									</div>
 									<div>
-										<p class="font-medium text-text">Set Amount & Target</p>
-										<p class="text-sm text-text-secondary">Specify swap amount and desired token</p>
+										<p class="text-text font-medium">Set Amount & Target</p>
+										<p class="text-text-secondary text-sm">Specify swap amount and desired token</p>
 									</div>
 								</div>
 								<div class="flex items-start gap-3">
-									<div class="w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">3</div>
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-indigo-500 text-sm font-bold text-white"
+									>
+										3
+									</div>
 									<div>
-										<p class="font-medium text-text">Zero-Knowledge Proof</p>
-										<p class="text-sm text-text-secondary">Generate cryptographic proof of valid swap</p>
+										<p class="text-text font-medium">Zero-Knowledge Proof</p>
+										<p class="text-text-secondary text-sm">
+											Generate cryptographic proof of valid swap
+										</p>
 									</div>
 								</div>
 								<div class="flex items-start gap-3">
-									<div class="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">4</div>
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-purple-500 text-sm font-bold text-white"
+									>
+										4
+									</div>
 									<div>
-										<p class="font-medium text-text">Receive New Private Note</p>
-										<p class="text-sm text-text-secondary">Get swapped tokens as a new private note</p>
+										<p class="text-text font-medium">Receive New Private Note</p>
+										<p class="text-text-secondary text-sm">
+											Get swapped tokens as a new private note
+										</p>
 									</div>
 								</div>
 							</div>
@@ -742,28 +797,36 @@
 					</Card>
 
 					<!-- Security Features -->
-					<Card class_="border-0 shadow-xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20">
+					<Card
+						class_="border-0 shadow-xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20"
+					>
 						<div class="space-y-4">
-							<h3 class="text-xl font-bold text-text flex items-center gap-2">
-								<Lock class="w-5 h-5 text-purple-500" />
+							<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+								<Lock class="h-5 w-5 text-purple-500" />
 								Security Features
 							</h3>
 							<div class="space-y-3">
 								<div class="flex items-center gap-3">
-									<CheckCircle class="w-5 h-5 text-purple-500" />
-									<span class="text-sm font-medium text-text">Anonymous token exchange via ZK proofs</span>
+									<CheckCircle class="h-5 w-5 text-purple-500" />
+									<span class="text-text text-sm font-medium"
+										>Anonymous token exchange via ZK proofs</span
+									>
 								</div>
 								<div class="flex items-center gap-3">
-									<CheckCircle class="w-5 h-5 text-purple-500" />
-									<span class="text-sm font-medium text-text">No connection between source and target</span>
+									<CheckCircle class="h-5 w-5 text-purple-500" />
+									<span class="text-text text-sm font-medium"
+										>No connection between source and target</span
+									>
 								</div>
 								<div class="flex items-center gap-3">
-									<CheckCircle class="w-5 h-5 text-purple-500" />
-									<span class="text-sm font-medium text-text">Decentralized exchange integration</span>
+									<CheckCircle class="h-5 w-5 text-purple-500" />
+									<span class="text-text text-sm font-medium"
+										>Decentralized exchange integration</span
+									>
 								</div>
 								<div class="flex items-center gap-3">
-									<CheckCircle class="w-5 h-5 text-purple-500" />
-									<span class="text-sm font-medium text-text">Automated refund protection</span>
+									<CheckCircle class="h-5 w-5 text-purple-500" />
+									<span class="text-text text-sm font-medium">Automated refund protection</span>
 								</div>
 							</div>
 						</div>
@@ -771,30 +834,36 @@
 
 					<!-- Quick Stats -->
 					<div class="grid grid-cols-2 gap-4">
-						<Card class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center">
+						<Card
+							class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
+						>
 							<div class="space-y-2">
 								<div class="text-2xl font-bold text-indigo-500">🔄</div>
-								<div class="text-sm text-text-secondary">Private Exchange</div>
+								<div class="text-text-secondary text-sm">Private Exchange</div>
 							</div>
 						</Card>
-						<Card class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center">
+						<Card
+							class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
+						>
 							<div class="space-y-2">
 								<div class="text-2xl font-bold text-purple-500">⚡</div>
-								<div class="text-sm text-text-secondary">Instant Quotes</div>
+								<div class="text-text-secondary text-sm">Instant Quotes</div>
 							</div>
 						</Card>
 					</div>
 
 					<!-- Supported Pairs Info -->
-					<Card class_="border-0 shadow-lg bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20">
+					<Card
+						class_="border-0 shadow-lg bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20"
+					>
 						<div class="space-y-3">
-							<h4 class="font-semibold text-text flex items-center gap-2">
-								<BarChart3 class="w-4 h-4 text-indigo-500" />
+							<h4 class="text-text flex items-center gap-2 font-semibold">
+								<BarChart3 class="h-4 w-4 text-indigo-500" />
 								Supported Trading Pairs
 							</h4>
-							<p class="text-sm text-text-secondary">
-								All swaps are powered by Ekubo DEX for optimal rates and deep liquidity. 
-								Supported pairs include all major token combinations in the privacy pool.
+							<p class="text-text-secondary text-sm">
+								All swaps are powered by Ekubo DEX for optimal rates and deep liquidity. Supported
+								pairs include all major token combinations in the privacy pool.
 							</p>
 						</div>
 					</Card>
@@ -821,24 +890,31 @@
 		}}
 	>
 		<div class="space-y-4">
-			<div class="flex items-center gap-3 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg">
-				<ArrowRightLeft class="w-5 h-5 text-indigo-500" />
+			<div
+				class="flex items-center gap-3 rounded-lg bg-gradient-to-r from-indigo-50 to-purple-50 p-4 dark:from-indigo-900/20 dark:to-purple-900/20"
+			>
+				<ArrowRightLeft class="h-5 w-5 text-indigo-500" />
 				<div>
-					<p class="font-medium text-text">Swap Details</p>
-					<p class="text-sm text-text-secondary">Review your transaction before proceeding</p>
+					<p class="text-text font-medium">Swap Details</p>
+					<p class="text-text-secondary text-sm">Review your transaction before proceeding</p>
 				</div>
 			</div>
 			<div class="space-y-2">
-				<p class="text-sm text-text">
-					<strong>Amount to swap:</strong> <span class="font-mono text-indigo-600 dark:text-indigo-400">{swapAmount}</span> tokens
+				<p class="text-text text-sm">
+					<strong>Amount to swap:</strong>
+					<span class="font-mono text-indigo-600 dark:text-indigo-400">{swapAmount}</span> tokens
 				</p>
-				<p class="text-sm text-text">
-					<strong>Transaction fee:</strong> <span class="font-mono text-purple-600 dark:text-purple-400">{feeWeiHex}</span> STRK
+				<p class="text-text text-sm">
+					<strong>Transaction fee:</strong>
+					<span class="font-mono text-purple-600 dark:text-purple-400">{feeWeiHex}</span> STRK
 				</p>
 			</div>
-			<div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+			<div
+				class="rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-800 dark:bg-yellow-900/20"
+			>
 				<p class="text-sm text-yellow-800 dark:text-yellow-400">
-					This transaction will consume your selected private notes and create new ones with the swapped tokens.
+					This transaction will consume your selected private notes and create new ones with the
+					swapped tokens.
 				</p>
 			</div>
 		</div>

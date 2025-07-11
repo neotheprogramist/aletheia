@@ -31,7 +31,24 @@
 	import { defaultDepositColumns, defaultPendingDepositColumns } from '$lib/utils/sharedColumns';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { fromWei, toWei } from '$lib/utils/toWei';
-	import { Copy, Trash2, Pen, ArrowRightLeft, Send, Users, Shield, Zap, Lock, CheckCircle, ArrowRight, Hash, CreditCard, Eye, UserCheck, ArrowUpDown } from 'lucide-svelte';
+	import {
+		Copy,
+		Trash2,
+		Pen,
+		ArrowRightLeft,
+		Send,
+		Users,
+		Shield,
+		Zap,
+		Lock,
+		CheckCircle,
+		ArrowRight,
+		Hash,
+		CreditCard,
+		Eye,
+		UserCheck,
+		ArrowUpDown
+	} from 'lucide-svelte';
 	import { Contract } from 'starknet';
 	import type { Component } from 'svelte';
 	import { get } from 'svelte/store';
@@ -581,26 +598,32 @@
 </script>
 
 <ProtectedRoute>
-	<div class="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-indigo-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20">
-		<div class="max-w-6xl mx-auto p-6 pt-8">
+	<div
+		class="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-indigo-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20"
+	>
+		<div class="mx-auto max-w-6xl p-6 pt-8">
 			<!-- Header Section -->
-			<div class="text-center mb-8">
-				<div class="flex items-center justify-center gap-3 mb-4">
-					<div class="p-3 rounded-xl bg-gradient-to-br from-blue-400 to-cyan-500 text-white shadow-lg">
-						<ArrowRightLeft class="w-8 h-8" />
+			<div class="mb-8 text-center">
+				<div class="mb-4 flex items-center justify-center gap-3">
+					<div
+						class="rounded-xl bg-gradient-to-br from-blue-400 to-cyan-500 p-3 text-white shadow-lg"
+					>
+						<ArrowRightLeft class="h-8 w-8" />
 					</div>
-					<h1 class="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+					<h1
+						class="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl"
+					>
 						Private Transfers
 					</h1>
 				</div>
-				<p class="text-text-secondary text-lg max-w-3xl mx-auto">
+				<p class="text-text-secondary mx-auto max-w-3xl text-lg">
 					Transfer funds between private notes within the privacy pool with complete anonymity
 				</p>
 			</div>
 
 			<!-- Mode Toggle -->
-			<div class="flex justify-center mb-8">
-				<div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-1 shadow-lg">
+			<div class="mb-8 flex justify-center">
+				<div class="rounded-xl bg-white/80 p-1 shadow-lg backdrop-blur-sm dark:bg-gray-800/80">
 					<SelectionToggle
 						options={[
 							{ label: 'Send Transfer', value: 'sender', isFirst: true },
@@ -614,16 +637,18 @@
 
 			{#if viewMode === 'recipient'}
 				<!-- Recipient Mode -->
-				<div class="grid lg:grid-cols-3 gap-6">
+				<div class="grid gap-6 lg:grid-cols-4">
 					<!-- Generate Note Section -->
-					<div class="lg:col-span-2 space-y-6">
+					<div class="space-y-6 lg:col-span-2">
 						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
 							<div class="space-y-6">
 								<div class="text-center">
-									<div class="p-4 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 text-white shadow-lg mx-auto w-fit mb-4">
-										<UserCheck class="w-8 h-8" />
+									<div
+										class="mx-auto mb-4 w-fit rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 p-4 text-white shadow-lg"
+									>
+										<UserCheck class="h-8 w-8" />
 									</div>
-									<h2 class="text-2xl font-bold text-text mb-2">Receive Private Transfer</h2>
+									<h2 class="text-text mb-2 text-2xl font-bold">Receive Private Transfer</h2>
 									<p class="text-text-secondary">
 										Generate an empty note to receive private transfers from other users
 									</p>
@@ -631,8 +656,8 @@
 
 								{#if pendingEmptyDeposits?.length}
 									<div class="space-y-4">
-										<h3 class="text-lg font-semibold text-text flex items-center gap-2">
-											<Hash class="w-5 h-5 text-blue-500" />
+										<h3 class="text-text flex items-center gap-2 text-lg font-semibold">
+											<Hash class="h-5 w-5 text-blue-500" />
 											Your Pending Notes
 										</h3>
 										<PaginatedTable
@@ -658,41 +683,65 @@
 					</div>
 
 					<!-- Information Panel for Recipients -->
-					<div class="space-y-6">
+					<div class="space-y-6 lg:col-span-2">
 						<!-- How to Receive -->
 						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
 							<div class="space-y-4">
-								<h3 class="text-xl font-bold text-text flex items-center gap-2">
-									<Users class="w-5 h-5 text-cyan-500" />
+								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+									<Users class="h-5 w-5 text-cyan-500" />
 									How to Receive Transfers
 								</h3>
 								<div class="space-y-4">
 									<div class="flex items-start gap-3">
-										<div class="w-6 h-6 bg-cyan-500 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">1</div>
+										<div
+											class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500 text-sm font-bold text-white"
+										>
+											1
+										</div>
 										<div>
-											<p class="font-medium text-text">Generate Empty Note</p>
-											<p class="text-sm text-text-secondary">Create a cryptographic note that can receive transfers</p>
+											<p class="text-text font-medium">Generate Empty Note</p>
+											<p class="text-text-secondary text-sm">
+												Create a cryptographic note that can receive transfers
+											</p>
 										</div>
 									</div>
 									<div class="flex items-start gap-3">
-										<div class="w-6 h-6 bg-cyan-500 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">2</div>
+										<div
+											class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500 text-sm font-bold text-white"
+										>
+											2
+										</div>
 										<div>
-											<p class="font-medium text-text">Share Note Hash</p>
-											<p class="text-sm text-text-secondary">Send your note hash to the person transferring funds</p>
+											<p class="text-text font-medium">Share Note Hash</p>
+											<p class="text-text-secondary text-sm">
+												Send your note hash to the person transferring funds
+											</p>
 										</div>
 									</div>
 									<div class="flex items-start gap-3">
-										<div class="w-6 h-6 bg-cyan-500 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">3</div>
+										<div
+											class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500 text-sm font-bold text-white"
+										>
+											3
+										</div>
 										<div>
-											<p class="font-medium text-text">Wait for Transfer</p>
-											<p class="text-sm text-text-secondary">Your note will be funded when sender completes transfer</p>
+											<p class="text-text font-medium">Wait for Transfer</p>
+											<p class="text-text-secondary text-sm">
+												Your note will be funded when sender completes transfer
+											</p>
 										</div>
 									</div>
 									<div class="flex items-start gap-3">
-										<div class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">4</div>
+										<div
+											class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm font-bold text-white"
+										>
+											4
+										</div>
 										<div>
-											<p class="font-medium text-text">Claim Your Funds</p>
-											<p class="text-sm text-text-secondary">Use your funded note for withdrawals or other operations</p>
+											<p class="text-text font-medium">Claim Your Funds</p>
+											<p class="text-text-secondary text-sm">
+												Use your funded note for withdrawals or other operations
+											</p>
 										</div>
 									</div>
 								</div>
@@ -700,28 +749,35 @@
 						</Card>
 
 						<!-- Security Features for Recipients -->
-						<Card class_="border-0 shadow-xl bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20">
+						<Card
+							class_="border-0 shadow-xl bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20"
+						>
 							<div class="space-y-4">
-								<h3 class="text-xl font-bold text-text flex items-center gap-2">
-									<Shield class="w-5 h-5 text-cyan-500" />
+								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+									<Shield class="h-5 w-5 text-cyan-500" />
 									Privacy Protection
 								</h3>
 								<div class="space-y-3">
 									<div class="flex items-center gap-3">
-										<CheckCircle class="w-5 h-5 text-cyan-500" />
-										<span class="text-sm font-medium text-text">Anonymous note generation</span>
+										<CheckCircle class="h-5 w-5 text-cyan-500" />
+										<span class="text-text text-sm font-medium">Anonymous note generation</span>
 									</div>
 									<div class="flex items-center gap-3">
-										<CheckCircle class="w-5 h-5 text-cyan-500" />
-										<span class="text-sm font-medium text-text">No connection to your identity</span>
+										<CheckCircle class="h-5 w-5 text-cyan-500" />
+										<span class="text-text text-sm font-medium">No connection to your identity</span
+										>
 									</div>
 									<div class="flex items-center gap-3">
-										<CheckCircle class="w-5 h-5 text-cyan-500" />
-										<span class="text-sm font-medium text-text">Cryptographically secure transfers</span>
+										<CheckCircle class="h-5 w-5 text-cyan-500" />
+										<span class="text-text text-sm font-medium"
+											>Cryptographically secure transfers</span
+										>
 									</div>
 									<div class="flex items-center gap-3">
-										<CheckCircle class="w-5 h-5 text-cyan-500" />
-										<span class="text-sm font-medium text-text">Zero-knowledge proof validation</span>
+										<CheckCircle class="h-5 w-5 text-cyan-500" />
+										<span class="text-text text-sm font-medium"
+											>Zero-knowledge proof validation</span
+										>
 									</div>
 								</div>
 							</div>
@@ -730,16 +786,18 @@
 				</div>
 			{:else}
 				<!-- Sender Mode -->
-				<div class="grid lg:grid-cols-3 gap-6">
+				<div class="grid gap-6 lg:grid-cols-4">
 					<!-- Main Transfer Form -->
-					<div class="lg:col-span-2 space-y-6">
+					<div class="space-y-6 lg:col-span-2">
 						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
 							<div class="space-y-6">
 								<div class="text-center">
-									<div class="p-4 rounded-xl bg-gradient-to-br from-blue-400 to-cyan-500 text-white shadow-lg mx-auto w-fit mb-4">
-										<Send class="w-8 h-8" />
+									<div
+										class="mx-auto mb-4 w-fit rounded-xl bg-gradient-to-br from-blue-400 to-cyan-500 p-4 text-white shadow-lg"
+									>
+										<Send class="h-8 w-8" />
 									</div>
-									<h2 class="text-2xl font-bold text-text mb-2">Send Private Transfer</h2>
+									<h2 class="text-text mb-2 text-2xl font-bold">Send Private Transfer</h2>
 									<p class="text-text-secondary">
 										Select a deposit to transfer from. Fee deposit will be automatically selected.
 									</p>
@@ -747,8 +805,8 @@
 
 								<!-- Token Selection -->
 								<div class="space-y-3">
-									<label class="flex items-center gap-2 text-sm font-semibold text-text">
-										<CreditCard class="w-4 h-4" />
+									<label class="text-text flex items-center gap-2 text-sm font-semibold">
+										<CreditCard class="h-4 w-4" />
 										Filter by Token
 									</label>
 									<TokenSelect
@@ -761,15 +819,17 @@
 
 								<!-- Deposits Table -->
 								{#if !deposits.length}
-									<div class="text-center py-8">
-										<Eye class="w-12 h-12 text-gray-400 mx-auto mb-4" />
-										<h3 class="text-lg font-medium text-text mb-2">No Deposits Found</h3>
-										<p class="text-text-secondary">Please make a deposit first to start transferring!</p>
+									<div class="py-8 text-center">
+										<Eye class="mx-auto mb-4 h-12 w-12 text-gray-400" />
+										<h3 class="text-text mb-2 text-lg font-medium">No Deposits Found</h3>
+										<p class="text-text-secondary">
+											Please make a deposit first to start transferring!
+										</p>
 									</div>
 								{:else}
 									<div class="space-y-4">
-										<h3 class="text-lg font-semibold text-text flex items-center gap-2">
-											<ArrowUpDown class="w-5 h-5 text-blue-500" />
+										<h3 class="text-text flex items-center gap-2 text-lg font-semibold">
+											<ArrowUpDown class="h-5 w-5 text-blue-500" />
 											Select Source Deposit
 										</h3>
 										<PaginatedTable
@@ -787,15 +847,21 @@
 
 								<!-- Auto-selected Fee Information -->
 								{#if autoSelectedFeeInfo}
-									<div class="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-lg border border-blue-200 dark:border-blue-800 p-4">
-										<h3 class="flex items-center gap-2 text-base font-semibold text-blue-800 dark:text-blue-200 mb-2">
-											<Zap class="w-4 h-4" />
+									<div
+										class="rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 p-4 dark:border-blue-800 dark:from-blue-900/20 dark:to-cyan-900/20"
+									>
+										<h3
+											class="mb-2 flex items-center gap-2 text-base font-semibold text-blue-800 dark:text-blue-200"
+										>
+											<Zap class="h-4 w-4" />
 											Fee Information
 										</h3>
 										<p class="text-sm text-blue-700 dark:text-blue-300">
 											Fee: <strong>{autoSelectedFeeInfo.feeInfo.formatted} STRK</strong>
 											{#if autoSelectedFeeInfo.feeDeposit}
-												• Auto-selected fee deposit: <strong>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong>
+												• Auto-selected fee deposit: <strong
+													>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong
+												>
 											{/if}
 										</p>
 									</div>
@@ -803,7 +869,9 @@
 
 								<!-- Error Message -->
 								{#if feePreloadError}
-									<div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+									<div
+										class="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20"
+									>
 										<p class="text-sm text-red-700 dark:text-red-300">{feePreloadError}</p>
 									</div>
 								{/if}
@@ -818,16 +886,18 @@
 
 								<!-- Transfer Form -->
 								{#if selectedTransferDeposit && selectedFeeDeposit && !feePreloadError}
-									<Card class_="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10 border border-blue-200 dark:border-blue-800">
+									<Card
+										class_="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10 border border-blue-200 dark:border-blue-800"
+									>
 										<form on:submit|preventDefault={initiateTransfer} class="space-y-4">
-											<h3 class="text-lg font-semibold text-text flex items-center gap-2">
-												<Hash class="w-5 h-5 text-blue-500" />
+											<h3 class="text-text flex items-center gap-2 text-lg font-semibold">
+												<Hash class="h-5 w-5 text-blue-500" />
 												Transfer Details
 											</h3>
-											
+
 											<div class="space-y-3">
-												<label class="flex items-center gap-2 text-sm font-semibold text-text">
-													<UserCheck class="w-4 h-4" />
+												<label class="text-text flex items-center gap-2 text-sm font-semibold">
+													<UserCheck class="h-4 w-4" />
 													Recipient Hash
 												</label>
 												<Input
@@ -839,8 +909,8 @@
 											</div>
 
 											<div class="space-y-3">
-												<label class="flex items-center gap-2 text-sm font-semibold text-text">
-													<ArrowRight class="w-4 h-4" />
+												<label class="text-text flex items-center gap-2 text-sm font-semibold">
+													<ArrowRight class="h-4 w-4" />
 													Transfer Amount
 												</label>
 												<div class="flex gap-2">
@@ -852,7 +922,7 @@
 													/>
 													<button
 														type="button"
-														class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+														class="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-blue-600"
 														on:click={() => {
 															if (selectedTransferDeposit) {
 																transferAmount = selectedTransferDeposit.displayAmount;
@@ -864,11 +934,11 @@
 												</div>
 											</div>
 
-											<Button 
-												text="Execute Transfer" 
-												loading={isLoading} 
+											<Button
+												text="Execute Transfer"
+												loading={isLoading}
 												type="submit"
-												class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-300" 
+												class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
 											/>
 										</form>
 									</Card>
@@ -878,41 +948,65 @@
 					</div>
 
 					<!-- Information Panel for Senders -->
-					<div class="space-y-6">
+					<div class="space-y-6 lg:col-span-2">
 						<!-- How Transfer Works -->
 						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
 							<div class="space-y-4">
-								<h3 class="text-xl font-bold text-text flex items-center gap-2">
-									<Zap class="w-5 h-5 text-blue-500" />
+								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+									<Zap class="h-5 w-5 text-blue-500" />
 									How Transfers Work
 								</h3>
 								<div class="space-y-4">
 									<div class="flex items-start gap-3">
-										<div class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">1</div>
+										<div
+											class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm font-bold text-white"
+										>
+											1
+										</div>
 										<div>
-											<p class="font-medium text-text">Select Source Note</p>
-											<p class="text-sm text-text-secondary">Choose which private note to transfer from</p>
+											<p class="text-text font-medium">Select Source Note</p>
+											<p class="text-text-secondary text-sm">
+												Choose which private note to transfer from
+											</p>
 										</div>
 									</div>
 									<div class="flex items-start gap-3">
-										<div class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">2</div>
+										<div
+											class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm font-bold text-white"
+										>
+											2
+										</div>
 										<div>
-											<p class="font-medium text-text">Get Recipient Hash</p>
-											<p class="text-sm text-text-secondary">Recipient shares their empty note hash with you</p>
+											<p class="text-text font-medium">Get Recipient Hash</p>
+											<p class="text-text-secondary text-sm">
+												Recipient shares their empty note hash with you
+											</p>
 										</div>
 									</div>
 									<div class="flex items-start gap-3">
-										<div class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">3</div>
+										<div
+											class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm font-bold text-white"
+										>
+											3
+										</div>
 										<div>
-											<p class="font-medium text-text">Set Amount</p>
-											<p class="text-sm text-text-secondary">Specify how much to transfer (partial or full)</p>
+											<p class="text-text font-medium">Set Amount</p>
+											<p class="text-text-secondary text-sm">
+												Specify how much to transfer (partial or full)
+											</p>
 										</div>
 									</div>
 									<div class="flex items-start gap-3">
-										<div class="w-6 h-6 bg-cyan-500 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">4</div>
+										<div
+											class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500 text-sm font-bold text-white"
+										>
+											4
+										</div>
 										<div>
-											<p class="font-medium text-text">Anonymous Transfer</p>
-											<p class="text-sm text-text-secondary">Notes are swapped with zero-knowledge proofs</p>
+											<p class="text-text font-medium">Anonymous Transfer</p>
+											<p class="text-text-secondary text-sm">
+												Notes are swapped with zero-knowledge proofs
+											</p>
 										</div>
 									</div>
 								</div>
@@ -920,28 +1014,32 @@
 						</Card>
 
 						<!-- Security Features -->
-						<Card class_="border-0 shadow-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
+						<Card
+							class_="border-0 shadow-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20"
+						>
 							<div class="space-y-4">
-								<h3 class="text-xl font-bold text-text flex items-center gap-2">
-									<Lock class="w-5 h-5 text-blue-500" />
+								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
+									<Lock class="h-5 w-5 text-blue-500" />
 									Security Features
 								</h3>
 								<div class="space-y-3">
 									<div class="flex items-center gap-3">
-										<CheckCircle class="w-5 h-5 text-blue-500" />
-										<span class="text-sm font-medium text-text">Complete sender anonymity</span>
+										<CheckCircle class="h-5 w-5 text-blue-500" />
+										<span class="text-text text-sm font-medium">Complete sender anonymity</span>
 									</div>
 									<div class="flex items-center gap-3">
-										<CheckCircle class="w-5 h-5 text-blue-500" />
-										<span class="text-sm font-medium text-text">No on-chain connection between parties</span>
+										<CheckCircle class="h-5 w-5 text-blue-500" />
+										<span class="text-text text-sm font-medium"
+											>No on-chain connection between parties</span
+										>
 									</div>
 									<div class="flex items-center gap-3">
-										<CheckCircle class="w-5 h-5 text-blue-500" />
-										<span class="text-sm font-medium text-text">Cryptographic note validation</span>
+										<CheckCircle class="h-5 w-5 text-blue-500" />
+										<span class="text-text text-sm font-medium">Cryptographic note validation</span>
 									</div>
 									<div class="flex items-center gap-3">
-										<CheckCircle class="w-5 h-5 text-blue-500" />
-										<span class="text-sm font-medium text-text">Automated fee handling</span>
+										<CheckCircle class="h-5 w-5 text-blue-500" />
+										<span class="text-text text-sm font-medium">Automated fee handling</span>
 									</div>
 								</div>
 							</div>
@@ -949,16 +1047,20 @@
 
 						<!-- Quick Stats -->
 						<div class="grid grid-cols-2 gap-4">
-							<Card class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center">
+							<Card
+								class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
+							>
 								<div class="space-y-2">
 									<div class="text-2xl font-bold text-blue-500">100%</div>
-									<div class="text-sm text-text-secondary">Private</div>
+									<div class="text-text-secondary text-sm">Private</div>
 								</div>
 							</Card>
-							<Card class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center">
+							<Card
+								class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
+							>
 								<div class="space-y-2">
 									<div class="text-2xl font-bold text-cyan-500">⚡</div>
-									<div class="text-sm text-text-secondary">Fast</div>
+									<div class="text-text-secondary text-sm">Fast</div>
 								</div>
 							</Card>
 						</div>
@@ -986,21 +1088,24 @@
 		}}
 	>
 		<div class="space-y-4">
-			<div class="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-lg p-4">
-				<h3 class="font-semibold text-text mb-2">Transfer Summary</h3>
+			<div
+				class="rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 p-4 dark:from-blue-900/20 dark:to-cyan-900/20"
+			>
+				<h3 class="text-text mb-2 font-semibold">Transfer Summary</h3>
 				<div class="space-y-2 text-sm">
 					<div class="flex justify-between">
 						<span class="text-text-secondary">Amount:</span>
-						<span class="font-medium text-text">{transferAmount} tokens</span>
+						<span class="text-text font-medium">{transferAmount} tokens</span>
 					</div>
 					<div class="flex justify-between">
 						<span class="text-text-secondary">Fee:</span>
-						<span class="font-medium text-text">{feeWeiHex} STRK</span>
+						<span class="text-text font-medium">{feeWeiHex} STRK</span>
 					</div>
 				</div>
 			</div>
-			<p class="text-sm text-text-secondary">
-				This transfer will destroy your source note and fund the recipient's note. This action cannot be reversed.
+			<p class="text-text-secondary text-sm">
+				This transfer will destroy your source note and fund the recipient's note. This action
+				cannot be reversed.
 			</p>
 		</div>
 	</Modal>
@@ -1026,19 +1131,19 @@
 	onClose={onCancelEdit}
 >
 	<div class="space-y-4">
-		<div class="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-lg p-4">
-			<h3 class="font-semibold text-text mb-2 flex items-center gap-2">
-				<Pen class="w-4 h-4" />
+		<div
+			class="rounded-lg bg-gradient-to-r from-cyan-50 to-blue-50 p-4 dark:from-cyan-900/20 dark:to-blue-900/20"
+		>
+			<h3 class="text-text mb-2 flex items-center gap-2 font-semibold">
+				<Pen class="h-4 w-4" />
 				Update Note Details
 			</h3>
-			<p class="text-sm text-text-secondary">
-				Specify the token and amount for this pending note
-			</p>
+			<p class="text-text-secondary text-sm">Specify the token and amount for this pending note</p>
 		</div>
-		
+
 		<div class="space-y-4">
 			<div class="space-y-2">
-				<label for="edit-token" class="text-sm font-medium text-text">Token</label>
+				<label for="edit-token" class="text-text text-sm font-medium">Token</label>
 				<TokenSelect
 					tokens={$tokens}
 					bind:value={editToken}
@@ -1046,15 +1151,10 @@
 					class_="w-full"
 				/>
 			</div>
-			
+
 			<div class="space-y-2">
-				<label for="edit-amount" class="text-sm font-medium text-text">Amount</label>
-				<Input 
-					bind:value={editAmount} 
-					placeholder="Enter amount" 
-					class_="w-full" 
-					required 
-				/>
+				<label for="edit-amount" class="text-text text-sm font-medium">Amount</label>
+				<Input bind:value={editAmount} placeholder="Enter amount" class_="w-full" required />
 			</div>
 		</div>
 	</div>

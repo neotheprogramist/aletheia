@@ -159,7 +159,7 @@
 				</p>
 			</div>
 
-			<div class="grid gap-6 lg:grid-cols-3">
+			<div class="grid gap-6 lg:grid-cols-4">
 				<!-- Main Deposit Form -->
 				<div class="space-y-6 lg:col-span-2">
 					<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm w-full">
@@ -243,7 +243,7 @@
 				</div>
 
 				<!-- Information Panel -->
-				<div class="space-y-6">
+				<div class="space-y-6 lg:col-span-2">
 					<!-- How It Works -->
 					<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
 						<div class="space-y-4">
