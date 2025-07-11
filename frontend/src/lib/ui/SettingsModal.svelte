@@ -79,14 +79,14 @@
 						on:click={toggleTheme}
 					>
 						<Sun class="w-5 h-5 mr-2 text-gray-900 dark:text-gray-100" />
-						<span class="text-gray-900 dark:text-gray-100">Light</span>
+						<span class="text-gray-900 dark:text-gray-100">{$t('ui.settings.theme.light')}</span>
 					</button>
 					<button
 						class="flex-1 flex items-center justify-center p-3 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors duration-200 border border-gray-300 dark:border-gray-600 {$theme === 'dark' ? 'ring-2 ring-blue-600' : ''}"
 						on:click={toggleTheme}
 					>
 						<Moon class="w-5 h-5 mr-2 text-gray-900 dark:text-gray-100" />
-						<span class="text-gray-900 dark:text-gray-100">Dark</span>
+						<span class="text-gray-900 dark:text-gray-100">{$t('ui.settings.theme.dark')}</span>
 					</button>
 				</div>
 			</div>

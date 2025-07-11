@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import Button from '$lib/ui/Button.svelte';
 	import Card from '$lib/ui/Card.svelte';
@@ -445,11 +446,11 @@
 					<h1
 						class="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl"
 					>
-						Private Withdrawal
+						{$t('ui.withdraw_page.title')}
 					</h1>
 				</div>
 				<p class="text-text-secondary mx-auto max-w-2xl text-lg">
-					Withdraw your private deposits to any address with complete anonymity
+					{$t('ui.withdraw_page.subtitle')}
 				</p>
 			</div>
 
@@ -462,7 +463,7 @@
 							<div class="flex items-center justify-between">
 								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 									<Eye class="h-5 w-5 text-purple-500" />
-									Select Deposit to Withdraw
+									{$t('ui.withdraw_page.select_deposit')}
 								</h3>
 							</div>
 
@@ -471,12 +472,12 @@
 								<div class="space-y-3">
 									<label class="text-text flex items-center gap-2 text-sm font-semibold">
 										<DollarSign class="h-4 w-4" />
-										Filter by Token
+										{$t('ui.withdraw_page.filter_by_token')}
 									</label>
 									<TokenSelect
 										tokens={$tokens}
 										bind:value={$selectedToken}
-										placeholder="Choose token to filter deposits"
+										placeholder={$t('deposit.select_token')}
 										class_="w-full sm:w-80"
 									/>
 								</div>
@@ -489,9 +490,9 @@
 										>
 											<Wallet class="h-8 w-8 text-gray-400" />
 										</div>
-										<h3 class="text-text mb-2 text-lg font-medium">No Deposits Found</h3>
+										<h3 class="text-text mb-2 text-lg font-medium">{$t('common.no_deposits_found', { default: 'No Deposits Found' })}</h3>
 										<p class="text-text-secondary">
-											Make a deposit first to start withdrawing privately!
+											{$t('common.make_deposit_first', { default: 'Make a deposit first to start withdrawing privately!' })}
 										</p>
 									</div>
 								{:else}
@@ -523,18 +524,18 @@
 							<div class="space-y-3">
 								<h3 class="flex items-center gap-2 font-semibold text-blue-800 dark:text-blue-300">
 									<Zap class="h-5 w-5" />
-									Fee Information
+									{$t('common.fee_information', { default: 'Fee Information' })}
 								</h3>
 								<div class="space-y-2">
 									<div class="flex items-center justify-between">
-										<span class="text-sm text-blue-700 dark:text-blue-300">Network Fee:</span>
+										<span class="text-sm text-blue-700 dark:text-blue-300">{$t('common.network_fee', { default: 'Network Fee' })}:</span>
 										<span class="font-bold text-blue-800 dark:text-blue-200"
 											>{autoSelectedFeeInfo.feeInfo.formatted} STRK</span
 										>
 									</div>
 									{#if autoSelectedFeeInfo.feeDeposit}
 										<div class="flex items-center justify-between">
-											<span class="text-sm text-blue-700 dark:text-blue-300">Fee Deposit:</span>
+											<span class="text-sm text-blue-700 dark:text-blue-300">{$t('common.fee_deposit', { default: 'Fee Deposit' })}:</span>
 											<span class="font-medium text-blue-800 dark:text-blue-200"
 												>{autoSelectedFeeInfo.feeDeposit.displayAmount}</span
 											>
@@ -554,7 +555,7 @@
 								<AlertTriangle class="mt-0.5 h-5 w-5 text-red-500" />
 								<div>
 									<h3 class="mb-1 font-semibold text-red-800 dark:text-red-300">
-										Fee Payment Issue
+										{$t('common.fee_payment_issue', { default: 'Fee Payment Issue' })}
 									</h3>
 									<p class="text-sm text-red-700 dark:text-red-300">{feePreloadError}</p>
 								</div>
@@ -565,8 +566,8 @@
 					<!-- Selected Deposits Display -->
 					<SelectedDeposits
 						items={[
-							{ title: 'Withdrawal Deposit', deposit: selectedWithdrawDeposit },
-							{ title: 'Fee Deposit (Auto-selected)', deposit: selectedFeeDeposit }
+							{ title: $t('common.withdrawal_deposit', { default: 'Withdrawal Deposit' }), deposit: selectedWithdrawDeposit },
+							{ title: $t('common.fee_deposit_auto', { default: 'Fee Deposit (Auto-selected)' }), deposit: selectedFeeDeposit }
 						]}
 					/>
 
@@ -576,7 +577,7 @@
 							<div class="space-y-6">
 								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 									<Wallet class="h-5 w-5 text-purple-500" />
-									Withdrawal Details
+									{$t('common.withdrawal_details', { default: 'Withdrawal Details' })}
 								</h3>
 
 								<form on:submit|preventDefault={initiateWithdraw} class="space-y-6">
@@ -584,12 +585,12 @@
 									<div class="space-y-3">
 										<label class="text-text flex items-center gap-2 text-sm font-semibold">
 											<Users class="h-4 w-4" />
-											Recipient Address
+											{$t('withdraw.recipient_address')}
 										</label>
 										<Input
 											bind:value={withdrawRecipient}
 											required
-											placeholder="Enter recipient wallet address"
+											placeholder={$t('common.enter_recipient_address', { default: 'Enter recipient wallet address' })}
 											class_="w-full text-lg font-medium"
 										/>
 									</div>
@@ -598,13 +599,13 @@
 									<div class="space-y-3">
 										<label class="text-text flex items-center gap-2 text-sm font-semibold">
 											<ArrowDown class="h-4 w-4" />
-											Withdrawal Amount
+											{$t('withdraw.withdraw_amount')}
 										</label>
 										<div class="flex gap-2">
 											<Input
 												bind:value={withdrawAmount}
 												required
-												placeholder="Enter amount to withdraw"
+												placeholder={$t('common.enter_amount_to_withdraw', { default: 'Enter amount to withdraw' })}
 												class_="flex-1 text-lg font-medium"
 											/>
 											<button
@@ -616,14 +617,14 @@
 													}
 												}}
 											>
-												Max
+												{$t('deposit.max')}
 											</button>
 										</div>
 									</div>
 
 									<!-- Submit Button -->
 									<Button
-										text="Execute Private Withdrawal"
+										text={$t('common.execute_private_withdrawal', { default: 'Execute Private Withdrawal' })}
 										loading={isLoading}
 										type="submit"
 										class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
@@ -641,7 +642,7 @@
 						<div class="space-y-4">
 							<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 								<Shield class="h-5 w-5 text-purple-500" />
-								How Private Withdrawals Work
+								{$t('ui.withdraw_page.how_it_works.title')}
 							</h3>
 							<div class="space-y-4">
 								<div class="flex items-start gap-3">
@@ -651,9 +652,9 @@
 										1
 									</div>
 									<div>
-										<p class="text-text font-medium">Select Your Deposit</p>
+										<p class="text-text font-medium">{$t('ui.withdraw_page.how_it_works.select_deposit.title')}</p>
 										<p class="text-text-secondary text-sm">
-											Choose which private deposit you want to withdraw from
+											{$t('ui.withdraw_page.how_it_works.select_deposit.description')}
 										</p>
 									</div>
 								</div>
@@ -664,9 +665,9 @@
 										2
 									</div>
 									<div>
-										<p class="text-text font-medium">Set Recipient & Amount</p>
+										<p class="text-text font-medium">{$t('ui.withdraw_page.how_it_works.set_recipient.title')}</p>
 										<p class="text-text-secondary text-sm">
-											Specify where to send funds and how much to withdraw
+											{$t('ui.withdraw_page.how_it_works.set_recipient.description')}
 										</p>
 									</div>
 								</div>
@@ -677,9 +678,9 @@
 										3
 									</div>
 									<div>
-										<p class="text-text font-medium">Zero-Knowledge Proof</p>
+										<p class="text-text font-medium">{$t('ui.withdraw_page.how_it_works.zero_knowledge.title')}</p>
 										<p class="text-text-secondary text-sm">
-											System generates proof without revealing your identity
+											{$t('ui.withdraw_page.how_it_works.zero_knowledge.description')}
 										</p>
 									</div>
 								</div>
@@ -690,9 +691,9 @@
 										4
 									</div>
 									<div>
-										<p class="text-text font-medium">Anonymous Transfer</p>
+										<p class="text-text font-medium">{$t('ui.withdraw_page.how_it_works.anonymous_transfer.title')}</p>
 										<p class="text-text-secondary text-sm">
-											Funds sent with complete privacy and unlinkability
+											{$t('ui.withdraw_page.how_it_works.anonymous_transfer.description')}
 										</p>
 									</div>
 								</div>
@@ -707,27 +708,27 @@
 						<div class="space-y-4">
 							<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 								<Shield class="h-5 w-5 text-purple-500" />
-								Privacy Features
+								{$t('ui.withdraw_page.privacy_features.title')}
 							</h3>
 							<div class="space-y-3">
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-purple-500" />
-									<span class="text-text text-sm font-medium">Break transaction linkability</span>
+									<span class="text-text text-sm font-medium">{$t('ui.withdraw_page.privacy_features.break_linkability')}</span>
 								</div>
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-purple-500" />
 									<span class="text-text text-sm font-medium"
-										>Hide withdrawal source and amount</span
+										>{$t('ui.withdraw_page.privacy_features.hide_source')}</span
 									>
 								</div>
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-purple-500" />
-									<span class="text-text text-sm font-medium">Automatic fee payment handling</span>
+									<span class="text-text text-sm font-medium">{$t('ui.withdraw_page.privacy_features.fee_handling')}</span>
 								</div>
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-purple-500" />
 									<span class="text-text text-sm font-medium"
-										>Mathematically guaranteed anonymity</span
+										>{$t('ui.withdraw_page.privacy_features.guaranteed_anonymity')}</span
 									>
 								</div>
 							</div>
@@ -741,7 +742,7 @@
 						>
 							<div class="space-y-2">
 								<div class="text-2xl font-bold text-purple-500">🔒</div>
-								<div class="text-text-secondary text-sm">Untraceable</div>
+								<div class="text-text-secondary text-sm">{$t('ui.withdraw_page.stats.untraceable')}</div>
 							</div>
 						</Card>
 						<Card
@@ -749,7 +750,7 @@
 						>
 							<div class="space-y-2">
 								<div class="text-2xl font-bold text-pink-500">⚡</div>
-								<div class="text-text-secondary text-sm">Fast</div>
+								<div class="text-text-secondary text-sm">{$t('ui.withdraw_page.stats.fast')}</div>
 							</div>
 						</Card>
 					</div>
@@ -761,10 +762,9 @@
 						<div class="flex items-start gap-3">
 							<AlertTriangle class="mt-0.5 h-5 w-5 text-yellow-500" />
 							<div>
-								<h4 class="mb-1 font-semibold text-yellow-800 dark:text-yellow-300">Important</h4>
+								<h4 class="mb-1 font-semibold text-yellow-800 dark:text-yellow-300">{$t('ui.withdraw_page.important_notice')}</h4>
 								<p class="text-sm text-yellow-700 dark:text-yellow-300">
-									Withdrawals are final and cannot be reversed. Double-check recipient address and
-									amount.
+									{$t('ui.withdraw_page.withdrawal_warning')}
 								</p>
 							</div>
 						</div>
@@ -777,9 +777,9 @@
 	<!-- Modal Confirm -->
 	<Modal
 		show={showFeeModal}
-		title="Confirm Private Withdrawal"
-		confirmText="Execute Withdrawal"
-		cancelText="Cancel"
+		title={$t('common.confirm_private_withdrawal', { default: 'Confirm Private Withdrawal' })}
+		confirmText={$t('common.execute_withdrawal', { default: 'Execute Withdrawal' })}
+		cancelText={$t('common.cancel')}
 		closeOnOutsideClick={false}
 		onConfirm={confirmWithdraw}
 		onCancel={() => {
@@ -795,27 +795,26 @@
 			<div
 				class="rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 p-4 dark:from-purple-900/20 dark:to-pink-900/20"
 			>
-				<h4 class="text-text mb-3 font-semibold">Withdrawal Summary</h4>
+				<h4 class="text-text mb-3 font-semibold">{$t('common.withdrawal_summary', { default: 'Withdrawal Summary' })}</h4>
 				<div class="space-y-2 text-sm">
 					<div class="flex justify-between">
-						<span class="text-text-secondary">Amount:</span>
+						<span class="text-text-secondary">{$t('common.amount')}:</span>
 						<span class="text-text font-semibold">{withdrawAmount}</span>
 					</div>
 					<div class="flex justify-between">
-						<span class="text-text-secondary">Network Fee:</span>
+						<span class="text-text-secondary">{$t('common.network_fee', { default: 'Network Fee' })}:</span>
 						<span class="text-text font-semibold">{feeWeiHex} STRK</span>
 					</div>
 					<div class="mt-2 border-t pt-2">
 						<div class="flex justify-between">
-							<span class="text-text-secondary">Recipient:</span>
+							<span class="text-text-secondary">{$t('common.recipient', { default: 'Recipient' })}:</span>
 							<span class="text-text font-mono text-xs break-all">{withdrawRecipient}</span>
 						</div>
 					</div>
 				</div>
 			</div>
 			<p class="text-text-secondary text-sm">
-				This withdrawal will be processed anonymously and cannot be reversed. Please verify all
-				details are correct.
+				{$t('common.withdrawal_confirmation_text', { default: 'This withdrawal will be processed anonymously and cannot be reversed. Please verify all details are correct.' })}
 			</p>
 		</div>
 	</Modal>

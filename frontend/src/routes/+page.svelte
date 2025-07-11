@@ -20,27 +20,11 @@
 			descriptionKey: 'home.features.deposit.description',
 			href: '/deposit',
 			details: {
-				title: 'Private Deposits',
-				description: 'Transform your tokens into private notes. While your deposit can be linked to your wallet, the privacy protection kicks in when you withdraw.',
-				howItWorks: [
-					'Connect your wallet with supported tokens',
-					'Choose the amount you want to deposit',
-					'Your tokens are locked in the privacy pool',
-					'You receive a private note representing your deposit',
-					'The note becomes truly anonymous when you withdraw to different addresses'
-				],
-				benefits: [
-					'🔒 Privacy protection for future withdrawals',
-					'🛡️ Break the link between deposits and withdrawals',
-					'⚡ Fast and secure transactions on StarkNet',
-					'🌐 Decentralized - no central authority controls your funds'
-				],
-				useCases: [
-					'Prepare funds for anonymous withdrawals later',
-					'Build up privacy reserves for future transactions',
-					'Store funds privately before complex DeFi operations',
-					'Create anonymous spending power for business needs'
-				]
+				titleKey: 'features.private_deposits.title',
+				descriptionKey: 'features.private_deposits.description',
+				howItWorksKeys: 'features.private_deposits.how_it_works',
+				benefitsKeys: 'features.private_deposits.benefits',
+				useCasesKeys: 'features.private_deposits.use_cases'
 			}
 		},
 		{
@@ -51,28 +35,11 @@
 			descriptionKey: 'home.features.withdraw.description',
 			href: '/withdraw',
 			details: {
-				title: 'Anonymous Withdrawals',
-				description: 'Withdraw your funds to any address without revealing the connection to your original deposit.',
-				howItWorks: [
-					'Select a private note from your deposits',
-					'Choose the withdrawal amount (partial or full)',
-					'Specify the destination address',
-					'Pay a small fee using another private note',
-					'Receive funds with complete anonymity'
-				],
-				benefits: [
-					'👤 Withdraw to any address anonymously',
-					'💰 Partial withdrawals supported',
-					'🔐 Zero-knowledge proofs ensure privacy',
-					'⚖️ Automated fee handling',
-					'🎯 Precise amount control'
-				],
-				useCases: [
-					'Pay suppliers without revealing your main wallet',
-					'Distribute funds to multiple addresses privately',
-					'Cash out investments without exposing your portfolio',
-					'Make anonymous donations or payments'
-				]
+				titleKey: 'features.anonymous_withdrawals.title',
+				descriptionKey: 'features.anonymous_withdrawals.description',
+				howItWorksKeys: 'features.anonymous_withdrawals.how_it_works',
+				benefitsKeys: 'features.anonymous_withdrawals.benefits',
+				useCasesKeys: 'features.anonymous_withdrawals.use_cases'
 			}
 		},
 		{
@@ -83,28 +50,11 @@
 			descriptionKey: 'home.features.transfer.description',
 			href: '/transfer',
 			details: {
-				title: 'Private Note Transfers',
-				description: 'Transfer funds between private notes within the privacy pool. Your note is destroyed and a new note is created for the recipient.',
-				howItWorks: [
-					'Select your private note as the funding source',
-					'Recipient generates an empty private note and shares its hash',
-					'You specify the transfer amount and recipient\'s note hash',
-					'Your note is destroyed and recipient\'s note is funded',
-					'Recipient can now claim their note with the transferred amount'
-				],
-				benefits: [
-					'🤝 Direct note-to-note transfers within privacy pool',
-					'👻 No on-chain link between sender and recipient',
-					'🔄 Notes are validated cryptographically',
-					'💸 Internal transfers with minimal fees',
-					'🛡️ Complete privacy for both parties'
-				],
-				useCases: [
-					'Send funds to other privacy pool users',
-					'Pay someone without revealing your identity',
-					'Transfer between your own notes for privacy',
-					'Conduct private business transactions'
-				]
+				titleKey: 'features.private_note_transfers.title',
+				descriptionKey: 'features.private_note_transfers.description',
+				howItWorksKeys: 'features.private_note_transfers.how_it_works',
+				benefitsKeys: 'features.private_note_transfers.benefits',
+				useCasesKeys: 'features.private_note_transfers.use_cases'
 			}
 		},
 		{
@@ -115,28 +65,11 @@
 			descriptionKey: 'home.features.merge.description',
 			href: '/merge',
 			details: {
-				title: 'Deposit Merging',
-				description: 'Combine multiple small deposits into larger ones to enhance privacy and reduce transaction costs.',
-				howItWorks: [
-					'Select multiple private notes of the same token',
-					'Choose which deposits to merge together',
-					'Pay a small merging fee',
-					'Receive a single larger private note',
-					'Your merged deposit has enhanced privacy'
-				],
-				benefits: [
-					'🔀 Combine multiple small deposits',
-					'💪 Stronger privacy through mixing',
-					'📊 Better fund management',
-					'⚡ Reduced future transaction costs',
-					'🎯 Optimal deposit sizes'
-				],
-				useCases: [
-					'Consolidate frequent small deposits',
-					'Prepare large amounts for future withdrawals',
-					'Optimize your private note portfolio',
-					'Enhance privacy through deposit mixing'
-				]
+				titleKey: 'features.deposit_merging.title',
+				descriptionKey: 'features.deposit_merging.description',
+				howItWorksKeys: 'features.deposit_merging.how_it_works',
+				benefitsKeys: 'features.deposit_merging.benefits',
+				useCasesKeys: 'features.deposit_merging.use_cases'
 			}
 		},
 		{
@@ -147,28 +80,11 @@
 			descriptionKey: 'home.features.swap.description',
 			href: '/swap',
 			details: {
-				title: 'Private Token Swaps',
-				description: 'Exchange one token for another while maintaining complete privacy through DeFi protocols.',
-				howItWorks: [
-					'Select your private note as the source token',
-					'Choose the target token you want to receive',
-					'Set your desired swap amount',
-					'Review the exchange rate and fees',
-					'Receive the new token as a private note'
-				],
-				benefits: [
-					'🔄 Anonymous token exchanges',
-					'📈 Access to DeFi markets privately',
-					'⚖️ Automated best price discovery',
-					'🛡️ MEV protection through privacy',
-					'🎯 Precise swap execution'
-				],
-				useCases: [
-					'Rebalance your portfolio privately',
-					'Swap tokens without revealing your holdings',
-					'Arbitrage opportunities with privacy',
-					'Convert rewards tokens anonymously'
-				]
+				titleKey: 'features.private_token_swaps.title',
+				descriptionKey: 'features.private_token_swaps.description',
+				howItWorksKeys: 'features.private_token_swaps.how_it_works',
+				benefitsKeys: 'features.private_token_swaps.benefits',
+				useCasesKeys: 'features.private_token_swaps.use_cases'
 			}
 		}
 	];
@@ -208,6 +124,11 @@
 		closeFeatureModal();
 		window.location.href = href;
 	}
+
+	// Reactive computed values for translation arrays
+	$: howItWorksSteps = selectedFeature ? $t(selectedFeature.details.howItWorksKeys) : [];
+	$: benefits = selectedFeature ? $t(selectedFeature.details.benefitsKeys) : [];
+	$: useCases = selectedFeature ? $t(selectedFeature.details.useCasesKeys) : [];
 </script>
 
 <div class="mx-auto max-w-6xl p-3 sm:p-6">
@@ -439,7 +360,7 @@
 {#if showFeatureModal && selectedFeature}
 	<Modal
 		show={showFeatureModal}
-		title={selectedFeature.details.title}
+		title={$t(selectedFeature.details.titleKey)}
 		onClose={closeFeatureModal}
 		showButtons={false}
 	>
@@ -450,8 +371,8 @@
 					<svelte:component this={selectedFeature.icon} class="w-8 h-8" />
 				</div>
 				<div>
-					<h3 class="text-xl font-bold">{selectedFeature.details.title}</h3>
-					<p class="text-white/80">{selectedFeature.details.description}</p>
+					<h3 class="text-xl font-bold">{$t(selectedFeature.details.titleKey)}</h3>
+					<p class="text-white/80">{$t(selectedFeature.details.descriptionKey)}</p>
 				</div>
 			</div>
 			
@@ -459,10 +380,10 @@
 			<div>
 				<h4 class="text-lg font-semibold mb-3 flex items-center text-text">
 					<Target class="w-5 h-5 mr-2 text-primary" />
-					How It Works
+					{$t('ui.modal.how_it_works')}
 				</h4>
 				<div class="space-y-3">
-					{#each selectedFeature.details.howItWorks as step, index}
+					{#each howItWorksSteps as step, index}
 						<div class="flex items-start space-x-3">
 							<div class="flex-shrink-0 w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold">
 								{index + 1}
@@ -477,10 +398,10 @@
 			<div>
 				<h4 class="text-lg font-semibold mb-3 flex items-center text-text">
 					<Zap class="w-5 h-5 mr-2 text-primary" />
-					Key Benefits
+					{$t('ui.modal.key_benefits')}
 				</h4>
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-					{#each selectedFeature.details.benefits as benefit}
+					{#each benefits as benefit}
 						<div class="flex items-start space-x-2 p-3 bg-surface border border-border rounded-lg">
 							<p class="text-sm text-text-secondary">{benefit}</p>
 						</div>
@@ -492,10 +413,10 @@
 			<div>
 				<h4 class="text-lg font-semibold mb-3 flex items-center text-text">
 					<Users class="w-5 h-5 mr-2 text-primary" />
-					Use Cases
+					{$t('ui.modal.use_cases')}
 				</h4>
 				<div class="space-y-2">
-					{#each selectedFeature.details.useCases as useCase}
+					{#each useCases as useCase}
 						<div class="flex items-start space-x-2">
 							<div class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
 							<p class="text-text-secondary">{useCase}</p>
@@ -507,7 +428,7 @@
 			<!-- Action Buttons -->
 			<div class="flex flex-col sm:flex-row gap-3 justify-center pt-4">
 				<Button 
-					text="Start Using {$t(selectedFeature.titleKey)}"
+					text={`${$t('ui.modal.start_using').replace('{feature}', $t(selectedFeature.titleKey))}`}
 					onClick={() => goToFeature(selectedFeature.href)}
 					class_="bg-gradient-to-r {selectedFeature.gradient} text-white px-8 py-3 text-lg font-semibold"
 				/>
@@ -515,7 +436,7 @@
 					class="rounded bg-surface px-6 py-3 text-text hover:bg-border border border-border font-semibold"
 					on:click={closeFeatureModal}
 				>
-					Close
+					{$t('ui.modal.close')}
 				</button>
 			</div>
 		</div>

@@ -177,5 +177,160 @@
     "high_slippage": "Deslizamiento alto",
     "insufficient_liquidity": "Liquidez insuficiente",
     "price_updated": "Precio actualizado"
+  },
+  "features": {
+    "private_deposits": {
+      "title": "Depósitos Privados",
+      "description": "Transforme sus tokens en notas privadas usando pruebas de conocimiento cero. Sus depósitos se vuelven completamente anónimos e inrastreables, garantizando máxima privacidad financiera en StarkNet."
+    },
+    "anonymous_withdrawals": {
+      "title": "Retiros Anónimos",
+      "description": "Retire sus fondos a cualquier dirección sin revelar la conexión con su depósito original. Use pruebas de conocimiento cero para probar propiedad sin exponer su identidad o historial de transacciones."
+    },
+    "private_note_transfers": {
+      "title": "Transferencias de Notas Privadas",
+      "description": "Transfiera fondos entre notas privadas dentro del pool sin revelar remitente, destinatario o cantidad. Habilite transacciones peer-to-peer completamente privadas usando notas criptográficas."
+    },
+    "deposit_merging": {
+      "title": "Fusión de Depósitos",
+      "description": "Combine múltiples depósitos pequeños en una sola nota más grande para mejorar la privacidad y eficiencia de gas. Fusione notas del mismo token para optimizar su conjunto de privacidad."
+    },
+    "private_token_swaps": {
+      "title": "Intercambios de Tokens Privados",
+      "description": "Intercambie un token por otro manteniendo privacidad completa. Intercambie tokens a través de protocolos DEX integrados sin revelar su actividad de trading o saldos al público."
+    }
+  },
+  "ui": {
+    "modal": {
+      "how_it_works": "Cómo funciona",
+      "key_benefits": "Beneficios clave",
+      "use_cases": "Casos de uso",
+      "start_using": "Comenzar a usar {feature}",
+      "close": "Cerrar"
+    },
+    "onboarding": {
+      "welcome": {
+        "title": "¡Bienvenido a Privacy Pools!",
+        "description": "Un protocolo de privacidad descentralizado que le permite depositar, retirar, transferir e intercambiar tokens con total anonimato usando pruebas de conocimiento cero."
+      },
+      "connect_wallet": {
+        "title": "Conecte Su Billetera",
+        "description": "Primero, conecte su billetera StarkNet para comenzar a usar Privacy Pools. Admitimos todas las principales billeteras StarkNet."
+      },
+      "make_deposit": {
+        "title": "Hacer un Depósito",
+        "description": "Deposite tokens en el pool de privacidad para recibir notas privadas. Estas notas representan sus fondos manteniéndolos completamente anónimos."
+      },
+      "withdraw_anonymously": {
+        "title": "Retirar Anónimamente",
+        "description": "Retire a cualquier dirección sin revelar la conexión con su depósito original. Privacidad financiera completa garantizada."
+      },
+      "advanced_features": {
+        "title": "Características Avanzadas",
+        "description": "Use Transferir para enviar tokens privadamente, Fusionar para combinar depósitos, o Intercambiar para intercambiar tokens anónimamente."
+      },
+      "getting_started": "Comenzando",
+      "skip": "Omitir",
+      "back": "Atrás",
+      "get_started": "Comenzar",
+      "next": "Siguiente",
+      "step_counter": "Paso {current} de {total}"
+    },
+    "navbar": {
+      "privacy_pools": "Privacy Pools",
+      "export_tooltip": "Exportar todas las operaciones a JSON",
+      "import_tooltip": "Importar operaciones desde JSON",
+      "settings_tooltip": "Configuración",
+      "toggle_mobile_menu": "Alternar menú móvil"
+    },
+    "settings": {
+      "theme": {
+        "light": "Claro",
+        "dark": "Oscuro"
+      }
+    },
+    "deposit_page": {
+      "title": "Depósito Privado",
+      "subtitle": "Transforme sus tokens en notas privadas para mayor privacidad financiera",
+      "select_token": "Seleccionar Token",
+      "choose_token_placeholder": "Elija su token",
+      "deposit_amount": "Cantidad del Depósito",
+      "amount_placeholder": "Ingrese cantidad a depositar",
+      "create_deposit_button": "Crear Depósito Privado"
+    },
+    "withdraw_page": {
+      "title": "Retiro Privado",
+      "subtitle": "Retire sus depósitos privados a cualquier dirección con total anonimato",
+      "select_deposit": "Seleccionar Depósito a Retirar",
+      "filter_by_token": "Filtrar por Token",
+      "how_it_works": {
+        "title": "Cómo Funcionan los Retiros Privados",
+        "select_deposit": {
+          "title": "Seleccione Su Depósito",
+          "description": "Elija qué depósito privado quiere retirar"
+        },
+        "set_recipient": {
+          "title": "Establecer Destinatario y Cantidad",
+          "description": "Especifique dónde enviar los fondos y cuánto retirar"
+        },
+        "zero_knowledge": {
+          "title": "Prueba de Conocimiento Cero",
+          "description": "El sistema genera una prueba sin revelar su identidad"
+        },
+        "anonymous_transfer": {
+          "title": "Transferencia Anónima",
+          "description": "Fondos enviados con privacidad completa y sin vinculación"
+        }
+      },
+      "privacy_features": {
+        "title": "Características de Privacidad",
+        "break_linkability": "Romper la vinculación de transacciones",
+        "hide_source": "Ocultar fuente y cantidad del retiro",
+        "fee_handling": "Manejo automático del pago de tarifas",
+        "guaranteed_anonymity": "Anonimato matemáticamente garantizado"
+      },
+      "stats": {
+        "untraceable": "Inrastreable",
+        "fast": "Rápido"
+      },
+      "important_notice": "Importante",
+      "withdrawal_warning": "Los retiros son finales y no se pueden revertir. Verifique dos veces la dirección del destinatario y la cantidad."
+    }
+  },
+  "progress": {
+    "deposit": {
+      "preparation": {
+        "title": "Preparación",
+        "description": "Preparando datos de transacción"
+      },
+      "wallet_approval": {
+        "title": "Aprobación de Billetera",
+        "description": "Esperando confirmación de billetera"
+      },
+      "onchain_confirmation": {
+        "title": "Confirmación en Cadena",
+        "description": "Esperando confirmación de blockchain"
+      }
+    }
+  },
+  "errors": {
+    "validation": {
+      "hex_address": "Debe ser dirección hexadecimal",
+      "amount_string": "La cantidad debe ser una cadena",
+      "amount_empty": "La cantidad no puede estar vacía",
+      "invalid_amount_format": "Formato de cantidad inválido",
+      "amount_positive": "La cantidad debe ser positiva"
+    },
+    "general": {
+      "unexpected_error": "Ocurrió un error inesperado",
+      "reload": "Recargar"
+    }
+  },
+  "notifications": {
+    "export_success": "Operaciones exportadas exitosamente a JSON.",
+    "export_failed": "Falló la exportación de operaciones.",
+    "import_success": "Operaciones importadas exitosamente.",
+    "import_failed": "Falló la importación de operaciones. Asegúrese de que el archivo sea JSON válido.",
+    "file_read_error": "Error al leer el archivo."
   }
 }

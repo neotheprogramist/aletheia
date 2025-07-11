@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { X, ArrowRight, ArrowLeft } from 'lucide-svelte';
 	import Button from './Button.svelte';
+	import { t } from '$lib/i18n';
 	
 	export let show: boolean = false;
 	export let onComplete: () => void = () => {};
@@ -9,30 +10,30 @@
 	
 	let currentStep = 0;
 	
-	const steps = [
+	$: steps = [
 		{
-			title: "Welcome to Privacy Pools!",
-			description: "A decentralized privacy protocol that lets you deposit, withdraw, transfer, and swap tokens while maintaining complete anonymity on StarkNet.",
+			title: $t('ui.onboarding.welcome.title'),
+			description: $t('ui.onboarding.welcome.description'),
 			image: "🔒"
 		},
 		{
-			title: "Connect Your Wallet",
-			description: "First, connect your StarkNet wallet to start using Privacy Pools. We support Argent X and Braavos wallets.",
+			title: $t('ui.onboarding.connect_wallet.title'),
+			description: $t('ui.onboarding.connect_wallet.description'),
 			image: "👛"
 		},
 		{
-			title: "Make a Deposit",
-			description: "Deposit tokens into the privacy pool. This creates a private note that only you can access with your secret key.",
+			title: $t('ui.onboarding.make_deposit.title'),
+			description: $t('ui.onboarding.make_deposit.description'),
 			image: "💰"
 		},
 		{
-			title: "Withdraw Anonymously", 
-			description: "Withdraw to any address without revealing the connection to your deposit. Fees are automatically selected from your deposits.",
+			title: $t('ui.onboarding.withdraw_anonymously.title'), 
+			description: $t('ui.onboarding.withdraw_anonymously.description'),
 			image: "🎭"
 		},
 		{
-			title: "Advanced Features",
-			description: "Use Transfer to send tokens privately to others, Merge to combine deposits for better privacy, or Swap to exchange tokens through DeFi protocols.",
+			title: $t('ui.onboarding.advanced_features.title'),
+			description: $t('ui.onboarding.advanced_features.description'),
 			image: "⚡"
 		}
 	];
@@ -69,7 +70,7 @@
 			<div class="flex items-center justify-between p-6 border-b border-border">
 				<div class="flex items-center gap-2">
 					<span class="text-2xl">{steps[currentStep].image}</span>
-					<h2 class="text-lg font-semibold text-text">Getting Started</h2>
+					<h2 class="text-lg font-semibold text-text">{$t('ui.onboarding.getting_started')}</h2>
 				</div>
 				<button 
 					class="rounded-lg p-1 text-text-secondary hover:text-text hover:bg-surface transition-colors"
@@ -105,7 +106,7 @@
 			<div class="flex items-center justify-between p-6 border-t border-border">
 				<Button
 					variant="outline"
-					text="Skip"
+					text={$t('ui.onboarding.skip')}
 					onClick={skip}
 					size="sm"
 				/>
@@ -114,14 +115,14 @@
 					{#if currentStep > 0}
 						<Button
 							variant="outline"
-							text="Back"
+							text={$t('ui.onboarding.back')}
 							onClick={prevStep}
 							size="sm"
 						/>
 					{/if}
 					
 					<Button
-						text={currentStep === steps.length - 1 ? "Get Started" : "Next"}
+						text={currentStep === steps.length - 1 ? $t('ui.onboarding.get_started') : $t('ui.onboarding.next')}
 						onClick={nextStep}
 						size="sm"
 					/>
@@ -131,7 +132,7 @@
 			<!-- Step counter -->
 			<div class="px-6 pb-4">
 				<div class="text-center text-sm text-text-secondary">
-					Step {currentStep + 1} of {steps.length}
+					{$t('ui.onboarding.step_counter').replace('{current}', (currentStep + 1).toString()).replace('{total}', steps.length.toString())}
 				</div>
 			</div>
 		</div>

@@ -4,6 +4,7 @@
 	import { wallet } from '$lib/stores/wallet';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS } from '$env/static/public';
+	import { t } from '$lib/i18n';
 
 	import Card from '$lib/ui/Card.svelte';
 	import Input from '$lib/ui/Input.svelte';
@@ -151,11 +152,11 @@
 					<h1
 						class="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl"
 					>
-						Private Deposit
+						{$t('ui.deposit_page.title')}
 					</h1>
 				</div>
 				<p class="text-text-secondary mx-auto max-w-2xl text-lg">
-					Transform your tokens into private notes for enhanced financial privacy
+					{$t('ui.deposit_page.subtitle')}
 				</p>
 			</div>
 
@@ -168,12 +169,12 @@
 							<div class="space-y-3">
 								<label class="text-text flex items-center gap-2 text-sm font-semibold">
 									<DollarSign class="h-4 w-4" />
-									Select Token
+									{$t('ui.deposit_page.select_token')}
 								</label>
 								<TokenSelect
 									tokens={$tokens}
 									bind:value={$selectedToken}
-									placeholder="Choose your token"
+									placeholder={$t('ui.deposit_page.choose_token_placeholder')}
 									class_="w-full"
 								/>
 							</div>
@@ -192,11 +193,11 @@
 							<div class="space-y-3">
 								<label class="text-text flex items-center gap-2 text-sm font-semibold">
 									<ArrowRight class="h-4 w-4" />
-									Deposit Amount
+									{$t('ui.deposit_page.deposit_amount')}
 								</label>
 								<div class="flex gap-2">
 									<Input
-										placeholder="Enter amount to deposit"
+										placeholder={$t('ui.deposit_page.amount_placeholder')}
 										bind:value={amount}
 										required
 										class_="flex-1 text-lg font-medium"
@@ -206,7 +207,7 @@
 
 							<!-- Submit Button -->
 							<Button
-								text="Create Private Deposit"
+								text={$t('ui.deposit_page.create_deposit_button')}
 								loading={isLoading}
 								onClick={depositHandler}
 								class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
@@ -222,18 +223,18 @@
 							<div class="space-y-3">
 								<h3 class="flex items-center gap-2 font-semibold text-blue-800 dark:text-blue-300">
 									<DollarSign class="h-5 w-5" />
-									Deposit Summary
+									{$t('ui.deposit_page.summary.title')}
 								</h3>
 								<div class="space-y-2">
 									<div class="flex items-center justify-between">
-										<span class="text-sm text-blue-700 dark:text-blue-300">Token:</span>
+										<span class="text-sm text-blue-700 dark:text-blue-300">{$t('ui.deposit_page.summary.token')}</span>
 										<span class="font-medium text-blue-800 dark:text-blue-200"
 											>{$tokens.find((t) => t.address === $selectedToken)?.symbol ||
-												'Unknown'}</span
+												$t('ui.deposit_page.summary.unknown')}</span
 										>
 									</div>
 									<div class="flex items-center justify-between">
-										<span class="text-sm text-blue-700 dark:text-blue-300">Amount:</span>
+										<span class="text-sm text-blue-700 dark:text-blue-300">{$t('ui.deposit_page.summary.amount')}</span>
 										<span class="font-medium text-blue-800 dark:text-blue-200">{amount}</span>
 									</div>
 								</div>
@@ -249,7 +250,7 @@
 						<div class="space-y-4">
 							<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 								<Zap class="h-5 w-5 text-blue-500" />
-								How Private Deposits Work
+								{$t('ui.deposit_page.how_it_works.title')}
 							</h3>
 							<div class="space-y-4">
 								<div class="flex items-start gap-3">
@@ -259,9 +260,9 @@
 										1
 									</div>
 									<div>
-										<p class="text-text font-medium">Choose Your Token</p>
+										<p class="text-text font-medium">{$t('ui.deposit_page.how_it_works.choose_token.title')}</p>
 										<p class="text-text-secondary text-sm">
-											Select from supported tokens in your wallet
+											{$t('ui.deposit_page.how_it_works.choose_token.description')}
 										</p>
 									</div>
 								</div>
@@ -272,9 +273,9 @@
 										2
 									</div>
 									<div>
-										<p class="text-text font-medium">Set Amount</p>
+										<p class="text-text font-medium">{$t('ui.deposit_page.how_it_works.set_amount.title')}</p>
 										<p class="text-text-secondary text-sm">
-											Enter the amount you want to deposit privately
+											{$t('ui.deposit_page.how_it_works.set_amount.description')}
 										</p>
 									</div>
 								</div>
@@ -285,9 +286,9 @@
 										3
 									</div>
 									<div>
-										<p class="text-text font-medium">Get Private Note</p>
+										<p class="text-text font-medium">{$t('ui.deposit_page.how_it_works.get_private_note.title')}</p>
 										<p class="text-text-secondary text-sm">
-											Receive a cryptographic note representing your deposit
+											{$t('ui.deposit_page.how_it_works.get_private_note.description')}
 										</p>
 									</div>
 								</div>
@@ -298,9 +299,9 @@
 										4
 									</div>
 									<div>
-										<p class="text-text font-medium">Anonymous Withdrawals</p>
+										<p class="text-text font-medium">{$t('ui.deposit_page.how_it_works.anonymous_withdrawals.title')}</p>
 										<p class="text-text-secondary text-sm">
-											Later withdraw to any address with complete privacy
+											{$t('ui.deposit_page.how_it_works.anonymous_withdrawals.description')}
 										</p>
 									</div>
 								</div>
@@ -315,31 +316,31 @@
 						<div class="space-y-4">
 							<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 								<Lock class="h-5 w-5 text-green-500" />
-								Security Features
+								{$t('ui.deposit_page.security_features.title')}
 							</h3>
 							<div class="space-y-3">
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-green-500" />
 									<span class="text-text text-sm font-medium"
-										>Zero-knowledge proofs protect your privacy</span
+										>{$t('ui.deposit_page.security_features.zero_knowledge')}</span
 									>
 								</div>
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-green-500" />
 									<span class="text-text text-sm font-medium"
-										>Cryptographic notes ensure anonymity</span
+										>{$t('ui.deposit_page.security_features.cryptographic_notes')}</span
 									>
 								</div>
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-green-500" />
 									<span class="text-text text-sm font-medium"
-										>Decentralized protocol - no central authority</span
+										>{$t('ui.deposit_page.security_features.decentralized')}</span
 									>
 								</div>
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-green-500" />
 									<span class="text-text text-sm font-medium"
-										>StarkNet security and fast finality</span
+										>{$t('ui.deposit_page.security_features.starknet_security')}</span
 									>
 								</div>
 							</div>
@@ -352,16 +353,16 @@
 							class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
 						>
 							<div class="space-y-2">
-								<div class="text-2xl font-bold text-green-500">100%</div>
-								<div class="text-text-secondary text-sm">Anonymous</div>
+								<div class="text-2xl font-bold text-green-500">{$t('ui.deposit_page.quick_stats.anonymous_percent')}</div>
+								<div class="text-text-secondary text-sm">{$t('ui.deposit_page.quick_stats.anonymous_label')}</div>
 							</div>
 						</Card>
 						<Card
 							class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
 						>
 							<div class="space-y-2">
-								<div class="text-2xl font-bold text-blue-500">⚡</div>
-								<div class="text-text-secondary text-sm">Instant</div>
+								<div class="text-2xl font-bold text-blue-500">{$t('ui.deposit_page.quick_stats.instant_icon')}</div>
+								<div class="text-text-secondary text-sm">{$t('ui.deposit_page.quick_stats.instant_label')}</div>
 							</div>
 						</Card>
 					</div>

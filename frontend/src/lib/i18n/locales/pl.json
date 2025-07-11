@@ -177,5 +177,160 @@
     "high_slippage": "Ostrzeżenie o wysokim poślizgu",
     "insufficient_liquidity": "Niewystarczająca płynność",
     "price_updated": "Cena zaktualizowana"
+  },
+  "features": {
+    "private_deposits": {
+      "title": "Prywatne Wpłaty",
+      "description": "Przekształć swoje tokeny w prywatne notatki używając dowodów zero-knowledge. Twoje wpłaty stają się całkowicie anonimowe i nieśledzone, zapewniając maksymalną prywatność finansową w StarkNet."
+    },
+    "anonymous_withdrawals": {
+      "title": "Anonimowe Wypłaty",
+      "description": "Wypłacaj swoje środki na dowolny adres bez ujawniania połączenia z pierwotną wpłatą. Korzystając z dowodów zero-knowledge, udowodnij własność bez ujawniania tożsamości lub historii transakcji."
+    },
+    "private_note_transfers": {
+      "title": "Przelewy Prywatnych Notatek",
+      "description": "Przelewaj środki między prywatnymi notatkami w puli bez ujawniania nadawcy, odbiorcy lub kwoty. Umożliwia całkowicie prywatne transakcje peer-to-peer używając notatek kryptograficznych."
+    },
+    "deposit_merging": {
+      "title": "Łączenie Wpłat",
+      "description": "Połącz wiele małych wpłat w jedną większą notatkę dla lepszej prywatności i efektywności gazu. Łącz notatki tego samego tokena, aby zoptymalizować swój zestaw prywatności."
+    },
+    "private_token_swaps": {
+      "title": "Prywatne Wymiany Tokenów",
+      "description": "Wymieniaj jeden token na drugi zachowując całkowitą prywatność. Wymieniaj tokeny przez zintegrowane protokoły DEX bez ujawniania swojej aktywności handlowej lub saldów publicznie."
+    }
+  },
+  "ui": {
+    "modal": {
+      "how_it_works": "Jak to działa",
+      "key_benefits": "Główne korzyści",
+      "use_cases": "Przypadki użycia",
+      "start_using": "Zacznij używać {feature}",
+      "close": "Zamknij"
+    },
+    "onboarding": {
+      "welcome": {
+        "title": "Witamy w Privacy Pools!",
+        "description": "Zdecentralizowany protokół prywatności, który pozwala wpłacać, wypłacać, przelewać i wymieniać tokeny z całkowitą anonimowością używając dowodów zero-knowledge."
+      },
+      "connect_wallet": {
+        "title": "Podłącz Swój Portfel",
+        "description": "Najpierw podłącz swój portfel StarkNet, aby rozpocząć korzystanie z Privacy Pools. Wspieramy wszystkie główne portfele StarkNet."
+      },
+      "make_deposit": {
+        "title": "Dokonaj Wpłaty",
+        "description": "Wpłać tokeny do puli prywatności, aby otrzymać prywatne notatki. Te notatki reprezentują Twoje środki, zachowując je całkowicie anonimowe."
+      },
+      "withdraw_anonymously": {
+        "title": "Wypłacaj Anonimowo",
+        "description": "Wypłacaj na dowolny adres bez ujawniania połączenia z pierwotną wpłatą. Gwarantowana całkowita prywatność finansowa."
+      },
+      "advanced_features": {
+        "title": "Zaawansowane Funkcje",
+        "description": "Użyj Transfer do prywatnego wysyłania tokenów, Merge do łączenia wpłat, lub Swap do anonimowej wymiany tokenów."
+      },
+      "getting_started": "Rozpoczynanie",
+      "skip": "Pomiń",
+      "back": "Wstecz",
+      "get_started": "Zacznij",
+      "next": "Następny",
+      "step_counter": "Krok {current} z {total}"
+    },
+    "navbar": {
+      "privacy_pools": "Privacy Pools",
+      "export_tooltip": "Eksportuj wszystkie operacje do JSON",
+      "import_tooltip": "Importuj operacje z JSON",
+      "settings_tooltip": "Ustawienia",
+      "toggle_mobile_menu": "Przełącz menu mobilne"
+    },
+    "settings": {
+      "theme": {
+        "light": "Jasny",
+        "dark": "Ciemny"
+      }
+    },
+    "deposit_page": {
+      "title": "Prywatna Wpłata",
+      "subtitle": "Przekształć swoje tokeny w prywatne notatki dla zwiększonej prywatności finansowej",
+      "select_token": "Wybierz Token",
+      "choose_token_placeholder": "Wybierz swój token",
+      "deposit_amount": "Kwota Wpłaty",
+      "amount_placeholder": "Wprowadź kwotę do wpłaty",
+      "create_deposit_button": "Utwórz Prywatna Wpłatę"
+    },
+    "withdraw_page": {
+      "title": "Prywatna Wypłata",
+      "subtitle": "Wypłacaj swoje prywatne wpłaty na dowolny adres z całkowitą anonimowością",
+      "select_deposit": "Wybierz Wpłatę do Wypłaty",
+      "filter_by_token": "Filtruj według Tokena",
+      "how_it_works": {
+        "title": "Jak Działają Prywatne Wypłaty",
+        "select_deposit": {
+          "title": "Wybierz Swoją Wpłatę",
+          "description": "Wybierz którą prywatna wpłatę chcesz wypłacić"
+        },
+        "set_recipient": {
+          "title": "Ustaw Odbiorca i Kwotę",
+          "description": "Określ gdzie wysłać środki i ile wypłacić"
+        },
+        "zero_knowledge": {
+          "title": "Dowód Zero-Knowledge",
+          "description": "System generuje dowód bez ujawniania Twojej tożsamości"
+        },
+        "anonymous_transfer": {
+          "title": "Anonimowy Przelew",
+          "description": "Środki wysłane z całkowitą prywatnością i bez możliwości połączenia"
+        }
+      },
+      "privacy_features": {
+        "title": "Funkcje Prywatności",
+        "break_linkability": "Przerwij łączność transakcji",
+        "hide_source": "Ukryj źródło wypłaty i kwotę",
+        "fee_handling": "Automatyczna obsługa płatności za opłaty",
+        "guaranteed_anonymity": "Matematycznie gwarantowana anonimowość"
+      },
+      "stats": {
+        "untraceable": "Nieśledny",
+        "fast": "Szybki"
+      },
+      "important_notice": "Ważne",
+      "withdrawal_warning": "Wypłaty są ostateczne i nie mogą być cofnięte. Sprawdź dwukrotnie adres odbiorcy i kwotę."
+    }
+  },
+  "progress": {
+    "deposit": {
+      "preparation": {
+        "title": "Przygotowanie",
+        "description": "Przygotowywanie danych transakcji"
+      },
+      "wallet_approval": {
+        "title": "Zatwierdzenie Portfela",
+        "description": "Oczekiwanie na potwierdzenie portfela"
+      },
+      "onchain_confirmation": {
+        "title": "Potwierdzenie Onchain",
+        "description": "Oczekiwanie na potwierdzenie blockchain"
+      }
+    }
+  },
+  "errors": {
+    "validation": {
+      "hex_address": "Musi być adresem hex",
+      "amount_string": "Kwota musi być ciągiem znaków",
+      "amount_empty": "Kwota nie może być pusta",
+      "invalid_amount_format": "Nieprawidłowy format kwoty",
+      "amount_positive": "Kwota musi być dodatnia"
+    },
+    "general": {
+      "unexpected_error": "Wystąpił nieoczekiwany błąd",
+      "reload": "Przeładuj"
+    }
+  },
+  "notifications": {
+    "export_success": "Operacje pomyślnie wyeksportowane do JSON.",
+    "export_failed": "Eksport operacji nieudany.",
+    "import_success": "Operacje pomyślnie zaimportowane.",
+    "import_failed": "Import operacji nieudany. Upewnij się, że plik to prawidłowy JSON.",
+    "file_read_error": "Błąd odczytywania pliku."
   }
 }
