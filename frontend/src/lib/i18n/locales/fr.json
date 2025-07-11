@@ -1,0 +1,181 @@
+{
+  "nav": {
+    "deposit": "Dépôt",
+    "withdraw": "Retrait",
+    "merge": "Fusion",
+    "transfer": "Transfert",
+    "swap": "Échange",
+    "settings": "Paramètres"
+  },
+  "home": {
+    "title": "Privacy Pools",
+    "subtitle": "La solution de confidentialité ultime pour vos transactions StarkNet. Échangez, transférez et effectuez des transactions en toute anonymité.",
+    "unlock_privacy": "Déverrouiller la confidentialité",
+    "connect_wallet_description": "Connectez votre portefeuille pour commencer à expérimenter la vraie confidentialité financière sur StarkNet",
+    "show_tutorial": "Afficher le tutoriel",
+    "connect_wallet": "Connecter le portefeuille",
+    "features": {
+      "deposit": {
+        "title": "Dépôt",
+        "description": "Sécurisez vos actifs avec la confidentialité"
+      },
+      "withdraw": {
+        "title": "Retrait",
+        "description": "Retraits anonymes vers n'importe quelle adresse"
+      },
+      "transfer": {
+        "title": "Transfert",
+        "description": "Transferts privés de pair à pair"
+      },
+      "merge": {
+        "title": "Fusion",
+        "description": "Combinez les dépôts pour une meilleure confidentialité"
+      },
+      "swap": {
+        "title": "Échange",
+        "description": "Échanges de jetons privés"
+      }
+    },
+    "stats": {
+      "title": "DeFi axé sur la confidentialité",
+      "subtitle": "Rejoignez l'avenir des transactions privées sur StarkNet avec des preuves à connaissance nulle et un anonymat complet",
+      "anonymous_transactions": "Transactions anonymes",
+      "lightning_fast": "Ultra rapide",
+      "decentralized": "Décentralisé"
+    },
+    "how_it_works": {
+      "title": "Comment ça marche",
+      "step1": "Connectez votre portefeuille et déposez des jetons",
+      "step2": "Recevez des notes privées représentant vos dépôts",
+      "step3": "Retirez, transférez ou échangez anonymement"
+    },
+    "why_choose": {
+      "title": "Pourquoi choisir Privacy Pools",
+      "privacy": "Les preuves à connaissance nulle garantissent une confidentialité complète",
+      "starknet": "Construit sur StarkNet pour des frais bas et des transactions rapides",
+      "decentralized": "Protocole décentralisé et sans confiance"
+    },
+    "learn_more": "En savoir plus"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue",
+    "theme": "Thème",
+    "close": "Fermer"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "next": "Suivant",
+    "finish": "Terminer",
+    "skip": "Passer",
+    "retry": "Réessayer",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "copy": "Copier",
+    "copied": "Copié",
+    "amount": "Montant",
+    "balance": "Solde",
+    "address": "Adresse",
+    "transaction": "Transaction",
+    "fee": "Frais",
+    "total": "Total",
+    "available": "Disponible",
+    "pending": "En attente",
+    "completed": "Terminé",
+    "failed": "Échoué"
+  },
+  "wallet": {
+    "connect": "Connecter le portefeuille",
+    "disconnect": "Déconnecter le portefeuille",
+    "connecting": "Connexion en cours...",
+    "connected": "Connecté",
+    "not_connected": "Non connecté",
+    "install_wallet": "Installer le portefeuille",
+    "wrong_network": "Mauvais réseau",
+    "switch_network": "Changer de réseau",
+    "account": "Compte",
+    "balance": "Solde"
+  },
+  "deposit": {
+    "title": "Dépôt",
+    "description": "Déposez des jetons pour recevoir des notes privées",
+    "select_token": "Sélectionner le jeton",
+    "enter_amount": "Entrer le montant",
+    "max": "Max",
+    "deposit_button": "Déposer",
+    "depositing": "Dépôt en cours...",
+    "success": "Dépôt réussi",
+    "error": "Erreur de dépôt",
+    "min_amount": "Montant minimum",
+    "max_amount": "Montant maximum",
+    "insufficient_balance": "Solde insuffisant",
+    "approve_first": "Approuver d'abord",
+    "approving": "Approbation en cours...",
+    "approved": "Approuvé"
+  },
+  "withdraw": {
+    "title": "Retrait",
+    "description": "Retirez des jetons vers n'importe quelle adresse",
+    "select_note": "Sélectionner la note",
+    "recipient_address": "Adresse du destinataire",
+    "withdraw_amount": "Montant du retrait",
+    "withdraw_button": "Retirer",
+    "withdrawing": "Retrait en cours...",
+    "success": "Retrait réussi",
+    "error": "Erreur de retrait",
+    "invalid_address": "Adresse invalide",
+    "insufficient_note_balance": "Solde de note insuffisant",
+    "fee_note": "Note de frais",
+    "anonymity_warning": "Avertissement d'anonymat"
+  },
+  "transfer": {
+    "title": "Transfert",
+    "description": "Transférez des notes privées à d'autres utilisateurs",
+    "select_source": "Sélectionner la source",
+    "recipient_note": "Note du destinataire",
+    "transfer_amount": "Montant du transfert",
+    "transfer_button": "Transférer",
+    "transferring": "Transfert en cours...",
+    "success": "Transfert réussi",
+    "error": "Erreur de transfert",
+    "invalid_note": "Note invalide",
+    "same_note_error": "Erreur de note identique",
+    "note_not_found": "Note non trouvée"
+  },
+  "merge": {
+    "title": "Fusion",
+    "description": "Fusionnez plusieurs notes en une seule",
+    "select_notes": "Sélectionner les notes",
+    "merged_amount": "Montant fusionné",
+    "merge_button": "Fusionner",
+    "merging": "Fusion en cours...",
+    "success": "Fusion réussie",
+    "error": "Erreur de fusion",
+    "min_notes": "Notes minimum",
+    "same_token_only": "Même jeton uniquement",
+    "merge_fee": "Frais de fusion"
+  },
+  "swap": {
+    "title": "Échange",
+    "description": "Échangez des jetons de manière privée",
+    "from_token": "Jeton source",
+    "to_token": "Jeton destination",
+    "swap_amount": "Montant de l'échange",
+    "estimated_output": "Sortie estimée",
+    "price_impact": "Impact sur le prix",
+    "slippage": "Glissement",
+    "swap_button": "Échanger",
+    "swapping": "Échange en cours...",
+    "success": "Échange réussi",
+    "error": "Erreur d'échange",
+    "high_slippage": "Glissement élevé",
+    "insufficient_liquidity": "Liquidité insuffisante",
+    "price_updated": "Prix mis à jour"
+  }
+}
