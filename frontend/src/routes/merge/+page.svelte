@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS } from '$env/static/public';
+	import { t } from '$lib/i18n';
 	import { getOperationDetails } from '$lib/db/operations';
 	import { abortOperation } from '$lib/privacy/abortOperation';
 	import { generateOperation } from '$lib/privacy/generateOperation';
@@ -151,14 +152,14 @@
 				selectedFeeKey = null;
 
 				if (!autoSelectedFeeInfo.hasEnoughBalance) {
-					feePreloadError = `Insufficient STRK balance. Required: ${autoSelectedFeeInfo.feeInfo.formatted} STRK`;
+					feePreloadError = $t('ui.merge_page.errors.insufficient_strk').replace('{amount}', autoSelectedFeeInfo.feeInfo.formatted);
 				} else {
-					feePreloadError = 'No available STRK deposits for fee payment';
+					feePreloadError = $t('ui.merge_page.errors.no_strk_deposits');
 				}
 			}
 		} catch (error) {
 			console.error('Error auto-selecting fee deposit:', error);
-			feePreloadError = 'Failed to load fee information';
+			feePreloadError = $t('ui.merge_page.errors.fee_load_failed');
 			autoSelectedFeeInfo = null;
 		}
 	}
@@ -175,7 +176,7 @@
 					!selectedFeeDeposit ||
 					!autoSelectedFeeInfo
 				) {
-					throw new Error('Please select both merge deposits first');
+					throw new Error($t('ui.merge_page.errors.select_deposits'));
 				}
 
 				// — Parse first merge note
@@ -187,7 +188,7 @@
 				const mergeTokenDecimals = await fetchTokenDecimals(merge1TokenAddress);
 				merge1Amount = fromWei(merge1NoteBalanceWei, mergeTokenDecimals);
 				if (merge1NoteBalanceWei <= 0n) {
-					throw new Error('Invalid first deposit balance');
+					throw new Error($t('ui.merge_page.errors.invalid_first_balance'));
 				}
 
 				// — Parse second merge note
@@ -196,12 +197,12 @@
 				merge2NoteBalanceWei = BigInt(merge2NoteBalance);
 				merge2Amount = fromWei(merge2NoteBalanceWei, mergeTokenDecimals);
 				if (merge2NoteBalanceWei <= 0n) {
-					throw new Error('Invalid first deposit balance');
+					throw new Error($t('ui.merge_page.errors.invalid_second_balance'));
 				}
 
 				// Check if are the same tokens
 				if (merge1TokenAddress !== merge2TokenAddress) {
-					throw new Error('Both merge notes must be for the same token');
+					throw new Error($t('ui.merge_page.errors.same_token_required'));
 				}
 
 				// — Parse Fee note (auto-selected)
@@ -216,19 +217,18 @@
 
 				if (feeWei > feeNoteBalanceWei) {
 					throw new Error(
-						`Fee (${feeWeiHex}) exceeds your fee note balance (${fromWei(
-							feeNoteBalanceWei,
-							feeNoteDecimals
-						)})`
+						$t('ui.merge_page.errors.fee_exceeds_balance')
+							.replace('{fee}', feeWeiHex)
+							.replace('{balance}', fromWei(feeNoteBalanceWei, feeNoteDecimals))
 					);
 				}
 
 				showFeeModal = true;
 			},
 			{
-				loading: '⏳ Executing Merge',
-				success: '✅ Merge ready!',
-				error: '❌ Merge failed'
+				loading: $t('ui.merge_page.toast.executing'),
+				success: $t('ui.merge_page.toast.ready'),
+				error: $t('ui.merge_page.toast.failed')
 			},
 			async () => {
 				isLoading = false;
@@ -246,16 +246,16 @@
 			// 2) Validate that note balances and calculated amounts are present
 			progressModalActions.updateStep('preparation', 'loading');
 			if (!merge1NoteBalanceWei || !merge2NoteBalanceWei) {
-				throw new Error('Cannot calculate refund – missing deposits amounts');
+				throw new Error($t('ui.merge_page.errors.missing_deposit_amounts'));
 			}
 
 			if (!feeNoteBalanceWei || !feeWei) {
-				throw new Error('Cannot calculate refund – missing fee amounts');
+				throw new Error($t('ui.merge_page.errors.missing_fee_amounts'));
 			}
 
 			// 3) Ensure zk library and merkle tree are initialized
 			const { garaga } = get(zkLibraries);
-			if (!garaga) throw new Error('Garaga not initialized');
+			if (!garaga) throw new Error($t('ui.common.errors.garaga_not_initialized'));
 			if (
 				!feeNote ||
 				!selectedFeeDeposit ||
@@ -264,10 +264,10 @@
 				!mergeNote1 ||
 				!mergeNote2
 			) {
-				throw new Error('Missing fee or merge deposits');
+				throw new Error($t('ui.merge_page.errors.missing_deposits'));
 			}
 			const tree = merkleTree;
-			if (!tree) throw new Error('Merkle tree does not exist');
+			if (!tree) throw new Error($t('ui.common.errors.merkle_tree_missing'));
 
 			// 4) Compute commitments for the merge and fee deposits
 			// And get the data for proving
@@ -322,7 +322,7 @@
 			const feeRefundOp = await getOperationDetails(feeRefundHash);
 
 			if (!merge1Op || !merge2Op || !feeOp || !mergeRefundOp || !feeRefundOp) {
-				throw new Error('One or more operations not found');
+				throw new Error($t('ui.merge_page.errors.operations_not_found'));
 			}
 
 			// 7) Build the witness input object for proof
@@ -378,13 +378,13 @@
 			// 9) Prepare for the StarkNet transaction
 			progressModalActions.updateStep('transaction-prepare', 'loading');
 			const rpc = get(provider);
-			if (!rpc) throw new Error('Missing Provider');
+			if (!rpc) throw new Error($t('ui.common.errors.missing_provider'));
 
 			const account = get(paymasterWallet);
-			if (!account) throw new Error('Missing Account');
+			if (!account) throw new Error($t('ui.common.errors.missing_account'));
 
 			const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
-			if (!privacyAbi) throw new Error('Missing ABI');
+			if (!privacyAbi) throw new Error($t('ui.common.errors.missing_abi'));
 
 			const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
 			privacy.connect(account);
@@ -410,9 +410,9 @@
 
 			// 10) Check receipt status and throw on failure
 			if (receipt.isReverted()) {
-				throw new Error(`Transaction reverted: ${receipt.value}`);
+				throw new Error($t('ui.common.errors.transaction_reverted').replace('{error}', receipt.value));
 			} else if (!receipt.isSuccess()) {
-				throw new Error(`Transaction error: ${receipt.value}`);
+				throw new Error($t('ui.common.errors.transaction_error').replace('{error}', receipt.value));
 			}
 
 			progressModalActions.updateStep('onchain-confirmation', 'completed');
@@ -489,11 +489,11 @@
 					<h1
 						class="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl"
 					>
-						Private Merge
+						{$t('ui.merge_page.title')}
 					</h1>
 				</div>
 				<p class="text-text-secondary mx-auto max-w-2xl text-lg">
-					Combine multiple deposits into a single private note for enhanced management
+					{$t('ui.merge_page.description')}
 				</p>
 			</div>
 
@@ -506,7 +506,7 @@
 							<div class="flex items-center justify-between">
 								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 									<Target class="h-5 w-5 text-orange-500" />
-									Select Deposits to Merge
+									{$t('ui.merge_page.select_deposits')}
 								</h3>
 							</div>
 
@@ -515,12 +515,12 @@
 								<div class="space-y-3">
 									<label class="text-text flex items-center gap-2 text-sm font-semibold">
 										<Layers class="h-4 w-4" />
-										Selection Mode
+										{$t('ui.merge_page.selection_mode')}
 									</label>
 									<SelectionToggle
 										options={[
-											{ label: 'First Deposit', value: 'merge1', isFirst: true },
-											{ label: 'Second Deposit', value: 'merge2', isLast: true }
+											{ label: $t('ui.merge_page.first_deposit'), value: 'merge1', isFirst: true },
+											{ label: $t('ui.merge_page.second_deposit'), value: 'merge2', isLast: true }
 										]}
 										selected={selectionMode}
 										onChange={handleSelectionChange}
@@ -532,12 +532,12 @@
 								<div class="space-y-3">
 									<label class="text-text flex items-center gap-2 text-sm font-semibold">
 										<DollarSign class="h-4 w-4" />
-										Filter by Token
+										{$t('ui.merge_page.filter_by_token')}
 									</label>
 									<TokenSelect
 										tokens={$tokens}
 										bind:value={$selectedToken}
-										placeholder="Choose token to filter deposits"
+										placeholder={$t('ui.merge_page.choose_token_placeholder')}
 										class_="w-full sm:w-80"
 									/>
 								</div>
@@ -550,8 +550,8 @@
 										>
 											<Layers class="h-8 w-8 text-gray-400" />
 										</div>
-										<h3 class="text-text mb-2 text-lg font-medium">No Deposits Found</h3>
-										<p class="text-text-secondary">Make a deposit first to start merging!</p>
+										<h3 class="text-text mb-2 text-lg font-medium">{$t('ui.merge_page.no_deposits_title')}</h3>
+										<p class="text-text-secondary">{$t('ui.merge_page.no_deposits_description')}</p>
 									</div>
 								{:else}
 									<div
@@ -592,18 +592,18 @@
 									class="flex items-center gap-2 font-semibold text-orange-800 dark:text-orange-300"
 								>
 									<Zap class="h-5 w-5" />
-									Fee Information
+									{$t('ui.merge_page.fee_information')}
 								</h3>
 								<div class="space-y-2">
 									<div class="flex items-center justify-between">
-										<span class="text-sm text-orange-700 dark:text-orange-300">Network Fee:</span>
+										<span class="text-sm text-orange-700 dark:text-orange-300">{$t('ui.merge_page.network_fee')}:</span>
 										<span class="font-bold text-orange-800 dark:text-orange-200"
 											>{autoSelectedFeeInfo.feeInfo.formatted} STRK</span
 										>
 									</div>
 									{#if autoSelectedFeeInfo.feeDeposit}
 										<div class="flex items-center justify-between">
-											<span class="text-sm text-orange-700 dark:text-orange-300">Fee Deposit:</span>
+											<span class="text-sm text-orange-700 dark:text-orange-300">{$t('ui.merge_page.fee_deposit')}:</span>
 											<span class="font-medium text-orange-800 dark:text-orange-200"
 												>{autoSelectedFeeInfo.feeDeposit.displayAmount}</span
 											>
@@ -623,7 +623,7 @@
 								<AlertTriangle class="mt-0.5 h-5 w-5 text-red-500" />
 								<div>
 									<h3 class="mb-1 font-semibold text-red-800 dark:text-red-300">
-										Fee Payment Issue
+										{$t('ui.merge_page.fee_payment_issue')}
 									</h3>
 									<p class="text-sm text-red-700 dark:text-red-300">{feePreloadError}</p>
 								</div>
@@ -634,9 +634,9 @@
 					<!-- Selected Deposits Display -->
 					<SelectedDeposits
 						items={[
-							{ title: 'First Deposit', deposit: selectedMerge1Deposit },
-							{ title: 'Second Deposit', deposit: selectedMerge2Deposit },
-							{ title: 'Fee Deposit (Auto-selected)', deposit: selectedFeeDeposit }
+							{ title: $t('ui.merge_page.first_deposit'), deposit: selectedMerge1Deposit },
+							{ title: $t('ui.merge_page.second_deposit'), deposit: selectedMerge2Deposit },
+							{ title: $t('ui.merge_page.fee_deposit_auto'), deposit: selectedFeeDeposit }
 						]}
 					/>
 
@@ -646,29 +646,29 @@
 							<div class="space-y-6">
 								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 									<Merge class="h-5 w-5 text-orange-500" />
-									Execute Merge
+									{$t('ui.merge_page.execute_merge')}
 								</h3>
 
 								<div
 									class="rounded-lg bg-gradient-to-r from-orange-50 to-red-50 p-4 dark:from-orange-900/20 dark:to-red-900/20"
 								>
-									<h4 class="text-text mb-3 font-semibold">Merge Summary</h4>
+									<h4 class="text-text mb-3 font-semibold">{$t('ui.merge_page.merge_summary')}</h4>
 									<div class="space-y-2 text-sm">
 										<div class="flex justify-between">
-											<span class="text-text-secondary">First Deposit:</span>
+											<span class="text-text-secondary">{$t('ui.merge_page.first_deposit')}:</span>
 											<span class="text-text font-semibold"
 												>{selectedMerge1Deposit.displayAmount}</span
 											>
 										</div>
 										<div class="flex justify-between">
-											<span class="text-text-secondary">Second Deposit:</span>
+											<span class="text-text-secondary">{$t('ui.merge_page.second_deposit')}:</span>
 											<span class="text-text font-semibold"
 												>{selectedMerge2Deposit.displayAmount}</span
 											>
 										</div>
 										{#if autoSelectedFeeInfo}
 											<div class="flex justify-between">
-												<span class="text-text-secondary">Network Fee:</span>
+												<span class="text-text-secondary">{$t('ui.merge_page.network_fee')}:</span>
 												<span class="text-text font-semibold"
 													>{autoSelectedFeeInfo.feeInfo.formatted} STRK</span
 												>
@@ -678,7 +678,7 @@
 								</div>
 
 								<Button
-									text="Combine Deposits"
+									text={$t('ui.merge_page.combine_deposits')}
 									loading={isLoading}
 									onClick={initiateMerge}
 									class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
@@ -695,7 +695,7 @@
 						<div class="space-y-4">
 							<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 								<Combine class="h-5 w-5 text-orange-500" />
-								How Private Merging Works
+								{$t('ui.merge_page.how_it_works')}
 							</h3>
 							<div class="space-y-4">
 								<div class="flex items-start gap-3">
@@ -705,9 +705,9 @@
 										1
 									</div>
 									<div>
-										<p class="text-text font-medium">Select Two Deposits</p>
+										<p class="text-text font-medium">{$t('ui.merge_page.step1_title')}</p>
 										<p class="text-text-secondary text-sm">
-											Choose two deposits of the same token to combine
+											{$t('ui.merge_page.step1_description')}
 										</p>
 									</div>
 								</div>
@@ -718,9 +718,9 @@
 										2
 									</div>
 									<div>
-										<p class="text-text font-medium">Automatic Fee Selection</p>
+										<p class="text-text font-medium">{$t('ui.merge_page.step2_title')}</p>
 										<p class="text-text-secondary text-sm">
-											System auto-selects optimal STRK deposit for fees
+											{$t('ui.merge_page.step2_description')}
 										</p>
 									</div>
 								</div>
@@ -731,9 +731,9 @@
 										3
 									</div>
 									<div>
-										<p class="text-text font-medium">Zero-Knowledge Proof</p>
+										<p class="text-text font-medium">{$t('ui.merge_page.step3_title')}</p>
 										<p class="text-text-secondary text-sm">
-											Generate cryptographic proof of valid merge
+											{$t('ui.merge_page.step3_description')}
 										</p>
 									</div>
 								</div>
@@ -744,9 +744,9 @@
 										4
 									</div>
 									<div>
-										<p class="text-text font-medium">Combined Note</p>
+										<p class="text-text font-medium">{$t('ui.merge_page.step4_title')}</p>
 										<p class="text-text-secondary text-sm">
-											Receive single note with total combined amount
+											{$t('ui.merge_page.step4_description')}
 										</p>
 									</div>
 								</div>
@@ -761,28 +761,28 @@
 						<div class="space-y-4">
 							<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 								<Shield class="h-5 w-5 text-orange-500" />
-								Privacy Benefits
+								{$t('ui.merge_page.privacy_benefits')}
 							</h3>
 							<div class="space-y-3">
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-orange-500" />
 									<span class="text-text text-sm font-medium"
-										>Consolidate multiple notes privately</span
+										>{$t('ui.merge_page.benefit1')}</span
 									>
 								</div>
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-orange-500" />
 									<span class="text-text text-sm font-medium"
-										>Maintain transaction unlinkability</span
+										>{$t('ui.merge_page.benefit2')}</span
 									>
 								</div>
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-orange-500" />
-									<span class="text-text text-sm font-medium">Optimize note management</span>
+									<span class="text-text text-sm font-medium">{$t('ui.merge_page.benefit3')}</span>
 								</div>
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-orange-500" />
-									<span class="text-text text-sm font-medium">Zero-knowledge validation</span>
+									<span class="text-text text-sm font-medium">{$t('ui.merge_page.benefit4')}</span>
 								</div>
 							</div>
 						</div>
@@ -795,7 +795,7 @@
 						>
 							<div class="space-y-2">
 								<div class="text-2xl font-bold text-orange-500">2→1</div>
-								<div class="text-text-secondary text-sm">Consolidation</div>
+								<div class="text-text-secondary text-sm">{$t('ui.merge_page.consolidation')}</div>
 							</div>
 						</Card>
 						<Card
@@ -803,7 +803,7 @@
 						>
 							<div class="space-y-2">
 								<div class="text-2xl font-bold text-red-500">🔒</div>
-								<div class="text-text-secondary text-sm">Private</div>
+								<div class="text-text-secondary text-sm">{$t('ui.merge_page.private')}</div>
 							</div>
 						</Card>
 					</div>
@@ -816,11 +816,10 @@
 							<AlertTriangle class="mt-0.5 h-5 w-5 text-yellow-500" />
 							<div>
 								<h4 class="mb-1 font-semibold text-yellow-800 dark:text-yellow-300">
-									Requirements
+									{$t('ui.merge_page.requirements')}
 								</h4>
 								<p class="text-sm text-yellow-700 dark:text-yellow-300">
-									Both deposits must be of the same token type. You'll need STRK deposits for
-									transaction fees.
+									{$t('ui.merge_page.requirements_description')}
 								</p>
 							</div>
 						</div>
@@ -833,9 +832,9 @@
 	<!-- Modal Confirm -->
 	<Modal
 		show={showFeeModal}
-		title="Confirm Private Merge"
-		confirmText="Execute Merge"
-		cancelText="Cancel"
+		title={$t('ui.merge_page.modal.title')}
+		confirmText={$t('ui.merge_page.modal.confirm')}
+		cancelText={$t('ui.merge_page.modal.cancel')}
 		closeOnOutsideClick={false}
 		onConfirm={confirmMerge}
 		onCancel={() => {
@@ -851,23 +850,23 @@
 			<div
 				class="rounded-lg bg-gradient-to-r from-orange-50 to-red-50 p-4 dark:from-orange-900/20 dark:to-red-900/20"
 			>
-				<h4 class="text-text mb-3 font-semibold">Merge Summary</h4>
+				<h4 class="text-text mb-3 font-semibold">{$t('ui.merge_page.merge_summary')}</h4>
 				<div class="space-y-2 text-sm">
 					<div class="flex justify-between">
-						<span class="text-text-secondary">First Amount:</span>
+						<span class="text-text-secondary">{$t('ui.merge_page.first_amount')}:</span>
 						<span class="text-text font-semibold">{merge1Amount}</span>
 					</div>
 					<div class="flex justify-between">
-						<span class="text-text-secondary">Second Amount:</span>
+						<span class="text-text-secondary">{$t('ui.merge_page.second_amount')}:</span>
 						<span class="text-text font-semibold">{merge2Amount}</span>
 					</div>
 					<div class="flex justify-between">
-						<span class="text-text-secondary">Network Fee:</span>
+						<span class="text-text-secondary">{$t('ui.merge_page.network_fee')}:</span>
 						<span class="text-text font-semibold">{feeWeiHex} STRK</span>
 					</div>
 					<div class="mt-2 border-t pt-2">
 						<div class="flex justify-between">
-							<span class="text-text-secondary">Combined Total:</span>
+							<span class="text-text-secondary">{$t('ui.merge_page.combined_total')}:</span>
 							<span class="font-bold text-orange-600"
 								>{merge1Amount && merge2Amount
 									? (parseFloat(merge1Amount) + parseFloat(merge2Amount)).toFixed(6)
@@ -878,8 +877,7 @@
 				</div>
 			</div>
 			<p class="text-text-secondary text-sm">
-				This merge operation will combine your two deposits into a single private note and cannot be
-				reversed.
+				{$t('ui.merge_page.modal.warning')}
 			</p>
 		</div>
 	</Modal>

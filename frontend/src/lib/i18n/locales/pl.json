@@ -373,7 +373,45 @@
       "choose_token_placeholder": "Wybierz swój token",
       "deposit_amount": "Kwota Wpłaty",
       "amount_placeholder": "Wprowadź kwotę do wpłaty",
-      "create_deposit_button": "Utwórz Prywatna Wpłatę"
+      "create_deposit_button": "Utwórz Prywatną Wpłatę",
+      "summary": {
+        "title": "Podsumowanie Wpłaty",
+        "token": "Token:",
+        "amount": "Kwota:",
+        "unknown": "Nieznany"
+      },
+      "how_it_works": {
+        "title": "Jak Działają Prywatne Wpłaty",
+        "choose_token": {
+          "title": "Wybierz Swój Token",
+          "description": "Wybierz spośród obsługiwanych tokenów w swoim portfelu"
+        },
+        "set_amount": {
+          "title": "Ustaw Kwotę",
+          "description": "Wprowadź kwotę, którą chcesz wpłacić prywatnie"
+        },
+        "get_private_note": {
+          "title": "Otrzymaj Prywatną Notatkę",
+          "description": "Otrzymaj kryptograficzną notatkę reprezentującą Twoją wpłatę"
+        },
+        "anonymous_withdrawals": {
+          "title": "Anonimowe Wypłaty",
+          "description": "Wypłacaj później na dowolną adres z pełną prywatnością"
+        }
+      },
+      "security_features": {
+        "title": "Funkcje Bezpieczeństwa",
+        "zero_knowledge": "Dowody zero-knowledge chronią Twoją prywatność",
+        "cryptographic_notes": "Notatki kryptograficzne gwarantują anonimowość",
+        "decentralized": "Protokół zdecentralizowany - brak centralnej władzy",
+        "starknet_security": "Bezpieczeństwo StarkNet i szybka finalność"
+      },
+      "quick_stats": {
+        "anonymous_percent": "100%",
+        "anonymous_label": "Anonimowe",
+        "instant_icon": "⚡",
+        "instant_label": "Natychmiastowe"
+      }
     },
     "withdraw_page": {
       "title": "Prywatna Wypłata",
@@ -412,6 +450,72 @@
       },
       "important_notice": "Ważne",
       "withdrawal_warning": "Wypłaty są ostateczne i nie mogą być cofnięte. Sprawdź dwukrotnie adres odbiorcy i kwotę."
+    },
+    "merge_page": {
+      "title": "Prywatne Łączenie",
+      "description": "Połącz wiele wpłat w jedną prywatną notatkę dla lepszego zarządzania",
+      "select_deposits": "Wybierz Wpłaty do Połączenia",
+      "selection_mode": "Tryb Wyboru",
+      "first_deposit": "Pierwsza Wpłata",
+      "second_deposit": "Druga Wpłata",
+      "filter_by_token": "Filtruj według Tokena",
+      "choose_token_placeholder": "Wybierz token do filtrowania wpłat",
+      "no_deposits_title": "Nie Znaleziono Wpłat",
+      "no_deposits_description": "Wpłać najpierw środki, aby rozpocząć łączenie!",
+      "fee_information": "Informacje o Opłacie",
+      "network_fee": "Opłata Sieciowa",
+      "fee_deposit": "Wpłata Opłaty",
+      "fee_payment_issue": "Problem z Płatnością Opłaty",
+      "fee_deposit_auto": "Wpłata Opłaty (Automatycznie wybrana)",
+      "execute_merge": "Wykonaj Łączenie",
+      "merge_summary": "Podsumowanie Łączenia",
+      "combine_deposits": "Połącz Wpłaty",
+      "how_it_works": "Jak Działa Prywatne Łączenie",
+      "step1_title": "Wybierz Dwie Wpłaty",
+      "step1_description": "Wybierz dwie wpłaty tego samego tokena do połączenia",
+      "step2_title": "Automatyczny Wybór Opłaty",
+      "step2_description": "System automatycznie wybiera optymalną wpłatę STRK na opłaty",
+      "step3_title": "Dowód Zero-Knowledge",
+      "step3_description": "Wygeneruj kryptograficzny dowód prawidłowego łączenia",
+      "step4_title": "Połączona Notatka",
+      "step4_description": "Otrzymaj jedną notatkę z całkowitą połączoną kwotą",
+      "privacy_benefits": "Korzyści Prywatności",
+      "benefit1": "Konsoliduj wiele notatek prywatnie",
+      "benefit2": "Zachowaj brak powiązania transakcji",
+      "benefit3": "Optymalizuj zarządzanie notatkami",
+      "benefit4": "Walidacja zero-knowledge",
+      "consolidation": "Konsolidacja",
+      "private": "Prywatne",
+      "requirements": "Wymagania",
+      "requirements_description": "Obie wpłaty muszą być tego samego typu tokena. Będziesz potrzebować wpłat STRK na opłaty transakcyjne.",
+      "first_amount": "Pierwsza Kwota",
+      "second_amount": "Druga Kwota",
+      "combined_total": "Łączna Suma",
+      "modal": {
+        "title": "Potwierdź Prywatne Łączenie",
+        "confirm": "Wykonaj Łączenie",
+        "cancel": "Anuluj",
+        "warning": "Ta operacja łączenia połączy Twoje dwie wpłaty w jedną prywatną notatkę i nie może być cofnięta."
+      },
+      "toast": {
+        "executing": "⏳ Wykonywanie Łączenia",
+        "ready": "✅ Łączenie gotowe!",
+        "failed": "❌ Łączenie nie powiodło się"
+      },
+      "errors": {
+        "select_deposits": "Proszę najpierw wybrać obie wpłaty do łączenia",
+        "invalid_first_balance": "Nieprawidłowe saldo pierwszej wpłaty",
+        "invalid_second_balance": "Nieprawidłowe saldo drugiej wpłaty",
+        "same_token_required": "Obie notatki łączenia muszą być dla tego samego tokena",
+        "fee_exceeds_balance": "Opłata ({fee}) przekracza saldo Twojej notatki opłaty ({balance})",
+        "missing_deposit_amounts": "Nie można obliczyć zwrotu – brakuje kwot wpłat",
+        "missing_fee_amounts": "Nie można obliczyć zwrotu – brakuje kwot opłat",
+        "missing_deposits": "Brakuje wpłat opłaty lub łączenia",
+        "operations_not_found": "Jedna lub więcej operacji nie została znaleziona",
+        "insufficient_strk": "Niewystarczające saldo STRK. Wymagane: {amount} STRK",
+        "no_strk_deposits": "Brak dostępnych wpłat STRK do płatności opłat",
+        "fee_load_failed": "Nie udało się załadować informacji o opłacie"
+      }
     }
   },
   "progress": {

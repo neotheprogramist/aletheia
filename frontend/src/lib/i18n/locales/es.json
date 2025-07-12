@@ -373,7 +373,111 @@
       "choose_token_placeholder": "Elija su token",
       "deposit_amount": "Cantidad del Depósito",
       "amount_placeholder": "Ingrese cantidad a depositar",
-      "create_deposit_button": "Crear Depósito Privado"
+      "create_deposit_button": "Crear Depósito Privado",
+      "summary": {
+        "title": "Resumen del Depósito",
+        "token": "Token:",
+        "amount": "Cantidad:",
+        "unknown": "Desconocido"
+      },
+      "how_it_works": {
+        "title": "Cómo Funcionan los Depósitos Privados",
+        "choose_token": {
+          "title": "Elija Su Token",
+          "description": "Seleccione entre los tokens soportados en su billetera"
+        },
+        "set_amount": {
+          "title": "Establezca la Cantidad",
+          "description": "Ingrese la cantidad que desea depositar en privado"
+        },
+        "get_private_note": {
+          "title": "Obtenga una Nota Privada",
+          "description": "Reciba una nota criptográfica que represente su depósito"
+        },
+        "anonymous_withdrawals": {
+          "title": "Retiros Anónimos",
+          "description": "Retire más tarde a cualquier dirección con privacidad completa"
+        }
+      },
+      "security_features": {
+        "title": "Características de Seguridad",
+        "zero_knowledge": "Las pruebas de conocimiento cero protegen su privacidad",
+        "cryptographic_notes": "Las notas criptográficas garantizan el anonimato",
+        "decentralized": "Protocolo descentralizado - sin autoridad central",
+        "starknet_security": "Seguridad StarkNet y finalidad rápida"
+      },
+      "quick_stats": {
+        "anonymous_percent": "100%",
+        "anonymous_label": "Anónimo",
+        "instant_icon": "⚡",
+        "instant_label": "Instantáneo"
+      }
+    },
+    "merge_page": {
+      "title": "Fusión Privada",
+      "description": "Combine múltiples depósitos en una nota privada para mejor gestión",
+      "select_deposits": "Seleccionar Depósitos para Fusionar",
+      "selection_mode": "Modo de Selección",
+      "first_deposit": "Primer Depósito",
+      "second_deposit": "Segundo Depósito",
+      "filter_by_token": "Filtrar por Token",
+      "choose_token_placeholder": "Elija token para filtrar depósitos",
+      "no_deposits_title": "No se Encontraron Depósitos",
+      "no_deposits_description": "¡Deposite fondos primero para comenzar a fusionar!",
+      "fee_information": "Información de Tarifas",
+      "network_fee": "Tarifa de Red",
+      "fee_deposit": "Depósito de Tarifa",
+      "fee_payment_issue": "Problema de Pago de Tarifa",
+      "fee_deposit_auto": "Depósito de Tarifa (Auto-seleccionado)",
+      "execute_merge": "Ejecutar Fusión",
+      "merge_summary": "Resumen de Fusión",
+      "combine_deposits": "Combinar Depósitos",
+      "how_it_works": "Cómo Funciona la Fusión Privada",
+      "step1_title": "Seleccionar Dos Depósitos",
+      "step1_description": "Elija dos depósitos del mismo token para fusionar",
+      "step2_title": "Auto-Selección de Tarifa",
+      "step2_description": "El sistema selecciona automáticamente el depósito STRK óptimo para tarifas",
+      "step3_title": "Prueba de Conocimiento Cero",
+      "step3_description": "Genere prueba criptográfica de fusión válida",
+      "step4_title": "Nota Fusionada",
+      "step4_description": "Reciba una sola nota con el monto total combinado",
+      "privacy_benefits": "Beneficios de Privacidad",
+      "benefit1": "Consolidar múltiples notas privadamente",
+      "benefit2": "Mantener desvinculación de transacciones",
+      "benefit3": "Optimizar gestión de notas",
+      "benefit4": "Validación de conocimiento cero",
+      "consolidation": "Consolidación",
+      "private": "Privado",
+      "requirements": "Requisitos",
+      "requirements_description": "Ambos depósitos deben ser del mismo tipo de token. Necesitará depósitos STRK para tarifas de transacción.",
+      "first_amount": "Primer Monto",
+      "second_amount": "Segundo Monto",
+      "combined_total": "Total Combinado",
+      "modal": {
+        "title": "Confirmar Fusión Privada",
+        "confirm": "Ejecutar Fusión",
+        "cancel": "Cancelar",
+        "warning": "Esta operación de fusión combinará sus dos depósitos en una nota privada y no se puede deshacer."
+      },
+      "toast": {
+        "executing": "⏳ Ejecutando Fusión",
+        "ready": "✅ ¡Fusión lista!",
+        "failed": "❌ Fusión falló"
+      },
+      "errors": {
+        "select_deposits": "Por favor seleccione primero ambos depósitos para fusionar",
+        "invalid_first_balance": "Balance del primer depósito inválido",
+        "invalid_second_balance": "Balance del segundo depósito inválido",
+        "same_token_required": "Ambas notas de fusión deben ser para el mismo token",
+        "fee_exceeds_balance": "La tarifa ({fee}) excede el balance de su nota de tarifa ({balance})",
+        "missing_deposit_amounts": "No se puede calcular reembolso - faltan montos de depósito",
+        "missing_fee_amounts": "No se puede calcular reembolso - faltan montos de tarifa",
+        "missing_deposits": "Faltan depósitos de tarifa o fusión",
+        "operations_not_found": "Una o más operaciones no encontradas",
+        "insufficient_strk": "Balance STRK insuficiente. Requerido: {amount} STRK",
+        "no_strk_deposits": "No hay depósitos STRK disponibles para pago de tarifas",
+        "fee_load_failed": "Falló al cargar información de tarifas"
+      }
     },
     "withdraw_page": {
       "title": "Retiro Privado",

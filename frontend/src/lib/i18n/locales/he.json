@@ -373,7 +373,111 @@
       "choose_token_placeholder": "בחר את הטוקן שלך",
       "deposit_amount": "סכום הפקדה",
       "amount_placeholder": "הכנס סכום להפקדה",
-      "create_deposit_button": "צור הפקדה פרטית"
+      "create_deposit_button": "צור הפקדה פרטית",
+      "summary": {
+        "title": "סיכום הפקדה",
+        "token": "טוקן:",
+        "amount": "כמות:",
+        "unknown": "לא ידוע"
+      },
+      "how_it_works": {
+        "title": "איך עובדות הפקדות פרטיות",
+        "choose_token": {
+          "title": "בחר את הטוקן שלך",
+          "description": "בחר מטוקנים נתמכים בארנק שלך"
+        },
+        "set_amount": {
+          "title": "קבע כמות",
+          "description": "הזן את הכמות שאתה רוצה להפקיד בפרטיות"
+        },
+        "get_private_note": {
+          "title": "קבל הערה פרטית",
+          "description": "קבל הערה קריפטוגרפית המייצגת את ההפקדה שלך"
+        },
+        "anonymous_withdrawals": {
+          "title": "משיכות אנונימיות",
+          "description": "משוך מאוחר יותר לכל כתובת עם פרטיות מלאה"
+        }
+      },
+      "security_features": {
+        "title": "תכונות בטיחות",
+        "zero_knowledge": "הוכחות אפס ידע מגינות על הפרטיות שלך",
+        "cryptographic_notes": "הערות קריפטוגרפיות מבטיחות אנונימיות",
+        "decentralized": "פרוטוקול מבוזר - ללא רשות מרכזית",
+        "starknet_security": "בטיחות StarkNet וסיום מהיר"
+      },
+      "quick_stats": {
+        "anonymous_percent": "100%",
+        "anonymous_label": "אנונימי",
+        "instant_icon": "⚡",
+        "instant_label": "מיידי"
+      }
+    },
+    "merge_page": {
+      "title": "מיזוג פרטי",
+      "description": "שלבו מספר הפקדות לפתק פרטי אחד לניהול טוב יותר",
+      "select_deposits": "בחרו הפקדות למיזוג",
+      "selection_mode": "מצב בחירה",
+      "first_deposit": "הפקדה ראשונה",
+      "second_deposit": "הפקדה שנייה",
+      "filter_by_token": "סינון לפי טוקן",
+      "choose_token_placeholder": "בחרו טוקן לסינון הפקדות",
+      "no_deposits_title": "לא נמצאו הפקדות",
+      "no_deposits_description": "הפקידו קודם כספים כדי להתחיל לבצע מיזוג!",
+      "fee_information": "מידע על עמלות",
+      "network_fee": "עמלת רשת",
+      "fee_deposit": "הפקדת עמלה",
+      "fee_payment_issue": "בעיה בתשלום עמלה",
+      "fee_deposit_auto": "הפקדת עמלה (נבחרה אוטומטית)",
+      "execute_merge": "בצע מיזוג",
+      "merge_summary": "סיכום מיזוג",
+      "combine_deposits": "שלב הפקדות",
+      "how_it_works": "איך עובד מיזוג פרטי",
+      "step1_title": "בחרו שתי הפקדות",
+      "step1_description": "בחרו שתי הפקדות מאותו טוקן למיזוג",
+      "step2_title": "בחירת עמלה אוטומטית",
+      "step2_description": "המערכת בוחרת אוטומטית הפקדת STRK אופטימלית לעמלות",
+      "step3_title": "הוכחת ידע אפס",
+      "step3_description": "יצרו הוכחה קריפטוגרפית למיזוג תקף",
+      "step4_title": "פתק ממוזג",
+      "step4_description": "קבלו פתק יחיד עם הסכום הכולל המשולב",
+      "privacy_benefits": "יתרונות פרטיות",
+      "benefit1": "איחוד מספר פתקים באופן פרטי",
+      "benefit2": "שמירה על אי-קישוריות עסקאות",
+      "benefit3": "ייעול ניהול פתקים",
+      "benefit4": "אימות ידע אפס",
+      "consolidation": "איחוד",
+      "private": "פרטי",
+      "requirements": "דרישות",
+      "requirements_description": "שתי ההפקדות חייבות להיות מאותו סוג טוקן. תזדקקו להפקדות STRK לעמלות עסקה.",
+      "first_amount": "סכום ראשון",
+      "second_amount": "סכום שני",
+      "combined_total": "סה\"כ משולב",
+      "modal": {
+        "title": "אשרו מיזוג פרטי",
+        "confirm": "בצע מיזוג",
+        "cancel": "ביטול",
+        "warning": "פעולת המיזוג הזו תשלב את שתי ההפקדות שלכם לפתק פרטי אחד ולא ניתן לבטל אותה."
+      },
+      "toast": {
+        "executing": "⏳ מבצע מיזוג",
+        "ready": "✅ מיזוג מוכן!",
+        "failed": "❌ מיזוג נכשל"
+      },
+      "errors": {
+        "select_deposits": "אנא בחרו תחילה את שתי ההפקדות למיזוג",
+        "invalid_first_balance": "יתרת הפקדה ראשונה לא תקפה",
+        "invalid_second_balance": "יתרת הפקדה שנייה לא תקפה",
+        "same_token_required": "שני פתקי המיזוג חייבים להיות לאותו טוקן",
+        "fee_exceeds_balance": "העמלה ({fee}) עולה על יתרת פתק העמלה שלכם ({balance})",
+        "missing_deposit_amounts": "לא ניתן לחשב החזר - חסרים סכומי הפקדה",
+        "missing_fee_amounts": "לא ניתן לחשב החזר - חסרים סכומי עמלה",
+        "missing_deposits": "חסרות הפקדות עמלה או מיזוג",
+        "operations_not_found": "פעולה אחת או יותר לא נמצאה",
+        "insufficient_strk": "יתרת STRK לא מספיקה. נדרש: {amount} STRK",
+        "no_strk_deposits": "אין הפקדות STRK זמינות לתשלום עמלות",
+        "fee_load_failed": "נכשל בטעינת מידע עמלות"
+      }
     },
     "withdraw_page": {
       "title": "משיכה פרטית",
