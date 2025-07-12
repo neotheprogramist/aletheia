@@ -484,7 +484,7 @@
 					<div
 						class="rounded-xl bg-gradient-to-br from-orange-400 to-red-500 p-3 text-white shadow-lg"
 					>
-						<Combine class="h-8 w-8" />
+						<Merge class="h-8 w-8" />
 					</div>
 					<h1
 						class="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl"

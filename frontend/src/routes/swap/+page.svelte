@@ -538,7 +538,7 @@
 					<div
 						class="rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 p-3 text-white shadow-lg"
 					>
-						<ArrowRightLeft class="h-8 w-8" />
+						<Shuffle class="h-8 w-8" />
 					</div>
 					<h1
 						class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl"
