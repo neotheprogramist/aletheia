@@ -181,23 +181,123 @@
   "features": {
     "private_deposits": {
       "title": "Depósitos Privados",
-      "description": "Transforme sus tokens en notas privadas usando pruebas de conocimiento cero. Sus depósitos se vuelven completamente anónimos e inrastreables, garantizando máxima privacidad financiera en StarkNet."
+      "description": "Transforme sus tokens en notas privadas usando pruebas de conocimiento cero. Sus depósitos se vuelven completamente anónimos e inrastreables, garantizando máxima privacidad financiera en StarkNet.",
+      "how_it_works": [
+        "Conecte su billetera StarkNet al pool de privacidad",
+        "Seleccione el token y cantidad que desea depositar",
+        "Reciba una nota criptográfica representando su depósito",
+        "Su depósito es ahora completamente privado y anónimo"
+      ],
+      "benefits": [
+        "🔒 Privacidad completa de transacciones",
+        "🚀 Tecnología de prueba de conocimiento cero",
+        "⚡ Transacciones StarkNet rápidas",
+        "🛡️ Seguridad criptográfica",
+        "🌐 Protocolo descentralizado"
+      ],
+      "use_cases": [
+        "Proteja su privacidad financiera de competidores",
+        "Prevenga análisis y seguimiento de transacciones",
+        "Asegure transacciones grandes del escrutinio público",
+        "Mantenga anonimato en actividades DeFi",
+        "Cree reservas privadas para uso futuro"
+      ]
     },
     "anonymous_withdrawals": {
       "title": "Retiros Anónimos",
-      "description": "Retire sus fondos a cualquier dirección sin revelar la conexión con su depósito original. Use pruebas de conocimiento cero para probar propiedad sin exponer su identidad o historial de transacciones."
+      "description": "Retire sus fondos a cualquier dirección sin revelar la conexión con su depósito original. Use pruebas de conocimiento cero para probar propiedad sin exponer su identidad o historial de transacciones.",
+      "how_it_works": [
+        "Seleccione su nota privada de sus depósitos",
+        "Ingrese cualquier dirección de retiro (puede ser diferente del depósito)",
+        "Genere prueba de conocimiento cero de propiedad",
+        "Complete retiro anónimo con privacidad total"
+      ],
+      "benefits": [
+        "🎭 Anonimato completo",
+        "🔄 Retiro a cualquier dirección",
+        "🛡️ Pruebas de conocimiento cero",
+        "⚡ Ejecución rápida",
+        "🔒 Sin vinculación de transacciones"
+      ],
+      "use_cases": [
+        "Retire a direcciones frescas para máxima privacidad",
+        "Rompa cadenas de transacciones y análisis",
+        "Proteja privacidad del destinatario",
+        "Evite ataques de clustering de direcciones",
+        "Mantenga confidencialidad financiera"
+      ]
     },
     "private_note_transfers": {
       "title": "Transferencias de Notas Privadas",
-      "description": "Transfiera fondos entre notas privadas dentro del pool sin revelar remitente, destinatario o cantidad. Habilite transacciones peer-to-peer completamente privadas usando notas criptográficas."
+      "description": "Transfiera fondos entre notas privadas dentro del pool sin revelar remitente, destinatario o cantidad. Habilite transacciones peer-to-peer completamente privadas usando notas criptográficas.",
+      "how_it_works": [
+        "Seleccione su nota privada fuente",
+        "Ingrese el hash de la nota del destinatario",
+        "Especifique cantidad de transferencia (puede ser parcial)",
+        "Ejecute transferencia privada con prueba de conocimiento cero"
+      ],
+      "benefits": [
+        "🤝 Transferencias peer-to-peer privadas",
+        "🔒 Cantidades y partes ocultas",
+        "⚡ Transferencias instantáneas dentro del pool",
+        "💰 Soporte de cantidades parciales",
+        "🛡️ Seguridad criptográfica"
+      ],
+      "use_cases": [
+        "Envíe pagos sin revelar identidad",
+        "Transacciones comerciales privadas",
+        "Donaciones y contribuciones anónimas",
+        "Distribución confidencial de fondos",
+        "Préstamos y créditos privados"
+      ]
     },
     "deposit_merging": {
       "title": "Fusión de Depósitos",
-      "description": "Combine múltiples depósitos pequeños en una sola nota más grande para mejorar la privacidad y eficiencia de gas. Fusione notas del mismo token para optimizar su conjunto de privacidad."
+      "description": "Combine múltiples depósitos pequeños en una sola nota más grande para mejorar la privacidad y eficiencia de gas. Fusione notas del mismo token para optimizar su conjunto de privacidad.",
+      "how_it_works": [
+        "Seleccione múltiples notas del mismo token",
+        "Verifique cantidad combinada y tarifas",
+        "Genere prueba de conocimiento cero para fusión",
+        "Reciba una sola nota privada consolidada"
+      ],
+      "benefits": [
+        "📊 Conjunto de privacidad mejorado",
+        "⚡ Optimización de gas",
+        "🔄 Mejor gestión de notas",
+        "💰 Tarifas futuras menores",
+        "🛡️ Anonimato mejorado"
+      ],
+      "use_cases": [
+        "Consolide depósitos pequeños para eficiencia",
+        "Optimice costos de gas para transacciones futuras",
+        "Mejore privacidad aumentando tamaño de nota",
+        "Simplifique gestión de notas",
+        "Prepárese para retiros anónimos grandes"
+      ]
     },
     "private_token_swaps": {
       "title": "Intercambios de Tokens Privados",
-      "description": "Intercambie un token por otro manteniendo privacidad completa. Intercambie tokens a través de protocolos DEX integrados sin revelar su actividad de trading o saldos al público."
+      "description": "Intercambie un token por otro manteniendo privacidad completa. Intercambie tokens a través de protocolos DEX integrados sin revelar su actividad de trading o saldos al público.",
+      "how_it_works": [
+        "Seleccione token fuente de sus notas privadas",
+        "Elija token destino y cantidad",
+        "Obtenga cotización de precio del DEX integrado",
+        "Ejecute intercambio privado con prueba de conocimiento cero"
+      ],
+      "benefits": [
+        "🔄 Intercambios de tokens privados",
+        "📈 Integración DEX",
+        "💰 Tarifas competitivas",
+        "🔒 Actividad de trading oculta",
+        "⚡ Ejecución rápida"
+      ],
+      "use_cases": [
+        "Rebalanceo de portafolio privado",
+        "Trading de arbitraje anónimo",
+        "Conversión de activos confidencial",
+        "Estrategias de inversión ocultas",
+        "Gestión de liquidez privada"
+      ]
     }
   },
   "ui": {

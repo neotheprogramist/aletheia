@@ -181,23 +181,123 @@
   "features": {
     "private_deposits": {
       "title": "Prywatne Wpłaty",
-      "description": "Przekształć swoje tokeny w prywatne notatki używając dowodów zero-knowledge. Twoje wpłaty stają się całkowicie anonimowe i nieśledzone, zapewniając maksymalną prywatność finansową w StarkNet."
+      "description": "Przekształć swoje tokeny w prywatne notatki używając dowodów zero-knowledge. Twoje wpłaty stają się całkowicie anonimowe i nieśledzone, zapewniając maksymalną prywatność finansową w StarkNet.",
+      "how_it_works": [
+        "Podłącz swój portfel StarkNet do puli prywatności",
+        "Wybierz token i kwotę, którą chcesz wpłacić",
+        "Otrzymaj kryptograficzną notatkę reprezentującą Twoją wpłatę",
+        "Twoja wpłata jest teraz całkowicie prywatna i anonimowa"
+      ],
+      "benefits": [
+        "🔒 Całkowita prywatność transakcji",
+        "🚀 Technologia dowodów zero-knowledge",
+        "⚡ Szybkie transakcje StarkNet",
+        "🛡️ Bezpieczeństwo kryptograficzne",
+        "🌐 Zdecentralizowany protokół"
+      ],
+      "use_cases": [
+        "Chroń swoją prywatność finansową przed konkurencją",
+        "Zapobiegaj analizie i śledzeniu transakcji",
+        "Zabezpiecz duże transakcje przed publiczną kontrolą",
+        "Zachowaj anonimowość w działaniach DeFi",
+        "Stwórz prywatne rezerwy na przyszłe użycie"
+      ]
     },
     "anonymous_withdrawals": {
       "title": "Anonimowe Wypłaty",
-      "description": "Wypłacaj swoje środki na dowolny adres bez ujawniania połączenia z pierwotną wpłatą. Korzystając z dowodów zero-knowledge, udowodnij własność bez ujawniania tożsamości lub historii transakcji."
+      "description": "Wypłacaj swoje środki na dowolny adres bez ujawniania połączenia z pierwotną wpłatą. Korzystając z dowodów zero-knowledge, udowodnij własność bez ujawniania tożsamości lub historii transakcji.",
+      "how_it_works": [
+        "Wybierz swoją prywatną notatkę z wpłat",
+        "Wprowadź dowolny adres wypłaty (może być inny niż wpłata)",
+        "Wygeneruj dowód zero-knowledge własności",
+        "Ukończ anonimową wypłatę z pełną prywatnością"
+      ],
+      "benefits": [
+        "🎭 Całkowita anonimowość",
+        "🔄 Wypłacaj na dowolny adres",
+        "🛡️ Dowody zero-knowledge",
+        "⚡ Szybka realizacja",
+        "🔒 Brak łączenia transakcji"
+      ],
+      "use_cases": [
+        "Wypłacaj na świeże adresy dla maksymalnej prywatności",
+        "Przerwij łańcuchy transakcji i analizę",
+        "Chroń prywatność odbiorcy",
+        "Unikaj ataków grupowania adresów",
+        "Zachowaj poufność finansową"
+      ]
     },
     "private_note_transfers": {
       "title": "Przelewy Prywatnych Notatek",
-      "description": "Przelewaj środki między prywatnymi notatkami w puli bez ujawniania nadawcy, odbiorcy lub kwoty. Umożliwia całkowicie prywatne transakcje peer-to-peer używając notatek kryptograficznych."
+      "description": "Przelewaj środki między prywatnymi notatkami w puli bez ujawniania nadawcy, odbiorcy lub kwoty. Umożliwia całkowicie prywatne transakcje peer-to-peer używając notatek kryptograficznych.",
+      "how_it_works": [
+        "Wybierz swoją źródłową prywatną notatkę",
+        "Wprowadź hash notatki odbiorcy",
+        "Określ kwotę przelewu (może być częściowa)",
+        "Wykonaj prywatny przelew z dowodem zero-knowledge"
+      ],
+      "benefits": [
+        "🤝 Prywatne przelewy peer-to-peer",
+        "🔒 Ukryte kwoty i strony",
+        "⚡ Natychmiastowe przelewy w puli",
+        "💰 Wsparcie częściowych kwot",
+        "🛡️ Bezpieczeństwo kryptograficzne"
+      ],
+      "use_cases": [
+        "Wysyłaj płatności bez ujawniania tożsamości",
+        "Prywatne transakcje biznesowe",
+        "Anonimowe darowizny i wpłaty",
+        "Poufna dystrybucja środków",
+        "Prywatne pożyczanie i kredytowanie"
+      ]
     },
     "deposit_merging": {
       "title": "Łączenie Wpłat",
-      "description": "Połącz wiele małych wpłat w jedną większą notatkę dla lepszej prywatności i efektywności gazu. Łącz notatki tego samego tokena, aby zoptymalizować swój zestaw prywatności."
+      "description": "Połącz wiele małych wpłat w jedną większą notatkę dla lepszej prywatności i efektywności gazu. Łącz notatki tego samego tokena, aby zoptymalizować swój zestaw prywatności.",
+      "how_it_works": [
+        "Wybierz wiele notatek tego samego tokena",
+        "Sprawdź łączną kwotę i opłaty",
+        "Wygeneruj dowód zero-knowledge dla łączenia",
+        "Otrzymaj jedną skonsolidowaną prywatną notatkę"
+      ],
+      "benefits": [
+        "📊 Lepszy zestaw prywatności",
+        "⚡ Optymalizacja gazu",
+        "🔄 Lepsze zarządzanie notatkami",
+        "💰 Niższe przyszłe opłaty",
+        "🛡️ Zwiększona anonimowość"
+      ],
+      "use_cases": [
+        "Konsoliduj małe wpłaty dla efektywności",
+        "Optymalizuj koszty gazu dla przyszłych transakcji",
+        "Popraw prywatność zwiększając rozmiar notatki",
+        "Uprość zarządzanie notatkami",
+        "Przygotuj się do dużych anonimowych wypłat"
+      ]
     },
     "private_token_swaps": {
       "title": "Prywatne Wymiany Tokenów",
-      "description": "Wymieniaj jeden token na drugi zachowując całkowitą prywatność. Wymieniaj tokeny przez zintegrowane protokoły DEX bez ujawniania swojej aktywności handlowej lub saldów publicznie."
+      "description": "Wymieniaj jeden token na drugi zachowując całkowitą prywatność. Wymieniaj tokeny przez zintegrowane protokoły DEX bez ujawniania swojej aktywności handlowej lub saldów publicznie.",
+      "how_it_works": [
+        "Wybierz token źródłowy z swoich prywatnych notatek",
+        "Wybierz token docelowy i kwotę",
+        "Otrzymaj ofertę cenową ze zintegrowanego DEX",
+        "Wykonaj prywatną zamianę z dowodem zero-knowledge"
+      ],
+      "benefits": [
+        "🔄 Prywatne wymiany tokenów",
+        "📈 Integracja z DEX",
+        "💰 Konkurencyjne kursy",
+        "🔒 Ukryta aktywność handlowa",
+        "⚡ Szybka realizacja"
+      ],
+      "use_cases": [
+        "Prywatne rebalansowanie portfela",
+        "Anonimowy handel arbitrażowy",
+        "Poufna konwersja aktywów",
+        "Ukryte strategie inwestycyjne",
+        "Prywatne zarządzanie płynnością"
+      ]
     }
   },
   "ui": {
