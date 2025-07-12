@@ -88,7 +88,24 @@
     "available": "Verfügbar",
     "pending": "Ausstehend",
     "completed": "Abgeschlossen",
-    "failed": "Fehlgeschlagen"
+    "failed": "Fehlgeschlagen",
+    "no_deposits_found": "Keine Einzahlungen gefunden",
+    "make_deposit_first": "Machen Sie zuerst eine Einzahlung, um privat abheben zu können!",
+    "fee_information": "Gebühreninformationen",
+    "network_fee": "Netzwerkgebühr",
+    "fee_deposit": "Gebühreneinzahlung",
+    "fee_payment_issue": "Problem bei der Gebührenzahlung",
+    "withdrawal_deposit": "Abhebungseinzahlung",
+    "fee_deposit_auto": "Gebühreneinzahlung (Automatisch ausgewählt)",
+    "withdrawal_details": "Abhebungsdetails",
+    "enter_recipient_address": "Empfänger-Wallet-Adresse eingeben",
+    "enter_amount_to_withdraw": "Abzuhebenden Betrag eingeben",
+    "execute_private_withdrawal": "Private Abhebung ausführen",
+    "confirm_private_withdrawal": "Private Abhebung bestätigen",
+    "execute_withdrawal": "Abhebung ausführen",
+    "withdrawal_summary": "Abhebungszusammenfassung",
+    "recipient": "Empfänger",
+    "withdrawal_confirmation_text": "Diese Abhebung wird anonym verarbeitet und kann nicht rückgängig gemacht werden. Bitte überprüfen Sie, ob alle Angaben korrekt sind."
   },
   "wallet": {
     "connect": "Wallet verbinden",
@@ -146,7 +163,67 @@
     "error": "Übertragung fehlgeschlagen",
     "invalid_note": "Ungültiger Notiz-Hash",
     "same_note_error": "Kann nicht an dieselbe Notiz übertragen",
-    "note_not_found": "Empfänger-Notiz nicht gefunden"
+    "note_not_found": "Empfänger-Notiz nicht gefunden",
+    "page_title": "Private Übertragungen",
+    "page_description": "Übertragen Sie Gelder zwischen privaten Notizen innerhalb des Privacy Pools mit vollständiger Anonymität",
+    "mode_send": "Übertragung Senden",
+    "mode_receive": "Übertragung Empfangen",
+    "send_title": "Private Übertragung Senden",
+    "send_description": "Wählen Sie eine Einzahlung aus, von der übertragen werden soll. Die Gebühreneinzahlung wird automatisch ausgewählt.",
+    "receive_title": "Private Übertragung Empfangen",
+    "receive_description": "Generieren Sie eine leere Notiz, um private Übertragungen von anderen Benutzern zu empfangen",
+    "filter_by_token": "Nach Token Filtern",
+    "select_source_deposit": "Quelleinzahlung Auswählen",
+    "no_deposits_title": "Keine Einzahlungen Gefunden",
+    "no_deposits_description": "Bitte machen Sie zuerst eine Einzahlung, um mit Übertragungen zu beginnen!",
+    "generate_empty_note": "Leere Notiz Generieren",
+    "your_pending_notes": "Ihre Ausstehenden Notizen",
+    "recipient_hash": "Empfänger-Hash",
+    "recipient_hash_placeholder": "Geben Sie den Notiz-Hash des Empfängers ein",
+    "transfer_amount_placeholder": "Zu übertragender Betrag",
+    "max": "Max",
+    "execute_transfer": "Übertragung Ausführen",
+    "confirm_transfer": "Übertragung Bestätigen",
+    "transfer_summary": "Übertragungszusammenfassung",
+    "transfer_confirmation_text": "Diese Übertragung wird Ihre Quellnotiz zerstören und die Notiz des Empfängers finanzieren. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "how_to_receive_title": "Wie man Übertragungen Empfängt",
+    "how_to_receive_step1": "Leere Notiz Generieren",
+    "how_to_receive_step1_desc": "Erstellen Sie eine kryptographische Notiz, die Übertragungen empfangen kann",
+    "how_to_receive_step2": "Notiz-Hash Teilen",
+    "how_to_receive_step2_desc": "Senden Sie Ihren Notiz-Hash an die Person, die Gelder überträgt",
+    "how_to_receive_step3": "Auf Übertragung Warten",
+    "how_to_receive_step3_desc": "Ihre Notiz wird finanziert, wenn der Sender die Übertragung abschließt",
+    "how_to_receive_step4": "Ihre Gelder Beanspruchen",
+    "how_to_receive_step4_desc": "Verwenden Sie Ihre finanzierte Notiz für Abhebungen oder andere Operationen",
+    "privacy_protection_title": "Datenschutz",
+    "privacy_feature1": "Anonyme Notizgenerierung",
+    "privacy_feature2": "Keine Verbindung zu Ihrer Identität",
+    "privacy_feature3": "Kryptographisch sichere Übertragungen",
+    "privacy_feature4": "Zero-Knowledge-Proof-Validierung",
+    "how_transfers_work_title": "Wie Übertragungen Funktionieren",
+    "how_transfers_step1": "Quellnotiz Auswählen",
+    "how_transfers_step1_desc": "Wählen Sie, von welcher privaten Notiz übertragen werden soll",
+    "how_transfers_step2": "Empfänger-Hash Erhalten",
+    "how_transfers_step2_desc": "Der Empfänger teilt seinen leeren Notiz-Hash mit Ihnen",
+    "how_transfers_step3": "Betrag Festlegen",
+    "how_transfers_step3_desc": "Geben Sie an, wie viel übertragen werden soll (teilweise oder vollständig)",
+    "how_transfers_step4": "Anonyme Übertragung",
+    "how_transfers_step4_desc": "Notizen werden mit Zero-Knowledge-Proofs getauscht",
+    "security_features_title": "Sicherheitsmerkmale",
+    "security_feature1": "Vollständige Sender-Anonymität",
+    "security_feature2": "Keine On-Chain-Verbindung zwischen den Parteien",
+    "security_feature3": "Kryptographische Notizvalidierung",
+    "security_feature4": "Automatisierte Gebührenbehandlung",
+    "stats_private": "100%",
+    "stats_private_label": "Privat",
+    "stats_fast": "⚡",
+    "stats_fast_label": "Schnell",
+    "edit_pending_note": "Ausstehende Notiz Bearbeiten",
+    "edit_note_description": "Geben Sie den Token und Betrag für diese ausstehende Notiz an",
+    "confirm_edit": "Bearbeitung Bestätigen",
+    "copy_full_hex": "Vollständigen Hex Kopieren",
+    "edit_operation": "Operation Bearbeiten",
+    "abort_operation": "Operation Abbrechen"
   },
   "merge": {
     "title": "Zusammenführen",
@@ -176,6 +253,511 @@
     "error": "Tausch fehlgeschlagen",
     "high_slippage": "Hohe Slippage-Warnung",
     "insufficient_liquidity": "Unzureichende Liquidität",
-    "price_updated": "Preis aktualisiert"
+    "price_updated": "Preis aktualisiert",
+    "page_title": "Privater Token-Tausch",
+    "page_description": "Tauschen Sie Ihre privaten Notizen zwischen verschiedenen Token aus, während Sie vollständige Anonymität beibehalten",
+    "select_deposit_title": "Einzahlung zum Tauschen Auswählen",
+    "filter_deposits_placeholder": "Einzahlungen nach Token filtern",
+    "no_deposits_title": "Keine Einzahlungen Verfügbar",
+    "no_deposits_description": "Bitte machen Sie zuerst eine Einzahlung, um das Tauschen zu ermöglichen!",
+    "selected_deposits_title": "Ausgewählte Einzahlungen",
+    "configure_swap_title": "Konfigurieren Sie Ihren Tausch",
+    "swap_amount_label": "Tauschbetrag",
+    "swap_amount_placeholder": "Geben Sie den zu tauschenden Betrag ein",
+    "max": "Max",
+    "receive_token_label": "Token zu Empfangen",
+    "receive_token_placeholder": "Wählen Sie den zu empfangenden Token",
+    "no_available_tokens": "Keine verfügbaren Token zum Tauschen",
+    "execute_private_swap": "Privaten Tausch Ausführen",
+    "confirm_private_swap": "Privaten Tausch Bestätigen",
+    "execute_swap_button": "Tausch Ausführen",
+    "swap_details": "Tauschdetails",
+    "swap_details_description": "Überprüfen Sie Ihre Transaktion, bevor Sie fortfahren",
+    "amount_to_swap": "Zu tauschender Betrag:",
+    "transaction_fee": "Transaktionsgebühr:",
+    "swap_warning": "Diese Transaktion wird Ihre ausgewählten privaten Notizen verbrauchen und neue mit den getauschten Token erstellen.",
+    "how_swaps_work_title": "Wie Private Täusche Funktionieren",
+    "how_swaps_step1": "Quelleinzahlung Auswählen",
+    "how_swaps_step1_desc": "Wählen Sie eine private Notiz, von der getauscht werden soll",
+    "how_swaps_step2": "Betrag & Ziel Festlegen",
+    "how_swaps_step2_desc": "Geben Sie Tauschbetrag und gewünschten Token an",
+    "how_swaps_step3": "Zero-Knowledge-Proof",
+    "how_swaps_step3_desc": "Generieren Sie einen kryptographischen Beweis für gültigen Tausch",
+    "how_swaps_step4": "Neue Private Notiz Erhalten",
+    "how_swaps_step4_desc": "Erhalten Sie getauschte Token als neue private Notiz",
+    "security_features_title": "Sicherheitsmerkmale",
+    "security_feature1": "Anonymer Token-Austausch über ZK-Proofs",
+    "security_feature2": "Keine Verbindung zwischen Quelle und Ziel",
+    "security_feature3": "Dezentrale Austauschintegration",
+    "security_feature4": "Automatischer Rückerstattungsschutz",
+    "stats_private_exchange": "🔄",
+    "stats_private_exchange_label": "Privater Austausch",
+    "stats_instant_quotes": "⚡",
+    "stats_instant_quotes_label": "Sofortige Angebote",
+    "supported_pairs_title": "Unterstützte Handelspaare",
+    "supported_pairs_description": "Alle Täusche werden von Ekubo DEX für optimale Kurse und tiefe Liquidität angetrieben. Unterstützte Paare umfassen alle wichtigen Token-Kombinationen im Privacy Pool."
+  },
+  "features": {
+    "private_deposits": {
+      "title": "Private Einzahlungen",
+      "description": "Verwandeln Sie Ihre Token mit Zero-Knowledge-Proofs in private Notizen. Ihre Einzahlungen werden vollständig anonym und nicht nachverfolgbar, was maximale finanzielle Privatsphäre auf StarkNet gewährleistet.",
+      "how_it_works": [
+        "Verbinden Sie Ihr StarkNet-Wallet mit dem Privacy Pool",
+        "Wählen Sie den Token und Betrag aus, den Sie einzahlen möchten",
+        "Erhalten Sie eine kryptographische Notiz, die Ihre Einzahlung repräsentiert",
+        "Ihre Einzahlung ist jetzt vollständig privat und anonym"
+      ],
+      "benefits": [
+        "🔒 Vollständige Transaktionsprivatsphäre",
+        "🚀 Zero-Knowledge-Proof-Technologie",
+        "⚡ Schnelle StarkNet-Transaktionen",
+        "🛡️ Kryptographische Sicherheit",
+        "🌐 Dezentralisiertes Protokoll"
+      ],
+      "use_cases": [
+        "Schützen Sie Ihre finanzielle Privatsphäre vor Konkurrenten",
+        "Verhindern Sie Transaktionsanalyse und -verfolgung",
+        "Sichern Sie große Transaktionen vor öffentlicher Prüfung",
+        "Bewahren Sie Anonymität bei DeFi-Aktivitäten",
+        "Erstellen Sie private Reserven für zukünftige Nutzung"
+      ]
+    },
+    "anonymous_withdrawals": {
+      "title": "Anonyme Abhebungen",
+      "description": "Heben Sie Ihre Gelder an jede Adresse ab, ohne die Verbindung zu Ihrer ursprünglichen Einzahlung preiszugeben. Mit Zero-Knowledge-Proofs beweisen Sie Eigentum, ohne Ihre Identität oder Transaktionshistorie offenzulegen.",
+      "how_it_works": [
+        "Wählen Sie Ihre private Notiz aus Ihren Einzahlungen",
+        "Geben Sie eine beliebige Abhebungsadresse ein (kann von der Einzahlung abweichen)",
+        "Generieren Sie einen Zero-Knowledge-Proof des Eigentums",
+        "Führen Sie eine anonyme Abhebung mit vollständiger Privatsphäre durch"
+      ],
+      "benefits": [
+        "🎭 Vollständige Anonymität",
+        "🔄 Abhebung an jede Adresse",
+        "🛡️ Zero-Knowledge-Proofs",
+        "⚡ Schnelle Ausführung",
+        "🔒 Keine Transaktionsverknüpfung"
+      ],
+      "use_cases": [
+        "Abhebung an neue Adressen für maximale Privatsphäre",
+        "Unterbrechen Sie Transaktionsketten und -analysen",
+        "Schützen Sie die Privatsphäre des Empfängers",
+        "Vermeiden Sie Adress-Clustering-Angriffe",
+        "Bewahren Sie finanzielle Vertraulichkeit"
+      ]
+    },
+    "private_note_transfers": {
+      "title": "Private Notiz-Übertragungen",
+      "description": "Übertragen Sie Gelder zwischen privaten Notizen innerhalb des Pools, ohne Sender, Empfänger oder Betrag preiszugeben. Ermöglichen Sie vollständig private Peer-to-Peer-Transaktionen mit kryptographischen Notizen.",
+      "how_it_works": [
+        "Wählen Sie Ihre Quell-private Notiz",
+        "Geben Sie den Hash der Empfänger-Notiz ein",
+        "Geben Sie den Übertragungsbetrag an (kann teilweise sein)",
+        "Führen Sie private Übertragung mit Zero-Knowledge-Proof aus"
+      ],
+      "benefits": [
+        "🤝 Private Peer-to-Peer-Übertragungen",
+        "🔒 Versteckte Beträge und Parteien",
+        "⚡ Sofortige Pool-interne Übertragungen",
+        "💰 Unterstützung für Teilbeträge",
+        "🛡️ Kryptographische Sicherheit"
+      ],
+      "use_cases": [
+        "Senden Sie Zahlungen ohne Identitätspreisgabe",
+        "Private Geschäftstransaktionen",
+        "Anonyme Spenden und Beiträge",
+        "Vertrauliche Fondsverteilung",
+        "Private Kredite und Darlehen"
+      ]
+    },
+    "deposit_merging": {
+      "title": "Einzahlungszusammenführung",
+      "description": "Kombinieren Sie mehrere kleine Einzahlungen zu einer einzigen größeren Notiz für verbesserte Privatsphäre und Gaseffizienz. Führen Sie Notizen desselben Tokens zusammen, um Ihr Privacy-Set zu optimieren und Transaktionskosten zu reduzieren.",
+      "how_it_works": [
+        "Wählen Sie mehrere Notizen desselben Tokens",
+        "Überprüfen Sie kombinierten Betrag und Gebühren",
+        "Generieren Sie Zero-Knowledge-Proof für Zusammenführung",
+        "Erhalten Sie eine einzige konsolidierte private Notiz"
+      ],
+      "benefits": [
+        "📊 Verbessertes Privacy-Set",
+        "⚡ Gas-Optimierung",
+        "🔄 Bessere Notizverwaltung",
+        "💰 Niedrigere zukünftige Gebühren",
+        "🛡️ Erhöhte Anonymität"
+      ],
+      "use_cases": [
+        "Konsolidieren Sie kleine Einzahlungen für Effizienz",
+        "Optimieren Sie Gaskosten für zukünftige Transaktionen",
+        "Verbessern Sie Privatsphäre durch Vergrößerung der Notizgröße",
+        "Vereinfachen Sie die Notizverwaltung",
+        "Bereiten Sie sich auf große anonyme Abhebungen vor"
+      ]
+    },
+    "private_token_swaps": {
+      "title": "Private Token-Tauschgeschäfte",
+      "description": "Tauschen Sie einen Token gegen einen anderen, während Sie vollständige Privatsphäre bewahren. Tauschen Sie Token über integrierte DEX-Protokolle, ohne Ihre Handelsaktivität oder Guthaben der Öffentlichkeit preiszugeben.",
+      "how_it_works": [
+        "Wählen Sie Quell-Token aus Ihren privaten Notizen",
+        "Wählen Sie Ziel-Token und Betrag",
+        "Holen Sie sich Preisangebot von integrierter DEX",
+        "Führen Sie privaten Tausch mit Zero-Knowledge-Proof aus"
+      ],
+      "benefits": [
+        "🔄 Private Token-Tauschgeschäfte",
+        "📈 DEX-Integration",
+        "💰 Wettbewerbsfähige Kurse",
+        "🔒 Versteckte Handelsaktivität",
+        "⚡ Schnelle Ausführung"
+      ],
+      "use_cases": [
+        "Private Portfolio-Neuausrichtung",
+        "Anonymer Arbitrage-Handel",
+        "Vertrauliche Asset-Konvertierung",
+        "Versteckte Investitionsstrategien",
+        "Private Liquiditätsverwaltung"
+      ]
+    }
+  },
+  "ui": {
+    "modal": {
+      "how_it_works": "Wie es funktioniert",
+      "key_benefits": "Hauptvorteile",
+      "use_cases": "Anwendungsfälle",
+      "start_using": "{feature} verwenden",
+      "close": "Schließen"
+    },
+    "onboarding": {
+      "welcome": {
+        "title": "Willkommen bei Privacy Pools!",
+        "description": "Ein dezentralisiertes Datenschutzprotokoll, mit dem Sie Token mit vollständiger Anonymität über Zero-Knowledge-Proofs einzahlen, abheben, übertragen und tauschen können."
+      },
+      "connect_wallet": {
+        "title": "Verbinden Sie Ihr Wallet",
+        "description": "Verbinden Sie zuerst Ihr StarkNet-Wallet, um Privacy Pools zu verwenden. Wir unterstützen alle wichtigen StarkNet-Wallets."
+      },
+      "make_deposit": {
+        "title": "Machen Sie eine Einzahlung",
+        "description": "Zahlen Sie Token in den Privacy Pool ein, um private Notizen zu erhalten. Diese Notizen repräsentieren Ihre Gelder und halten sie dabei vollständig anonym."
+      },
+      "withdraw_anonymously": {
+        "title": "Anonym abheben",
+        "description": "Heben Sie an jede Adresse ab, ohne die Verbindung zu Ihrer ursprünglichen Einzahlung preiszugeben. Vollständige finanzielle Privatsphäre garantiert."
+      },
+      "advanced_features": {
+        "title": "Erweiterte Funktionen",
+        "description": "Verwenden Sie Transfer, um Token privat zu senden, Merge, um Einzahlungen zu kombinieren, oder Swap, um Token anonym zu tauschen."
+      },
+      "getting_started": "Erste Schritte",
+      "skip": "Überspringen",
+      "back": "Zurück",
+      "get_started": "Loslegen",
+      "next": "Weiter",
+      "step_counter": "Schritt {current} von {total}"
+    },
+    "navbar": {
+      "privacy_pools": "Privacy Pools",
+      "export_tooltip": "Alle Operationen als JSON exportieren",
+      "import_tooltip": "Operationen aus JSON importieren",
+      "settings_tooltip": "Einstellungen",
+      "export_operations": "Operationen exportieren",
+      "import_operations": "Operationen importieren",
+      "toggle_mobile_menu": "Mobile Menü umschalten"
+    },
+    "settings": {
+      "theme": {
+        "light": "Hell",
+        "dark": "Dunkel"
+      }
+    },
+    "deposit_page": {
+      "title": "Private Einzahlung",
+      "subtitle": "Verwandeln Sie Ihre Token in private Notizen für erhöhte finanzielle Privatsphäre",
+      "select_token": "Token auswählen",
+      "choose_token_placeholder": "Wählen Sie Ihren Token",
+      "deposit_amount": "Einzahlungsbetrag",
+      "amount_placeholder": "Betrag zum Einzahlen eingeben",
+      "create_deposit_button": "Private Einzahlung erstellen",
+      "summary": {
+        "title": "Einzahlungszusammenfassung",
+        "token": "Token:",
+        "amount": "Betrag:",
+        "unknown": "Unbekannt"
+      },
+      "how_it_works": {
+        "title": "Wie private Einzahlungen funktionieren",
+        "choose_token": {
+          "title": "Wählen Sie Ihren Token",
+          "description": "Wählen Sie aus unterstützten Token in Ihrem Wallet"
+        },
+        "set_amount": {
+          "title": "Betrag festlegen",
+          "description": "Geben Sie den Betrag ein, den Sie privat einzahlen möchten"
+        },
+        "get_private_note": {
+          "title": "Private Notiz erhalten",
+          "description": "Erhalten Sie eine kryptographische Notiz, die Ihre Einzahlung repräsentiert"
+        },
+        "anonymous_withdrawals": {
+          "title": "Anonyme Abhebungen",
+          "description": "Später an jede Adresse mit vollständiger Privatsphäre abheben"
+        }
+      },
+      "security_features": {
+        "title": "Sicherheitsfeatures",
+        "zero_knowledge": "Zero-Knowledge-Proofs schützen Ihre Privatsphäre",
+        "cryptographic_notes": "Kryptographische Notizen gewährleisten Anonymität",
+        "decentralized": "Dezentralisiertes Protokoll - keine zentrale Autorität",
+        "starknet_security": "StarkNet-Sicherheit und schnelle Finalität"
+      },
+      "quick_stats": {
+        "anonymous_percent": "100%",
+        "anonymous_label": "Anonym",
+        "instant_icon": "⚡",
+        "instant_label": "Sofortig"
+      }
+    },
+    "merge_page": {
+      "title": "Private Zusammenführung",
+      "description": "Mehrere Einzahlungen zu einer privaten Notiz für bessere Verwaltung kombinieren",
+      "select_deposits": "Einzahlungen zum Zusammenführen auswählen",
+      "selection_mode": "Auswahlmodus",
+      "first_deposit": "Erste Einzahlung",
+      "second_deposit": "Zweite Einzahlung",
+      "filter_by_token": "Nach Token filtern",
+      "choose_token_placeholder": "Token zum Filtern von Einzahlungen auswählen",
+      "no_deposits_title": "Keine Einzahlungen gefunden",
+      "no_deposits_description": "Zahlen Sie zuerst Gelder ein, um mit dem Zusammenführen zu beginnen!",
+      "fee_information": "Gebühreninformationen",
+      "network_fee": "Netzwerkgebühr",
+      "fee_deposit": "Gebühreneinzahlung",
+      "fee_payment_issue": "Problem bei der Gebührenzahlung",
+      "fee_deposit_auto": "Gebühreneinzahlung (Automatisch ausgewählt)",
+      "execute_merge": "Zusammenführung ausführen",
+      "merge_summary": "Zusammenführungszusammenfassung",
+      "combine_deposits": "Einzahlungen kombinieren",
+      "how_it_works": "Wie private Zusammenführung funktioniert",
+      "step1_title": "Zwei Einzahlungen auswählen",
+      "step1_description": "Wählen Sie zwei Einzahlungen desselben Tokens zum Zusammenführen",
+      "step2_title": "Automatische Gebührenauswahl",
+      "step2_description": "System wählt automatisch optimale STRK-Einzahlung für Gebühren",
+      "step3_title": "Zero-Knowledge-Proof",
+      "step3_description": "Kryptographischen Beweis für gültige Zusammenführung generieren",
+      "step4_title": "Zusammengeführte Notiz",
+      "step4_description": "Eine einzelne Notiz mit kombiniertem Gesamtbetrag erhalten",
+      "privacy_benefits": "Datenschutzvorteile",
+      "benefit1": "Mehrere Notizen privat konsolidieren",
+      "benefit2": "Transaktionsunverknüpfbarkeit beibehalten",
+      "benefit3": "Notizverwaltung optimieren",
+      "benefit4": "Zero-Knowledge-Validierung",
+      "consolidation": "Konsolidierung",
+      "private": "Privat",
+      "requirements": "Anforderungen",
+      "requirements_description": "Beide Einzahlungen müssen vom gleichen Token-Typ sein. Sie benötigen STRK-Einzahlungen für Transaktionsgebühren.",
+      "first_amount": "Erster Betrag",
+      "second_amount": "Zweiter Betrag",
+      "combined_total": "Kombinierte Summe",
+      "modal": {
+        "title": "Private Zusammenführung bestätigen",
+        "confirm": "Zusammenführung ausführen",
+        "cancel": "Abbrechen",
+        "warning": "Diese Zusammenführungsoperation wird Ihre zwei Einzahlungen zu einer privaten Notiz kombinieren und kann nicht rückgängig gemacht werden."
+      },
+      "toast": {
+        "executing": "⏳ Führe Zusammenführung aus",
+        "ready": "✅ Zusammenführung bereit!",
+        "failed": "❌ Zusammenführung fehlgeschlagen"
+      },
+      "errors": {
+        "select_deposits": "Bitte wählen Sie zuerst beide Einzahlungen zum Zusammenführen aus",
+        "invalid_first_balance": "Ungültiges Guthaben der ersten Einzahlung",
+        "invalid_second_balance": "Ungültiges Guthaben der zweiten Einzahlung",
+        "same_token_required": "Beide Zusammenführungsnotizen müssen für denselben Token sein",
+        "fee_exceeds_balance": "Gebühr ({fee}) übersteigt Ihr Gebührennotiz-Guthaben ({balance})",
+        "missing_deposit_amounts": "Rückerstattung kann nicht berechnet werden - fehlende Einzahlungsbeträge",
+        "missing_fee_amounts": "Rückerstattung kann nicht berechnet werden - fehlende Gebührenbeträge",
+        "missing_deposits": "Fehlende Gebühren- oder Zusammenführungseinzahlungen",
+        "operations_not_found": "Ein oder mehrere Operationen nicht gefunden",
+        "insufficient_strk": "Unzureichendes STRK-Guthaben. Erforderlich: {amount} STRK",
+        "no_strk_deposits": "Keine verfügbaren STRK-Einzahlungen für Gebührenzahlung",
+        "fee_load_failed": "Laden der Gebühreninformationen fehlgeschlagen"
+      }
+    },
+    "pagination": {
+      "type_placeholder": "Tippen..."
+    },
+    "withdraw_page": {
+      "title": "Private Abhebung",
+      "subtitle": "Heben Sie Ihre privaten Einzahlungen an jede Adresse mit vollständiger Anonymität ab",
+      "select_deposit": "Einzahlung zum Abheben Auswählen",
+      "filter_by_token": "Nach Token Filtern",
+      "how_it_works": {
+        "title": "Wie Private Abhebungen Funktionieren",
+        "select_deposit": {
+          "title": "Wählen Sie Ihre Einzahlung",
+          "description": "Wählen Sie welche private Einzahlung Sie abheben möchten"
+        },
+        "set_recipient": {
+          "title": "Empfänger und Betrag Festlegen",
+          "description": "Geben Sie an, wohin die Gelder gesendet und wie viel abgehoben werden soll"
+        },
+        "zero_knowledge": {
+          "title": "Zero-Knowledge-Proof",
+          "description": "Das System generiert einen Beweis ohne Ihre Identität preiszugeben"
+        },
+        "anonymous_transfer": {
+          "title": "Anonyme Übertragung",
+          "description": "Gelder mit vollständiger Privatsphäre und ohne Verknüpfung gesendet"
+        }
+      },
+      "privacy_features": {
+        "title": "Datenschutz-Funktionen",
+        "break_linkability": "Transaktionsverknüpfung unterbrechen",
+        "hide_source": "Abhebungsquelle und -betrag verbergen",
+        "fee_handling": "Automatische Gebührenzahlungsabwicklung",
+        "guaranteed_anonymity": "Mathematisch garantierte Anonymität"
+      },
+      "stats": {
+        "untraceable": "Nicht nachverfolgbar",
+        "fast": "Schnell"
+      },
+      "important_notice": "Wichtig",
+      "withdrawal_warning": "Abhebungen sind endgültig und können nicht rückgängig gemacht werden. Überprüfen Sie die Empfängeradresse und den Betrag doppelt."
+    }
+  },
+  "progress": {
+    "deposit": {
+      "preparation": {
+        "title": "Vorbereitung",
+        "description": "Transaktionsdaten werden vorbereitet"
+      },
+      "wallet_approval": {
+        "title": "Wallet-Genehmigung",
+        "description": "Warten auf Wallet-Bestätigung"
+      },
+      "onchain_confirmation": {
+        "title": "Onchain-Bestätigung",
+        "description": "Warten auf Blockchain-Bestätigung"
+      }
+    },
+    "withdraw": {
+      "preparation": {
+        "title": "Vorbereitung",
+        "description": "Transaktionsdaten werden vorbereitet"
+      },
+      "proof_generation": {
+        "title": "Proof-Generierung",
+        "description": "Zero-Knowledge-Proof wird generiert"
+      },
+      "transaction_prepare": {
+        "title": "Transaktionsvorbereitung",
+        "description": "Transaktion für Ausführung vorbereiten"
+      },
+      "executing_transaction": {
+        "title": "Transaktion ausführen",
+        "description": "Transaktion wird ausgeführt"
+      },
+      "onchain_confirmation": {
+        "title": "Onchain-Bestätigung",
+        "description": "Warten auf Blockchain-Bestätigung"
+      }
+    },
+    "merge": {
+      "preparation": {
+        "title": "Vorbereitung",
+        "description": "Zusammenführungs-Transaktionsdaten werden vorbereitet"
+      },
+      "proof_generation": {
+        "title": "Proof-Generierung",
+        "description": "Zero-Knowledge-Proof für Zusammenführung wird generiert"
+      },
+      "transaction_prepare": {
+        "title": "Transaktionsvorbereitung",
+        "description": "Zusammenführungs-Transaktion für Ausführung vorbereiten"
+      },
+      "executing_transaction": {
+        "title": "Transaktion ausführen",
+        "description": "Zusammenführungs-Transaktion wird ausgeführt"
+      },
+      "onchain_confirmation": {
+        "title": "Onchain-Bestätigung",
+        "description": "Warten auf Blockchain-Bestätigung"
+      }
+    },
+    "swap": {
+      "preparation": {
+        "title": "Vorbereitung",
+        "description": "Tausch-Transaktionsdaten werden vorbereitet"
+      },
+      "proof_generation": {
+        "title": "Proof-Generierung",
+        "description": "Zero-Knowledge-Proof für Tausch wird generiert"
+      },
+      "quote_fetching": {
+        "title": "Angebot abrufen",
+        "description": "Tausch-Angebot von Ekubo abrufen"
+      },
+      "transaction_prepare": {
+        "title": "Transaktionsvorbereitung",
+        "description": "Tausch-Transaktion für Ausführung vorbereiten"
+      },
+      "executing_transaction": {
+        "title": "Transaktion ausführen",
+        "description": "Tausch-Transaktion wird ausgeführt"
+      },
+      "onchain_confirmation": {
+        "title": "Onchain-Bestätigung",
+        "description": "Warten auf Blockchain-Bestätigung"
+      }
+    },
+    "transfer": {
+      "preparation": {
+        "title": "Vorbereitung",
+        "description": "Übertragungs-Transaktionsdaten werden vorbereitet"
+      },
+      "proof_generation": {
+        "title": "Proof-Generierung",
+        "description": "Zero-Knowledge-Proof für Übertragung wird generiert"
+      },
+      "transaction_prepare": {
+        "title": "Transaktionsvorbereitung",
+        "description": "Übertragungs-Transaktion für Ausführung vorbereiten"
+      },
+      "executing_transaction": {
+        "title": "Transaktion ausführen",
+        "description": "Übertragungs-Transaktion wird ausgeführt"
+      },
+      "onchain_confirmation": {
+        "title": "Onchain-Bestätigung",
+        "description": "Warten auf Blockchain-Bestätigung"
+      }
+    }
+  },
+  "errors": {
+    "validation": {
+      "hex_address": "Muss eine Hex-Adresse sein",
+      "numeric_string": "Muss eine numerische Zeichenkette sein",
+      "amount_string": "Betrag muss eine Zeichenkette sein",
+      "amount_empty": "Betrag kann nicht leer sein",
+      "invalid_amount_format": "Ungültiges Betragsformat",
+      "invalid_numeric_value": "Ungültiger numerischer Wert nach Verarbeitung",
+      "amount_positive": "Betrag muss positiv sein"
+    },
+    "merge": {
+      "insufficient_strk": "Unzureichendes STRK-Guthaben. Benötigt: {amount} STRK",
+      "no_strk_deposits": "Keine verfügbaren STRK-Einzahlungen für Gebührenzahlung",
+      "failed_load_fee": "Laden der Gebühreninformationen fehlgeschlagen"
+    },
+    "general": {
+      "unexpected_error": "Unerwarteter Fehler aufgetreten",
+      "reload": "Neu laden"
+    }
+  },
+  "notifications": {
+    "export_success": "Operationen erfolgreich als JSON exportiert.",
+    "export_failed": "Export der Operationen fehlgeschlagen.",
+    "import_success": "Operationen erfolgreich importiert.",
+    "import_failed": "Import der Operationen fehlgeschlagen. Stellen Sie sicher, dass die Datei gültiges JSON ist.",
+    "file_read_error": "Fehler beim Lesen der Datei."
   }
 }

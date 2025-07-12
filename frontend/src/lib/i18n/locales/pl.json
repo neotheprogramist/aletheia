@@ -88,7 +88,24 @@
     "available": "Dostępne",
     "pending": "Oczekujące",
     "completed": "Ukończone",
-    "failed": "Nieudane"
+    "failed": "Nieudane",
+    "no_deposits_found": "Nie znaleziono wpłat",
+    "make_deposit_first": "Dokonaj najpierw wpłaty, aby zacząć prywatnie wypłacać!",
+    "fee_information": "Informacje o opłacie",
+    "network_fee": "Opłata sieciowa",
+    "fee_deposit": "Wpłata na opłatę",
+    "fee_payment_issue": "Problem z płatnością opłaty",
+    "withdrawal_deposit": "Wpłata do wypłaty",
+    "fee_deposit_auto": "Wpłata na opłatę (Auto-wybrana)",
+    "withdrawal_details": "Szczegóły wypłaty",
+    "enter_recipient_address": "Wprowadź adres portfela odbiorcy",
+    "enter_amount_to_withdraw": "Wprowadź kwotę do wypłaty",
+    "execute_private_withdrawal": "Wykonaj prywatną wypłatę",
+    "confirm_private_withdrawal": "Potwierdź prywatną wypłatę",
+    "execute_withdrawal": "Wykonaj wypłatę",
+    "withdrawal_summary": "Podsumowanie wypłaty",
+    "recipient": "Odbiorca",
+    "withdrawal_confirmation_text": "Ta wypłata zostanie przetworzona anonimowo i nie może być cofnięta. Sprawdź czy wszystkie szczegóły są poprawne."
   },
   "wallet": {
     "connect": "Podłącz portfel",
@@ -146,7 +163,67 @@
     "error": "Przelew nieudany",
     "invalid_note": "Nieprawidłowy hash notatki",
     "same_note_error": "Nie można przelać na tę samą notatkę",
-    "note_not_found": "Notatka odbiorcy nie znaleziona"
+    "note_not_found": "Notatka odbiorcy nie znaleziona",
+    "page_title": "Prywatne Przelewy",
+    "page_description": "Przelewaj środki między prywatnymi notatkami w puli prywatności z całkowitą anonimowością",
+    "mode_send": "Wyślij Przelew",
+    "mode_receive": "Odbierz Przelew",
+    "send_title": "Wyślij Prywatny Przelew",
+    "send_description": "Wybierz wpłatę, z której chcesz przelać. Wpłata opłat zostanie automatycznie wybrana.",
+    "receive_title": "Odbierz Prywatny Przelew",
+    "receive_description": "Wygeneruj pustą notatkę, aby odbierać prywatne przelewy od innych użytkowników",
+    "filter_by_token": "Filtruj według Tokena",
+    "select_source_deposit": "Wybierz Źródłową Wpłatę",
+    "no_deposits_title": "Nie Znaleziono Wpłat",
+    "no_deposits_description": "Najpierw dokonaj wpłaty, aby zacząć przelewanie!",
+    "generate_empty_note": "Wygeneruj Pustą Notatkę",
+    "your_pending_notes": "Twoje Oczekujące Notatki",
+    "recipient_hash": "Hash Odbiorcy",
+    "recipient_hash_placeholder": "Wprowadź hash notatki odbiorcy",
+    "transfer_amount_placeholder": "Kwota do przelania",
+    "max": "Maks",
+    "execute_transfer": "Wykonaj Przelew",
+    "confirm_transfer": "Potwierdź Przelew",
+    "transfer_summary": "Podsumowanie Przelewu",
+    "transfer_confirmation_text": "Ten przelew zniszczy Twoją notatkę źródłową i sfinansuje notatkę odbiorcy. Ta akcja nie może zostać cofnięta.",
+    "how_to_receive_title": "Jak Odbierać Przelewy",
+    "how_to_receive_step1": "Wygeneruj Pustą Notatkę",
+    "how_to_receive_step1_desc": "Stwórz kryptograficzną notatkę, która może odbierać przelewy",
+    "how_to_receive_step2": "Udostępnij Hash Notatki",
+    "how_to_receive_step2_desc": "Wyślij hash swojej notatki osobie przelewającej środki",
+    "how_to_receive_step3": "Czekaj na Przelew",
+    "how_to_receive_step3_desc": "Twoja notatka zostanie sfinansowana, gdy nadawca zakończy przelew",
+    "how_to_receive_step4": "Odbierz Swoje Środki",
+    "how_to_receive_step4_desc": "Użyj swojej sfinansowanej notatki do wypłat lub innych operacji",
+    "privacy_protection_title": "Ochrona Prywatności",
+    "privacy_feature1": "Anonimowe generowanie notatek",
+    "privacy_feature2": "Brak połączenia z Twoją tożsamością",
+    "privacy_feature3": "Kryptograficznie bezpieczne przelewy",
+    "privacy_feature4": "Walidacja dowodów zero-knowledge",
+    "how_transfers_work_title": "Jak Działają Przelewy",
+    "how_transfers_step1": "Wybierz Notatkę Źródłową",
+    "how_transfers_step1_desc": "Wybierz, z której prywatnej notatki przelać",
+    "how_transfers_step2": "Uzyskaj Hash Odbiorcy",
+    "how_transfers_step2_desc": "Odbiorca dzieli się z Tobą hashem swojej pustej notatki",
+    "how_transfers_step3": "Ustaw Kwotę",
+    "how_transfers_step3_desc": "Określ, ile przelać (częściowo lub całość)",
+    "how_transfers_step4": "Anonimowy Przelew",
+    "how_transfers_step4_desc": "Notatki są zamieniane z dowodami zero-knowledge",
+    "security_features_title": "Funkcje Bezpieczeństwa",
+    "security_feature1": "Całkowita anonimowość nadawcy",
+    "security_feature2": "Brak połączenia on-chain między stronami",
+    "security_feature3": "Kryptograficzna walidacja notatek",
+    "security_feature4": "Automatyczna obsługa opłat",
+    "stats_private": "100%",
+    "stats_private_label": "Prywatne",
+    "stats_fast": "⚡",
+    "stats_fast_label": "Szybkie",
+    "edit_pending_note": "Edytuj Oczekującą Notatkę",
+    "edit_note_description": "Określ token i kwotę dla tej oczekującej notatki",
+    "confirm_edit": "Potwierdź Edycję",
+    "copy_full_hex": "Kopiuj pełny hex",
+    "edit_operation": "Edytuj operację",
+    "abort_operation": "Przerwij operację"
   },
   "merge": {
     "title": "Połącz",
@@ -176,6 +253,407 @@
     "error": "Zamiana nieudana",
     "high_slippage": "Ostrzeżenie o wysokim poślizgu",
     "insufficient_liquidity": "Niewystarczająca płynność",
-    "price_updated": "Cena zaktualizowana"
+    "price_updated": "Cena zaktualizowana",
+    "page_title": "Prywatna Wymiana Tokenów",
+    "page_description": "Wymieniaj swoje prywatne notatki między różnymi tokenami, zachowując całkowitą anonimowość",
+    "select_deposit_title": "Wybierz Wpłatę do Wymiany",
+    "filter_deposits_placeholder": "Filtruj wpłaty według tokena",
+    "no_deposits_title": "Brak Dostępnych Wpłat",
+    "no_deposits_description": "Najpierw dokonaj wpłaty, aby włączyć wymianę!",
+    "selected_deposits_title": "Wybrane Wpłaty",
+    "configure_swap_title": "Skonfiguruj Swoją Wymianę",
+    "swap_amount_label": "Kwota Wymiany",
+    "swap_amount_placeholder": "Wprowadź kwotę do wymiany",
+    "max": "Maks",
+    "receive_token_label": "Token do Otrzymania",
+    "receive_token_placeholder": "Wybierz token do otrzymania",
+    "no_available_tokens": "Brak dostępnych tokenów do wymiany",
+    "execute_private_swap": "Wykonaj Prywatną Wymianę",
+    "confirm_private_swap": "Potwierdź Prywatną Wymianę",
+    "execute_swap_button": "Wykonaj Wymianę",
+    "swap_details": "Szczegóły Wymiany",
+    "swap_details_description": "Przejrzyj swoją transakcję przed kontynuowaniem",
+    "amount_to_swap": "Kwota do wymiany:",
+    "transaction_fee": "Opłata transakcyjna:",
+    "swap_warning": "Ta transakcja zużyje wybrane prywatne notatki i stworzy nowe z wymienionymi tokenami.",
+    "how_swaps_work_title": "Jak Działają Prywatne Wymiany",
+    "how_swaps_step1": "Wybierz Wpłatę Źródłową",
+    "how_swaps_step1_desc": "Wybierz prywatną notatkę, z której wymienić",
+    "how_swaps_step2": "Ustaw Kwotę i Cel",
+    "how_swaps_step2_desc": "Określ kwotę wymiany i żądany token",
+    "how_swaps_step3": "Dowód Zero-Knowledge",
+    "how_swaps_step3_desc": "Wygeneruj kryptograficzny dowód ważnej wymiany",
+    "how_swaps_step4": "Otrzymaj Nową Prywatną Notatkę",
+    "how_swaps_step4_desc": "Uzyskaj wymienione tokeny jako nową prywatną notatkę",
+    "security_features_title": "Funkcje Bezpieczeństwa",
+    "security_feature1": "Anonimowa wymiana tokenów poprzez dowody ZK",
+    "security_feature2": "Brak połączenia między źródłem a celem",
+    "security_feature3": "Integracja zdecentralizowanej giełdy",
+    "security_feature4": "Automatyczna ochrona zwrotów",
+    "stats_private_exchange": "🔄",
+    "stats_private_exchange_label": "Prywatna Wymiana",
+    "stats_instant_quotes": "⚡",
+    "stats_instant_quotes_label": "Natychmiastowe Wyceny",
+    "supported_pairs_title": "Obsługiwane Pary Handlowe",
+    "supported_pairs_description": "Wszystkie wymiany są obsługiwane przez Ekubo DEX dla optymalnych kursów i głębokiej płynności. Obsługiwane pary obejmują wszystkie główne kombinacje tokenów w puli prywatności."
+  },
+  "features": {
+    "private_deposits": {
+      "title": "Prywatne Wpłaty",
+      "description": "Przekształć swoje tokeny w prywatne notatki używając dowodów zero-knowledge. Twoje wpłaty stają się całkowicie anonimowe i nieśledzone, zapewniając maksymalną prywatność finansową w StarkNet.",
+      "how_it_works": [
+        "Podłącz swój portfel StarkNet do puli prywatności",
+        "Wybierz token i kwotę, którą chcesz wpłacić",
+        "Otrzymaj kryptograficzną notatkę reprezentującą Twoją wpłatę",
+        "Twoja wpłata jest teraz całkowicie prywatna i anonimowa"
+      ],
+      "benefits": [
+        "🔒 Całkowita prywatność transakcji",
+        "🚀 Technologia dowodów zero-knowledge",
+        "⚡ Szybkie transakcje StarkNet",
+        "🛡️ Bezpieczeństwo kryptograficzne",
+        "🌐 Zdecentralizowany protokół"
+      ],
+      "use_cases": [
+        "Chroń swoją prywatność finansową przed konkurencją",
+        "Zapobiegaj analizie i śledzeniu transakcji",
+        "Zabezpiecz duże transakcje przed publiczną kontrolą",
+        "Zachowaj anonimowość w działaniach DeFi",
+        "Stwórz prywatne rezerwy na przyszłe użycie"
+      ]
+    },
+    "anonymous_withdrawals": {
+      "title": "Anonimowe Wypłaty",
+      "description": "Wypłacaj swoje środki na dowolny adres bez ujawniania połączenia z pierwotną wpłatą. Korzystając z dowodów zero-knowledge, udowodnij własność bez ujawniania tożsamości lub historii transakcji.",
+      "how_it_works": [
+        "Wybierz swoją prywatną notatkę z wpłat",
+        "Wprowadź dowolny adres wypłaty (może być inny niż wpłata)",
+        "Wygeneruj dowód zero-knowledge własności",
+        "Ukończ anonimową wypłatę z pełną prywatnością"
+      ],
+      "benefits": [
+        "🎭 Całkowita anonimowość",
+        "🔄 Wypłacaj na dowolny adres",
+        "🛡️ Dowody zero-knowledge",
+        "⚡ Szybka realizacja",
+        "🔒 Brak łączenia transakcji"
+      ],
+      "use_cases": [
+        "Wypłacaj na świeże adresy dla maksymalnej prywatności",
+        "Przerwij łańcuchy transakcji i analizę",
+        "Chroń prywatność odbiorcy",
+        "Unikaj ataków grupowania adresów",
+        "Zachowaj poufność finansową"
+      ]
+    },
+    "private_note_transfers": {
+      "title": "Przelewy Prywatnych Notatek",
+      "description": "Przelewaj środki między prywatnymi notatkami w puli bez ujawniania nadawcy, odbiorcy lub kwoty. Umożliwia całkowicie prywatne transakcje peer-to-peer używając notatek kryptograficznych.",
+      "how_it_works": [
+        "Wybierz swoją źródłową prywatną notatkę",
+        "Wprowadź hash notatki odbiorcy",
+        "Określ kwotę przelewu (może być częściowa)",
+        "Wykonaj prywatny przelew z dowodem zero-knowledge"
+      ],
+      "benefits": [
+        "🤝 Prywatne przelewy peer-to-peer",
+        "🔒 Ukryte kwoty i strony",
+        "⚡ Natychmiastowe przelewy w puli",
+        "💰 Wsparcie częściowych kwot",
+        "🛡️ Bezpieczeństwo kryptograficzne"
+      ],
+      "use_cases": [
+        "Wysyłaj płatności bez ujawniania tożsamości",
+        "Prywatne transakcje biznesowe",
+        "Anonimowe darowizny i wpłaty",
+        "Poufna dystrybucja środków",
+        "Prywatne pożyczanie i kredytowanie"
+      ]
+    },
+    "deposit_merging": {
+      "title": "Łączenie Wpłat",
+      "description": "Połącz wiele małych wpłat w jedną większą notatkę dla lepszej prywatności i efektywności gazu. Łącz notatki tego samego tokena, aby zoptymalizować swój zestaw prywatności.",
+      "how_it_works": [
+        "Wybierz wiele notatek tego samego tokena",
+        "Sprawdź łączną kwotę i opłaty",
+        "Wygeneruj dowód zero-knowledge dla łączenia",
+        "Otrzymaj jedną skonsolidowaną prywatną notatkę"
+      ],
+      "benefits": [
+        "📊 Lepszy zestaw prywatności",
+        "⚡ Optymalizacja gazu",
+        "🔄 Lepsze zarządzanie notatkami",
+        "💰 Niższe przyszłe opłaty",
+        "🛡️ Zwiększona anonimowość"
+      ],
+      "use_cases": [
+        "Konsoliduj małe wpłaty dla efektywności",
+        "Optymalizuj koszty gazu dla przyszłych transakcji",
+        "Popraw prywatność zwiększając rozmiar notatki",
+        "Uprość zarządzanie notatkami",
+        "Przygotuj się do dużych anonimowych wypłat"
+      ]
+    },
+    "private_token_swaps": {
+      "title": "Prywatne Wymiany Tokenów",
+      "description": "Wymieniaj jeden token na drugi zachowując całkowitą prywatność. Wymieniaj tokeny przez zintegrowane protokoły DEX bez ujawniania swojej aktywności handlowej lub saldów publicznie.",
+      "how_it_works": [
+        "Wybierz token źródłowy z swoich prywatnych notatek",
+        "Wybierz token docelowy i kwotę",
+        "Otrzymaj ofertę cenową ze zintegrowanego DEX",
+        "Wykonaj prywatną zamianę z dowodem zero-knowledge"
+      ],
+      "benefits": [
+        "🔄 Prywatne wymiany tokenów",
+        "📈 Integracja z DEX",
+        "💰 Konkurencyjne kursy",
+        "🔒 Ukryta aktywność handlowa",
+        "⚡ Szybka realizacja"
+      ],
+      "use_cases": [
+        "Prywatne rebalansowanie portfela",
+        "Anonimowy handel arbitrażowy",
+        "Poufna konwersja aktywów",
+        "Ukryte strategie inwestycyjne",
+        "Prywatne zarządzanie płynnością"
+      ]
+    }
+  },
+  "ui": {
+    "modal": {
+      "how_it_works": "Jak to działa",
+      "key_benefits": "Główne korzyści",
+      "use_cases": "Przypadki użycia",
+      "start_using": "Zacznij używać {feature}",
+      "close": "Zamknij"
+    },
+    "onboarding": {
+      "welcome": {
+        "title": "Witamy w Privacy Pools!",
+        "description": "Zdecentralizowany protokół prywatności, który pozwala wpłacać, wypłacać, przelewać i wymieniać tokeny z całkowitą anonimowością używając dowodów zero-knowledge."
+      },
+      "connect_wallet": {
+        "title": "Podłącz Swój Portfel",
+        "description": "Najpierw podłącz swój portfel StarkNet, aby rozpocząć korzystanie z Privacy Pools. Wspieramy wszystkie główne portfele StarkNet."
+      },
+      "make_deposit": {
+        "title": "Dokonaj Wpłaty",
+        "description": "Wpłać tokeny do puli prywatności, aby otrzymać prywatne notatki. Te notatki reprezentują Twoje środki, zachowując je całkowicie anonimowe."
+      },
+      "withdraw_anonymously": {
+        "title": "Wypłacaj Anonimowo",
+        "description": "Wypłacaj na dowolny adres bez ujawniania połączenia z pierwotną wpłatą. Gwarantowana całkowita prywatność finansowa."
+      },
+      "advanced_features": {
+        "title": "Zaawansowane Funkcje",
+        "description": "Użyj Transfer do prywatnego wysyłania tokenów, Merge do łączenia wpłat, lub Swap do anonimowej wymiany tokenów."
+      },
+      "getting_started": "Rozpoczynanie",
+      "skip": "Pomiń",
+      "back": "Wstecz",
+      "get_started": "Zacznij",
+      "next": "Następny",
+      "step_counter": "Krok {current} z {total}"
+    },
+    "navbar": {
+      "privacy_pools": "Privacy Pools",
+      "export_tooltip": "Eksportuj wszystkie operacje do JSON",
+      "import_tooltip": "Importuj operacje z JSON",
+      "settings_tooltip": "Ustawienia",
+      "toggle_mobile_menu": "Przełącz menu mobilne"
+    },
+    "settings": {
+      "theme": {
+        "light": "Jasny",
+        "dark": "Ciemny"
+      }
+    },
+    "deposit_page": {
+      "title": "Prywatna Wpłata",
+      "subtitle": "Przekształć swoje tokeny w prywatne notatki dla zwiększonej prywatności finansowej",
+      "select_token": "Wybierz Token",
+      "choose_token_placeholder": "Wybierz swój token",
+      "deposit_amount": "Kwota Wpłaty",
+      "amount_placeholder": "Wprowadź kwotę do wpłaty",
+      "create_deposit_button": "Utwórz Prywatną Wpłatę",
+      "summary": {
+        "title": "Podsumowanie Wpłaty",
+        "token": "Token:",
+        "amount": "Kwota:",
+        "unknown": "Nieznany"
+      },
+      "how_it_works": {
+        "title": "Jak Działają Prywatne Wpłaty",
+        "choose_token": {
+          "title": "Wybierz Swój Token",
+          "description": "Wybierz spośród obsługiwanych tokenów w swoim portfelu"
+        },
+        "set_amount": {
+          "title": "Ustaw Kwotę",
+          "description": "Wprowadź kwotę, którą chcesz wpłacić prywatnie"
+        },
+        "get_private_note": {
+          "title": "Otrzymaj Prywatną Notatkę",
+          "description": "Otrzymaj kryptograficzną notatkę reprezentującą Twoją wpłatę"
+        },
+        "anonymous_withdrawals": {
+          "title": "Anonimowe Wypłaty",
+          "description": "Wypłacaj później na dowolną adres z pełną prywatnością"
+        }
+      },
+      "security_features": {
+        "title": "Funkcje Bezpieczeństwa",
+        "zero_knowledge": "Dowody zero-knowledge chronią Twoją prywatność",
+        "cryptographic_notes": "Notatki kryptograficzne gwarantują anonimowość",
+        "decentralized": "Protokół zdecentralizowany - brak centralnej władzy",
+        "starknet_security": "Bezpieczeństwo StarkNet i szybka finalność"
+      },
+      "quick_stats": {
+        "anonymous_percent": "100%",
+        "anonymous_label": "Anonimowe",
+        "instant_icon": "⚡",
+        "instant_label": "Natychmiastowe"
+      }
+    },
+    "withdraw_page": {
+      "title": "Prywatna Wypłata",
+      "subtitle": "Wypłacaj swoje prywatne wpłaty na dowolny adres z całkowitą anonimowością",
+      "select_deposit": "Wybierz Wpłatę do Wypłaty",
+      "filter_by_token": "Filtruj według Tokena",
+      "how_it_works": {
+        "title": "Jak Działają Prywatne Wypłaty",
+        "select_deposit": {
+          "title": "Wybierz Swoją Wpłatę",
+          "description": "Wybierz którą prywatna wpłatę chcesz wypłacić"
+        },
+        "set_recipient": {
+          "title": "Ustaw Odbiorca i Kwotę",
+          "description": "Określ gdzie wysłać środki i ile wypłacić"
+        },
+        "zero_knowledge": {
+          "title": "Dowód Zero-Knowledge",
+          "description": "System generuje dowód bez ujawniania Twojej tożsamości"
+        },
+        "anonymous_transfer": {
+          "title": "Anonimowy Przelew",
+          "description": "Środki wysłane z całkowitą prywatnością i bez możliwości połączenia"
+        }
+      },
+      "privacy_features": {
+        "title": "Funkcje Prywatności",
+        "break_linkability": "Przerwij łączność transakcji",
+        "hide_source": "Ukryj źródło wypłaty i kwotę",
+        "fee_handling": "Automatyczna obsługa płatności za opłaty",
+        "guaranteed_anonymity": "Matematycznie gwarantowana anonimowość"
+      },
+      "stats": {
+        "untraceable": "Nieśledny",
+        "fast": "Szybki"
+      },
+      "important_notice": "Ważne",
+      "withdrawal_warning": "Wypłaty są ostateczne i nie mogą być cofnięte. Sprawdź dwukrotnie adres odbiorcy i kwotę."
+    },
+    "merge_page": {
+      "title": "Prywatne Łączenie",
+      "description": "Połącz wiele wpłat w jedną prywatną notatkę dla lepszego zarządzania",
+      "select_deposits": "Wybierz Wpłaty do Połączenia",
+      "selection_mode": "Tryb Wyboru",
+      "first_deposit": "Pierwsza Wpłata",
+      "second_deposit": "Druga Wpłata",
+      "filter_by_token": "Filtruj według Tokena",
+      "choose_token_placeholder": "Wybierz token do filtrowania wpłat",
+      "no_deposits_title": "Nie Znaleziono Wpłat",
+      "no_deposits_description": "Wpłać najpierw środki, aby rozpocząć łączenie!",
+      "fee_information": "Informacje o Opłacie",
+      "network_fee": "Opłata Sieciowa",
+      "fee_deposit": "Wpłata Opłaty",
+      "fee_payment_issue": "Problem z Płatnością Opłaty",
+      "fee_deposit_auto": "Wpłata Opłaty (Automatycznie wybrana)",
+      "execute_merge": "Wykonaj Łączenie",
+      "merge_summary": "Podsumowanie Łączenia",
+      "combine_deposits": "Połącz Wpłaty",
+      "how_it_works": "Jak Działa Prywatne Łączenie",
+      "step1_title": "Wybierz Dwie Wpłaty",
+      "step1_description": "Wybierz dwie wpłaty tego samego tokena do połączenia",
+      "step2_title": "Automatyczny Wybór Opłaty",
+      "step2_description": "System automatycznie wybiera optymalną wpłatę STRK na opłaty",
+      "step3_title": "Dowód Zero-Knowledge",
+      "step3_description": "Wygeneruj kryptograficzny dowód prawidłowego łączenia",
+      "step4_title": "Połączona Notatka",
+      "step4_description": "Otrzymaj jedną notatkę z całkowitą połączoną kwotą",
+      "privacy_benefits": "Korzyści Prywatności",
+      "benefit1": "Konsoliduj wiele notatek prywatnie",
+      "benefit2": "Zachowaj brak powiązania transakcji",
+      "benefit3": "Optymalizuj zarządzanie notatkami",
+      "benefit4": "Walidacja zero-knowledge",
+      "consolidation": "Konsolidacja",
+      "private": "Prywatne",
+      "requirements": "Wymagania",
+      "requirements_description": "Obie wpłaty muszą być tego samego typu tokena. Będziesz potrzebować wpłat STRK na opłaty transakcyjne.",
+      "first_amount": "Pierwsza Kwota",
+      "second_amount": "Druga Kwota",
+      "combined_total": "Łączna Suma",
+      "modal": {
+        "title": "Potwierdź Prywatne Łączenie",
+        "confirm": "Wykonaj Łączenie",
+        "cancel": "Anuluj",
+        "warning": "Ta operacja łączenia połączy Twoje dwie wpłaty w jedną prywatną notatkę i nie może być cofnięta."
+      },
+      "toast": {
+        "executing": "⏳ Wykonywanie Łączenia",
+        "ready": "✅ Łączenie gotowe!",
+        "failed": "❌ Łączenie nie powiodło się"
+      },
+      "errors": {
+        "select_deposits": "Proszę najpierw wybrać obie wpłaty do łączenia",
+        "invalid_first_balance": "Nieprawidłowe saldo pierwszej wpłaty",
+        "invalid_second_balance": "Nieprawidłowe saldo drugiej wpłaty",
+        "same_token_required": "Obie notatki łączenia muszą być dla tego samego tokena",
+        "fee_exceeds_balance": "Opłata ({fee}) przekracza saldo Twojej notatki opłaty ({balance})",
+        "missing_deposit_amounts": "Nie można obliczyć zwrotu – brakuje kwot wpłat",
+        "missing_fee_amounts": "Nie można obliczyć zwrotu – brakuje kwot opłat",
+        "missing_deposits": "Brakuje wpłat opłaty lub łączenia",
+        "operations_not_found": "Jedna lub więcej operacji nie została znaleziona",
+        "insufficient_strk": "Niewystarczające saldo STRK. Wymagane: {amount} STRK",
+        "no_strk_deposits": "Brak dostępnych wpłat STRK do płatności opłat",
+        "fee_load_failed": "Nie udało się załadować informacji o opłacie"
+      }
+    }
+  },
+  "progress": {
+    "deposit": {
+      "preparation": {
+        "title": "Przygotowanie",
+        "description": "Przygotowywanie danych transakcji"
+      },
+      "wallet_approval": {
+        "title": "Zatwierdzenie Portfela",
+        "description": "Oczekiwanie na potwierdzenie portfela"
+      },
+      "onchain_confirmation": {
+        "title": "Potwierdzenie Onchain",
+        "description": "Oczekiwanie na potwierdzenie blockchain"
+      }
+    }
+  },
+  "errors": {
+    "validation": {
+      "hex_address": "Musi być adresem hex",
+      "amount_string": "Kwota musi być ciągiem znaków",
+      "amount_empty": "Kwota nie może być pusta",
+      "invalid_amount_format": "Nieprawidłowy format kwoty",
+      "amount_positive": "Kwota musi być dodatnia"
+    },
+    "general": {
+      "unexpected_error": "Wystąpił nieoczekiwany błąd",
+      "reload": "Przeładuj"
+    }
+  },
+  "notifications": {
+    "export_success": "Operacje pomyślnie wyeksportowane do JSON.",
+    "export_failed": "Eksport operacji nieudany.",
+    "import_success": "Operacje pomyślnie zaimportowane.",
+    "import_failed": "Import operacji nieudany. Upewnij się, że plik to prawidłowy JSON.",
+    "file_read_error": "Błąd odczytywania pliku."
   }
 }

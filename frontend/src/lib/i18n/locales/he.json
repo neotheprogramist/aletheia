@@ -88,7 +88,24 @@
     "available": "זמין",
     "pending": "בהמתנה",
     "completed": "הושלם",
-    "failed": "נכשל"
+    "failed": "נכשל",
+    "no_deposits_found": "לא נמצאו הפקדות",
+    "make_deposit_first": "בצעו ראשית הפקדה כדי להתחיל למשוך בפרטיות!",
+    "fee_information": "מידע על עמלות",
+    "network_fee": "עמלת רשת",
+    "fee_deposit": "הפקדת עמלה",
+    "fee_payment_issue": "בעיה בתשלום עמלה",
+    "withdrawal_deposit": "הפקדת משיכה",
+    "fee_deposit_auto": "הפקדת עמלה (נבחרה אוטומטית)",
+    "withdrawal_details": "פרטי משיכה",
+    "enter_recipient_address": "הזינו כתובת ארנק נמען",
+    "enter_amount_to_withdraw": "הזינו כמות למשיכה",
+    "execute_private_withdrawal": "בצע משיכה פרטית",
+    "confirm_private_withdrawal": "אשר משיכה פרטית",
+    "execute_withdrawal": "בצע משיכה",
+    "withdrawal_summary": "סיכום משיכה",
+    "recipient": "נמען",
+    "withdrawal_confirmation_text": "משיכה זו תעובד באופן אנונימי ולא ניתן לבטלה. אנא וודאו שכל הפרטים נכונים."
   },
   "wallet": {
     "connect": "חבר ארנק",
@@ -146,7 +163,67 @@
     "error": "העברה נכשלה",
     "invalid_note": "האש הערה לא חוקי",
     "same_note_error": "לא ניתן להעביר לאותה הערה",
-    "note_not_found": "הערת מקבל לא נמצאה"
+    "note_not_found": "הערת מקבל לא נמצאה",
+    "page_title": "העברות פרטיות",
+    "page_description": "העבר כספים בין הערות פרטיות בתוך בריכת הפרטיות עם אנונימיות מלאה",
+    "mode_send": "שלח העברה",
+    "mode_receive": "קבל העברה",
+    "send_title": "שלח העברה פרטית",
+    "send_description": "בחר הפקדה ממנה להעביר. הפקדת העמלות תבחר באופן אוטומטי.",
+    "receive_title": "קבל העברה פרטית",
+    "receive_description": "יצור הערה ריקה לקבלת העברות פרטיות ממשתמשים אחרים",
+    "filter_by_token": "סנן לפי טוקן",
+    "select_source_deposit": "בחר הפקדת מקור",
+    "no_deposits_title": "לא נמצאו הפקדות",
+    "no_deposits_description": "אנא בצע הפקדה ראשונה כדי להתחיל להעביר!",
+    "generate_empty_note": "יצור הערה ריקה",
+    "your_pending_notes": "ההערות הממתינות שלך",
+    "recipient_hash": "האש מקבל",
+    "recipient_hash_placeholder": "הכנס האש הערת המקבל",
+    "transfer_amount_placeholder": "סכום להעברה",
+    "max": "מקסימום",
+    "execute_transfer": "בצע העברה",
+    "confirm_transfer": "אשר העברה",
+    "transfer_summary": "סיכום העברה",
+    "transfer_confirmation_text": "העברה זו תהרוס את הערת המקור שלך ותממן את הערת המקבל. פעולה זו לא ניתנת לביטול.",
+    "how_to_receive_title": "איך לקבל העברות",
+    "how_to_receive_step1": "יצור הערה ריקה",
+    "how_to_receive_step1_desc": "צור הערה קריפטוגרפית שיכולה לקבל העברות",
+    "how_to_receive_step2": "שתף האש הערה",
+    "how_to_receive_step2_desc": "שלח את האש ההערה שלך לאדם המעביר כספים",
+    "how_to_receive_step3": "המתן להעברה",
+    "how_to_receive_step3_desc": "ההערה שלך תמומן כאשר השולח ישלים את ההעברה",
+    "how_to_receive_step4": "תבע את הכספים שלך",
+    "how_to_receive_step4_desc": "השתמש בהערה הממומנת שלך למשיכות או פעולות אחרות",
+    "privacy_protection_title": "הגנת פרטיות",
+    "privacy_feature1": "יצירת הערות אנונימיות",
+    "privacy_feature2": "אין חיבור לזהות שלך",
+    "privacy_feature3": "העברות מאובטחות קריפטוגרפית",
+    "privacy_feature4": "אימות בהוכחות אפס ידע",
+    "how_transfers_work_title": "איך עובדות העברות",
+    "how_transfers_step1": "בחר הערת מקור",
+    "how_transfers_step1_desc": "בחר מאיזו הערה פרטית להעביר",
+    "how_transfers_step2": "קבל האש מקבל",
+    "how_transfers_step2_desc": "המקבל משתף את האש ההערה הריקה שלו איתך",
+    "how_transfers_step3": "קבע סכום",
+    "how_transfers_step3_desc": "ציין כמה להעביר (חלקי או מלא)",
+    "how_transfers_step4": "העברה אנונימית",
+    "how_transfers_step4_desc": "ההערות מוחלפות עם הוכחות אפס ידע",
+    "security_features_title": "תכונות ביטחון",
+    "security_feature1": "אנונימיות מלאה של השולח",
+    "security_feature2": "אין חיבור בשרשרת בין הצדדים",
+    "security_feature3": "אימות קריפטוגרפי של הערות",
+    "security_feature4": "טיפול אוטומטי בעמלות",
+    "stats_private": "100%",
+    "stats_private_label": "פרטי",
+    "stats_fast": "⚡",
+    "stats_fast_label": "מהיר",
+    "edit_pending_note": "ערוך הערה ממתינה",
+    "edit_note_description": "ציין את הטוקן והסכום עבור הערה ממתינה זו",
+    "confirm_edit": "אשר עריכה",
+    "copy_full_hex": "העתק hex מלא",
+    "edit_operation": "ערוך פעולה",
+    "abort_operation": "בטל פעולה"
   },
   "merge": {
     "title": "מיזוג",
@@ -176,6 +253,407 @@
     "error": "החלפה נכשלה",
     "high_slippage": "אזהרת החלקה גבוהה",
     "insufficient_liquidity": "נזילות לא מספקת",
-    "price_updated": "מחיר עודכן"
+    "price_updated": "מחיר עודכן",
+    "page_title": "החלפת טוקנים פרטית",
+    "page_description": "החלף את ההערות הפרטיות שלך בין טוקנים שונים תוך שמירה על אנונימיות מלאה",
+    "select_deposit_title": "בחר הפקדה להחלפה",
+    "filter_deposits_placeholder": "סנן הפקדות לפי טוקן",
+    "no_deposits_title": "אין הפקדות זמינות",
+    "no_deposits_description": "אנא בצע הפקדה ראשונה כדי לאפשר החלפות!",
+    "selected_deposits_title": "הפקדות נבחרות",
+    "configure_swap_title": "קבע את ההחלפה שלך",
+    "swap_amount_label": "סכום החלפה",
+    "swap_amount_placeholder": "הכנס סכום להחלפה",
+    "max": "מקסימום",
+    "receive_token_label": "טוקן לקבלה",
+    "receive_token_placeholder": "בחר טוקן לקבלה",
+    "no_available_tokens": "אין טוקנים זמינים להחלפה",
+    "execute_private_swap": "בצע החלפה פרטית",
+    "confirm_private_swap": "אשר החלפה פרטית",
+    "execute_swap_button": "בצע החלפה",
+    "swap_details": "פרטי החלפה",
+    "swap_details_description": "בדוק את העסקה שלך לפני המשך",
+    "amount_to_swap": "סכום להחלפה:",
+    "transaction_fee": "עמלת עסקה:",
+    "swap_warning": "עסקה זו תצרוך את ההערות הפרטיות הנבחרות שלך ותיצור חדשות עם הטוקנים המוחלפים.",
+    "how_swaps_work_title": "איך עובדות החלפות פרטיות",
+    "how_swaps_step1": "בחר הפקדת מקור",
+    "how_swaps_step1_desc": "בחר הערה פרטית ממנה להחליף",
+    "how_swaps_step2": "קבע סכום ויעד",
+    "how_swaps_step2_desc": "ציין סכום החלפה וטוקן רצוי",
+    "how_swaps_step3": "הוכחת אפס ידע",
+    "how_swaps_step3_desc": "יצור הוכחה קריפטוגרפית של החלפה חוקית",
+    "how_swaps_step4": "קבל הערה פרטית חדשה",
+    "how_swaps_step4_desc": "קבל טוקנים מוחלפים כהערה פרטית חדשה",
+    "security_features_title": "תכונות ביטחון",
+    "security_feature1": "החלפת טוקנים אנונימית דרך הוכחות ZK",
+    "security_feature2": "אין חיבור בין מקור ליעד",
+    "security_feature3": "אינטגרציה של בורסה מבוזרת",
+    "security_feature4": "הגנת החזר אוטומטית",
+    "stats_private_exchange": "🔄",
+    "stats_private_exchange_label": "החלפה פרטית",
+    "stats_instant_quotes": "⚡",
+    "stats_instant_quotes_label": "ציטוטים מיידיים",
+    "supported_pairs_title": "צמדי מסחר נתמכים",
+    "supported_pairs_description": "כל ההחלפות מופעלות על ידי Ekubo DEX לשיעורים אופטימליים ונזילות עמוקה. הצמדים הנתמכים כוללים את כל צירופי הטוקנים העיקריים בבריכת הפרטיות."
+  },
+  "features": {
+    "private_deposits": {
+      "title": "הפקדות פרטיות",
+      "description": "הפכו את הטוקנים שלכם להערות פרטיות באמצעות הוכחות אפס ידע. ההפקדות שלכם הופכות לאנונימיות ובלתי ניתנות למעקב לחלוטין.",
+      "how_it_works": [
+        "חברו את ארנק StarkNet שלכם למאגר הפרטיות",
+        "בחרו את הטוקן והכמות שאתם רוצים להפקיד",
+        "קבלו הערה קריפטוגרפית המייצגת את ההפקדה שלכם",
+        "ההפקדה שלכם היא כעת פרטית ואנונימית לחלוטין"
+      ],
+      "benefits": [
+        "🔒 פרטיות עסקאות מלאה",
+        "🚀 טכנולוגיית הוכחת אפס ידע",
+        "⚡ עסקאות StarkNet מהירות",
+        "🛡️ אבטחה קריפטוגרפית",
+        "🌐 פרוטוקול מבוזר"
+      ],
+      "use_cases": [
+        "הגנו על הפרטיות הפיננסית שלכם מפני מתחרים",
+        "מנעו ניתוח ומעקב אחר עסקאות",
+        "אבטחו עסקאות גדולות מביקורת ציבורית",
+        "שמרו על אנונימיות בפעילויות DeFi",
+        "צרו עתודות פרטיות לשימוש עתידי"
+      ]
+    },
+    "anonymous_withdrawals": {
+      "title": "משיכות אנונימיות",
+      "description": "משכו את הכספים שלכם לכל כתובת מבלי לחשוף את הקשר להפקדה המקורית. השתמשו בהוכחות אפס ידע כדי להוכיח בעלות.",
+      "how_it_works": [
+        "בחרו את ההערה הפרטית שלכם מההפקדות",
+        "הזינו כל כתובת משיכה (יכולה להיות שונה מההפקדה)",
+        "יצרו הוכחת אפס ידע של בעלות",
+        "השלימו משיכה אנונימית עם פרטיות מלאה"
+      ],
+      "benefits": [
+        "🎭 אנונימיות מלאה",
+        "🔄 משיכה לכל כתובת",
+        "🛡️ הוכחות אפס ידע",
+        "⚡ ביצוע מהיר",
+        "🔒 ללא קישור עסקאות"
+      ],
+      "use_cases": [
+        "משכו לכתובות חדשות לפרטיות מקסימלית",
+        "שברו שרשראות עסקאות וניתוח",
+        "הגנו על פרטיות הנמען",
+        "הימנעו מהתקפות קיבוץ כתובות",
+        "שמרו על סודיות פיננסית"
+      ]
+    },
+    "private_note_transfers": {
+      "title": "העברות הערות פרטיות",
+      "description": "העבירו כספים בין הערות פרטיות בתוך הבריכה מבלי לחשוף שולח, נמען או סכום. אפשרו עסקאות פרטיות לחלוטין.",
+      "how_it_works": [
+        "בחרו את ההערה הפרטית המקור שלכם",
+        "הזינו את ה-hash של הערת הנמען",
+        "ציינו כמות העברה (יכולה להיות חלקית)",
+        "בצעו העברה פרטית עם הוכחת אפס ידע"
+      ],
+      "benefits": [
+        "🤝 העברות peer-to-peer פרטיות",
+        "🔒 כמויות וצדדים מוסתרים",
+        "⚡ העברות מיידיות בתוך הבריכה",
+        "💰 תמיכה בכמויות חלקיות",
+        "🛡️ אבטחה קריפטוגרפית"
+      ],
+      "use_cases": [
+        "שלחו תשלומים מבלי לחשוף זהות",
+        "עסקאות עסקיות פרטיות",
+        "תרומות ונדבות אנונימיות",
+        "חלוקת כספים סודית",
+        "הלוואות והשאלות פרטיות"
+      ]
+    },
+    "deposit_merging": {
+      "title": "מיזוג הפקדות",
+      "description": "שלבו מספר הפקדות קטנות להערה אחת גדולה יותר לשיפור הפרטיות ויעילות הגז.",
+      "how_it_works": [
+        "בחרו מספר הערות של אותו טוקן",
+        "בדקו כמות מאוחדת ועמלות",
+        "יצרו הוכחת אפס ידע למיזוג",
+        "קבלו הערה פרטית אחת מאוחדת"
+      ],
+      "benefits": [
+        "📊 מערך פרטיות משופר",
+        "⚡ אופטימיזציה של גז",
+        "🔄 ניהול הערות טוב יותר",
+        "💰 עמלות עתידיות נמוכות יותר",
+        "🛡️ אנונימיות מוגברת"
+      ],
+      "use_cases": [
+        "אחדו הפקדות קטנות ליעילות",
+        "אפטמו עלויות גז לעסקאות עתידיות",
+        "שפרו פרטיות על ידי הגדלת גודל הערה",
+        "פשטו ניהול הערות",
+        "הכינו למשיכות אנונימיות גדולות"
+      ]
+    },
+    "private_token_swaps": {
+      "title": "החלפות טוקנים פרטיות",
+      "description": "החליפו טוקן אחד באחר תוך שמירה על פרטיות מלאה. החליפו טוקנים דרך פרוטוקולי DEX משולבים.",
+      "how_it_works": [
+        "בחרו טוקן מקור מההערות הפרטיות שלכם",
+        "בחרו טוקן יעד וכמות",
+        "קבלו הצעת מחיר מה-DEX המשולב",
+        "בצעו החלפה פרטית עם הוכחת אפס ידע"
+      ],
+      "benefits": [
+        "🔄 החלפות טוקנים פרטיות",
+        "📈 אינטגרציה של DEX",
+        "💰 שערים תחרותיים",
+        "🔒 פעילות מסחר מוסתרת",
+        "⚡ ביצוע מהיר"
+      ],
+      "use_cases": [
+        "איזון תיק השקעות פרטי",
+        "מסחר ארביטראז' אנונימי",
+        "המרת נכסים סודית",
+        "אסטרטגיות השקעה מוסתרות",
+        "ניהול נזילות פרטי"
+      ]
+    }
+  },
+  "ui": {
+    "modal": {
+      "how_it_works": "איך זה עובד",
+      "key_benefits": "יתרונות מרכזיים",
+      "use_cases": "מקרי שימוש",
+      "start_using": "התחל להשתמש ב{feature}",
+      "close": "סגור"
+    },
+    "onboarding": {
+      "welcome": {
+        "title": "ברוכים הבאים ל-Privacy Pools!",
+        "description": "פרוטוקול פרטיות מבוזר המאפשר לכם להפקיד, למשוך, להעביר ולהחליף טוקנים באנונימיות מלאה באמצעות הוכחות אפס ידע."
+      },
+      "connect_wallet": {
+        "title": "חברו את הארנק שלכם",
+        "description": "ראשית, חברו את ארנק StarkNet שלכם כדי להתחיל להשתמש ב-Privacy Pools. אנו תומכים בכל ארנקי StarkNet העיקריים."
+      },
+      "make_deposit": {
+        "title": "בצעו הפקדה",
+        "description": "הפקידו טוקנים לבריכת הפרטיות כדי לקבל הערות פרטיות. הערות אלה מייצגות את הכספים שלכם תוך שמירה על אנונימיות מלאה."
+      },
+      "withdraw_anonymously": {
+        "title": "משכו באנונימיות",
+        "description": "משכו לכל כתובת מבלי לחשוף את הקשר להפקדה המקורית שלכם. פרטיות פיננסית מלאה מובטחת."
+      },
+      "advanced_features": {
+        "title": "תכונות מתקדמות",
+        "description": "השתמשו בהעברה כדי לשלוח טוקנים באופן פרטי, במיזוג כדי לשלב הפקדות, או בהחלפה כדי להחליף טוקנים באנונימיות."
+      },
+      "getting_started": "תחילת עבודה",
+      "skip": "דלג",
+      "back": "חזור",
+      "get_started": "התחל",
+      "next": "הבא",
+      "step_counter": "שלב {current} מתוך {total}"
+    },
+    "navbar": {
+      "privacy_pools": "Privacy Pools",
+      "export_tooltip": "ייצא את כל הפעולות ל-JSON",
+      "import_tooltip": "ייבא פעולות מ-JSON",
+      "settings_tooltip": "הגדרות",
+      "toggle_mobile_menu": "החלף תפריט נייד"
+    },
+    "settings": {
+      "theme": {
+        "light": "בהיר",
+        "dark": "כהה"
+      }
+    },
+    "deposit_page": {
+      "title": "הפקדה פרטית",
+      "subtitle": "הפכו את הטוקנים שלכם להערות פרטיות לפרטיות פיננסית משופרת",
+      "select_token": "בחר טוקן",
+      "choose_token_placeholder": "בחר את הטוקן שלך",
+      "deposit_amount": "סכום הפקדה",
+      "amount_placeholder": "הכנס סכום להפקדה",
+      "create_deposit_button": "צור הפקדה פרטית",
+      "summary": {
+        "title": "סיכום הפקדה",
+        "token": "טוקן:",
+        "amount": "כמות:",
+        "unknown": "לא ידוע"
+      },
+      "how_it_works": {
+        "title": "איך עובדות הפקדות פרטיות",
+        "choose_token": {
+          "title": "בחר את הטוקן שלך",
+          "description": "בחר מטוקנים נתמכים בארנק שלך"
+        },
+        "set_amount": {
+          "title": "קבע כמות",
+          "description": "הזן את הכמות שאתה רוצה להפקיד בפרטיות"
+        },
+        "get_private_note": {
+          "title": "קבל הערה פרטית",
+          "description": "קבל הערה קריפטוגרפית המייצגת את ההפקדה שלך"
+        },
+        "anonymous_withdrawals": {
+          "title": "משיכות אנונימיות",
+          "description": "משוך מאוחר יותר לכל כתובת עם פרטיות מלאה"
+        }
+      },
+      "security_features": {
+        "title": "תכונות בטיחות",
+        "zero_knowledge": "הוכחות אפס ידע מגינות על הפרטיות שלך",
+        "cryptographic_notes": "הערות קריפטוגרפיות מבטיחות אנונימיות",
+        "decentralized": "פרוטוקול מבוזר - ללא רשות מרכזית",
+        "starknet_security": "בטיחות StarkNet וסיום מהיר"
+      },
+      "quick_stats": {
+        "anonymous_percent": "100%",
+        "anonymous_label": "אנונימי",
+        "instant_icon": "⚡",
+        "instant_label": "מיידי"
+      }
+    },
+    "merge_page": {
+      "title": "מיזוג פרטי",
+      "description": "שלבו מספר הפקדות לפתק פרטי אחד לניהול טוב יותר",
+      "select_deposits": "בחרו הפקדות למיזוג",
+      "selection_mode": "מצב בחירה",
+      "first_deposit": "הפקדה ראשונה",
+      "second_deposit": "הפקדה שנייה",
+      "filter_by_token": "סינון לפי טוקן",
+      "choose_token_placeholder": "בחרו טוקן לסינון הפקדות",
+      "no_deposits_title": "לא נמצאו הפקדות",
+      "no_deposits_description": "הפקידו קודם כספים כדי להתחיל לבצע מיזוג!",
+      "fee_information": "מידע על עמלות",
+      "network_fee": "עמלת רשת",
+      "fee_deposit": "הפקדת עמלה",
+      "fee_payment_issue": "בעיה בתשלום עמלה",
+      "fee_deposit_auto": "הפקדת עמלה (נבחרה אוטומטית)",
+      "execute_merge": "בצע מיזוג",
+      "merge_summary": "סיכום מיזוג",
+      "combine_deposits": "שלב הפקדות",
+      "how_it_works": "איך עובד מיזוג פרטי",
+      "step1_title": "בחרו שתי הפקדות",
+      "step1_description": "בחרו שתי הפקדות מאותו טוקן למיזוג",
+      "step2_title": "בחירת עמלה אוטומטית",
+      "step2_description": "המערכת בוחרת אוטומטית הפקדת STRK אופטימלית לעמלות",
+      "step3_title": "הוכחת ידע אפס",
+      "step3_description": "יצרו הוכחה קריפטוגרפית למיזוג תקף",
+      "step4_title": "פתק ממוזג",
+      "step4_description": "קבלו פתק יחיד עם הסכום הכולל המשולב",
+      "privacy_benefits": "יתרונות פרטיות",
+      "benefit1": "איחוד מספר פתקים באופן פרטי",
+      "benefit2": "שמירה על אי-קישוריות עסקאות",
+      "benefit3": "ייעול ניהול פתקים",
+      "benefit4": "אימות ידע אפס",
+      "consolidation": "איחוד",
+      "private": "פרטי",
+      "requirements": "דרישות",
+      "requirements_description": "שתי ההפקדות חייבות להיות מאותו סוג טוקן. תזדקקו להפקדות STRK לעמלות עסקה.",
+      "first_amount": "סכום ראשון",
+      "second_amount": "סכום שני",
+      "combined_total": "סה\"כ משולב",
+      "modal": {
+        "title": "אשרו מיזוג פרטי",
+        "confirm": "בצע מיזוג",
+        "cancel": "ביטול",
+        "warning": "פעולת המיזוג הזו תשלב את שתי ההפקדות שלכם לפתק פרטי אחד ולא ניתן לבטל אותה."
+      },
+      "toast": {
+        "executing": "⏳ מבצע מיזוג",
+        "ready": "✅ מיזוג מוכן!",
+        "failed": "❌ מיזוג נכשל"
+      },
+      "errors": {
+        "select_deposits": "אנא בחרו תחילה את שתי ההפקדות למיזוג",
+        "invalid_first_balance": "יתרת הפקדה ראשונה לא תקפה",
+        "invalid_second_balance": "יתרת הפקדה שנייה לא תקפה",
+        "same_token_required": "שני פתקי המיזוג חייבים להיות לאותו טוקן",
+        "fee_exceeds_balance": "העמלה ({fee}) עולה על יתרת פתק העמלה שלכם ({balance})",
+        "missing_deposit_amounts": "לא ניתן לחשב החזר - חסרים סכומי הפקדה",
+        "missing_fee_amounts": "לא ניתן לחשב החזר - חסרים סכומי עמלה",
+        "missing_deposits": "חסרות הפקדות עמלה או מיזוג",
+        "operations_not_found": "פעולה אחת או יותר לא נמצאה",
+        "insufficient_strk": "יתרת STRK לא מספיקה. נדרש: {amount} STRK",
+        "no_strk_deposits": "אין הפקדות STRK זמינות לתשלום עמלות",
+        "fee_load_failed": "נכשל בטעינת מידע עמלות"
+      }
+    },
+    "withdraw_page": {
+      "title": "משיכה פרטית",
+      "subtitle": "משכו את ההפקדות הפרטיות שלכם לכל כתובת עם אנונימיות מלאה",
+      "select_deposit": "בחר הפקדה למשיכה",
+      "filter_by_token": "סנן לפי טוקן",
+      "how_it_works": {
+        "title": "איך עובדות משיכות פרטיות",
+        "select_deposit": {
+          "title": "בחר את ההפקדה שלך",
+          "description": "בחר איזו הפקדה פרטית אתה רוצה למשוך"
+        },
+        "set_recipient": {
+          "title": "קבע נמען וסכום",
+          "description": "ציין לאן לשלוח את הכספים וכמה למשוך"
+        },
+        "zero_knowledge": {
+          "title": "הוכחת אפס ידע",
+          "description": "המערכת מייצרת הוכחה בלי לחשוף את הזהות שלך"
+        },
+        "anonymous_transfer": {
+          "title": "העברה אנונימית",
+          "description": "כספים נשלחים עם פרטיות מלאה וללא קישוריות"
+        }
+      },
+      "privacy_features": {
+        "title": "תכונות פרטיות",
+        "break_linkability": "שבר קישוריות עסקאות",
+        "hide_source": "הסתר מקור ומסכום משיכה",
+        "fee_handling": "טיפול אוטומטי בתשלום עמלות",
+        "guaranteed_anonymity": "אנונימיות מובטחת מתמטית"
+      },
+      "stats": {
+        "untraceable": "בלתי ניתן למעקב",
+        "fast": "מהיר"
+      },
+      "important_notice": "חשוב",
+      "withdrawal_warning": "משיכות הן סופיות ולא ניתן לבטל אותן. בדוק פעמיים את כתובת הנמען והסכום."
+    }
+  },
+  "progress": {
+    "deposit": {
+      "preparation": {
+        "title": "הכנה",
+        "description": "מכין נתוני עסקה"
+      },
+      "wallet_approval": {
+        "title": "אישור ארנק",
+        "description": "ממתין לאישור ארנק"
+      },
+      "onchain_confirmation": {
+        "title": "אישור בבלוקצ'יין",
+        "description": "ממתין לאישור בלוקצ'יין"
+      }
+    }
+  },
+  "errors": {
+    "validation": {
+      "hex_address": "חייב להיות כתובת הקס",
+      "amount_string": "הסכום חייב להיות מחרוזת",
+      "amount_empty": "הסכום לא יכול להיות ריק",
+      "invalid_amount_format": "פורמט סכום לא תקין",
+      "amount_positive": "הסכום חייב להיות חיובי"
+    },
+    "general": {
+      "unexpected_error": "אירעה שגיאה בלתי צפויה",
+      "reload": "טען מחדש"
+    }
+  },
+  "notifications": {
+    "export_success": "פעולות יוצאו בהצלחה ל-JSON.",
+    "export_failed": "ייצוא פעולות נכשל.",
+    "import_success": "פעולות יובאו בהצלחה.",
+    "import_failed": "ייבוא פעולות נכשל. וודא שהקובץ הוא JSON תקין.",
+    "file_read_error": "שגיאה בקריאת הקובץ."
   }
 }

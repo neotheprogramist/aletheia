@@ -88,7 +88,24 @@
     "available": "Available",
     "pending": "Pending",
     "completed": "Completed",
-    "failed": "Failed"
+    "failed": "Failed",
+    "no_deposits_found": "No Deposits Found",
+    "make_deposit_first": "Make a deposit first to start withdrawing privately!",
+    "fee_information": "Fee Information",
+    "network_fee": "Network Fee",
+    "fee_deposit": "Fee Deposit",
+    "fee_payment_issue": "Fee Payment Issue",
+    "withdrawal_deposit": "Withdrawal Deposit",
+    "fee_deposit_auto": "Fee Deposit (Auto-selected)",
+    "withdrawal_details": "Withdrawal Details",
+    "enter_recipient_address": "Enter recipient wallet address",
+    "enter_amount_to_withdraw": "Enter amount to withdraw",
+    "execute_private_withdrawal": "Execute Private Withdrawal",
+    "confirm_private_withdrawal": "Confirm Private Withdrawal",
+    "execute_withdrawal": "Execute Withdrawal",
+    "withdrawal_summary": "Withdrawal Summary",
+    "recipient": "Recipient",
+    "withdrawal_confirmation_text": "This withdrawal will be processed anonymously and cannot be reversed. Please verify all details are correct."
   },
   "wallet": {
     "connect": "Connect Wallet",
@@ -146,7 +163,67 @@
     "error": "Transfer failed",
     "invalid_note": "Invalid note hash",
     "same_note_error": "Cannot transfer to same note",
-    "note_not_found": "Recipient note not found"
+    "note_not_found": "Recipient note not found",
+    "page_title": "Private Transfers",
+    "page_description": "Transfer funds between private notes within the privacy pool with complete anonymity",
+    "mode_send": "Send Transfer",
+    "mode_receive": "Receive Transfer",
+    "send_title": "Send Private Transfer",
+    "send_description": "Select a deposit to transfer from. Fee deposit will be automatically selected.",
+    "receive_title": "Receive Private Transfer",
+    "receive_description": "Generate an empty note to receive private transfers from other users",
+    "filter_by_token": "Filter by Token",
+    "select_source_deposit": "Select Source Deposit",
+    "no_deposits_title": "No Deposits Found",
+    "no_deposits_description": "Please make a deposit first to start transferring!",
+    "generate_empty_note": "Generate Empty Note",
+    "your_pending_notes": "Your Pending Notes",
+    "recipient_hash": "Recipient Hash",
+    "recipient_hash_placeholder": "Enter recipient's note hash",
+    "transfer_amount_placeholder": "Amount to transfer",
+    "max": "Max",
+    "execute_transfer": "Execute Transfer",
+    "confirm_transfer": "Confirm Transfer",
+    "transfer_summary": "Transfer Summary",
+    "transfer_confirmation_text": "This transfer will destroy your source note and fund the recipient's note. This action cannot be reversed.",
+    "how_to_receive_title": "How to Receive Transfers",
+    "how_to_receive_step1": "Generate Empty Note",
+    "how_to_receive_step1_desc": "Create a cryptographic note that can receive transfers",
+    "how_to_receive_step2": "Share Note Hash",
+    "how_to_receive_step2_desc": "Send your note hash to the person transferring funds",
+    "how_to_receive_step3": "Wait for Transfer",
+    "how_to_receive_step3_desc": "Your note will be funded when sender completes transfer",
+    "how_to_receive_step4": "Claim Your Funds",
+    "how_to_receive_step4_desc": "Use your funded note for withdrawals or other operations",
+    "privacy_protection_title": "Privacy Protection",
+    "privacy_feature1": "Anonymous note generation",
+    "privacy_feature2": "No connection to your identity",
+    "privacy_feature3": "Cryptographically secure transfers",
+    "privacy_feature4": "Zero-knowledge proof validation",
+    "how_transfers_work_title": "How Transfers Work",
+    "how_transfers_step1": "Select Source Note",
+    "how_transfers_step1_desc": "Choose which private note to transfer from",
+    "how_transfers_step2": "Get Recipient Hash",
+    "how_transfers_step2_desc": "Recipient shares their empty note hash with you",
+    "how_transfers_step3": "Set Amount",
+    "how_transfers_step3_desc": "Specify how much to transfer (partial or full)",
+    "how_transfers_step4": "Anonymous Transfer",
+    "how_transfers_step4_desc": "Notes are swapped with zero-knowledge proofs",
+    "security_features_title": "Security Features",
+    "security_feature1": "Complete sender anonymity",
+    "security_feature2": "No on-chain connection between parties",
+    "security_feature3": "Cryptographic note validation",
+    "security_feature4": "Automated fee handling",
+    "stats_private": "100%",
+    "stats_private_label": "Private",
+    "stats_fast": "⚡",
+    "stats_fast_label": "Fast",
+    "edit_pending_note": "Edit Pending Note",
+    "edit_note_description": "Specify the token and amount for this pending note",
+    "confirm_edit": "Confirm Edit",
+    "copy_full_hex": "Copy full hex",
+    "edit_operation": "Edit operation",
+    "abort_operation": "Abort operation"
   },
   "merge": {
     "title": "Merge",
@@ -176,6 +253,512 @@
     "error": "Swap failed",
     "high_slippage": "High slippage warning",
     "insufficient_liquidity": "Insufficient liquidity",
-    "price_updated": "Price updated"
+    "price_updated": "Price updated",
+    "page_title": "Private Token Swap",
+    "page_description": "Exchange your private notes between different tokens while maintaining complete anonymity",
+    "select_deposit_title": "Select Deposit to Swap",
+    "filter_deposits_placeholder": "Filter deposits by token",
+    "no_deposits_title": "No Deposits Available",
+    "no_deposits_description": "Please make a deposit first to enable swapping!",
+    "selected_deposits_title": "Selected Deposits",
+    "configure_swap_title": "Configure Your Swap",
+    "swap_amount_label": "Swap Amount",
+    "swap_amount_placeholder": "Enter amount to swap",
+    "max": "Max",
+    "receive_token_label": "Receive Token",
+    "receive_token_placeholder": "Select token to receive",
+    "no_available_tokens": "No available tokens for swapping",
+    "execute_private_swap": "Execute Private Swap",
+    "confirm_private_swap": "Confirm Private Swap",
+    "execute_swap_button": "Execute Swap",
+    "swap_details": "Swap Details",
+    "swap_details_description": "Review your transaction before proceeding",
+    "amount_to_swap": "Amount to swap:",
+    "transaction_fee": "Transaction fee:",
+    "swap_warning": "This transaction will consume your selected private notes and create new ones with the swapped tokens.",
+    "how_swaps_work_title": "How Private Swaps Work",
+    "how_swaps_step1": "Select Source Deposit",
+    "how_swaps_step1_desc": "Choose a private note to swap from",
+    "how_swaps_step2": "Set Amount & Target",
+    "how_swaps_step2_desc": "Specify swap amount and desired token",
+    "how_swaps_step3": "Zero-Knowledge Proof",
+    "how_swaps_step3_desc": "Generate cryptographic proof of valid swap",
+    "how_swaps_step4": "Receive New Private Note",
+    "how_swaps_step4_desc": "Get swapped tokens as a new private note",
+    "security_features_title": "Security Features",
+    "security_feature1": "Anonymous token exchange via ZK proofs",
+    "security_feature2": "No connection between source and target",
+    "security_feature3": "Decentralized exchange integration",
+    "security_feature4": "Automated refund protection",
+    "stats_private_exchange": "🔄",
+    "stats_private_exchange_label": "Private Exchange",
+    "stats_instant_quotes": "⚡",
+    "stats_instant_quotes_label": "Instant Quotes",
+    "supported_pairs_title": "Supported Trading Pairs",
+    "supported_pairs_description": "All swaps are powered by Ekubo DEX for optimal rates and deep liquidity. Supported pairs include all major token combinations in the privacy pool."
+  },
+  "features": {
+    "private_deposits": {
+      "title": "Private Deposits",
+      "description": "Transform your tokens into private notes using zero-knowledge proofs. Your deposits become completely anonymous and untraceable, ensuring maximum financial privacy on StarkNet.",
+      "how_it_works": [
+        "Connect your StarkNet wallet to the privacy pool",
+        "Select the token and amount you want to deposit",
+        "Receive a cryptographic note representing your deposit",
+        "Your deposit is now completely private and anonymous"
+      ],
+      "benefits": [
+        "🔒 Complete transaction privacy",
+        "🚀 Zero-knowledge proof technology",
+        "⚡ Fast StarkNet transactions",
+        "🛡️ Cryptographic security",
+        "🌐 Decentralized protocol"
+      ],
+      "use_cases": [
+        "Protect your financial privacy from competitors",
+        "Prevent transaction analysis and tracking",
+        "Secure large transactions from public scrutiny",
+        "Maintain anonymity in DeFi activities",
+        "Create private reserves for future use"
+      ]
+    },
+    "anonymous_withdrawals": {
+      "title": "Anonymous Withdrawals",
+      "description": "Withdraw your funds to any address without revealing the connection to your original deposit. Using zero-knowledge proofs, prove ownership without exposing your identity or transaction history.",
+      "how_it_works": [
+        "Select your private note from your deposits",
+        "Enter any withdrawal address (can be different from deposit)",
+        "Generate zero-knowledge proof of ownership",
+        "Complete anonymous withdrawal with full privacy"
+      ],
+      "benefits": [
+        "🎭 Complete anonymity",
+        "🔄 Withdraw to any address",
+        "🛡️ Zero-knowledge proofs",
+        "⚡ Fast execution",
+        "🔒 No transaction linking"
+      ],
+      "use_cases": [
+        "Withdraw to fresh addresses for maximum privacy",
+        "Break transaction chains and analysis",
+        "Protect recipient privacy",
+        "Avoid address clustering attacks",
+        "Maintain financial confidentiality"
+      ]
+    },
+    "private_note_transfers": {
+      "title": "Private Note Transfers",
+      "description": "Transfer funds between private notes within the pool without revealing sender, recipient, or amount. Enable completely private peer-to-peer transactions using cryptographic notes.",
+      "how_it_works": [
+        "Select your source private note",
+        "Enter the recipient's note hash",
+        "Specify transfer amount (can be partial)",
+        "Execute private transfer with zero-knowledge proof"
+      ],
+      "benefits": [
+        "🤝 Private peer-to-peer transfers",
+        "🔒 Hidden amounts and parties",
+        "⚡ Instant within-pool transfers",
+        "💰 Partial amount support",
+        "🛡️ Cryptographic security"
+      ],
+      "use_cases": [
+        "Send payments without revealing identity",
+        "Private business transactions",
+        "Anonymous donations and contributions",
+        "Confidential fund distribution",
+        "Private lending and borrowing"
+      ]
+    },
+    "deposit_merging": {
+      "title": "Deposit Merging",
+      "description": "Combine multiple small deposits into a single larger note for improved privacy and gas efficiency. Merge notes of the same token to optimize your privacy set and reduce transaction costs.",
+      "how_it_works": [
+        "Select multiple notes of the same token",
+        "Verify combined amount and fees",
+        "Generate zero-knowledge proof for merge",
+        "Receive single consolidated private note"
+      ],
+      "benefits": [
+        "📊 Improved privacy set",
+        "⚡ Gas optimization",
+        "🔄 Better note management",
+        "💰 Lower future fees",
+        "🛡️ Enhanced anonymity"
+      ],
+      "use_cases": [
+        "Consolidate small deposits for efficiency",
+        "Optimize gas costs for future transactions",
+        "Improve privacy by increasing note size",
+        "Simplify note management",
+        "Prepare for large anonymous withdrawals"
+      ]
+    },
+    "private_token_swaps": {
+      "title": "Private Token Swaps",
+      "description": "Exchange one token for another while maintaining complete privacy. Swap tokens through integrated DEX protocols without revealing your trading activity or balances to the public.",
+      "how_it_works": [
+        "Select source token from your private notes",
+        "Choose destination token and amount",
+        "Get price quote from integrated DEX",
+        "Execute private swap with zero-knowledge proof"
+      ],
+      "benefits": [
+        "🔄 Private token exchanges",
+        "📈 DEX integration",
+        "💰 Competitive rates",
+        "🔒 Hidden trading activity",
+        "⚡ Fast execution"
+      ],
+      "use_cases": [
+        "Private portfolio rebalancing",
+        "Anonymous arbitrage trading",
+        "Confidential asset conversion",
+        "Hidden investment strategies",
+        "Private liquidity management"
+      ]
+    }
+  },
+  "ui": {
+    "modal": {
+      "how_it_works": "How It Works",
+      "key_benefits": "Key Benefits",
+      "use_cases": "Use Cases",
+      "start_using": "Start Using {feature}",
+      "close": "Close"
+    },
+    "onboarding": {
+      "welcome": {
+        "title": "Welcome to Privacy Pools!",
+        "description": "A decentralized privacy protocol that lets you deposit, withdraw, transfer, and swap tokens with complete anonymity using zero-knowledge proofs."
+      },
+      "connect_wallet": {
+        "title": "Connect Your Wallet",
+        "description": "First, connect your StarkNet wallet to start using Privacy Pools. We support all major StarkNet wallets."
+      },
+      "make_deposit": {
+        "title": "Make a Deposit",
+        "description": "Deposit tokens into the privacy pool to receive private notes. These notes represent your funds while keeping them completely anonymous."
+      },
+      "withdraw_anonymously": {
+        "title": "Withdraw Anonymously",
+        "description": "Withdraw to any address without revealing the connection to your original deposit. Complete financial privacy guaranteed."
+      },
+      "advanced_features": {
+        "title": "Advanced Features",
+        "description": "Use Transfer to send tokens privately, Merge to combine deposits, or Swap to exchange tokens anonymously."
+      },
+      "getting_started": "Getting Started",
+      "skip": "Skip",
+      "back": "Back",
+      "get_started": "Get Started",
+      "next": "Next",
+      "step_counter": "Step {current} of {total}"
+    },
+    "navbar": {
+      "privacy_pools": "Privacy Pools",
+      "export_tooltip": "Export all operations to JSON",
+      "import_tooltip": "Import operations from JSON",
+      "settings_tooltip": "Settings",
+      "export_operations": "Export operations",
+      "import_operations": "Import operations",
+      "toggle_mobile_menu": "Toggle mobile menu"
+    },
+    "settings": {
+      "theme": {
+        "light": "Light",
+        "dark": "Dark"
+      }
+    },
+    "deposit_page": {
+      "title": "Private Deposit",
+      "subtitle": "Transform your tokens into private notes for enhanced financial privacy",
+      "select_token": "Select Token",
+      "choose_token_placeholder": "Choose your token",
+    "choose_token_filter_placeholder": "Choose token to filter deposits",
+      "deposit_amount": "Deposit Amount",
+      "amount_placeholder": "Enter amount to deposit",
+      "create_deposit_button": "Create Private Deposit",
+      "summary": {
+        "title": "Deposit Summary",
+        "token": "Token:",
+        "amount": "Amount:",
+        "unknown": "Unknown"
+      },
+      "how_it_works": {
+        "title": "How Private Deposits Work",
+        "choose_token": {
+          "title": "Choose Your Token",
+          "description": "Select from supported tokens in your wallet"
+        },
+        "set_amount": {
+          "title": "Set Amount",
+          "description": "Enter the amount you want to deposit privately"
+        },
+        "get_private_note": {
+          "title": "Get Private Note",
+          "description": "Receive a cryptographic note representing your deposit"
+        },
+        "anonymous_withdrawals": {
+          "title": "Anonymous Withdrawals",
+          "description": "Later withdraw to any address with complete privacy"
+        }
+      },
+      "security_features": {
+        "title": "Security Features",
+        "zero_knowledge": "Zero-knowledge proofs protect your privacy",
+        "cryptographic_notes": "Cryptographic notes ensure anonymity",
+        "decentralized": "Decentralized protocol - no central authority",
+        "starknet_security": "StarkNet security and fast finality"
+      },
+      "quick_stats": {
+        "anonymous_percent": "100%",
+        "anonymous_label": "Anonymous",
+        "instant_icon": "⚡",
+        "instant_label": "Instant"
+      }
+    },
+    "merge_page": {
+      "title": "Private Merge",
+      "description": "Combine multiple deposits into one private note for better management",
+      "select_deposits": "Select Deposits to Merge",
+      "selection_mode": "Selection Mode",
+      "first_deposit": "First Deposit",
+      "second_deposit": "Second Deposit",
+      "filter_by_token": "Filter by Token",
+      "choose_token_placeholder": "Choose token to filter deposits",
+      "no_deposits_title": "No Deposits Found",
+      "no_deposits_description": "Deposit funds first to start merging!",
+      "fee_information": "Fee Information",
+      "network_fee": "Network Fee",
+      "fee_deposit": "Fee Deposit",
+      "fee_payment_issue": "Fee Payment Issue",
+      "fee_deposit_auto": "Fee Deposit (Auto-selected)",
+      "execute_merge": "Execute Merge",
+      "merge_summary": "Merge Summary",
+      "combine_deposits": "Combine Deposits",
+      "how_it_works": "How Private Merge Works",
+      "step1_title": "Select Two Deposits",
+      "step1_description": "Choose two deposits of the same token to merge",
+      "step2_title": "Auto-Select Fee",
+      "step2_description": "System automatically selects optimal STRK deposit for fees",
+      "step3_title": "Zero-Knowledge Proof",
+      "step3_description": "Generate cryptographic proof of valid merge",
+      "step4_title": "Merged Note",
+      "step4_description": "Receive single note with combined total amount",
+      "privacy_benefits": "Privacy Benefits",
+      "benefit1": "Consolidate multiple notes privately",
+      "benefit2": "Maintain transaction unlinkability",
+      "benefit3": "Optimize note management",
+      "benefit4": "Zero-knowledge validation",
+      "consolidation": "Consolidation",
+      "private": "Private",
+      "requirements": "Requirements",
+      "requirements_description": "Both deposits must be of the same token type. You will need STRK deposits for transaction fees.",
+      "first_amount": "First Amount",
+      "second_amount": "Second Amount",
+      "combined_total": "Combined Total",
+      "modal": {
+        "title": "Confirm Private Merge",
+        "confirm": "Execute Merge",
+        "cancel": "Cancel",
+        "warning": "This merge operation will combine your two deposits into one private note and cannot be undone."
+      },
+      "toast": {
+        "executing": "⏳ Executing Merge",
+        "ready": "✅ Merge ready!",
+        "failed": "❌ Merge failed"
+      },
+      "errors": {
+        "select_deposits": "Please select both deposits to merge first",
+        "invalid_first_balance": "Invalid first deposit balance",
+        "invalid_second_balance": "Invalid second deposit balance",
+        "same_token_required": "Both merge notes must be for the same token",
+        "fee_exceeds_balance": "Fee ({fee}) exceeds your fee note balance ({balance})",
+        "missing_deposit_amounts": "Cannot calculate refund - missing deposit amounts",
+        "missing_fee_amounts": "Cannot calculate refund - missing fee amounts",
+        "missing_deposits": "Missing fee or merge deposits",
+        "operations_not_found": "One or more operations not found",
+        "insufficient_strk": "Insufficient STRK balance. Required: {amount} STRK",
+        "no_strk_deposits": "No available STRK deposits for fee payment",
+        "fee_load_failed": "Failed to load fee information"
+      }
+    },
+    "pagination": {
+      "type_placeholder": "Type..."
+    },
+    "withdraw_page": {
+      "title": "Private Withdrawal",
+      "subtitle": "Withdraw your private deposits to any address with complete anonymity",
+      "select_deposit": "Select Deposit to Withdraw",
+      "filter_by_token": "Filter by Token",
+      "how_it_works": {
+        "title": "How Private Withdrawals Work",
+        "select_deposit": {
+          "title": "Select Your Deposit",
+          "description": "Choose which private deposit you want to withdraw from"
+        },
+        "set_recipient": {
+          "title": "Set Recipient & Amount",
+          "description": "Specify where to send funds and how much to withdraw"
+        },
+        "zero_knowledge": {
+          "title": "Zero-Knowledge Proof",
+          "description": "System generates proof without revealing your identity"
+        },
+        "anonymous_transfer": {
+          "title": "Anonymous Transfer",
+          "description": "Funds sent with complete privacy and unlinkability"
+        }
+      },
+      "privacy_features": {
+        "title": "Privacy Features",
+        "break_linkability": "Break transaction linkability",
+        "hide_source": "Hide withdrawal source and amount",
+        "fee_handling": "Automatic fee payment handling",
+        "guaranteed_anonymity": "Mathematically guaranteed anonymity"
+      },
+      "stats": {
+        "untraceable": "Untraceable",
+        "fast": "Fast"
+      },
+      "important_notice": "Important",
+      "withdrawal_warning": "Withdrawals are final and cannot be reversed. Double-check recipient address and amount."
+    }
+  },
+  "progress": {
+    "deposit": {
+      "preparation": {
+        "title": "Preparation",
+        "description": "Preparing transaction data"
+      },
+      "wallet_approval": {
+        "title": "Wallet Approval",
+        "description": "Waiting for wallet confirmation"
+      },
+      "onchain_confirmation": {
+        "title": "Onchain Confirmation",
+        "description": "Waiting for blockchain confirmation"
+      }
+    },
+    "withdraw": {
+      "preparation": {
+        "title": "Preparation",
+        "description": "Preparing transaction data"
+      },
+      "proof_generation": {
+        "title": "Proof Generation",
+        "description": "Generating zero-knowledge proof"
+      },
+      "transaction_prepare": {
+        "title": "Transaction Prepare",
+        "description": "Preparing transaction for execution"
+      },
+      "executing_transaction": {
+        "title": "Executing Transaction",
+        "description": "Executing Transaction"
+      },
+      "onchain_confirmation": {
+        "title": "Onchain Confirmation",
+        "description": "Waiting for blockchain confirmation"
+      }
+    },
+    "merge": {
+      "preparation": {
+        "title": "Preparation",
+        "description": "Preparing merge transaction data"
+      },
+      "proof_generation": {
+        "title": "Proof Generation",
+        "description": "Generating zero-knowledge proof for merge"
+      },
+      "transaction_prepare": {
+        "title": "Transaction Prepare",
+        "description": "Preparing merge transaction for execution"
+      },
+      "executing_transaction": {
+        "title": "Executing Transaction",
+        "description": "Executing merge transaction"
+      },
+      "onchain_confirmation": {
+        "title": "Onchain Confirmation",
+        "description": "Waiting for blockchain confirmation"
+      }
+    },
+    "swap": {
+      "preparation": {
+        "title": "Preparation",
+        "description": "Preparing swap transaction data"
+      },
+      "proof_generation": {
+        "title": "Proof Generation",
+        "description": "Generating zero-knowledge proof for swap"
+      },
+      "quote_fetching": {
+        "title": "Quote Fetching",
+        "description": "Fetching swap quote from Ekubo"
+      },
+      "transaction_prepare": {
+        "title": "Transaction Prepare",
+        "description": "Preparing swap transaction for execution"
+      },
+      "executing_transaction": {
+        "title": "Executing Transaction",
+        "description": "Executing swap transaction"
+      },
+      "onchain_confirmation": {
+        "title": "Onchain Confirmation",
+        "description": "Waiting for blockchain confirmation"
+      }
+    },
+    "transfer": {
+      "preparation": {
+        "title": "Preparation",
+        "description": "Preparing transfer transaction data"
+      },
+      "proof_generation": {
+        "title": "Proof Generation",
+        "description": "Generating zero-knowledge proof for transfer"
+      },
+      "transaction_prepare": {
+        "title": "Transaction Prepare",
+        "description": "Preparing transfer transaction for execution"
+      },
+      "executing_transaction": {
+        "title": "Executing Transaction",
+        "description": "Executing transfer transaction"
+      },
+      "onchain_confirmation": {
+        "title": "Onchain Confirmation",
+        "description": "Waiting for blockchain confirmation"
+      }
+    }
+  },
+  "errors": {
+    "validation": {
+      "hex_address": "Must be hex address",
+      "numeric_string": "Must be numeric string",
+      "amount_string": "Amount must be a string",
+      "amount_empty": "Amount cannot be empty",
+      "invalid_amount_format": "Invalid amount format",
+      "invalid_numeric_value": "Invalid numeric value after processing",
+      "amount_positive": "Amount must be positive"
+    },
+    "merge": {
+      "insufficient_strk": "Insufficient STRK balance. Required: {amount} STRK",
+      "no_strk_deposits": "No available STRK deposits for fee payment",
+      "failed_load_fee": "Failed to load fee information"
+    },
+    "general": {
+      "unexpected_error": "Unexpected error occurred",
+      "reload": "Reload"
+    }
+  },
+  "notifications": {
+    "export_success": "Operations successfully exported to JSON.",
+    "export_failed": "Failed to export operations.",
+    "import_success": "Operations successfully imported.",
+    "import_failed": "Failed to import operations. Ensure the file is valid JSON.",
+    "file_read_error": "Error reading the file."
   }
 }

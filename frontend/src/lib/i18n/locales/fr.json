@@ -88,7 +88,24 @@
     "available": "Disponible",
     "pending": "En attente",
     "completed": "Terminé",
-    "failed": "Échoué"
+    "failed": "Échoué",
+    "no_deposits_found": "Aucun dépôt trouvé",
+    "make_deposit_first": "Faites d'abord un dépôt pour commencer à retirer en privé !",
+    "fee_information": "Informations sur les frais",
+    "network_fee": "Frais de réseau",
+    "fee_deposit": "Dépôt de frais",
+    "fee_payment_issue": "Problème de paiement des frais",
+    "withdrawal_deposit": "Dépôt de retrait",
+    "fee_deposit_auto": "Dépôt de frais (Auto-sélectionné)",
+    "withdrawal_details": "Détails du retrait",
+    "enter_recipient_address": "Entrez l'adresse du portefeuille du destinataire",
+    "enter_amount_to_withdraw": "Entrez le montant à retirer",
+    "execute_private_withdrawal": "Exécuter le retrait privé",
+    "confirm_private_withdrawal": "Confirmer le retrait privé",
+    "execute_withdrawal": "Exécuter le retrait",
+    "withdrawal_summary": "Résumé du retrait",
+    "recipient": "Destinataire",
+    "withdrawal_confirmation_text": "Ce retrait sera traité anonymement et ne peut pas être annulé. Veuillez vérifier que tous les détails sont corrects."
   },
   "wallet": {
     "connect": "Connecter le portefeuille",
@@ -146,7 +163,67 @@
     "error": "Erreur de transfert",
     "invalid_note": "Note invalide",
     "same_note_error": "Erreur de note identique",
-    "note_not_found": "Note non trouvée"
+    "note_not_found": "Note non trouvée",
+    "page_title": "Transferts Privés",
+    "page_description": "Transférez des fonds entre notes privées dans le pool de confidentialité avec un anonymat complet",
+    "mode_send": "Envoyer un Transfert",
+    "mode_receive": "Recevoir un Transfert",
+    "send_title": "Envoyer un Transfert Privé",
+    "send_description": "Sélectionnez un dépôt à partir duquel transférer. Le dépôt de frais sera automatiquement sélectionné.",
+    "receive_title": "Recevoir un Transfert Privé",
+    "receive_description": "Générez une note vide pour recevoir des transferts privés d'autres utilisateurs",
+    "filter_by_token": "Filtrer par Jeton",
+    "select_source_deposit": "Sélectionner le Dépôt Source",
+    "no_deposits_title": "Aucun Dépôt Trouvé",
+    "no_deposits_description": "Veuillez d'abord effectuer un dépôt pour commencer à transférer !",
+    "generate_empty_note": "Générer une Note Vide",
+    "your_pending_notes": "Vos Notes en Attente",
+    "recipient_hash": "Hash du Destinataire",
+    "recipient_hash_placeholder": "Entrez le hash de la note du destinataire",
+    "transfer_amount_placeholder": "Montant à transférer",
+    "max": "Max",
+    "execute_transfer": "Exécuter le Transfert",
+    "confirm_transfer": "Confirmer le Transfert",
+    "transfer_summary": "Résumé du Transfert",
+    "transfer_confirmation_text": "Ce transfert détruira votre note source et financera la note du destinataire. Cette action ne peut pas être annulée.",
+    "how_to_receive_title": "Comment Recevoir des Transferts",
+    "how_to_receive_step1": "Générer une Note Vide",
+    "how_to_receive_step1_desc": "Créez une note cryptographique qui peut recevoir des transferts",
+    "how_to_receive_step2": "Partager le Hash de la Note",
+    "how_to_receive_step2_desc": "Envoyez le hash de votre note à la personne qui transfère les fonds",
+    "how_to_receive_step3": "Attendre le Transfert",
+    "how_to_receive_step3_desc": "Votre note sera financée lorsque l'expéditeur terminera le transfert",
+    "how_to_receive_step4": "Récupérer Vos Fonds",
+    "how_to_receive_step4_desc": "Utilisez votre note financée pour des retraits ou d'autres opérations",
+    "privacy_protection_title": "Protection de la Confidentialité",
+    "privacy_feature1": "Génération de notes anonymes",
+    "privacy_feature2": "Aucune connexion à votre identité",
+    "privacy_feature3": "Transferts cryptographiquement sécurisés",
+    "privacy_feature4": "Validation par preuve à connaissance nulle",
+    "how_transfers_work_title": "Comment Fonctionnent les Transferts",
+    "how_transfers_step1": "Sélectionner la Note Source",
+    "how_transfers_step1_desc": "Choisissez de quelle note privée transférer",
+    "how_transfers_step2": "Obtenir le Hash du Destinataire",
+    "how_transfers_step2_desc": "Le destinataire partage le hash de sa note vide avec vous",
+    "how_transfers_step3": "Définir le Montant",
+    "how_transfers_step3_desc": "Spécifiez combien transférer (partiel ou complet)",
+    "how_transfers_step4": "Transfert Anonyme",
+    "how_transfers_step4_desc": "Les notes sont échangées avec des preuves à connaissance nulle",
+    "security_features_title": "Fonctionnalités de Sécurité",
+    "security_feature1": "Anonymat complet de l'expéditeur",
+    "security_feature2": "Aucune connexion on-chain entre les parties",
+    "security_feature3": "Validation cryptographique des notes",
+    "security_feature4": "Gestion automatisée des frais",
+    "stats_private": "100%",
+    "stats_private_label": "Privé",
+    "stats_fast": "⚡",
+    "stats_fast_label": "Rapide",
+    "edit_pending_note": "Modifier la Note en Attente",
+    "edit_note_description": "Spécifiez le jeton et le montant pour cette note en attente",
+    "confirm_edit": "Confirmer la Modification",
+    "copy_full_hex": "Copier le hex complet",
+    "edit_operation": "Modifier l'opération",
+    "abort_operation": "Abandonner l'opération"
   },
   "merge": {
     "title": "Fusion",
@@ -176,6 +253,511 @@
     "error": "Erreur d'échange",
     "high_slippage": "Glissement élevé",
     "insufficient_liquidity": "Liquidité insuffisante",
-    "price_updated": "Prix mis à jour"
+    "price_updated": "Prix mis à jour",
+    "page_title": "Échange de Jetons Privé",
+    "page_description": "Échangez vos notes privées entre différents jetons tout en maintenant un anonymat complet",
+    "select_deposit_title": "Sélectionner le Dépôt à Échanger",
+    "filter_deposits_placeholder": "Filtrer les dépôts par jeton",
+    "no_deposits_title": "Aucun Dépôt Disponible",
+    "no_deposits_description": "Veuillez d'abord effectuer un dépôt pour activer l'échange !",
+    "selected_deposits_title": "Dépôts Sélectionnés",
+    "configure_swap_title": "Configurez Votre Échange",
+    "swap_amount_label": "Montant de l'Échange",
+    "swap_amount_placeholder": "Entrez le montant à échanger",
+    "max": "Max",
+    "receive_token_label": "Jeton à Recevoir",
+    "receive_token_placeholder": "Sélectionnez le jeton à recevoir",
+    "no_available_tokens": "Aucun jeton disponible pour l'échange",
+    "execute_private_swap": "Exécuter l'Échange Privé",
+    "confirm_private_swap": "Confirmer l'Échange Privé",
+    "execute_swap_button": "Exécuter l'Échange",
+    "swap_details": "Détails de l'Échange",
+    "swap_details_description": "Vérifiez votre transaction avant de continuer",
+    "amount_to_swap": "Montant à échanger :",
+    "transaction_fee": "Frais de transaction :",
+    "swap_warning": "Cette transaction consommera vos notes privées sélectionnées et créera de nouvelles notes avec les jetons échangés.",
+    "how_swaps_work_title": "Comment Fonctionnent les Échanges Privés",
+    "how_swaps_step1": "Sélectionner le Dépôt Source",
+    "how_swaps_step1_desc": "Choisissez une note privée à partir de laquelle échanger",
+    "how_swaps_step2": "Définir le Montant et la Cible",
+    "how_swaps_step2_desc": "Spécifiez le montant de l'échange et le jeton souhaité",
+    "how_swaps_step3": "Preuve à Connaissance Nulle",
+    "how_swaps_step3_desc": "Générez une preuve cryptographique d'échange valide",
+    "how_swaps_step4": "Recevoir une Nouvelle Note Privée",
+    "how_swaps_step4_desc": "Obtenez les jetons échangés sous forme de nouvelle note privée",
+    "security_features_title": "Fonctionnalités de Sécurité",
+    "security_feature1": "Échange de jetons anonyme via des preuves ZK",
+    "security_feature2": "Aucune connexion entre la source et la cible",
+    "security_feature3": "Intégration d'échange décentralisé",
+    "security_feature4": "Protection automatisée contre les remboursements",
+    "stats_private_exchange": "🔄",
+    "stats_private_exchange_label": "Échange Privé",
+    "stats_instant_quotes": "⚡",
+    "stats_instant_quotes_label": "Cotations Instantanées",
+    "supported_pairs_title": "Paires de Trading Supportées",
+    "supported_pairs_description": "Tous les échanges sont alimentés par Ekubo DEX pour des taux optimaux et une liquidité profonde. Les paires supportées incluent toutes les combinaisons de jetons majeures du pool de confidentialité."
+  },
+  "features": {
+    "private_deposits": {
+      "title": "Dépôts Privés",
+      "description": "Transformez vos jetons en notes privées grâce aux preuves à connaissance nulle. Vos dépôts deviennent complètement anonymes et intraçables, garantissant une confidentialité financière maximale sur StarkNet.",
+      "how_it_works": [
+        "Connectez votre portefeuille StarkNet au pool de confidentialité",
+        "Sélectionnez le jeton et le montant que vous souhaitez déposer",
+        "Recevez une note cryptographique représentant votre dépôt",
+        "Votre dépôt est maintenant complètement privé et anonyme"
+      ],
+      "benefits": [
+        "🔒 Confidentialité complète des transactions",
+        "🚀 Technologie de preuve à connaissance nulle",
+        "⚡ Transactions StarkNet rapides",
+        "🛡️ Sécurité cryptographique",
+        "🌐 Protocole décentralisé"
+      ],
+      "use_cases": [
+        "Protégez votre confidentialité financière des concurrents",
+        "Empêchez l'analyse et le suivi des transactions",
+        "Sécurisez les grandes transactions contre l'examen public",
+        "Maintenez l'anonymat dans les activités DeFi",
+        "Créez des réserves privées pour un usage futur"
+      ]
+    },
+    "anonymous_withdrawals": {
+      "title": "Retraits Anonymes",
+      "description": "Retirez vos fonds vers n'importe quelle adresse sans révéler la connexion avec votre dépôt initial. En utilisant des preuves à connaissance nulle, prouvez la propriété sans exposer votre identité ou votre historique de transactions.",
+      "how_it_works": [
+        "Sélectionnez votre note privée parmi vos dépôts",
+        "Entrez n'importe quelle adresse de retrait (peut être différente du dépôt)",
+        "Générez une preuve à connaissance nulle de propriété",
+        "Effectuez un retrait anonyme avec une confidentialité totale"
+      ],
+      "benefits": [
+        "🎭 Anonymat complet",
+        "🔄 Retrait vers n'importe quelle adresse",
+        "🛡️ Preuves à connaissance nulle",
+        "⚡ Exécution rapide",
+        "🔒 Aucun lien de transaction"
+      ],
+      "use_cases": [
+        "Retirez vers des adresses nouvelles pour une confidentialité maximale",
+        "Brisez les chaînes de transactions et l'analyse",
+        "Protégez la confidentialité du destinataire",
+        "Évitez les attaques de regroupement d'adresses",
+        "Maintenez la confidentialité financière"
+      ]
+    },
+    "private_note_transfers": {
+      "title": "Transferts de Notes Privées",
+      "description": "Transférez des fonds entre notes privées dans le pool sans révéler l'expéditeur, le destinataire ou le montant. Permettez des transactions peer-to-peer complètement privées en utilisant des notes cryptographiques.",
+      "how_it_works": [
+        "Sélectionnez votre note privée source",
+        "Entrez le hash de la note du destinataire",
+        "Spécifiez le montant du transfert (peut être partiel)",
+        "Exécutez le transfert privé avec une preuve à connaissance nulle"
+      ],
+      "benefits": [
+        "🤝 Transferts privés peer-to-peer",
+        "🔒 Montants et parties cachés",
+        "⚡ Transferts instantanés dans le pool",
+        "💰 Support des montants partiels",
+        "🛡️ Sécurité cryptographique"
+      ],
+      "use_cases": [
+        "Envoyez des paiements sans révéler l'identité",
+        "Transactions commerciales privées",
+        "Donations et contributions anonymes",
+        "Distribution confidentielle de fonds",
+        "Prêts et emprunts privés"
+      ]
+    },
+    "deposit_merging": {
+      "title": "Fusion de Dépôts",
+      "description": "Combinez plusieurs petits dépôts en une seule note plus grande pour améliorer la confidentialité et l'efficacité en gaz. Fusionnez les notes du même jeton pour optimiser votre ensemble de confidentialité et réduire les coûts de transaction.",
+      "how_it_works": [
+        "Sélectionnez plusieurs notes du même jeton",
+        "Vérifiez le montant combiné et les frais",
+        "Générez une preuve à connaissance nulle pour la fusion",
+        "Recevez une seule note privée consolidée"
+      ],
+      "benefits": [
+        "📊 Ensemble de confidentialité amélioré",
+        "⚡ Optimisation du gaz",
+        "🔄 Meilleure gestion des notes",
+        "💰 Frais futurs réduits",
+        "🛡️ Anonymat renforcé"
+      ],
+      "use_cases": [
+        "Consolidez les petits dépôts pour l'efficacité",
+        "Optimisez les coûts en gaz pour les transactions futures",
+        "Améliorez la confidentialité en augmentant la taille des notes",
+        "Simplifiez la gestion des notes",
+        "Préparez-vous pour de gros retraits anonymes"
+      ]
+    },
+    "private_token_swaps": {
+      "title": "Échanges de Jetons Privés",
+      "description": "Échangez un jeton contre un autre tout en maintenant une confidentialité complète. Échangez des jetons via des protocoles DEX intégrés sans révéler votre activité de trading ou vos soldes au public.",
+      "how_it_works": [
+        "Sélectionnez le jeton source parmi vos notes privées",
+        "Choisissez le jeton de destination et le montant",
+        "Obtenez un devis de prix du DEX intégré",
+        "Exécutez l'échange privé avec une preuve à connaissance nulle"
+      ],
+      "benefits": [
+        "🔄 Échanges de jetons privés",
+        "📈 Intégration DEX",
+        "💰 Taux compétitifs",
+        "🔒 Activité de trading cachée",
+        "⚡ Exécution rapide"
+      ],
+      "use_cases": [
+        "Rééquilibrage de portefeuille privé",
+        "Trading d'arbitrage anonyme",
+        "Conversion d'actifs confidentielle",
+        "Stratégies d'investissement cachées",
+        "Gestion de liquidité privée"
+      ]
+    }
+  },
+  "ui": {
+    "modal": {
+      "how_it_works": "Comment ça marche",
+      "key_benefits": "Avantages clés",
+      "use_cases": "Cas d'usage",
+      "start_using": "Commencer à utiliser {feature}",
+      "close": "Fermer"
+    },
+    "onboarding": {
+      "welcome": {
+        "title": "Bienvenue dans Privacy Pools !",
+        "description": "Un protocole de confidentialité décentralisé qui vous permet de déposer, retirer, transférer et échanger des jetons en toute anonymité grâce aux preuves à connaissance nulle."
+      },
+      "connect_wallet": {
+        "title": "Connectez votre portefeuille",
+        "description": "D'abord, connectez votre portefeuille StarkNet pour commencer à utiliser Privacy Pools. Nous supportons tous les principaux portefeuilles StarkNet."
+      },
+      "make_deposit": {
+        "title": "Effectuez un dépôt",
+        "description": "Déposez des jetons dans le pool de confidentialité pour recevoir des notes privées. Ces notes représentent vos fonds tout en les gardant complètement anonymes."
+      },
+      "withdraw_anonymously": {
+        "title": "Retirez anonymement",
+        "description": "Retirez vers n'importe quelle adresse sans révéler la connexion avec votre dépôt initial. Confidentialité financière complète garantie."
+      },
+      "advanced_features": {
+        "title": "Fonctionnalités avancées",
+        "description": "Utilisez Transfer pour envoyer des jetons en privé, Merge pour combiner des dépôts, ou Swap pour échanger des jetons anonymement."
+      },
+      "getting_started": "Commencer",
+      "skip": "Passer",
+      "back": "Retour",
+      "get_started": "Commencer",
+      "next": "Suivant",
+      "step_counter": "Étape {current} sur {total}"
+    },
+    "navbar": {
+      "privacy_pools": "Privacy Pools",
+      "export_tooltip": "Exporter toutes les opérations en JSON",
+      "import_tooltip": "Importer des opérations depuis JSON",
+      "settings_tooltip": "Paramètres",
+      "export_operations": "Exporter les opérations",
+      "import_operations": "Importer les opérations",
+      "toggle_mobile_menu": "Basculer le menu mobile"
+    },
+    "settings": {
+      "theme": {
+        "light": "Clair",
+        "dark": "Sombre"
+      }
+    },
+    "deposit_page": {
+      "title": "Dépôt Privé",
+      "subtitle": "Transformez vos jetons en notes privées pour une confidentialité financière renforcée",
+      "select_token": "Sélectionner le jeton",
+      "choose_token_placeholder": "Choisissez votre jeton",
+      "deposit_amount": "Montant du dépôt",
+      "amount_placeholder": "Entrez le montant à déposer",
+      "create_deposit_button": "Créer un dépôt privé",
+      "summary": {
+        "title": "Résumé du dépôt",
+        "token": "Jeton :",
+        "amount": "Montant :",
+        "unknown": "Inconnu"
+      },
+      "how_it_works": {
+        "title": "Comment fonctionnent les dépôts privés",
+        "choose_token": {
+          "title": "Choisissez votre jeton",
+          "description": "Sélectionnez parmi les jetons supportés dans votre portefeuille"
+        },
+        "set_amount": {
+          "title": "Définissez le montant",
+          "description": "Entrez le montant que vous souhaitez déposer en privé"
+        },
+        "get_private_note": {
+          "title": "Obtenez une note privée",
+          "description": "Recevez une note cryptographique représentant votre dépôt"
+        },
+        "anonymous_withdrawals": {
+          "title": "Retraits anonymes",
+          "description": "Retirez plus tard vers n'importe quelle adresse avec une confidentialité complète"
+        }
+      },
+      "security_features": {
+        "title": "Fonctionnalités de sécurité",
+        "zero_knowledge": "Les preuves à connaissance nulle protègent votre confidentialité",
+        "cryptographic_notes": "Les notes cryptographiques garantissent l'anonymat",
+        "decentralized": "Protocole décentralisé - aucune autorité centrale",
+        "starknet_security": "Sécurité StarkNet et finalité rapide"
+      },
+      "quick_stats": {
+        "anonymous_percent": "100%",
+        "anonymous_label": "Anonyme",
+        "instant_icon": "⚡",
+        "instant_label": "Instantané"
+      }
+    },
+    "merge_page": {
+      "title": "Fusion Privée",
+      "description": "Combinez plusieurs dépôts en une seule note privée pour une meilleure gestion",
+      "select_deposits": "Sélectionner les Dépôts à Fusionner",
+      "selection_mode": "Mode de Sélection",
+      "first_deposit": "Premier Dépôt",
+      "second_deposit": "Deuxième Dépôt",
+      "filter_by_token": "Filtrer par Token",
+      "choose_token_placeholder": "Choisissez un token pour filtrer les dépôts",
+      "no_deposits_title": "Aucun Dépôt Trouvé",
+      "no_deposits_description": "Déposez des fonds d'abord pour commencer à fusionner !",
+      "fee_information": "Informations sur les Frais",
+      "network_fee": "Frais de Réseau",
+      "fee_deposit": "Dépôt de Frais",
+      "fee_payment_issue": "Problème de Paiement des Frais",
+      "fee_deposit_auto": "Dépôt de Frais (Auto-sélectionné)",
+      "execute_merge": "Exécuter la Fusion",
+      "merge_summary": "Résumé de la Fusion",
+      "combine_deposits": "Combiner les Dépôts",
+      "how_it_works": "Comment Fonctionne la Fusion Privée",
+      "step1_title": "Sélectionner Deux Dépôts",
+      "step1_description": "Choisissez deux dépôts du même token à fusionner",
+      "step2_title": "Auto-Sélection des Frais",
+      "step2_description": "Le système sélectionne automatiquement le dépôt STRK optimal pour les frais",
+      "step3_title": "Preuve à Connaissance Nulle",
+      "step3_description": "Générez une preuve cryptographique de fusion valide",
+      "step4_title": "Note Fusionnée",
+      "step4_description": "Recevez une seule note avec le montant total combiné",
+      "privacy_benefits": "Avantages de Confidentialité",
+      "benefit1": "Consolidez plusieurs notes en privé",
+      "benefit2": "Maintenez la non-liabilité des transactions",
+      "benefit3": "Optimisez la gestion des notes",
+      "benefit4": "Validation à connaissance nulle",
+      "consolidation": "Consolidation",
+      "private": "Privé",
+      "requirements": "Exigences",
+      "requirements_description": "Les deux dépôts doivent être du même type de token. Vous aurez besoin de dépôts STRK pour les frais de transaction.",
+      "first_amount": "Premier Montant",
+      "second_amount": "Deuxième Montant",
+      "combined_total": "Total Combiné",
+      "modal": {
+        "title": "Confirmer la Fusion Privée",
+        "confirm": "Exécuter la Fusion",
+        "cancel": "Annuler",
+        "warning": "Cette opération de fusion combinera vos deux dépôts en une seule note privée et ne peut pas être annulée."
+      },
+      "toast": {
+        "executing": "⏳ Exécution de la Fusion",
+        "ready": "✅ Fusion prête !",
+        "failed": "❌ Fusion échouée"
+      },
+      "errors": {
+        "select_deposits": "Veuillez d'abord sélectionner les deux dépôts à fusionner",
+        "invalid_first_balance": "Solde du premier dépôt invalide",
+        "invalid_second_balance": "Solde du deuxième dépôt invalide",
+        "same_token_required": "Les deux notes de fusion doivent être pour le même token",
+        "fee_exceeds_balance": "Les frais ({fee}) dépassent le solde de votre note de frais ({balance})",
+        "missing_deposit_amounts": "Impossible de calculer le remboursement - montants de dépôt manquants",
+        "missing_fee_amounts": "Impossible de calculer le remboursement - montants de frais manquants",
+        "missing_deposits": "Dépôts de frais ou de fusion manquants",
+        "operations_not_found": "Une ou plusieurs opérations non trouvées",
+        "insufficient_strk": "Solde STRK insuffisant. Requis : {amount} STRK",
+        "no_strk_deposits": "Aucun dépôt STRK disponible pour le paiement des frais",
+        "fee_load_failed": "Échec du chargement des informations de frais"
+      }
+    },
+    "pagination": {
+      "type_placeholder": "Tapez..."
+    },
+    "withdraw_page": {
+      "title": "Retrait Privé",
+      "subtitle": "Retirez vos dépôts privés vers n'importe quelle adresse avec un anonymat complet",
+      "select_deposit": "Sélectionner le Dépôt à Retirer",
+      "filter_by_token": "Filtrer par Token",
+      "how_it_works": {
+        "title": "Comment Fonctionnent les Retraits Privés",
+        "select_deposit": {
+          "title": "Sélectionnez Votre Dépôt",
+          "description": "Choisissez quel dépôt privé vous voulez retirer"
+        },
+        "set_recipient": {
+          "title": "Définir le Destinataire et le Montant",
+          "description": "Spécifiez où envoyer les fonds et combien retirer"
+        },
+        "zero_knowledge": {
+          "title": "Preuve à Connaissance Nulle",
+          "description": "Le système génère une preuve sans révéler votre identité"
+        },
+        "anonymous_transfer": {
+          "title": "Transfert Anonyme",
+          "description": "Fonds envoyés avec une confidentialité complète et non reliables"
+        }
+      },
+      "privacy_features": {
+        "title": "Fonctionnalités de Confidentialité",
+        "break_linkability": "Briser la liaison des transactions",
+        "hide_source": "Cacher la source et le montant du retrait",
+        "fee_handling": "Gestion automatique du paiement des frais",
+        "guaranteed_anonymity": "Anonymat mathématiquement garanti"
+      },
+      "stats": {
+        "untraceable": "Intraçable",
+        "fast": "Rapide"
+      },
+      "important_notice": "Important",
+      "withdrawal_warning": "Les retraits sont définitifs et ne peuvent pas être annulés. Vérifiez deux fois l'adresse du destinataire et le montant."
+    }
+  },
+  "progress": {
+    "deposit": {
+      "preparation": {
+        "title": "Préparation",
+        "description": "Préparation des données de transaction"
+      },
+      "wallet_approval": {
+        "title": "Approbation du portefeuille",
+        "description": "En attente de confirmation du portefeuille"
+      },
+      "onchain_confirmation": {
+        "title": "Confirmation on-chain",
+        "description": "En attente de confirmation de la blockchain"
+      }
+    },
+    "withdraw": {
+      "preparation": {
+        "title": "Préparation",
+        "description": "Préparation des données de transaction"
+      },
+      "proof_generation": {
+        "title": "Génération de preuve",
+        "description": "Génération de la preuve à connaissance nulle"
+      },
+      "transaction_prepare": {
+        "title": "Préparation de transaction",
+        "description": "Préparation de la transaction pour l'exécution"
+      },
+      "executing_transaction": {
+        "title": "Exécution de transaction",
+        "description": "Exécution de la transaction"
+      },
+      "onchain_confirmation": {
+        "title": "Confirmation on-chain",
+        "description": "En attente de confirmation de la blockchain"
+      }
+    },
+    "merge": {
+      "preparation": {
+        "title": "Préparation",
+        "description": "Préparation des données de transaction de fusion"
+      },
+      "proof_generation": {
+        "title": "Génération de preuve",
+        "description": "Génération de la preuve à connaissance nulle pour la fusion"
+      },
+      "transaction_prepare": {
+        "title": "Préparation de transaction",
+        "description": "Préparation de la transaction de fusion pour l'exécution"
+      },
+      "executing_transaction": {
+        "title": "Exécution de transaction",
+        "description": "Exécution de la transaction de fusion"
+      },
+      "onchain_confirmation": {
+        "title": "Confirmation on-chain",
+        "description": "En attente de confirmation de la blockchain"
+      }
+    },
+    "swap": {
+      "preparation": {
+        "title": "Préparation",
+        "description": "Préparation des données de transaction d'échange"
+      },
+      "proof_generation": {
+        "title": "Génération de preuve",
+        "description": "Génération de la preuve à connaissance nulle pour l'échange"
+      },
+      "quote_fetching": {
+        "title": "Récupération du devis",
+        "description": "Récupération du devis d'échange depuis Ekubo"
+      },
+      "transaction_prepare": {
+        "title": "Préparation de transaction",
+        "description": "Préparation de la transaction d'échange pour l'exécution"
+      },
+      "executing_transaction": {
+        "title": "Exécution de transaction",
+        "description": "Exécution de la transaction d'échange"
+      },
+      "onchain_confirmation": {
+        "title": "Confirmation on-chain",
+        "description": "En attente de confirmation de la blockchain"
+      }
+    },
+    "transfer": {
+      "preparation": {
+        "title": "Préparation",
+        "description": "Préparation des données de transaction de transfert"
+      },
+      "proof_generation": {
+        "title": "Génération de preuve",
+        "description": "Génération de la preuve à connaissance nulle pour le transfert"
+      },
+      "transaction_prepare": {
+        "title": "Préparation de transaction",
+        "description": "Préparation de la transaction de transfert pour l'exécution"
+      },
+      "executing_transaction": {
+        "title": "Exécution de transaction",
+        "description": "Exécution de la transaction de transfert"
+      },
+      "onchain_confirmation": {
+        "title": "Confirmation on-chain",
+        "description": "En attente de confirmation de la blockchain"
+      }
+    }
+  },
+  "errors": {
+    "validation": {
+      "hex_address": "Doit être une adresse hexadécimale",
+      "numeric_string": "Doit être une chaîne numérique",
+      "amount_string": "Le montant doit être une chaîne",
+      "amount_empty": "Le montant ne peut pas être vide",
+      "invalid_amount_format": "Format de montant invalide",
+      "invalid_numeric_value": "Valeur numérique invalide après traitement",
+      "amount_positive": "Le montant doit être positif"
+    },
+    "merge": {
+      "insufficient_strk": "Solde STRK insuffisant. Requis : {amount} STRK",
+      "no_strk_deposits": "Aucun dépôt STRK disponible pour le paiement des frais",
+      "failed_load_fee": "Échec du chargement des informations de frais"
+    },
+    "general": {
+      "unexpected_error": "Une erreur inattendue s'est produite",
+      "reload": "Recharger"
+    }
+  },
+  "notifications": {
+    "export_success": "Opérations exportées avec succès en JSON.",
+    "export_failed": "Échec de l'exportation des opérations.",
+    "import_success": "Opérations importées avec succès.",
+    "import_failed": "Échec de l'importation des opérations. Assurez-vous que le fichier est un JSON valide.",
+    "file_read_error": "Erreur lors de la lecture du fichier."
   }
 }

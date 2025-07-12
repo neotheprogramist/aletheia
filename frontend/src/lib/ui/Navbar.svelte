@@ -43,13 +43,13 @@
 
 			toastStore.addToast({
 				type: 'success',
-				message: 'Operations successfully exported to JSON.'
+				message: $t('notifications.export_success')
 			});
 		} catch (err) {
 			console.error(err);
 			toastStore.addToast({
 				type: 'error',
-				message: 'Failed to export operations.'
+				message: $t('notifications.export_failed')
 			});
 		}
 	}
@@ -71,13 +71,13 @@
 				await importOperations(text);
 				toastStore.addToast({
 					type: 'success',
-					message: 'Operations successfully imported.'
+					message: $t('notifications.import_success')
 				});
 			} catch (err) {
 				console.error(err);
 				toastStore.addToast({
 					type: 'error',
-					message: 'Failed to import operations. Ensure the file is valid JSON.'
+					message: $t('notifications.import_failed')
 				});
 			} finally {
 				input.value = '';
@@ -87,7 +87,7 @@
 		reader.onerror = () => {
 			toastStore.addToast({
 				type: 'error',
-				message: 'Error reading the file.'
+				message: $t('notifications.file_read_error')
 			});
 			input.value = '';
 		};
@@ -111,7 +111,7 @@
 				<div class="relative">
 					<img
 						src="/logo.svg"
-						alt="Privacy Pools"
+						alt="{$t('ui.navbar.privacy_pools')}"
 						class="h-6 w-6 transition-transform duration-200 group-hover:scale-110 sm:h-8 sm:w-8"
 					/>
 					<div
@@ -120,7 +120,7 @@
 				</div>
 				<span
 					class="hidden bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent md:block"
-					>Privacy Pools</span
+					>{$t('ui.navbar.privacy_pools')}</span
 				>
 			</a>
 
@@ -143,7 +143,7 @@
 					<div class="flex items-center gap-2">
 						<button
 							class="rounded-lg p-2 text-text-secondary hover:text-primary hover:bg-surface hover:scale-110 transition-all duration-300 ease-in-out"
-							title="Export all operations to JSON"
+							title="{$t('ui.navbar.export_tooltip')}"
 							on:click={handleExport}
 						>
 							<Download size={18} />
@@ -151,7 +151,7 @@
 
 						<button
 							class="rounded-lg p-2 text-text-secondary hover:text-primary hover:bg-surface hover:scale-110 transition-all duration-300 ease-in-out"
-							title="Import operations from JSON"
+							title="{$t('ui.navbar.import_tooltip')}"
 							on:click={openFilePicker}
 						>
 							<Upload size={18} />
@@ -165,7 +165,7 @@
 					{/if}
 					<button
 						class="rounded-lg p-2 text-text-secondary hover:text-primary hover:bg-surface hover:scale-110 transition-all duration-300 ease-in-out"
-						title="Settings"
+						title="{$t('ui.navbar.settings_tooltip')}"
 						on:click={toggleSettings}
 					>
 						<Settings size={18} />
@@ -178,7 +178,7 @@
 				<button
 					class="mobile-menu-button rounded-lg p-2 text-text hover:bg-surface hover:scale-110 transition-all duration-300 ease-in-out"
 					on:click={toggleMobileMenu}
-					aria-label="Toggle mobile menu"
+					aria-label="{$t('ui.navbar.toggle_mobile_menu')}"
 				>
 					{#if showMobileMenu}
 						<X size={18} />
@@ -217,14 +217,14 @@
 						<div class="border-t border-border pt-3 mt-3 flex justify-center gap-4">
 							<button
 								class="rounded-lg p-3 text-text hover:bg-surface hover:scale-110 transition-all duration-300 ease-in-out"
-								title="Export operations"
+								title="{$t('ui.navbar.export_operations')}"
 								on:click={handleExport}
 							>
 								<Download size={20} />
 							</button>
 							<button
 								class="rounded-lg p-3 text-text hover:bg-surface hover:scale-110 transition-all duration-300 ease-in-out"
-								title="Import operations"
+								title="{$t('ui.navbar.import_operations')}"
 								on:click={openFilePicker}
 							>
 								<Upload size={20} />
