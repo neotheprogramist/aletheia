@@ -61,6 +61,7 @@
 		progressModalActions,
 		transferProgressSteps
 	} from '$lib/stores/progressModal';
+	import { t } from '$lib/i18n';
 
 	// --- VIEW & TRANSFER STATE ---
 	let viewMode: 'sender' | 'recipient' = 'sender';
@@ -613,11 +614,11 @@
 					<h1
 						class="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl"
 					>
-						Private Transfers
+						{$t('transfer.page_title')}
 					</h1>
 				</div>
 				<p class="text-text-secondary mx-auto max-w-3xl text-lg">
-					Transfer funds between private notes within the privacy pool with complete anonymity
+					{$t('transfer.page_description')}
 				</p>
 			</div>
 
@@ -626,8 +627,8 @@
 				<div class="rounded-xl bg-white/80 p-1 shadow-lg backdrop-blur-sm dark:bg-gray-800/80">
 					<SelectionToggle
 						options={[
-							{ label: 'Send Transfer', value: 'sender', isFirst: true },
-							{ label: 'Receive Transfer', value: 'recipient', isLast: true }
+							{ label: $t('transfer.mode_send'), value: 'sender', isFirst: true },
+							{ label: $t('transfer.mode_receive'), value: 'recipient', isLast: true }
 						]}
 						selected={viewMode}
 						onChange={(v) => (viewMode = v as 'sender' | 'recipient')}
@@ -648,9 +649,9 @@
 									>
 										<UserCheck class="h-8 w-8" />
 									</div>
-									<h2 class="text-text mb-2 text-2xl font-bold">Receive Private Transfer</h2>
+									<h2 class="text-text mb-2 text-2xl font-bold">{$t('transfer.receive_title')}</h2>
 									<p class="text-text-secondary">
-										Generate an empty note to receive private transfers from other users
+										{$t('transfer.receive_description')}
 									</p>
 								</div>
 
@@ -658,7 +659,7 @@
 									<div class="space-y-4">
 										<h3 class="text-text flex items-center gap-2 text-lg font-semibold">
 											<Hash class="h-5 w-5 text-blue-500" />
-											Your Pending Notes
+											{$t('transfer.your_pending_notes')}
 										</h3>
 										<PaginatedTable
 											columns={defaultPendingDepositColumns}
@@ -672,7 +673,7 @@
 
 								<form on:submit|preventDefault={generateEmptyOperaition} class="space-y-4">
 									<Button
-										text="Generate Empty Note"
+										text={$t('transfer.generate_empty_note')}
 										loading={isLoading}
 										type="submit"
 										class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
@@ -689,7 +690,7 @@
 							<div class="space-y-4">
 								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 									<Users class="h-5 w-5 text-cyan-500" />
-									How to Receive Transfers
+									{$t('transfer.how_to_receive_title')}
 								</h3>
 								<div class="space-y-4">
 									<div class="flex items-start gap-3">
@@ -699,9 +700,9 @@
 											1
 										</div>
 										<div>
-											<p class="text-text font-medium">Generate Empty Note</p>
+											<p class="text-text font-medium">{$t('transfer.how_to_receive_step1')}</p>
 											<p class="text-text-secondary text-sm">
-												Create a cryptographic note that can receive transfers
+												{$t('transfer.how_to_receive_step1_desc')}
 											</p>
 										</div>
 									</div>
@@ -712,9 +713,9 @@
 											2
 										</div>
 										<div>
-											<p class="text-text font-medium">Share Note Hash</p>
+											<p class="text-text font-medium">{$t('transfer.how_to_receive_step2')}</p>
 											<p class="text-text-secondary text-sm">
-												Send your note hash to the person transferring funds
+												{$t('transfer.how_to_receive_step2_desc')}
 											</p>
 										</div>
 									</div>
@@ -725,9 +726,9 @@
 											3
 										</div>
 										<div>
-											<p class="text-text font-medium">Wait for Transfer</p>
+											<p class="text-text font-medium">{$t('transfer.how_to_receive_step3')}</p>
 											<p class="text-text-secondary text-sm">
-												Your note will be funded when sender completes transfer
+												{$t('transfer.how_to_receive_step3_desc')}
 											</p>
 										</div>
 									</div>
@@ -738,9 +739,9 @@
 											4
 										</div>
 										<div>
-											<p class="text-text font-medium">Claim Your Funds</p>
+											<p class="text-text font-medium">{$t('transfer.how_to_receive_step4')}</p>
 											<p class="text-text-secondary text-sm">
-												Use your funded note for withdrawals or other operations
+												{$t('transfer.how_to_receive_step4_desc')}
 											</p>
 										</div>
 									</div>
@@ -755,29 +756,24 @@
 							<div class="space-y-4">
 								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 									<Shield class="h-5 w-5 text-cyan-500" />
-									Privacy Protection
+									{$t('transfer.privacy_protection_title')}
 								</h3>
 								<div class="space-y-3">
 									<div class="flex items-center gap-3">
 										<CheckCircle class="h-5 w-5 text-cyan-500" />
-										<span class="text-text text-sm font-medium">Anonymous note generation</span>
+										<span class="text-text text-sm font-medium">{$t('transfer.privacy_feature1')}</span>
 									</div>
 									<div class="flex items-center gap-3">
 										<CheckCircle class="h-5 w-5 text-cyan-500" />
-										<span class="text-text text-sm font-medium">No connection to your identity</span
-										>
+										<span class="text-text text-sm font-medium">{$t('transfer.privacy_feature2')}</span>
 									</div>
 									<div class="flex items-center gap-3">
 										<CheckCircle class="h-5 w-5 text-cyan-500" />
-										<span class="text-text text-sm font-medium"
-											>Cryptographically secure transfers</span
-										>
+										<span class="text-text text-sm font-medium">{$t('transfer.privacy_feature3')}</span>
 									</div>
 									<div class="flex items-center gap-3">
 										<CheckCircle class="h-5 w-5 text-cyan-500" />
-										<span class="text-text text-sm font-medium"
-											>Zero-knowledge proof validation</span
-										>
+										<span class="text-text text-sm font-medium">{$t('transfer.privacy_feature4')}</span>
 									</div>
 								</div>
 							</div>
@@ -797,9 +793,9 @@
 									>
 										<Send class="h-8 w-8" />
 									</div>
-									<h2 class="text-text mb-2 text-2xl font-bold">Send Private Transfer</h2>
+									<h2 class="text-text mb-2 text-2xl font-bold">{$t('transfer.send_title')}</h2>
 									<p class="text-text-secondary">
-										Select a deposit to transfer from. Fee deposit will be automatically selected.
+										{$t('transfer.send_description')}
 									</p>
 								</div>
 
@@ -807,12 +803,12 @@
 								<div class="space-y-3">
 									<label class="text-text flex items-center gap-2 text-sm font-semibold">
 										<CreditCard class="h-4 w-4" />
-										Filter by Token
+										{$t('transfer.filter_by_token')}
 									</label>
 									<TokenSelect
 										tokens={$tokens}
 										bind:value={$selectedToken}
-										placeholder="Choose token to filter deposits"
+										placeholder={$t('ui.deposit_page.choose_token_filter_placeholder')}
 										class_="w-full"
 									/>
 								</div>
@@ -821,16 +817,16 @@
 								{#if !deposits.length}
 									<div class="py-8 text-center">
 										<Eye class="mx-auto mb-4 h-12 w-12 text-gray-400" />
-										<h3 class="text-text mb-2 text-lg font-medium">No Deposits Found</h3>
+										<h3 class="text-text mb-2 text-lg font-medium">{$t('transfer.no_deposits_title')}</h3>
 										<p class="text-text-secondary">
-											Please make a deposit first to start transferring!
+											{$t('transfer.no_deposits_description')}
 										</p>
 									</div>
 								{:else}
 									<div class="space-y-4">
 										<h3 class="text-text flex items-center gap-2 text-lg font-semibold">
 											<ArrowUpDown class="h-5 w-5 text-blue-500" />
-											Select Source Deposit
+											{$t('transfer.select_source_deposit')}
 										</h3>
 										<PaginatedTable
 											columns={defaultDepositColumns}
@@ -954,7 +950,7 @@
 							<div class="space-y-4">
 								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 									<Zap class="h-5 w-5 text-blue-500" />
-									How Transfers Work
+									{$t('transfer.how_transfers_work_title')}
 								</h3>
 								<div class="space-y-4">
 									<div class="flex items-start gap-3">
@@ -964,9 +960,9 @@
 											1
 										</div>
 										<div>
-											<p class="text-text font-medium">Select Source Note</p>
+											<p class="text-text font-medium">{$t('transfer.how_transfers_step1')}</p>
 											<p class="text-text-secondary text-sm">
-												Choose which private note to transfer from
+												{$t('transfer.how_transfers_step1_desc')}
 											</p>
 										</div>
 									</div>
@@ -977,9 +973,9 @@
 											2
 										</div>
 										<div>
-											<p class="text-text font-medium">Get Recipient Hash</p>
+											<p class="text-text font-medium">{$t('transfer.how_transfers_step2')}</p>
 											<p class="text-text-secondary text-sm">
-												Recipient shares their empty note hash with you
+												{$t('transfer.how_transfers_step2_desc')}
 											</p>
 										</div>
 									</div>
@@ -990,9 +986,9 @@
 											3
 										</div>
 										<div>
-											<p class="text-text font-medium">Set Amount</p>
+											<p class="text-text font-medium">{$t('transfer.how_transfers_step3')}</p>
 											<p class="text-text-secondary text-sm">
-												Specify how much to transfer (partial or full)
+												{$t('transfer.how_transfers_step3_desc')}
 											</p>
 										</div>
 									</div>
@@ -1003,9 +999,9 @@
 											4
 										</div>
 										<div>
-											<p class="text-text font-medium">Anonymous Transfer</p>
+											<p class="text-text font-medium">{$t('transfer.how_transfers_step4')}</p>
 											<p class="text-text-secondary text-sm">
-												Notes are swapped with zero-knowledge proofs
+												{$t('transfer.how_transfers_step4_desc')}
 											</p>
 										</div>
 									</div>
@@ -1020,26 +1016,24 @@
 							<div class="space-y-4">
 								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 									<Lock class="h-5 w-5 text-blue-500" />
-									Security Features
+									{$t('transfer.security_features_title')}
 								</h3>
 								<div class="space-y-3">
 									<div class="flex items-center gap-3">
 										<CheckCircle class="h-5 w-5 text-blue-500" />
-										<span class="text-text text-sm font-medium">Complete sender anonymity</span>
+										<span class="text-text text-sm font-medium">{$t('transfer.security_feature1')}</span>
 									</div>
 									<div class="flex items-center gap-3">
 										<CheckCircle class="h-5 w-5 text-blue-500" />
-										<span class="text-text text-sm font-medium"
-											>No on-chain connection between parties</span
-										>
+										<span class="text-text text-sm font-medium">{$t('transfer.security_feature2')}</span>
 									</div>
 									<div class="flex items-center gap-3">
 										<CheckCircle class="h-5 w-5 text-blue-500" />
-										<span class="text-text text-sm font-medium">Cryptographic note validation</span>
+										<span class="text-text text-sm font-medium">{$t('transfer.security_feature3')}</span>
 									</div>
 									<div class="flex items-center gap-3">
 										<CheckCircle class="h-5 w-5 text-blue-500" />
-										<span class="text-text text-sm font-medium">Automated fee handling</span>
+										<span class="text-text text-sm font-medium">{$t('transfer.security_feature4')}</span>
 									</div>
 								</div>
 							</div>
@@ -1051,16 +1045,16 @@
 								class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
 							>
 								<div class="space-y-2">
-									<div class="text-2xl font-bold text-blue-500">100%</div>
-									<div class="text-text-secondary text-sm">Private</div>
+									<div class="text-2xl font-bold text-blue-500">{$t('transfer.stats_private')}</div>
+									<div class="text-text-secondary text-sm">{$t('transfer.stats_private_label')}</div>
 								</div>
 							</Card>
 							<Card
 								class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
 							>
 								<div class="space-y-2">
-									<div class="text-2xl font-bold text-cyan-500">⚡</div>
-									<div class="text-text-secondary text-sm">Fast</div>
+									<div class="text-2xl font-bold text-cyan-500">{$t('transfer.stats_fast')}</div>
+									<div class="text-text-secondary text-sm">{$t('transfer.stats_fast_label')}</div>
 								</div>
 							</Card>
 						</div>
@@ -1073,9 +1067,9 @@
 	<!-- Confirmation Modal -->
 	<Modal
 		show={showFeeModal}
-		title="Confirm Transfer"
-		confirmText="Execute Transfer"
-		cancelText="Cancel"
+		title={$t('transfer.confirm_transfer')}
+		confirmText={$t('transfer.execute_transfer')}
+		cancelText={$t('common.cancel')}
 		closeOnOutsideClick={false}
 		onConfirm={confirmTransfer}
 		onCancel={() => {
@@ -1091,21 +1085,20 @@
 			<div
 				class="rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 p-4 dark:from-blue-900/20 dark:to-cyan-900/20"
 			>
-				<h3 class="text-text mb-2 font-semibold">Transfer Summary</h3>
+				<h3 class="text-text mb-2 font-semibold">{$t('transfer.transfer_summary')}</h3>
 				<div class="space-y-2 text-sm">
 					<div class="flex justify-between">
-						<span class="text-text-secondary">Amount:</span>
+						<span class="text-text-secondary">{$t('common.amount')}:</span>
 						<span class="text-text font-medium">{transferAmount} tokens</span>
 					</div>
 					<div class="flex justify-between">
-						<span class="text-text-secondary">Fee:</span>
+						<span class="text-text-secondary">{$t('common.fee')}:</span>
 						<span class="text-text font-medium">{feeWeiHex} STRK</span>
 					</div>
 				</div>
 			</div>
 			<p class="text-text-secondary text-sm">
-				This transfer will destroy your source note and fund the recipient's note. This action
-				cannot be reversed.
+				{$t('transfer.transfer_confirmation_text')}
 			</p>
 		</div>
 	</Modal>
@@ -1122,9 +1115,9 @@
 <!-- Edit Modal -->
 <Modal
 	show={showEditModal}
-	title="Edit Pending Note"
-	confirmText="Confirm Edit"
-	cancelText="Cancel"
+	title={$t('transfer.edit_pending_note')}
+	confirmText={$t('transfer.confirm_edit')}
+	cancelText={$t('common.cancel')}
 	closeOnOutsideClick={false}
 	onConfirm={onConfirmEdit}
 	onCancel={onCancelEdit}

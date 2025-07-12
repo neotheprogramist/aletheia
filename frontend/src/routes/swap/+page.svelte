@@ -59,6 +59,7 @@
 		Coins,
 		BarChart3
 	} from 'lucide-svelte';
+	import { t } from '$lib/i18n';
 
 	const STRK_ADDRESS = supportedTokens[0].address;
 
@@ -542,11 +543,11 @@
 					<h1
 						class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl"
 					>
-						Private Token Swap
+						{$t('swap.page_title')}
 					</h1>
 				</div>
 				<p class="text-text-secondary mx-auto max-w-2xl text-lg">
-					Exchange your private notes between different tokens while maintaining complete anonymity
+					{$t('swap.page_description')}
 				</p>
 			</div>
 
@@ -558,13 +559,13 @@
 						<div class="space-y-6">
 							<div class="mb-4 flex items-center gap-3">
 								<Coins class="h-5 w-5 text-indigo-500" />
-								<h3 class="text-text text-xl font-bold">Select Deposit to Swap</h3>
+								<h3 class="text-text text-xl font-bold">{$t('swap.select_deposit_title')}</h3>
 							</div>
 
 							<TokenSelect
 								tokens={$tokens}
 								bind:value={$selectedToken}
-								placeholder="Filter deposits by token"
+								placeholder={$t('swap.filter_deposits_placeholder')}
 								class_="w-full"
 							/>
 
@@ -575,8 +576,8 @@
 									>
 										<Shuffle class="h-8 w-8 text-indigo-500" />
 									</div>
-									<h3 class="text-text mb-2 text-lg font-semibold">No Deposits Available</h3>
-									<p class="text-text-secondary">Please make a deposit first to enable swapping!</p>
+									<h3 class="text-text mb-2 text-lg font-semibold">{$t('swap.no_deposits_title')}</h3>
+									<p class="text-text-secondary">{$t('swap.no_deposits_description')}</p>
 								</div>
 							{:else}
 								<div
@@ -646,7 +647,7 @@
 							<div class="space-y-4">
 								<div class="mb-4 flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-green-500" />
-									<h3 class="text-text text-xl font-bold">Selected Deposits</h3>
+									<h3 class="text-text text-xl font-bold">{$t('swap.selected_deposits_title')}</h3>
 								</div>
 								<SelectedDeposits
 									items={[
@@ -666,7 +667,7 @@
 							<div class="space-y-6">
 								<div class="mb-4 flex items-center gap-3">
 									<RefreshCw class="h-5 w-5 text-indigo-500" />
-									<h3 class="text-text text-xl font-bold">Configure Your Swap</h3>
+									<h3 class="text-text text-xl font-bold">{$t('swap.configure_swap_title')}</h3>
 								</div>
 
 								<form on:submit|preventDefault={initiateSwap} class="space-y-6">
@@ -674,13 +675,13 @@
 									<div class="space-y-3">
 										<label class="text-text flex items-center gap-2 text-sm font-semibold">
 											<ArrowRight class="h-4 w-4" />
-											Swap Amount
+											{$t('swap.swap_amount_label')}
 										</label>
 										<div class="flex gap-2">
 											<Input
 												bind:value={swapAmount}
 												required
-												placeholder="Enter amount to swap"
+												placeholder={$t('swap.swap_amount_placeholder')}
 												class_="flex-1 text-lg font-medium"
 											/>
 											<button
@@ -692,7 +693,7 @@
 													}
 												}}
 											>
-												Max
+												{$t('swap.max')}
 											</button>
 										</div>
 									</div>
@@ -741,7 +742,7 @@
 						<div class="space-y-4">
 							<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 								<Zap class="h-5 w-5 text-indigo-500" />
-								How Private Swaps Work
+								{$t('swap.how_swaps_work_title')}
 							</h3>
 							<div class="space-y-4">
 								<div class="flex items-start gap-3">
@@ -751,8 +752,8 @@
 										1
 									</div>
 									<div>
-										<p class="text-text font-medium">Select Source Deposit</p>
-										<p class="text-text-secondary text-sm">Choose a private note to swap from</p>
+										<p class="text-text font-medium">{$t('swap.how_swaps_step1')}</p>
+										<p class="text-text-secondary text-sm">{$t('swap.how_swaps_step1_desc')}</p>
 									</div>
 								</div>
 								<div class="flex items-start gap-3">
@@ -762,8 +763,8 @@
 										2
 									</div>
 									<div>
-										<p class="text-text font-medium">Set Amount & Target</p>
-										<p class="text-text-secondary text-sm">Specify swap amount and desired token</p>
+										<p class="text-text font-medium">{$t('swap.how_swaps_step2')}</p>
+										<p class="text-text-secondary text-sm">{$t('swap.how_swaps_step2_desc')}</p>
 									</div>
 								</div>
 								<div class="flex items-start gap-3">
@@ -773,9 +774,9 @@
 										3
 									</div>
 									<div>
-										<p class="text-text font-medium">Zero-Knowledge Proof</p>
+										<p class="text-text font-medium">{$t('swap.how_swaps_step3')}</p>
 										<p class="text-text-secondary text-sm">
-											Generate cryptographic proof of valid swap
+											{$t('swap.how_swaps_step3_desc')}
 										</p>
 									</div>
 								</div>
@@ -786,9 +787,9 @@
 										4
 									</div>
 									<div>
-										<p class="text-text font-medium">Receive New Private Note</p>
+										<p class="text-text font-medium">{$t('swap.how_swaps_step4')}</p>
 										<p class="text-text-secondary text-sm">
-											Get swapped tokens as a new private note
+											{$t('swap.how_swaps_step4_desc')}
 										</p>
 									</div>
 								</div>
@@ -803,30 +804,24 @@
 						<div class="space-y-4">
 							<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 								<Lock class="h-5 w-5 text-purple-500" />
-								Security Features
+								{$t('swap.security_features_title')}
 							</h3>
 							<div class="space-y-3">
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-purple-500" />
-									<span class="text-text text-sm font-medium"
-										>Anonymous token exchange via ZK proofs</span
-									>
+									<span class="text-text text-sm font-medium">{$t('swap.security_feature1')}</span>
 								</div>
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-purple-500" />
-									<span class="text-text text-sm font-medium"
-										>No connection between source and target</span
-									>
+									<span class="text-text text-sm font-medium">{$t('swap.security_feature2')}</span>
 								</div>
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-purple-500" />
-									<span class="text-text text-sm font-medium"
-										>Decentralized exchange integration</span
-									>
+									<span class="text-text text-sm font-medium">{$t('swap.security_feature3')}</span>
 								</div>
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-purple-500" />
-									<span class="text-text text-sm font-medium">Automated refund protection</span>
+									<span class="text-text text-sm font-medium">{$t('swap.security_feature4')}</span>
 								</div>
 							</div>
 						</div>
@@ -838,16 +833,16 @@
 							class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
 						>
 							<div class="space-y-2">
-								<div class="text-2xl font-bold text-indigo-500">🔄</div>
-								<div class="text-text-secondary text-sm">Private Exchange</div>
+								<div class="text-2xl font-bold text-indigo-500">{$t('swap.stats_private_exchange')}</div>
+								<div class="text-text-secondary text-sm">{$t('swap.stats_private_exchange_label')}</div>
 							</div>
 						</Card>
 						<Card
 							class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
 						>
 							<div class="space-y-2">
-								<div class="text-2xl font-bold text-purple-500">⚡</div>
-								<div class="text-text-secondary text-sm">Instant Quotes</div>
+								<div class="text-2xl font-bold text-purple-500">{$t('swap.stats_instant_quotes')}</div>
+								<div class="text-text-secondary text-sm">{$t('swap.stats_instant_quotes_label')}</div>
 							</div>
 						</Card>
 					</div>
@@ -859,11 +854,10 @@
 						<div class="space-y-3">
 							<h4 class="text-text flex items-center gap-2 font-semibold">
 								<BarChart3 class="h-4 w-4 text-indigo-500" />
-								Supported Trading Pairs
+								{$t('swap.supported_pairs_title')}
 							</h4>
 							<p class="text-text-secondary text-sm">
-								All swaps are powered by Ekubo DEX for optimal rates and deep liquidity. Supported
-								pairs include all major token combinations in the privacy pool.
+								{$t('swap.supported_pairs_description')}
 							</p>
 						</div>
 					</Card>
@@ -875,9 +869,9 @@
 	<!-- Modal Confirm -->
 	<Modal
 		show={showFeeModal}
-		title="Confirm Private Swap"
-		confirmText="Execute Swap"
-		cancelText="Cancel"
+		title={$t('swap.confirm_private_swap')}
+		confirmText={$t('swap.execute_swap_button')}
+		cancelText={$t('common.cancel')}
 		closeOnOutsideClick={false}
 		onConfirm={confirmSwap}
 		onCancel={() => {
@@ -895,17 +889,17 @@
 			>
 				<ArrowRightLeft class="h-5 w-5 text-indigo-500" />
 				<div>
-					<p class="text-text font-medium">Swap Details</p>
-					<p class="text-text-secondary text-sm">Review your transaction before proceeding</p>
+					<p class="text-text font-medium">{$t('swap.swap_details')}</p>
+					<p class="text-text-secondary text-sm">{$t('swap.swap_details_description')}</p>
 				</div>
 			</div>
 			<div class="space-y-2">
 				<p class="text-text text-sm">
-					<strong>Amount to swap:</strong>
+					<strong>{$t('swap.amount_to_swap')}</strong>
 					<span class="font-mono text-indigo-600 dark:text-indigo-400">{swapAmount}</span> tokens
 				</p>
 				<p class="text-text text-sm">
-					<strong>Transaction fee:</strong>
+					<strong>{$t('swap.transaction_fee')}</strong>
 					<span class="font-mono text-purple-600 dark:text-purple-400">{feeWeiHex}</span> STRK
 				</p>
 			</div>
@@ -913,8 +907,7 @@
 				class="rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-800 dark:bg-yellow-900/20"
 			>
 				<p class="text-sm text-yellow-800 dark:text-yellow-400">
-					This transaction will consume your selected private notes and create new ones with the
-					swapped tokens.
+					{$t('swap.swap_warning')}
 				</p>
 			</div>
 		</div>
