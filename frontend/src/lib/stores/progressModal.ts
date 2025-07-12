@@ -53,161 +53,162 @@ export const progressModalActions = {
 	}
 };
 
-export const depositProgressSteps: ProgressStep[] = [
+export const depositProgressSteps = (t: any): ProgressStep[] => [
 	{
 		id: 'preparation',
-		title: 'Preparation',
-		description: 'Preparing transaction data',
+		title: t('progress_modal.deposit.preparation.title'),
+		description: t('progress_modal.deposit.preparation.description'),
 		status: 'pending'
 	},
 	{
 		id: 'wallet-approval',
-		title: 'Wallet Approval',
-		description: 'Waiting for wallet confirmation',
+		title: t('progress_modal.deposit.wallet_approval.title'),
+		description: t('progress_modal.deposit.wallet_approval.description'),
 		status: 'pending'
 	},
 	{
 		id: 'onchain-confirmation',
-		title: 'Onchain Confirmation',
-		description: 'Waiting for blockchain confirmation',
+		title: t('progress_modal.deposit.onchain_confirmation.title'),
+		description: t('progress_modal.deposit.onchain_confirmation.description'),
 		status: 'pending'
 	}
 ];
 
-export const withdrawProgressSteps: ProgressStep[] = [
+export const withdrawProgressSteps = (t: any): ProgressStep[] => [
 	{
 		id: 'preparation',
-		title: 'Preparation',
-		description: 'Preparing transaction data',
+		title: t('progress_modal.withdraw.preparation.title'),
+		description: t('progress_modal.withdraw.preparation.description'),
 		status: 'pending'
 	},
 	{
 		id: 'proof-generation',
-		title: 'Proof Generation',
-		description: 'Generating zero-knowledge proof',
+		title: t('progress_modal.withdraw.proof_generation.title'),
+		description: t('progress_modal.withdraw.proof_generation.description'),
 		status: 'pending'
 	},
 	{
 		id: 'transaction-prepare',
-		title: 'Transaction Prepare',
-		description: 'Preparing transaction for execution',
+		title: t('progress_modal.withdraw.transaction_prepare.title'),
+		description: t('progress_modal.withdraw.transaction_prepare.description'),
 		status: 'pending'
 	},
 	{
 		id: 'executing-transaction',
-		title: 'Executing Transaction',
-		description: 'Executing Transaction',
+		title: t('progress_modal.withdraw.executing_transaction.title'),
+		description: t('progress_modal.withdraw.executing_transaction.description'),
 		status: 'pending'
 	},
 	{
 		id: 'onchain-confirmation',
-		title: 'Onchain Confirmation',
-		description: 'Waiting for blockchain confirmation',
+		title: t('progress_modal.withdraw.onchain_confirmation.title'),
+		description: t('progress_modal.withdraw.onchain_confirmation.description'),
 		status: 'pending'
 	}
 ];
 
-export const mergeProgressSteps: ProgressStep[] = [
+export const mergeProgressSteps = (t: any): ProgressStep[] => [
 	{
 		id: 'preparation',
-		title: 'Preparation',
-		description: 'Preparing merge transaction data',
+		title: t('progress_modal.merge.preparation.title'),
+		description: t('progress_modal.merge.preparation.description'),
 		status: 'pending'
 	},
 	{
 		id: 'proof-generation',
-		title: 'Proof Generation',
-		description: 'Generating zero-knowledge proof for merge',
+		title: t('progress_modal.merge.proof_generation.title'),
+		description: t('progress_modal.merge.proof_generation.description'),
 		status: 'pending'
 	},
 	{
 		id: 'transaction-prepare',
-		title: 'Transaction Prepare',
-		description: 'Preparing merge transaction for execution',
+		title: t('progress_modal.merge.transaction_prepare.title'),
+		description: t('progress_modal.merge.transaction_prepare.description'),
 		status: 'pending'
 	},
 	{
 		id: 'executing-transaction',
-		title: 'Executing Transaction',
-		description: 'Executing merge transaction',
+		title: t('progress_modal.merge.executing_transaction.title'),
+		description: t('progress_modal.merge.executing_transaction.description'),
 		status: 'pending'
 	},
 	{
 		id: 'onchain-confirmation',
-		title: 'Onchain Confirmation',
-		description: 'Waiting for blockchain confirmation',
+		title: t('progress_modal.merge.onchain_confirmation.title'),
+		description: t('progress_modal.merge.onchain_confirmation.description'),
 		status: 'pending'
 	}
 ];
 
-export const swapProgressSteps: ProgressStep[] = [
+export const swapProgressSteps = (t: any): ProgressStep[] => [
 	{
 		id: 'preparation',
-		title: 'Preparation',
-		description: 'Preparing swap transaction data',
+		title: t('progress_modal.swap.preparation.title'),
+		description: t('progress_modal.swap.preparation.description'),
 		status: 'pending'
 	},
 	{
 		id: 'proof-generation',
-		title: 'Proof Generation',
-		description: 'Generating zero-knowledge proof for swap',
+		title: t('progress_modal.swap.proof_generation.title'),
+		description: t('progress_modal.swap.proof_generation.description'),
 		status: 'pending'
 	},
 	{
 		id: 'quote-fetching',
-		title: 'Quote Fetching',
-		description: 'Fetching swap quote from Ekubo',
+		title: t('progress_modal.swap.quote_fetching.title'),
+		description: t('progress_modal.swap.quote_fetching.description'),
 		status: 'pending'
 	},
 	{
 		id: 'transaction-prepare',
-		title: 'Transaction Prepare',
-		description: 'Preparing swap transaction for execution',
+		title: t('progress_modal.swap.transaction_prepare.title'),
+		description: t('progress_modal.swap.transaction_prepare.description'),
 		status: 'pending'
 	},
 	{
 		id: 'executing-transaction',
-		title: 'Executing Transaction',
-		description: 'Executing swap transaction',
+		title: t('progress_modal.swap.executing_transaction.title'),
+		description: t('progress_modal.swap.executing_transaction.description'),
 		status: 'pending'
 	},
 	{
 		id: 'onchain-confirmation',
-		title: 'Onchain Confirmation',
-		description: 'Waiting for blockchain confirmation',
+		title: t('progress_modal.swap.onchain_confirmation.title'),
+		description: t('progress_modal.swap.onchain_confirmation.description'),
 		status: 'pending'
 	}
 ];
 
-export const transferProgressSteps: ProgressStep[] = [
+
+export const transferProgressSteps = (t: any): ProgressStep[] => [
 	{
 		id: 'preparation',
-		title: 'Preparation',
-		description: 'Preparing transfer transaction data',
+		title: t('progress_modal.transfer.preparation.title'),
+		description: t('progress_modal.transfer.preparation.description'),
 		status: 'pending'
 	},
 	{
 		id: 'proof-generation',
-		title: 'Proof Generation',
-		description: 'Generating zero-knowledge proof for transfer',
+		title: t('progress_modal.transfer.proof_generation.title'),
+		description: t('progress_modal.transfer.proof_generation.description'),
 		status: 'pending'
 	},
 	{
 		id: 'transaction-prepare',
-		title: 'Transaction Prepare',
-		description: 'Preparing transfer transaction for execution',
+		title: t('progress_modal.transfer.transaction_prepare.title'),
+		description: t('progress_modal.transfer.transaction_prepare.description'),
 		status: 'pending'
 	},
 	{
 		id: 'executing-transaction',
-		title: 'Executing Transaction',
-		description: 'Executing transfer transaction',
+		title: t('progress_modal.transfer.executing_transaction.title'),
+		description: t('progress_modal.transfer.executing_transaction.description'),
 		status: 'pending'
 	},
 	{
 		id: 'onchain-confirmation',
-		title: 'Onchain Confirmation',
-		description: 'Waiting for blockchain confirmation',
+		title: t('progress_modal.transfer.onchain_confirmation.title'),
+		description: t('progress_modal.transfer.onchain_confirmation.description'),
 		status: 'pending'
 	}
 ];

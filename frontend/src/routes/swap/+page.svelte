@@ -260,7 +260,7 @@
 	async function confirmSwap() {
 		// 1) Close the modal and start progress
 		showFeeModal = false;
-		progressModalActions.show('Swap Progress', [...swapProgressSteps]);
+		progressModalActions.show('Swap Progress', [...swapProgressSteps($t)]);
 
 		try {
 			// 2) Validate that note balances and calculated amounts are present

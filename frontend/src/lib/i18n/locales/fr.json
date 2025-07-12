@@ -7,6 +7,119 @@
     "swap": "Échange",
     "settings": "Paramètres"
   },
+  "progress_modal": {
+    "deposit": {
+      "title": "Progression du Dépôt",
+      "preparation": {
+        "title": "Préparation",
+        "description": "Préparation des données de transaction"
+      },
+      "wallet_approval": {
+        "title": "Approbation du Portefeuille",
+        "description": "En attente de la confirmation du portefeuille"
+      },
+      "onchain_confirmation": {
+        "title": "Confirmation On-Chain",
+        "description": "En attente de la confirmation blockchain"
+      }
+    },
+    "withdraw": {
+      "title": "Progression du Retrait",
+      "preparation": {
+        "title": "Préparation",
+        "description": "Préparation des données de transaction"
+      },
+      "proof_generation": {
+        "title": "Génération de Preuve",
+        "description": "Génération de preuve à connaissance nulle"
+      },
+      "transaction_prepare": {
+        "title": "Préparation de Transaction",
+        "description": "Préparation de la transaction pour exécution"
+      },
+      "executing_transaction": {
+        "title": "Exécution de Transaction",
+        "description": "Exécution de la transaction"
+      },
+      "onchain_confirmation": {
+        "title": "Confirmation On-Chain",
+        "description": "En attente de la confirmation blockchain"
+      }
+    },
+    "merge": {
+      "title": "Progression de Fusion",
+      "preparation": {
+        "title": "Préparation",
+        "description": "Préparation des données de transaction de fusion"
+      },
+      "proof_generation": {
+        "title": "Génération de Preuve",
+        "description": "Génération de preuve à connaissance nulle pour fusion"
+      },
+      "transaction_prepare": {
+        "title": "Préparation de Transaction",
+        "description": "Préparation de la transaction de fusion pour exécution"
+      },
+      "executing_transaction": {
+        "title": "Exécution de Transaction",
+        "description": "Exécution de la transaction de fusion"
+      },
+      "onchain_confirmation": {
+        "title": "Confirmation On-Chain",
+        "description": "En attente de la confirmation blockchain"
+      }
+    },
+    "transfer": {
+      "title": "Progression de Transfert",
+      "preparation": {
+        "title": "Préparation",
+        "description": "Préparation des données de transaction de transfert"
+      },
+      "proof_generation": {
+        "title": "Génération de Preuve",
+        "description": "Génération de preuve à connaissance nulle pour transfert"
+      },
+      "transaction_prepare": {
+        "title": "Préparation de Transaction",
+        "description": "Préparation de la transaction de transfert pour exécution"
+      },
+      "executing_transaction": {
+        "title": "Exécution de Transaction",
+        "description": "Exécution de la transaction de transfert"
+      },
+      "onchain_confirmation": {
+        "title": "Confirmation On-Chain",
+        "description": "En attente de la confirmation blockchain"
+      }
+    },
+    "swap": {
+      "title": "Progression d'Échange",
+      "preparation": {
+        "title": "Préparation",
+        "description": "Préparation des données de transaction d'échange"
+      },
+      "proof_generation": {
+        "title": "Génération de Preuve",
+        "description": "Génération de preuve à connaissance nulle pour échange"
+      },
+      "quote_fetching": {
+        "title": "Récupération de Cotation",
+        "description": "Récupération de cotation d'échange depuis Ekubo"
+      },
+      "transaction_prepare": {
+        "title": "Préparation de Transaction",
+        "description": "Préparation de la transaction d'échange pour exécution"
+      },
+      "executing_transaction": {
+        "title": "Exécution de Transaction",
+        "description": "Exécution de la transaction d'échange"
+      },
+      "onchain_confirmation": {
+        "title": "Confirmation On-Chain",
+        "description": "En attente de la confirmation blockchain"
+      }
+    }
+  },
   "home": {
     "title": "Privacy Pools",
     "subtitle": "La solution de confidentialité ultime pour vos transactions StarkNet. Échangez, transférez et effectuez des transactions en toute anonymité.",
