@@ -53,7 +53,7 @@
 		isLoading = true;
 		let operationHash = '';
 
-		progressModalActions.show('Deposit Progress', [...depositProgressSteps]);
+		progressModalActions.show($t('progress_modal.deposit.title'), [...depositProgressSteps($t)]);
 
 		try {
 			progressModalActions.updateStep('preparation', 'loading');

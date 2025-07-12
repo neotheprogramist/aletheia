@@ -7,6 +7,119 @@
     "swap": "Swap",
     "settings": "Settings"
   },
+  "progress_modal": {
+    "deposit": {
+      "title": "Deposit Progress",
+      "preparation": {
+        "title": "Preparation",
+        "description": "Preparing transaction data"
+      },
+      "wallet_approval": {
+        "title": "Wallet Approval",
+        "description": "Waiting for wallet confirmation"
+      },
+      "onchain_confirmation": {
+        "title": "Onchain Confirmation",
+        "description": "Waiting for blockchain confirmation"
+      }
+    },
+    "withdraw": {
+      "title": "Withdraw Progress",
+      "preparation": {
+        "title": "Preparation",
+        "description": "Preparing transaction data"
+      },
+      "proof_generation": {
+        "title": "Proof Generation",
+        "description": "Generating zero-knowledge proof"
+      },
+      "transaction_prepare": {
+        "title": "Transaction Prepare",
+        "description": "Preparing transaction for execution"
+      },
+      "executing_transaction": {
+        "title": "Executing Transaction",
+        "description": "Executing Transaction"
+      },
+      "onchain_confirmation": {
+        "title": "Onchain Confirmation",
+        "description": "Waiting for blockchain confirmation"
+      }
+    },
+    "merge": {
+      "title": "Merge Progress",
+      "preparation": {
+        "title": "Preparation",
+        "description": "Preparing merge transaction data"
+      },
+      "proof_generation": {
+        "title": "Proof Generation",
+        "description": "Generating zero-knowledge proof for merge"
+      },
+      "transaction_prepare": {
+        "title": "Transaction Prepare",
+        "description": "Preparing merge transaction for execution"
+      },
+      "executing_transaction": {
+        "title": "Executing Transaction",
+        "description": "Executing merge transaction"
+      },
+      "onchain_confirmation": {
+        "title": "Onchain Confirmation",
+        "description": "Waiting for blockchain confirmation"
+      }
+    },
+    "transfer": {
+      "title": "Transfer Progress",
+      "preparation": {
+        "title": "Preparation",
+        "description": "Preparing transfer transaction data"
+      },
+      "proof_generation": {
+        "title": "Proof Generation",
+        "description": "Generating zero-knowledge proof for transfer"
+      },
+      "transaction_prepare": {
+        "title": "Transaction Prepare",
+        "description": "Preparing transfer transaction for execution"
+      },
+      "executing_transaction": {
+        "title": "Executing Transaction",
+        "description": "Executing transfer transaction"
+      },
+      "onchain_confirmation": {
+        "title": "Onchain Confirmation",
+        "description": "Waiting for blockchain confirmation"
+      }
+    },
+    "swap": {
+      "title": "Swap Progress",
+      "preparation": {
+        "title": "Preparation",
+        "description": "Preparing swap transaction data"
+      },
+      "proof_generation": {
+        "title": "Proof Generation",
+        "description": "Generating zero-knowledge proof for swap"
+      },
+      "quote_fetching": {
+        "title": "Quote Fetching",
+        "description": "Fetching swap quote from Ekubo"
+      },
+      "transaction_prepare": {
+        "title": "Transaction Prepare",
+        "description": "Preparing swap transaction for execution"
+      },
+      "executing_transaction": {
+        "title": "Executing Transaction",
+        "description": "Executing swap transaction"
+      },
+      "onchain_confirmation": {
+        "title": "Onchain Confirmation",
+        "description": "Waiting for blockchain confirmation"
+      }
+    }
+  },
   "home": {
     "title": "Privacy Pools",
     "subtitle": "The ultimate privacy solution for your StarkNet transactions. Trade, transfer, and transact with complete anonymity.",

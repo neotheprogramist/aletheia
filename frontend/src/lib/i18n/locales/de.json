@@ -7,6 +7,119 @@
     "swap": "Tausch",
     "settings": "Einstellungen"
   },
+  "progress_modal": {
+    "deposit": {
+      "title": "Einzahlungsfortschritt",
+      "preparation": {
+        "title": "Vorbereitung",
+        "description": "Transaktionsdaten werden vorbereitet"
+      },
+      "wallet_approval": {
+        "title": "Wallet-Genehmigung",
+        "description": "Warten auf Wallet-Bestätigung"
+      },
+      "onchain_confirmation": {
+        "title": "On-Chain-Bestätigung",
+        "description": "Warten auf Blockchain-Bestätigung"
+      }
+    },
+    "withdraw": {
+      "title": "Abhebungsfortschritt",
+      "preparation": {
+        "title": "Vorbereitung",
+        "description": "Transaktionsdaten werden vorbereitet"
+      },
+      "proof_generation": {
+        "title": "Beweis-Generierung",
+        "description": "Zero-Knowledge-Beweis wird generiert"
+      },
+      "transaction_prepare": {
+        "title": "Transaktionsvorbereitung",
+        "description": "Transaktion wird für Ausführung vorbereitet"
+      },
+      "executing_transaction": {
+        "title": "Transaktionsausführung",
+        "description": "Transaktion wird ausgeführt"
+      },
+      "onchain_confirmation": {
+        "title": "On-Chain-Bestätigung",
+        "description": "Warten auf Blockchain-Bestätigung"
+      }
+    },
+    "merge": {
+      "title": "Zusammenführungsfortschritt",
+      "preparation": {
+        "title": "Vorbereitung",
+        "description": "Zusammenführungstransaktionsdaten werden vorbereitet"
+      },
+      "proof_generation": {
+        "title": "Beweis-Generierung",
+        "description": "Zero-Knowledge-Beweis für Zusammenführung wird generiert"
+      },
+      "transaction_prepare": {
+        "title": "Transaktionsvorbereitung",
+        "description": "Zusammenführungstransaktion wird für Ausführung vorbereitet"
+      },
+      "executing_transaction": {
+        "title": "Transaktionsausführung",
+        "description": "Zusammenführungstransaktion wird ausgeführt"
+      },
+      "onchain_confirmation": {
+        "title": "On-Chain-Bestätigung",
+        "description": "Warten auf Blockchain-Bestätigung"
+      }
+    },
+    "transfer": {
+      "title": "Übertragungsfortschritt",
+      "preparation": {
+        "title": "Vorbereitung",
+        "description": "Übertragungstransaktionsdaten werden vorbereitet"
+      },
+      "proof_generation": {
+        "title": "Beweis-Generierung",
+        "description": "Zero-Knowledge-Beweis für Übertragung wird generiert"
+      },
+      "transaction_prepare": {
+        "title": "Transaktionsvorbereitung",
+        "description": "Übertragungstransaktion wird für Ausführung vorbereitet"
+      },
+      "executing_transaction": {
+        "title": "Transaktionsausführung",
+        "description": "Übertragungstransaktion wird ausgeführt"
+      },
+      "onchain_confirmation": {
+        "title": "On-Chain-Bestätigung",
+        "description": "Warten auf Blockchain-Bestätigung"
+      }
+    },
+    "swap": {
+      "title": "Tauschfortschritt",
+      "preparation": {
+        "title": "Vorbereitung",
+        "description": "Tauschtransaktionsdaten werden vorbereitet"
+      },
+      "proof_generation": {
+        "title": "Beweis-Generierung",
+        "description": "Zero-Knowledge-Beweis für Tausch wird generiert"
+      },
+      "quote_fetching": {
+        "title": "Kursabruf",
+        "description": "Tauschangebot von Ekubo wird abgerufen"
+      },
+      "transaction_prepare": {
+        "title": "Transaktionsvorbereitung",
+        "description": "Tauschtransaktion wird für Ausführung vorbereitet"
+      },
+      "executing_transaction": {
+        "title": "Transaktionsausführung",
+        "description": "Tauschtransaktion wird ausgeführt"
+      },
+      "onchain_confirmation": {
+        "title": "On-Chain-Bestätigung",
+        "description": "Warten auf Blockchain-Bestätigung"
+      }
+    }
+  },
   "home": {
     "title": "Privacy Pools",
     "subtitle": "Die ultimative Datenschutzlösung für Ihre StarkNet-Transaktionen. Handeln, übertragen und transagieren Sie mit völliger Anonymität.",

@@ -240,7 +240,7 @@
 	async function confirmMerge() {
 		// 1) Close the modal and start progress
 		showFeeModal = false;
-		progressModalActions.show('Merge Progress', [...mergeProgressSteps]);
+		progressModalActions.show($t('progress_modal.merge.title'), [...mergeProgressSteps($t)]);
 
 		try {
 			// 2) Validate that note balances and calculated amounts are present
@@ -410,9 +410,9 @@
 
 			// 10) Check receipt status and throw on failure
 			if (receipt.isReverted()) {
-				throw new Error($t('ui.common.errors.transaction_reverted').replace('{error}', receipt.value));
+				throw new Error(`Transaction reverted: ${receipt.value}`);
 			} else if (!receipt.isSuccess()) {
-				throw new Error($t('ui.common.errors.transaction_error').replace('{error}', receipt.value));
+				throw new Error(`Transaction error: ${receipt.value}`);
 			}
 
 			progressModalActions.updateStep('onchain-confirmation', 'completed');

@@ -204,7 +204,7 @@
 	async function confirmWithdraw() {
 		// 1) Close the modal and start progress
 		showFeeModal = false;
-		progressModalActions.show('Withdraw Progress', [...withdrawProgressSteps]);
+		progressModalActions.show($t('progress_modal.withdraw.title'), [...withdrawProgressSteps($t)]);
 
 		try {
 			// 2) Validate that note balances and calculated amounts are present

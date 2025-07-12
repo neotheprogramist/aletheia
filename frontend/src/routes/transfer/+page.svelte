@@ -240,7 +240,7 @@
 	async function confirmTransfer() {
 		// 1) Close the modal and start progress
 		showFeeModal = false;
-		progressModalActions.show('Transfer Progress', [...transferProgressSteps]);
+		progressModalActions.show($t('progress_modal.transfer.title'), [...transferProgressSteps($t)]);
 
 		try {
 			// 2) Validate that note balances and calculated amounts are present
