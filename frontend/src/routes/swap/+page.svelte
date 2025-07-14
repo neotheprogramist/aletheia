@@ -661,33 +661,6 @@
 						</Card>
 					{/if}
 
-					<!-- Fee issue information -->
-					{#if autoSelectedFeeInfo && !autoSelectedFeeInfo.feeDeposit}
-						<Card
-							class_="border-0 shadow-lg bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20"
-						>
-							<div class="flex items-start gap-3">
-								<div class="rounded-lg bg-red-500 p-2 text-white">
-									<Shield class="h-4 w-4" />
-								</div>
-								<div class="flex-1">
-									<h3 class="font-semibold text-red-800 dark:text-red-300 mb-1">
-										{$t('common.fee_payment_issue', { default: 'Fee Payment Issue' })}
-									</h3>
-									<p class="text-sm text-red-700 dark:text-red-400">
-										{#if !autoSelectedFeeInfo.hasEnoughBalance}
-											{$t('common.insufficient_strk_balance_short', { 
-												default: `Insufficient STRK balance. Required: ${autoSelectedFeeInfo.feeInfo.formatted} STRK`
-											})}
-										{:else}
-											{$t('common.no_available_strk_deposits', { default: 'No available STRK deposits for fee payment' })}
-										{/if}
-									</p>
-								</div>
-							</div>
-						</Card>
-					{/if}
-
 					<!-- Selected Deposits Display -->
 					{#if selectedSwapDeposit || selectedFeeDeposit}
 						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
@@ -970,6 +943,10 @@
 	<InsufficientFeeModal
 		show={showInsufficientFeeModal}
 		requiredFeeAmount={autoSelectedFeeInfo?.feeInfo.formatted || ''}
-		onClose={() => showInsufficientFeeModal = false}
+		onClose={() => {
+			showInsufficientFeeModal = false;
+			// Reset all deposit selections when closing modal
+			resetAll();
+		}}
 	/>
 </ProtectedRoute>
