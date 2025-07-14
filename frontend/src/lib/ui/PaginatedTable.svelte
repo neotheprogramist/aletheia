@@ -98,12 +98,13 @@
 
 	/**
 	 * When a row is clicked:
-	 * • compute its global index, then
+	 * • find the correct global index in the original items array, then
 	 * • call `onRowClick(globalIndex)` unless that index is disabled.
 	 */
-	function handleRowClick(_item: any, localIdx: number) {
-		const globalIndex = (currentPage - 1) * pageSize + localIdx;
-		if (disabledKeys.includes(globalIndex)) return;
+	function handleRowClick(item: any, _localIdx: number) {
+		// Find the correct global index in the original items array
+		const globalIndex = items.findIndex(origItem => origItem[keyField] === item[keyField]);
+		if (globalIndex === -1 || disabledKeys.includes(globalIndex)) return;
 		onRowClick(globalIndex);
 	}
 
