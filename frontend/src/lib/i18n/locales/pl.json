@@ -16,8 +16,8 @@
 	},
 	"tooltips": {
 		"navbar": {
-			"export": "Eksportuj wszystkie operacje do pliku JSON jako backup",
-			"import": "Importuj operacje z pliku backup JSON",
+			"export": "Pobierz kopię zapasową wszystkich operacji",
+			"import": "Wybierz plik kopii zapasowej do przywrócenia",
 			"settings": "Ustawienia aplikacji: język, motyw, preferowane tokeny",
 			"export_description": "Pobierz dane swoich prywatnych operacji do kopii zapasowej",
 			"import_description": "Przywróć operacje z wcześniej wyeksportowanego pliku",

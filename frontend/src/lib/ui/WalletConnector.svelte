@@ -23,25 +23,20 @@
 
 <div class="flex items-center gap-3">
 	{#if $isConnected}
-		<div class="flex items-center gap-1 bg-card rounded px-2 py-1">
-			<span class="font-mono text-sm">
+		<Tooltip text={copied ? $t('tooltips.common.copied') : $t('tooltips.common.copy_address')} position="bottom" theme="dark">
+			<button
+				on:click={copyAddress}
+				class="bg-card rounded px-2 py-1 font-mono text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200 cursor-pointer"
+				class:text-green-600={copied}
+				class:bg-green-50={copied}
+				class:dark:bg-green-900={copied}
+			>
 				{$walletAddress.slice(0, 6)}…{$walletAddress.slice(-4)}
-			</span>
-			<Tooltip text={copied ? $t('tooltips.common.copied') : $t('tooltips.common.copy_address')} position="bottom" theme="dark">
-				<button
-					on:click={copyAddress}
-					class="ml-1 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-					class:text-green-600={copied}
-					class:text-gray-500={!copied}
-				>
-					{#if copied}
-						<Check size={14} />
-					{:else}
-						<Copy size={14} />
-					{/if}
-				</button>
-			</Tooltip>
-		</div>
+				{#if copied}
+					<Check size={14} class="inline ml-1" />
+				{/if}
+			</button>
+		</Tooltip>
 		<button
 			on:click={disconnectWallet}
 			class="button rounded bg-red-600 px-3 py-1 text-white hover:bg-red-700"

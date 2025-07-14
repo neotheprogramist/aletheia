@@ -16,8 +16,8 @@
   },
   "tooltips": {
     "navbar": {
-      "export": "Exporter toutes les opérations vers un fichier JSON comme sauvegarde",
-      "import": "Importer les opérations depuis un fichier de sauvegarde JSON",
+      "export": "Télécharger une sauvegarde de toutes vos opérations",
+      "import": "Sélectionner un fichier de sauvegarde à restaurer",
       "settings": "Paramètres de l'application : langue, thème, jetons préférés",
       "export_description": "Télécharger vos données d'opérations privées pour sauvegarde",
       "import_description": "Restaurer les opérations depuis un fichier précédemment exporté",

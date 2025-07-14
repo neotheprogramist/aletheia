@@ -419,8 +419,8 @@
   },
   "tooltips": {
     "navbar": {
-      "export": "Export all operations to JSON file as backup",
-      "import": "Import operations from JSON backup file",
+      "export": "Download backup of all your operations",
+      "import": "Select backup file to restore operations",
       "settings": "Application settings: language, theme, preferred tokens",
       "export_description": "Download your private operations data for backup",
       "import_description": "Restore operations from a previously exported file",
