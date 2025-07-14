@@ -9,7 +9,9 @@ export const defaultDepositColumns: Column<DisplayOperation>[] = [
 
 export const createElegantDepositColumns = (
 	selectedWithdrawKey: number | null = null,
-	selectedFeeKey: number | null = null
+	selectedFeeKey: number | null = null,
+	selectedMerge2Key: number | null = null,
+	pageType: 'withdraw' | 'merge' = 'withdraw'
 ): Column<DisplayOperation>[] => [
 	{ 
 		label: 'Deposit', 
@@ -30,9 +32,14 @@ export const createElegantDepositColumns = (
 			
 			if (deposit.index === selectedWithdrawKey) {
 				statusDot = 'bg-purple-500';
-				statusText = 'Operation';
+				statusText = pageType === 'merge' ? 'Merge 1' : 'Operation';
 				statusTextColor = 'text-purple-600 dark:text-purple-400';
 				borderColor = 'border-purple-300 dark:border-purple-500';
+			} else if (deposit.index === selectedMerge2Key) {
+				statusDot = 'bg-orange-500';
+				statusText = 'Merge 2';
+				statusTextColor = 'text-orange-600 dark:text-orange-400';
+				borderColor = 'border-orange-300 dark:border-orange-500';
 			} else if (deposit.index === selectedFeeKey) {
 				statusDot = 'bg-blue-500';
 				statusText = 'Fee';
@@ -42,6 +49,8 @@ export const createElegantDepositColumns = (
 			
 			let clickHint = '';
 			if (deposit.index === selectedWithdrawKey) {
+				clickHint = '<div class="text-xs text-gray-400 mt-0.5">Click to unselect</div>';
+			} else if (deposit.index === selectedMerge2Key) {
 				clickHint = '<div class="text-xs text-gray-400 mt-0.5">Click to unselect</div>';
 			} else if (deposit.index === selectedFeeKey) {
 				clickHint = '<div class="text-xs text-gray-400 mt-0.5">Click to change fee</div>';

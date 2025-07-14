@@ -556,7 +556,7 @@
 								{:else}
 									<div class="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
 										<PaginatedTable
-											columns={createElegantDepositColumns(selectedWithdrawKey, selectedFeeKey)}
+											columns={createElegantDepositColumns(selectedWithdrawKey, selectedFeeKey, null, 'withdraw')}
 											items={deposits}
 											pageSize={5}
 											keyField="index"
@@ -959,7 +959,11 @@
 	<InsufficientFeeModal
 		show={showInsufficientFeeModal}
 		requiredFeeAmount={autoSelectedFeeInfo?.feeInfo.formatted || ''}
-		onClose={() => showInsufficientFeeModal = false}
+		onClose={() => {
+			showInsufficientFeeModal = false;
+			// Reset all deposit selections when closing modal
+			resetAll();
+		}}
 	/>
 </ProtectedRoute>
 

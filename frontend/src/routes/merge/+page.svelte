@@ -23,7 +23,7 @@
 	import { fetchMergeFee } from '$lib/utils/fetchFeeForExtension';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
 	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
-	import { defaultDepositColumns } from '$lib/utils/sharedColumns';
+	import { createElegantDepositColumns } from '$lib/utils/sharedColumns';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { fromWei } from '$lib/utils/toWei';
 	import { Contract } from 'starknet';
@@ -88,6 +88,11 @@
 	let feeNoteBalanceWei: bigint | null = null;
 	let feeWei: bigint | null = null;
 
+	// Element reference for smooth scrolling
+	let mergeFormElement: HTMLElement;
+	let highlightForm = false;
+	let stopPulsing = false;
+
 	$: if (browser && $selectedToken) {
 		loadDeposits(
 			$selectedToken,
@@ -101,9 +106,45 @@
 		const selectedDeposit = deposits.find((d) => d.index === selectedKey) ?? null;
 
 		if (selectionMode === 'merge1') {
+			// Allow unselecting current merge1 deposit
+			if (selectedKey === selectedMerge1Key) {
+				selectedMerge1Key = null;
+				selectedMerge1Deposit = null;
+				// Reset fee if it was auto-selected
+				if (autoSelectedFeeInfo) {
+					selectedFeeKey = null;
+					selectedFeeDeposit = null;
+					autoSelectedFeeInfo = null;
+				}
+				// Stay in merge1 mode after unselecting
+				return;
+			}
+			// Don't allow selecting the same deposit that's already selected as merge2
+			if (selectedKey === selectedMerge2Key) {
+				return;
+			}
 			selectedMerge1Key = selectedKey;
 			selectedMerge1Deposit = selectedDeposit;
+			// Auto-switch to merge2 mode after selecting first deposit
+			selectionMode = 'merge2';
 		} else if (selectionMode === 'merge2') {
+			// Allow unselecting current merge2 deposit
+			if (selectedKey === selectedMerge2Key) {
+				selectedMerge2Key = null;
+				selectedMerge2Deposit = null;
+				// Reset fee if it was auto-selected
+				if (autoSelectedFeeInfo) {
+					selectedFeeKey = null;
+					selectedFeeDeposit = null;
+					autoSelectedFeeInfo = null;
+				}
+				// Stay in merge2 mode after unselecting
+				return;
+			}
+			// Don't allow selecting the same deposit that's already selected as merge1
+			if (selectedKey === selectedMerge1Key) {
+				return;
+			}
 			selectedMerge2Key = selectedKey;
 			selectedMerge2Deposit = selectedDeposit;
 		}
@@ -124,6 +165,32 @@
 		autoSelectedFeeInfo = null;
 		feePreloadError = null;
 		showInsufficientFeeModal = false;
+	}
+
+	function resetMerge1() {
+		selectedMerge1Key = null;
+		selectedMerge1Deposit = null;
+		// Reset fee if it was auto-selected
+		if (autoSelectedFeeInfo) {
+			selectedFeeKey = null;
+			selectedFeeDeposit = null;
+			autoSelectedFeeInfo = null;
+		}
+		// Switch to merge1 selection mode
+		selectionMode = 'merge1';
+	}
+
+	function resetMerge2() {
+		selectedMerge2Key = null;
+		selectedMerge2Deposit = null;
+		// Reset fee if it was auto-selected
+		if (autoSelectedFeeInfo) {
+			selectedFeeKey = null;
+			selectedFeeDeposit = null;
+			autoSelectedFeeInfo = null;
+		}
+		// Switch to merge2 selection mode
+		selectionMode = 'merge2';
 	}
 
 	function handleSelectionChange(value: string) {
@@ -151,17 +218,32 @@
 			if (autoSelectedFeeInfo.feeDeposit) {
 				selectedFeeDeposit = autoSelectedFeeInfo.feeDeposit;
 				selectedFeeKey = autoSelectedFeeInfo.feeDeposit.index;
+				
+				// Smooth scroll to merge form after successful deposit selection
+				setTimeout(() => {
+					if (mergeFormElement) {
+						mergeFormElement.scrollIntoView({ 
+							behavior: 'smooth', 
+							block: 'start' 
+						});
+						
+						// Add highlight effect after scroll
+						setTimeout(() => {
+							highlightForm = true;
+							stopPulsing = false;
+							// Stop pulsing after 3 seconds, keep colors
+							setTimeout(() => {
+								stopPulsing = true;
+							}, 3000);
+						}, 600);
+					}
+				}, 100);
 			} else {
 				selectedFeeDeposit = null;
 				selectedFeeKey = null;
 
-				if (!autoSelectedFeeInfo.hasEnoughBalance) {
-					feePreloadError = `Insufficient STRK balance. Required: ${autoSelectedFeeInfo.feeInfo.formatted} STRK`;
-					showInsufficientFeeModal = true;
-				} else {
-					feePreloadError = 'No available STRK deposits for fee payment';
-					showInsufficientFeeModal = true;
-				}
+				// Both scenarios should show the modal, not the small error alert
+				showInsufficientFeeModal = true;
 			}
 		} catch (error) {
 			console.error('Error auto-selecting fee deposit:', error);
@@ -564,29 +646,95 @@
 										class="rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 p-1 dark:from-gray-700 dark:to-gray-600"
 									>
 										<PaginatedTable
-											columns={defaultDepositColumns}
+											columns={createElegantDepositColumns(
+												selectedMerge1Key,
+												selectedFeeKey,
+												selectedMerge2Key,
+												'merge'
+											)}
 											items={deposits}
 											pageSize={5}
 											keyField="index"
 											disabledKeys={undefined}
 											onRowClick={handleRowClick}
-											activeKey={selectionMode === 'merge1' ? selectedMerge1Key : selectedMerge2Key}
-											inactiveKeys={[
-												...(selectionMode !== 'merge1' && selectedMerge1Key !== null
-													? [selectedMerge1Key]
-													: []),
-												...(selectionMode !== 'merge2' && selectedMerge2Key !== null
-													? [selectedMerge2Key]
-													: []),
-												...(selectedFeeKey !== null ? [selectedFeeKey] : [])
-											]}
-											hoverClass="hover:bg-orange-600"
+											activeKey={null}
+											inactiveKeys={[]}
+											hoverClass="hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 dark:hover:from-orange-900/30 dark:hover:to-red-900/30 transition-all duration-200"
 										/>
 									</div>
 								{/if}
 							</div>
 						</div>
 					</Card>
+
+					<!-- Selected Deposits Display -->
+					{#if selectedMerge1Deposit || selectedMerge2Deposit || selectedFeeDeposit}
+						<Card class_="border-0 shadow-xl bg-gray-50 dark:bg-gray-800/50">
+							<div class="flex items-center gap-2 mb-4">
+								<CheckCircle class="h-5 w-5 text-green-500" />
+								<span class="text-lg font-semibold text-gray-700 dark:text-gray-300">Selected Deposits</span>
+							</div>
+							<div class="space-y-3">
+								<!-- Merge 1 Deposit -->
+								{#if selectedMerge1Deposit}
+									<div class="rounded-lg border border-purple-200 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20 p-4">
+										<div class="flex items-center justify-between mb-2">
+											<div class="flex items-center gap-2">
+												<div class="w-2 h-2 rounded-full bg-purple-500"></div>
+												<span class="text-sm font-medium text-purple-800 dark:text-purple-300">Merge 1 Deposit</span>
+											</div>
+											<button
+												on:click={() => resetMerge1()}
+												class="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 underline"
+											>
+												Reset
+											</button>
+										</div>
+										<div class="flex items-center gap-2">
+											<span class="font-semibold text-purple-900 dark:text-purple-100">{selectedMerge1Deposit.displayAmount}</span>
+											<span class="text-sm text-purple-700 dark:text-purple-400">#{selectedMerge1Deposit.index}</span>
+										</div>
+									</div>
+								{/if}
+
+								<!-- Merge 2 Deposit -->
+								{#if selectedMerge2Deposit}
+									<div class="rounded-lg border border-orange-200 dark:border-orange-700 bg-orange-50 dark:bg-orange-900/20 p-4">
+										<div class="flex items-center justify-between mb-2">
+											<div class="flex items-center gap-2">
+												<div class="w-2 h-2 rounded-full bg-orange-500"></div>
+												<span class="text-sm font-medium text-orange-800 dark:text-orange-300">Merge 2 Deposit</span>
+											</div>
+											<button
+												on:click={() => resetMerge2()}
+												class="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-200 underline"
+											>
+												Reset
+											</button>
+										</div>
+										<div class="flex items-center gap-2">
+											<span class="font-semibold text-orange-900 dark:text-orange-100">{selectedMerge2Deposit.displayAmount}</span>
+											<span class="text-sm text-orange-700 dark:text-orange-400">#{selectedMerge2Deposit.index}</span>
+										</div>
+									</div>
+								{/if}
+
+								<!-- Fee Deposit -->
+								{#if selectedFeeDeposit}
+									<div class="rounded-lg border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 p-4">
+										<div class="flex items-center gap-2 mb-2">
+											<div class="w-2 h-2 rounded-full bg-blue-500"></div>
+											<span class="text-sm font-medium text-blue-800 dark:text-blue-300">Fee Deposit (Auto-selected)</span>
+										</div>
+										<div class="flex items-center gap-2">
+											<span class="font-semibold text-blue-900 dark:text-blue-100">{selectedFeeDeposit.displayAmount}</span>
+											<span class="text-sm text-blue-700 dark:text-blue-400">#{selectedFeeDeposit.index}</span>
+										</div>
+									</div>
+								{/if}
+							</div>
+						</Card>
+					{/if}
 
 					<!-- Auto-selected fee information -->
 					{#if autoSelectedFeeInfo}
@@ -654,19 +802,13 @@
 						</Card>
 					{/if}
 
-					<!-- Selected Deposits Display -->
-					<SelectedDeposits
-						items={[
-							{ title: $t('ui.merge_page.first_deposit'), deposit: selectedMerge1Deposit },
-							{ title: $t('ui.merge_page.second_deposit'), deposit: selectedMerge2Deposit },
-							{ title: $t('ui.merge_page.fee_deposit_auto'), deposit: selectedFeeDeposit }
-						]}
-					/>
-
 					<!-- Merge Button -->
 					{#if selectedMerge1Deposit && selectedMerge2Deposit && selectedFeeDeposit && !feePreloadError}
-						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-							<div class="space-y-6">
+						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm {highlightForm ? 'ring-4 ring-orange-500 shadow-orange-500/25 shadow-2xl bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/30 dark:to-red-900/30 border-orange-300 dark:border-orange-500' : ''} {highlightForm && !stopPulsing ? 'animate-pulse-scale' : ''} transition-all duration-500 ease-in-out"
+							on:mouseenter={() => stopPulsing = true}
+							on:click={() => stopPulsing = true}
+						>
+							<div class="space-y-6" bind:this={mergeFormElement}>
 								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 									<Merge class="h-5 w-5 text-orange-500" />
 									{$t('ui.merge_page.execute_merge')}
@@ -915,6 +1057,29 @@
 	<InsufficientFeeModal
 		show={showInsufficientFeeModal}
 		requiredFeeAmount={autoSelectedFeeInfo?.feeInfo.formatted || ''}
-		onClose={() => showInsufficientFeeModal = false}
+		onClose={() => {
+			showInsufficientFeeModal = false;
+			// Reset all deposit selections when closing modal
+			resetAll();
+			// Reset to merge1 selection mode
+			selectionMode = 'merge1';
+		}}
 	/>
 </ProtectedRoute>
+
+<style>
+	@keyframes pulse-scale {
+		0%, 100% {
+			transform: scale(1);
+			opacity: 1;
+		}
+		50% {
+			transform: scale(1.03);
+			opacity: 0.9;
+		}
+	}
+
+	:global(.animate-pulse-scale) {
+		animation: pulse-scale 1.5s ease-in-out infinite;
+	}
+</style>
