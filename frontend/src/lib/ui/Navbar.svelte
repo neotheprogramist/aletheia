@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import WalletConnector from '$lib/ui/WalletConnector.svelte';
 	import SettingsModal from '$lib/ui/SettingsModal.svelte';
 	import { isConnected } from '$lib/stores/wallet';
@@ -94,24 +94,20 @@
 
 		reader.readAsText(file);
 	}
-
-	function isActive(path: string) {
-		return $page.url.pathname === path;
-	}
 </script>
 
-<nav class="fixed inset-x-0 top-0 z-10 border-b border-border bg-background backdrop-blur-sm">
+<nav class="border-border bg-background fixed inset-x-0 top-0 z-10 border-b backdrop-blur-sm">
 	<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 		<div class="flex h-16 items-center justify-between">
 			<!-- Logo -->
 			<a
 				href="/"
-				class="group flex items-center gap-2 text-lg font-bold tracking-tight text-primary sm:text-xl"
+				class="group text-primary flex items-center gap-2 text-lg font-bold tracking-tight sm:text-xl"
 			>
 				<div class="relative">
 					<img
 						src="/logo.svg"
-						alt="{$t('ui.navbar.privacy_pools')}"
+						alt={$t('ui.navbar.privacy_pools')}
 						class="h-6 w-6 transition-transform duration-200 group-hover:scale-110 sm:h-8 sm:w-8"
 					/>
 					<div
@@ -125,16 +121,14 @@
 			</a>
 
 			<!-- Desktop Navigation -->
-			<div class="hidden items-center space-x-6 xl:flex">
+			<div class="hidden items-center space-x-6 lg:flex">
 				{#if $isConnected}
 					{#each ['/deposit', '/withdraw', '/merge', '/transfer', '/swap'] as route}
 						<a
-							href="{route}"
-							class="transition-all duration-300 ease-in-out px-2 py-2 rounded-lg
-								{isActive(route)
-									? 'text-primary border-primary scale-110 transform border-b-2 font-bold shadow-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20'
-									: 'text-text-secondary hover:text-primary hover:scale-105 hover:font-semibold transform'}"
-							aria-current={isActive(route) ? 'page' : undefined}
+							href={route}
+							class="rounded-lg px-2 py-2 transition-all duration-300 ease-in-out"
+							class:active="{page.url.pathname.includes(route)}"
+							aria-current={page.url.pathname.includes(route) ? 'page' : undefined}
 						>
 							{$t(`nav.${route.slice(1)}`)}
 						</a>
@@ -142,16 +136,16 @@
 
 					<div class="flex items-center gap-2">
 						<button
-							class="rounded-lg p-2 text-text-secondary hover:text-primary hover:bg-surface hover:scale-110 transition-all duration-300 ease-in-out"
-							title="{$t('ui.navbar.export_tooltip')}"
+							class="text-text-secondary hover:text-primary hover:bg-surface rounded-lg p-2 transition-all duration-300 ease-in-out hover:scale-110"
+							title={$t('ui.navbar.export_tooltip')}
 							on:click={handleExport}
 						>
 							<Download size={18} />
 						</button>
 
 						<button
-							class="rounded-lg p-2 text-text-secondary hover:text-primary hover:bg-surface hover:scale-110 transition-all duration-300 ease-in-out"
-							title="{$t('ui.navbar.import_tooltip')}"
+							class="text-text-secondary hover:text-primary hover:bg-surface rounded-lg p-2 transition-all duration-300 ease-in-out hover:scale-110"
+							title={$t('ui.navbar.import_tooltip')}
 							on:click={openFilePicker}
 						>
 							<Upload size={18} />
@@ -164,8 +158,8 @@
 						<WalletConnector />
 					{/if}
 					<button
-						class="rounded-lg p-2 text-text-secondary hover:text-primary hover:bg-surface hover:scale-110 transition-all duration-300 ease-in-out"
-						title="{$t('ui.navbar.settings_tooltip')}"
+						class="text-text-secondary hover:text-primary hover:bg-surface rounded-lg p-2 transition-all duration-300 ease-in-out hover:scale-110"
+						title={$t('ui.navbar.settings_tooltip')}
 						on:click={toggleSettings}
 					>
 						<Settings size={18} />
@@ -174,11 +168,11 @@
 			</div>
 
 			<!-- Mobile menu button -->
-			<div class="flex items-center xl:hidden">
+			<div class="flex items-center lg:hidden">
 				<button
-					class="mobile-menu-button rounded-lg p-2 text-text hover:bg-surface hover:scale-110 transition-all duration-300 ease-in-out"
+					class="mobile-menu-button text-text hover:bg-surface rounded-lg p-2 transition-all duration-300 ease-in-out hover:scale-110"
 					on:click={toggleMobileMenu}
-					aria-label="{$t('ui.navbar.toggle_mobile_menu')}"
+					aria-label={$t('ui.navbar.toggle_mobile_menu')}
 				>
 					{#if showMobileMenu}
 						<X size={18} />
@@ -191,9 +185,9 @@
 
 		<!-- Mobile Navigation Menu -->
 		{#if showMobileMenu}
-			<div class="xl:hidden border-t border-border bg-card">
-				<div class="px-2 pt-2 pb-3 space-y-1">
-					<div class="flex items-center justify-between px-3 py-2 border-b border-border mb-3">
+			<div class="border-border bg-card border-t lg:hidden">
+				<div class="space-y-1 px-2 pt-2 pb-3">
+					<div class="border-border mb-3 flex items-center justify-between border-b px-3 py-2">
 						{#if $isConnected}
 							<WalletConnector />
 						{/if}
@@ -202,29 +196,27 @@
 					{#if $isConnected}
 						{#each ['/deposit', '/withdraw', '/merge', '/transfer', '/swap'] as route}
 							<a
-								href="{route}"
-								class="block px-3 py-2 rounded-lg text-base font-medium transition-all duration-300 ease-in-out
-									{isActive(route)
-										? 'scale-105 transform bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold shadow-lg'
-										: 'text-text hover:bg-surface hover:scale-105 hover:font-semibold'}"
+								href={route}
+								class="block rounded-lg px-3 py-2 text-base font-medium transition-all duration-300 ease-in-out"
+								class:active="{page.url.pathname.includes(route)}"
 								on:click={closeMobileMenu}
-								aria-current={isActive(route) ? 'page' : undefined}
+								aria-current={page.url.pathname.includes(route) ? 'page' : undefined}
 							>
 								{$t(`nav.${route.slice(1)}`)}
 							</a>
 						{/each}
 
-						<div class="border-t border-border pt-3 mt-3 flex justify-center gap-4">
+						<div class="border-border mt-3 flex justify-center gap-4 border-t pt-3">
 							<button
-								class="rounded-lg p-3 text-text hover:bg-surface hover:scale-110 transition-all duration-300 ease-in-out"
-								title="{$t('ui.navbar.export_operations')}"
+								class="text-text hover:bg-surface rounded-lg p-3 transition-all duration-300 ease-in-out hover:scale-110"
+								title={$t('ui.navbar.export_operations')}
 								on:click={handleExport}
 							>
 								<Download size={20} />
 							</button>
 							<button
-								class="rounded-lg p-3 text-text hover:bg-surface hover:scale-110 transition-all duration-300 ease-in-out"
-								title="{$t('ui.navbar.import_operations')}"
+								class="text-text hover:bg-surface rounded-lg p-3 transition-all duration-300 ease-in-out hover:scale-110"
+								title={$t('ui.navbar.import_operations')}
 								on:click={openFilePicker}
 							>
 								<Upload size={20} />
@@ -246,3 +238,77 @@
 </nav>
 
 <SettingsModal show={showSettings} onClose={closeSettings} />
+
+<style>
+	/* Desktop active link - czysty look z dolnym podświetleniem */
+	.active:not(.block) {
+		position: relative;
+		color: var(--color-primary);
+		font-weight: 600;
+		text-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+		transform: translateY(-1px);
+	}
+
+	.active:not(.block)::before {
+		content: '';
+		position: absolute;
+		bottom: -2px;
+		left: 50%;
+		width: 0;
+		height: 2px;
+		background: linear-gradient(90deg, transparent, var(--color-primary), var(--color-secondary), transparent);
+		transform: translateX(-50%);
+		animation: expandGlow 0.3s ease-out forwards;
+		box-shadow: 0 0 8px var(--color-primary);
+	}
+
+	/* Mobile active link - gradient block */
+	.active.block {
+		background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+		color: white;
+		font-weight: 600;
+		border-radius: 8px;
+		box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+		transform: scale(1.02);
+		position: relative;
+		overflow: hidden;
+	}
+
+	.active.block::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+		animation: shimmer 1.5s infinite;
+	}
+
+	/* Animacje */
+	@keyframes expandGlow {
+		from {
+			width: 0;
+		}
+		to {
+			width: 100%;
+		}
+	}
+
+	@keyframes shimmer {
+		0% {
+			left: -100%;
+		}
+		100% {
+			left: 100%;
+		}
+	}
+
+	/* Hover effects dla nieaktywnych linków */
+	a:not(.active):hover {
+		color: var(--color-primary);
+		transform: translateY(-1px);
+		text-shadow: 0 0 4px rgba(59, 130, 246, 0.2);
+		transition: all 0.3s ease;
+	}
+</style>
