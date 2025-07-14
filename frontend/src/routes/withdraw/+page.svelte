@@ -100,13 +100,13 @@
 
 	function handleRowClick(globalIdx: number) {
 		const clickedKey = deposits[globalIdx].index;
-		
+
 		// If clicking on already selected withdraw deposit, deselect it
 		if (selectedWithdrawKey === clickedKey) {
 			resetAll();
 			return;
 		}
-		
+
 		// If clicking on the fee deposit, set it as operation deposit and auto-select new fee
 		if (selectedFeeKey === clickedKey) {
 			// Set clicked fee deposit as the new operation deposit
@@ -114,21 +114,21 @@
 			selectedWithdrawDeposit = deposits.find((d) => d.index === selectedWithdrawKey) ?? null;
 			withdrawRecipient = '';
 			withdrawAmount = '';
-			
+
 			// Clear old fee selection and auto-select new fee
 			selectedFeeKey = null;
 			selectedFeeDeposit = null;
 			autoSelectedFeeInfo = null;
 			feePreloadError = null;
 			showInsufficientFeeModal = false;
-			
+
 			// Auto-select new fee deposit
 			if (selectedWithdrawDeposit) {
 				autoSelectFeeDeposit();
 			}
 			return;
 		}
-		
+
 		// Select new withdraw deposit
 		selectedWithdrawKey = clickedKey;
 		selectedWithdrawDeposit = deposits.find((d) => d.index === selectedWithdrawKey) ?? null;
@@ -151,7 +151,6 @@
 		showInsufficientFeeModal = false;
 	}
 
-
 	/** Auto-select fee deposit when withdraw deposit is chosen */
 	async function autoSelectFeeDeposit() {
 		if (!selectedWithdrawDeposit) return;
@@ -173,15 +172,15 @@
 			if (autoSelectedFeeInfo.feeDeposit) {
 				selectedFeeDeposit = autoSelectedFeeInfo.feeDeposit;
 				selectedFeeKey = autoSelectedFeeInfo.feeDeposit.index;
-				
+
 				// Smooth scroll to withdraw form after successful deposit selection
 				setTimeout(() => {
 					if (withdrawFormElement) {
-						withdrawFormElement.scrollIntoView({ 
-							behavior: 'smooth', 
-							block: 'start' 
+						withdrawFormElement.scrollIntoView({
+							behavior: 'smooth',
+							block: 'start'
 						});
-						
+
 						// Add highlight effect after scroll
 						setTimeout(() => {
 							highlightForm = true;
@@ -549,15 +548,26 @@
 										>
 											<Wallet class="h-8 w-8 text-gray-400" />
 										</div>
-										<h3 class="text-text mb-2 text-lg font-medium">{$t('common.no_deposits_found', { default: 'No Deposits Found' })}</h3>
+										<h3 class="text-text mb-2 text-lg font-medium">
+											{$t('common.no_deposits_found', { default: 'No Deposits Found' })}
+										</h3>
 										<p class="text-text-secondary">
-											{$t('common.make_deposit_first', { default: 'Make a deposit first to start withdrawing privately!' })}
+											{$t('common.make_deposit_first', {
+												default: 'Make a deposit first to start withdrawing privately!'
+											})}
 										</p>
 									</div>
 								{:else}
-									<div class="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+									<div
+										class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
+									>
 										<PaginatedTable
-											columns={createElegantDepositColumns(selectedWithdrawKey, selectedFeeKey, null, 'withdraw')}
+											columns={createElegantDepositColumns(
+												selectedWithdrawKey,
+												selectedFeeKey,
+												null,
+												'withdraw'
+											)}
 											items={deposits}
 											pageSize={5}
 											keyField="index"
@@ -576,51 +586,67 @@
 					<!-- Selected Deposits Display -->
 					{#if selectedWithdrawDeposit || selectedFeeDeposit}
 						<Card class_="border-0 shadow-xl bg-gray-50 dark:bg-gray-800/50">
-							<div class="flex items-center gap-2 mb-4">
+							<div class="mb-4 flex items-center gap-2">
 								<CheckCircle class="h-5 w-5 text-green-500" />
-								<span class="text-lg font-semibold text-gray-700 dark:text-gray-300">Selected Deposits</span>
+								<span class="text-lg font-semibold text-gray-700 dark:text-gray-300"
+									>Selected Deposits</span
+								>
 							</div>
 							<div class="space-y-3">
 								<!-- Operation Deposit -->
 								{#if selectedWithdrawDeposit}
-									<div class="rounded-lg border border-purple-200 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20 p-4">
-										<div class="flex items-center justify-between mb-2">
+									<div
+										class="rounded-lg border border-purple-200 bg-purple-50 p-4 dark:border-purple-700 dark:bg-purple-900/20"
+									>
+										<div class="mb-2 flex items-center justify-between">
 											<div class="flex items-center gap-2">
-												<div class="w-2 h-2 rounded-full bg-purple-500"></div>
-												<span class="text-sm font-medium text-purple-800 dark:text-purple-300">Operation Deposit</span>
+												<div class="h-2 w-2 rounded-full bg-purple-500"></div>
+												<span class="text-sm font-medium text-purple-800 dark:text-purple-300"
+													>Operation Deposit</span
+												>
 											</div>
 											<button
 												on:click={() => resetAll()}
-												class="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 underline"
+												class="text-xs text-purple-600 underline hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-200"
 											>
 												Remove
 											</button>
 										</div>
 										<div class="flex items-center gap-2">
-											<span class="font-semibold text-purple-900 dark:text-purple-100">{selectedWithdrawDeposit.displayAmount}</span>
-											<span class="text-sm text-purple-700 dark:text-purple-400">#{selectedWithdrawDeposit.index}</span>
+											<span class="font-semibold text-purple-900 dark:text-purple-100"
+												>{selectedWithdrawDeposit.displayAmount}</span
+											>
+											<span class="text-sm text-purple-700 dark:text-purple-400"
+												>#{selectedWithdrawDeposit.index}</span
+											>
 										</div>
 									</div>
 								{/if}
 
 								<!-- Fee Deposit -->
 								{#if selectedFeeDeposit}
-									<div class="rounded-lg border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 p-4">
-										<div class="flex items-center gap-2 mb-2">
-											<div class="w-2 h-2 rounded-full bg-blue-500"></div>
-											<span class="text-sm font-medium text-blue-800 dark:text-blue-300">Fee Deposit (Auto-selected)</span>
+									<div
+										class="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-700 dark:bg-blue-900/20"
+									>
+										<div class="mb-2 flex items-center gap-2">
+											<div class="h-2 w-2 rounded-full bg-blue-500"></div>
+											<span class="text-sm font-medium text-blue-800 dark:text-blue-300"
+												>Fee Deposit (Auto-selected)</span
+											>
 										</div>
 										<div class="flex items-center gap-2">
-											<span class="font-semibold text-blue-900 dark:text-blue-100">{selectedFeeDeposit.displayAmount}</span>
-											<span class="text-sm text-blue-700 dark:text-blue-400">#{selectedFeeDeposit.index}</span>
+											<span class="font-semibold text-blue-900 dark:text-blue-100"
+												>{selectedFeeDeposit.displayAmount}</span
+											>
+											<span class="text-sm text-blue-700 dark:text-blue-400"
+												>#{selectedFeeDeposit.index}</span
+											>
 										</div>
 									</div>
 								{/if}
 							</div>
 						</Card>
 					{/if}
-
-					
 
 					<!-- Auto-selected fee information -->
 					{#if autoSelectedFeeInfo}
@@ -634,32 +660,37 @@
 								</h3>
 								<div class="space-y-3">
 									<div class="flex items-center justify-between">
-										<span class="text-sm text-blue-700 dark:text-blue-300">{$t('common.network_fee', { default: 'Network Fee' })}:</span>
+										<span class="text-sm text-blue-700 dark:text-blue-300"
+											>{$t('common.network_fee', { default: 'Network Fee' })}:</span
+										>
 										<span class="font-bold text-blue-800 dark:text-blue-200"
 											>{autoSelectedFeeInfo.feeInfo.formatted} STRK</span
 										>
 									</div>
 									{#if autoSelectedFeeInfo.feeDeposit}
 										<div class="flex items-center justify-between">
-											<span class="text-sm text-blue-700 dark:text-blue-300">{$t('common.fee_deposit', { default: 'Fee Deposit' })}:</span>
+											<span class="text-sm text-blue-700 dark:text-blue-300"
+												>{$t('common.fee_deposit', { default: 'Fee Deposit' })}:</span
+											>
 											<span class="font-medium text-blue-800 dark:text-blue-200"
 												>{autoSelectedFeeInfo.feeDeposit.displayAmount}</span
 											>
 										</div>
 									{/if}
 								</div>
-								
+
 								<!-- Auto-selection explanation -->
 								<div class="rounded-lg bg-blue-100 p-3 dark:bg-blue-900/30">
 									<div class="flex items-start gap-2">
 										<CheckCircle class="mt-0.5 h-4 w-4 text-blue-600 dark:text-blue-400" />
 										<div class="text-xs text-blue-700 dark:text-blue-300">
-											<p class="font-medium mb-1">
+											<p class="mb-1 font-medium">
 												{$t('common.auto_fee_selection', { default: 'Automatic Fee Selection' })}
 											</p>
 											<p>
-												{$t('common.auto_fee_explanation', { 
-													default: 'The system automatically selected the best STRK deposit to pay for network fees. This deposit has sufficient balance and is separate from your withdrawal deposit to maintain privacy.' 
+												{$t('common.auto_fee_explanation', {
+													default:
+														'The system automatically selected the best STRK deposit to pay for network fees. This deposit has sufficient balance and is separate from your withdrawal deposit to maintain privacy.'
 												})}
 											</p>
 										</div>
@@ -688,9 +719,14 @@
 
 					<!-- Withdraw Form -->
 					{#if selectedWithdrawDeposit && selectedFeeDeposit && !feePreloadError}
-						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm {highlightForm ? 'ring-4 ring-purple-500 shadow-purple-500/25 shadow-2xl bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 border-purple-300 dark:border-purple-500' : ''} {highlightForm && !stopPulsing ? 'animate-pulse-scale' : ''} transition-all duration-500 ease-in-out"
-							on:mouseenter={() => stopPulsing = true}
-							on:click={() => stopPulsing = true}
+						<Card
+							class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm {highlightForm
+								? 'ring-4 ring-purple-500 shadow-purple-500/25 shadow-2xl bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 border-purple-300 dark:border-purple-500'
+								: ''} {highlightForm && !stopPulsing
+								? 'animate-pulse-scale'
+								: ''} transition-all duration-500 ease-in-out"
+							on:mouseenter={() => (stopPulsing = true)}
+							on:click={() => (stopPulsing = true)}
 						>
 							<div class="space-y-6" bind:this={withdrawFormElement}>
 								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
@@ -708,7 +744,9 @@
 										<Input
 											bind:value={withdrawRecipient}
 											required
-											placeholder={$t('common.enter_recipient_address', { default: 'Enter recipient wallet address' })}
+											placeholder={$t('common.enter_recipient_address', {
+												default: 'Enter recipient wallet address'
+											})}
 											class_="w-full text-lg font-medium"
 										/>
 									</div>
@@ -723,7 +761,9 @@
 											<Input
 												bind:value={withdrawAmount}
 												required
-												placeholder={$t('common.enter_amount_to_withdraw', { default: 'Enter amount to withdraw' })}
+												placeholder={$t('common.enter_amount_to_withdraw', {
+													default: 'Enter amount to withdraw'
+												})}
 												class_="flex-1 text-lg font-medium"
 											/>
 											<button
@@ -742,7 +782,9 @@
 
 									<!-- Submit Button -->
 									<Button
-										text={$t('common.execute_private_withdrawal', { default: 'Execute Private Withdrawal' })}
+										text={$t('common.execute_private_withdrawal', {
+											default: 'Execute Private Withdrawal'
+										})}
 										loading={isLoading}
 										type="submit"
 										class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
@@ -770,7 +812,9 @@
 										1
 									</div>
 									<div>
-										<p class="text-text font-medium">{$t('ui.withdraw_page.how_it_works.select_deposit.title')}</p>
+										<p class="text-text font-medium">
+											{$t('ui.withdraw_page.how_it_works.select_deposit.title')}
+										</p>
 										<p class="text-text-secondary text-sm">
 											{$t('ui.withdraw_page.how_it_works.select_deposit.description')}
 										</p>
@@ -783,9 +827,16 @@
 										2
 									</div>
 									<div>
-										<p class="text-text font-medium">{$t('ui.withdraw_page.how_it_works.auto_fee_selection.title', { default: 'Auto Fee Selection' })}</p>
+										<p class="text-text font-medium">
+											{$t('ui.withdraw_page.how_it_works.auto_fee_selection.title', {
+												default: 'Auto Fee Selection'
+											})}
+										</p>
 										<p class="text-text-secondary text-sm">
-											{$t('ui.withdraw_page.how_it_works.auto_fee_selection.description', { default: 'System automatically finds the best STRK deposit to pay network fees, ensuring privacy by using a separate deposit.' })}
+											{$t('ui.withdraw_page.how_it_works.auto_fee_selection.description', {
+												default:
+													'System automatically finds the best STRK deposit to pay network fees, ensuring privacy by using a separate deposit.'
+											})}
 										</p>
 									</div>
 								</div>
@@ -796,7 +847,9 @@
 										3
 									</div>
 									<div>
-										<p class="text-text font-medium">{$t('ui.withdraw_page.how_it_works.set_recipient.title')}</p>
+										<p class="text-text font-medium">
+											{$t('ui.withdraw_page.how_it_works.set_recipient.title')}
+										</p>
 										<p class="text-text-secondary text-sm">
 											{$t('ui.withdraw_page.how_it_works.set_recipient.description')}
 										</p>
@@ -809,7 +862,9 @@
 										4
 									</div>
 									<div>
-										<p class="text-text font-medium">{$t('ui.withdraw_page.how_it_works.zero_knowledge.title')}</p>
+										<p class="text-text font-medium">
+											{$t('ui.withdraw_page.how_it_works.zero_knowledge.title')}
+										</p>
 										<p class="text-text-secondary text-sm">
 											{$t('ui.withdraw_page.how_it_works.zero_knowledge.description')}
 										</p>
@@ -822,7 +877,9 @@
 										5
 									</div>
 									<div>
-										<p class="text-text font-medium">{$t('ui.withdraw_page.how_it_works.anonymous_transfer.title')}</p>
+										<p class="text-text font-medium">
+											{$t('ui.withdraw_page.how_it_works.anonymous_transfer.title')}
+										</p>
 										<p class="text-text-secondary text-sm">
 											{$t('ui.withdraw_page.how_it_works.anonymous_transfer.description')}
 										</p>
@@ -844,7 +901,9 @@
 							<div class="space-y-3">
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-purple-500" />
-									<span class="text-text text-sm font-medium">{$t('ui.withdraw_page.privacy_features.break_linkability')}</span>
+									<span class="text-text text-sm font-medium"
+										>{$t('ui.withdraw_page.privacy_features.break_linkability')}</span
+									>
 								</div>
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-purple-500" />
@@ -854,7 +913,9 @@
 								</div>
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-purple-500" />
-									<span class="text-text text-sm font-medium">{$t('ui.withdraw_page.privacy_features.fee_handling')}</span>
+									<span class="text-text text-sm font-medium"
+										>{$t('ui.withdraw_page.privacy_features.fee_handling')}</span
+									>
 								</div>
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-purple-500" />
@@ -873,7 +934,9 @@
 						>
 							<div class="space-y-2">
 								<div class="text-2xl font-bold text-purple-500">🔒</div>
-								<div class="text-text-secondary text-sm">{$t('ui.withdraw_page.stats.untraceable')}</div>
+								<div class="text-text-secondary text-sm">
+									{$t('ui.withdraw_page.stats.untraceable')}
+								</div>
 							</div>
 						</Card>
 						<Card
@@ -893,7 +956,9 @@
 						<div class="flex items-start gap-3">
 							<AlertTriangle class="mt-0.5 h-5 w-5 text-yellow-500" />
 							<div>
-								<h4 class="mb-1 font-semibold text-yellow-800 dark:text-yellow-300">{$t('ui.withdraw_page.important_notice')}</h4>
+								<h4 class="mb-1 font-semibold text-yellow-800 dark:text-yellow-300">
+									{$t('ui.withdraw_page.important_notice')}
+								</h4>
 								<p class="text-sm text-yellow-700 dark:text-yellow-300">
 									{$t('ui.withdraw_page.withdrawal_warning')}
 								</p>
@@ -926,26 +991,35 @@
 			<div
 				class="rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 p-4 dark:from-purple-900/20 dark:to-pink-900/20"
 			>
-				<h4 class="text-text mb-3 font-semibold">{$t('common.withdrawal_summary', { default: 'Withdrawal Summary' })}</h4>
+				<h4 class="text-text mb-3 font-semibold">
+					{$t('common.withdrawal_summary', { default: 'Withdrawal Summary' })}
+				</h4>
 				<div class="space-y-2 text-sm">
 					<div class="flex justify-between">
 						<span class="text-text-secondary">{$t('common.amount')}:</span>
 						<span class="text-text font-semibold">{withdrawAmount}</span>
 					</div>
 					<div class="flex justify-between">
-						<span class="text-text-secondary">{$t('common.network_fee', { default: 'Network Fee' })}:</span>
+						<span class="text-text-secondary"
+							>{$t('common.network_fee', { default: 'Network Fee' })}:</span
+						>
 						<span class="text-text font-semibold">{feeWeiHex} STRK</span>
 					</div>
 					<div class="mt-2 border-t pt-2">
 						<div class="flex justify-between">
-							<span class="text-text-secondary">{$t('common.recipient', { default: 'Recipient' })}:</span>
+							<span class="text-text-secondary"
+								>{$t('common.recipient', { default: 'Recipient' })}:</span
+							>
 							<span class="text-text font-mono text-xs break-all">{withdrawRecipient}</span>
 						</div>
 					</div>
 				</div>
 			</div>
 			<p class="text-text-secondary text-sm">
-				{$t('common.withdrawal_confirmation_text', { default: 'This withdrawal will be processed anonymously and cannot be reversed. Please verify all details are correct.' })}
+				{$t('common.withdrawal_confirmation_text', {
+					default:
+						'This withdrawal will be processed anonymously and cannot be reversed. Please verify all details are correct.'
+				})}
 			</p>
 		</div>
 	</Modal>
@@ -970,7 +1044,8 @@
 
 <style>
 	@keyframes pulse-scale {
-		0%, 100% {
+		0%,
+		100% {
 			transform: scale(1);
 			opacity: 1;
 		}
