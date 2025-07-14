@@ -1,7 +1,7 @@
 // Central IndexedDB setup + generic transaction helper
 
 const DB_NAME = 'privacy-pools-data';
-const DB_VERSION = 4;
+const DB_VERSION = 6;
 
 // Our two stores
 export type StoreName = 'merkle_leaves' | 'operations';
