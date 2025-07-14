@@ -1,4 +1,11 @@
 {
+	"banner": {
+		"beta_warning": {
+			"title": "⚠️ Esta es una versión BETA - ¡Úsala con extrema precaución!",
+			"description": "Los fondos depositados pueden perderse permanentemente. Solo usa pequeñas cantidades para pruebas. Este software es experimental.",
+			"dismiss": "Ocultar advertencia"
+		}
+	},
 	"nav": {
 		"deposit": "Depósito",
 		"withdraw": "Retiro",

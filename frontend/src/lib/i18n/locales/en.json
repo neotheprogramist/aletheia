@@ -1,4 +1,11 @@
 {
+  "banner": {
+    "beta_warning": {
+      "title": "⚠️ This is a BETA version - Use with extreme caution!",
+      "description": "Funds deposited may be lost permanently. Only use small amounts for testing. This software is experimental.",
+      "dismiss": "Dismiss warning"
+    }
+  },
   "nav": {
     "deposit": "Deposit",
     "withdraw": "Withdraw",

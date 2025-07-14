@@ -1,4 +1,11 @@
 {
+  "banner": {
+    "beta_warning": {
+      "title": "⚠️ Dies ist eine BETA-Version - Verwenden Sie sie mit äußerster Vorsicht!",
+      "description": "Eingezahlte Mittel können dauerhaft verloren gehen. Verwenden Sie nur kleine Beträge zum Testen. Diese Software ist experimentell.",
+      "dismiss": "Warnung ausblenden"
+    }
+  },
   "nav": {
     "deposit": "Einzahlung",
     "withdraw": "Abhebung",

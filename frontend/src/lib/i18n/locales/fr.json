@@ -1,4 +1,11 @@
 {
+  "banner": {
+    "beta_warning": {
+      "title": "⚠️ Ceci est une version BETA - Utilisez avec une extrême prudence !",
+      "description": "Les fonds déposés peuvent être perdus définitivement. N'utilisez que de petits montants pour les tests. Ce logiciel est expérimental.",
+      "dismiss": "Masquer l'avertissement"
+    }
+  },
   "nav": {
     "deposit": "Dépôt",
     "withdraw": "Retrait",

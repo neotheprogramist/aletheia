@@ -1,4 +1,11 @@
 {
+	"banner": {
+		"beta_warning": {
+			"title": "⚠️ To jest wersja BETA - Używaj z najwyższą ostrożnością!",
+			"description": "Wpłacone środki mogą zostać bezpowrotnie utracone. Używaj tylko małych kwot do testów. To oprogramowanie jest eksperymentalne.",
+			"dismiss": "Ukryj ostrzeżenie"
+		}
+	},
 	"nav": {
 		"deposit": "Wpłata",
 		"withdraw": "Wypłata",
