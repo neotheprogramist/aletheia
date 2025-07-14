@@ -18,7 +18,7 @@
 		"navbar": {
 			"export": "Pobierz kopię zapasową wszystkich operacji",
 			"import": "Wybierz plik kopii zapasowej do przywrócenia",
-			"settings": "Ustawienia aplikacji: język, motyw, preferowane tokeny",
+			"settings": "Ustawienia aplikacji: język i preferencje",
 			"export_description": "Pobierz dane swoich prywatnych operacji do kopii zapasowej",
 			"import_description": "Przywróć operacje z wcześniej wyeksportowanego pliku",
 			"settings_description": "Skonfiguruj swoje preferencje Privacy Poolz"

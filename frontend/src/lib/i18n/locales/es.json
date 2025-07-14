@@ -18,7 +18,7 @@
 		"navbar": {
 			"export": "Descargar respaldo de todas tus operaciones",
 			"import": "Seleccionar archivo de respaldo para restaurar",
-			"settings": "Configuración de la aplicación: idioma, tema, tokens preferidos",
+			"settings": "Configuración de la aplicación: idioma y preferencias",
 			"export_description": "Descargar datos de tus operaciones privadas para respaldo",
 			"import_description": "Restaurar operaciones desde un archivo previamente exportado",
 			"settings_description": "Configurar tus preferencias de Privacy Poolz"

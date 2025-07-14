@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { availableLanguages, currentLanguage, changeLanguage, t } from '$lib/i18n';
-	import { theme } from '$lib/stores/theme';
-	import { Sun, Moon, Check } from 'lucide-svelte';
+	import { Check } from 'lucide-svelte';
 
 	export let show: boolean = false;
 	export let onClose: () => void = () => {};
@@ -18,11 +17,6 @@
 	function handleLanguageChange(lang: string) {
 		changeLanguage(lang);
 		selectedLanguage = lang;
-	}
-
-	function toggleTheme() {
-		theme.update((t) => (t === 'dark' ? 'light' : 'dark'));
-		document.documentElement.classList.toggle('light');
 	}
 
 	function outsideClick(event: MouseEvent) {
@@ -67,27 +61,6 @@
 							{/if}
 						</button>
 					{/each}
-				</div>
-			</div>
-
-			<!-- Theme Selection -->
-			<div class="mb-6">
-				<h3 class="mb-3 text-lg font-medium text-gray-900 dark:text-gray-100">{$t('settings.theme')}</h3>
-				<div class="flex space-x-3">
-					<button
-						class="flex-1 flex items-center justify-center p-3 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors duration-200 border border-gray-300 dark:border-gray-600 {$theme === 'light' ? 'ring-2 ring-blue-600' : ''}"
-						on:click={toggleTheme}
-					>
-						<Sun class="w-5 h-5 mr-2 text-gray-900 dark:text-gray-100" />
-						<span class="text-gray-900 dark:text-gray-100">{$t('ui.settings.theme.light')}</span>
-					</button>
-					<button
-						class="flex-1 flex items-center justify-center p-3 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors duration-200 border border-gray-300 dark:border-gray-600 {$theme === 'dark' ? 'ring-2 ring-blue-600' : ''}"
-						on:click={toggleTheme}
-					>
-						<Moon class="w-5 h-5 mr-2 text-gray-900 dark:text-gray-100" />
-						<span class="text-gray-900 dark:text-gray-100">{$t('ui.settings.theme.dark')}</span>
-					</button>
 				</div>
 			</div>
 

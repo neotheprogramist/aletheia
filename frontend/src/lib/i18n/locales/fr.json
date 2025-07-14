@@ -18,7 +18,7 @@
     "navbar": {
       "export": "Télécharger une sauvegarde de toutes vos opérations",
       "import": "Sélectionner un fichier de sauvegarde à restaurer",
-      "settings": "Paramètres de l'application : langue, thème, jetons préférés",
+      "settings": "Paramètres de l'application : langue et préférences",
       "export_description": "Télécharger vos données d'opérations privées pour sauvegarde",
       "import_description": "Restaurer les opérations depuis un fichier précédemment exporté",
       "settings_description": "Configurer vos préférences Privacy Poolz"

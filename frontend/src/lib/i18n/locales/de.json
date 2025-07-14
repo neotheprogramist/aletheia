@@ -18,7 +18,7 @@
     "navbar": {
       "export": "Backup aller Ihrer Operationen herunterladen",
       "import": "Backup-Datei zum Wiederherstellen auswählen",
-      "settings": "Anwendungseinstellungen: Sprache, Theme, bevorzugte Token",
+      "settings": "Anwendungseinstellungen: Sprache und Einstellungen",
       "export_description": "Ihre privaten Operationsdaten für Backup herunterladen",
       "import_description": "Operationen aus einer zuvor exportierten Datei wiederherstellen",
       "settings_description": "Ihre Privacy Poolz-Einstellungen konfigurieren"
