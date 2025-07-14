@@ -14,6 +14,7 @@
 	import Button from '$lib/ui/Button.svelte';
 	import Card from '$lib/ui/Card.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
+	import InsufficientFeeModal from '$lib/ui/InsufficientFeeModal.svelte';
 	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
@@ -79,6 +80,7 @@
 
 	let isLoading = false;
 	let showFeeModal = false;
+	let showInsufficientFeeModal = false;
 
 	// Confirmation data
 	let merge1NoteBalanceWei: bigint | null = null;
@@ -121,6 +123,7 @@
 		selectedFeeDeposit = null;
 		autoSelectedFeeInfo = null;
 		feePreloadError = null;
+		showInsufficientFeeModal = false;
 	}
 
 	function handleSelectionChange(value: string) {
@@ -132,6 +135,7 @@
 		if (!selectedMerge1Deposit || !selectedMerge2Deposit) return;
 
 		feePreloadError = null;
+		showInsufficientFeeModal = false;
 
 		try {
 			// Get fee info and auto-select the best STRK deposit
@@ -152,9 +156,11 @@
 				selectedFeeKey = null;
 
 				if (!autoSelectedFeeInfo.hasEnoughBalance) {
-					feePreloadError = $t('ui.merge_page.errors.insufficient_strk').replace('{amount}', autoSelectedFeeInfo.feeInfo.formatted);
+					feePreloadError = `Insufficient STRK balance. Required: ${autoSelectedFeeInfo.feeInfo.formatted} STRK`;
+					showInsufficientFeeModal = true;
 				} else {
-					feePreloadError = $t('ui.merge_page.errors.no_strk_deposits');
+					feePreloadError = 'No available STRK deposits for fee payment';
+					showInsufficientFeeModal = true;
 				}
 			}
 		} catch (error) {
@@ -587,28 +593,45 @@
 						<Card
 							class_="border-0 shadow-xl bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20"
 						>
-							<div class="space-y-3">
+							<div class="space-y-4">
 								<h3
 									class="flex items-center gap-2 font-semibold text-orange-800 dark:text-orange-300"
 								>
 									<Zap class="h-5 w-5" />
-									{$t('ui.merge_page.fee_information')}
+									{$t('ui.merge_page.fee_information', { default: 'Fee Information' })}
 								</h3>
-								<div class="space-y-2">
+								<div class="space-y-3">
 									<div class="flex items-center justify-between">
-										<span class="text-sm text-orange-700 dark:text-orange-300">{$t('ui.merge_page.network_fee')}:</span>
+										<span class="text-sm text-orange-700 dark:text-orange-300">{$t('ui.merge_page.network_fee', { default: 'Network Fee' })}:</span>
 										<span class="font-bold text-orange-800 dark:text-orange-200"
 											>{autoSelectedFeeInfo.feeInfo.formatted} STRK</span
 										>
 									</div>
 									{#if autoSelectedFeeInfo.feeDeposit}
 										<div class="flex items-center justify-between">
-											<span class="text-sm text-orange-700 dark:text-orange-300">{$t('ui.merge_page.fee_deposit')}:</span>
+											<span class="text-sm text-orange-700 dark:text-orange-300">{$t('ui.merge_page.fee_deposit', { default: 'Fee Deposit' })}:</span>
 											<span class="font-medium text-orange-800 dark:text-orange-200"
 												>{autoSelectedFeeInfo.feeDeposit.displayAmount}</span
 											>
 										</div>
 									{/if}
+								</div>
+								
+								<!-- Auto-selection explanation -->
+								<div class="rounded-lg bg-orange-100 p-3 dark:bg-orange-900/30">
+									<div class="flex items-start gap-2">
+										<CheckCircle class="mt-0.5 h-4 w-4 text-orange-600 dark:text-orange-400" />
+										<div class="text-xs text-orange-700 dark:text-orange-300">
+											<p class="font-medium mb-1">
+												{$t('common.auto_fee_selection', { default: 'Automatic Fee Selection' })}
+											</p>
+											<p>
+												{$t('common.auto_fee_merge_explanation', { 
+													default: 'The system automatically selected the best STRK deposit to pay for network fees. This deposit is separate from your merge deposits to maintain privacy.' 
+												})}
+											</p>
+										</div>
+									</div>
 								</div>
 							</div>
 						</Card>
@@ -887,5 +910,11 @@
 		title={$progressModalStore.title}
 		steps={$progressModalStore.steps}
 		onClose={progressModalActions.hide}
+	/>
+
+	<InsufficientFeeModal
+		show={showInsufficientFeeModal}
+		requiredFeeAmount={autoSelectedFeeInfo?.feeInfo.formatted || ''}
+		onClose={() => showInsufficientFeeModal = false}
 	/>
 </ProtectedRoute>

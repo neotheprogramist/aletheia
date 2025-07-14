@@ -8,6 +8,7 @@
 	import { NoteDataSchema, type NoteData } from '$lib/schemas/schemas';
 	import { fetchExtensionFee } from '$lib/utils/fetchFeeForExtension';
 	import Modal from '$lib/ui/Modal.svelte';
+	import InsufficientFeeModal from '$lib/ui/InsufficientFeeModal.svelte';
 	import {
 		PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
 		PUBLIC_SWAP_EXTENSION_CONTRACT_ADDRESS,
@@ -86,6 +87,7 @@
 
 	let isLoading = false;
 	let showFeeModal = false;
+	let showInsufficientFeeModal = false;
 
 	// Confirmation data
 	let swapNoteBalanceWei: bigint | null = null;
@@ -141,6 +143,7 @@
 		selectedFeeDeposit = null;
 		autoSelectedFeeInfo = null;
 		feePreloadError = null;
+		showInsufficientFeeModal = false;
 	}
 
 	/** Auto-select fee deposit when swap deposit is chosen */
@@ -148,6 +151,7 @@
 		if (!selectedSwapDeposit) return;
 
 		feePreloadError = null;
+		showInsufficientFeeModal = false;
 
 		try {
 			// Get fee info and auto-select the best STRK deposit
@@ -167,11 +171,8 @@
 				selectedFeeDeposit = null;
 				selectedFeeKey = null;
 
-				if (!autoSelectedFeeInfo.hasEnoughBalance) {
-					feePreloadError = `Insufficient STRK balance. Required: ${autoSelectedFeeInfo.feeInfo.formatted} STRK`;
-				} else {
-					feePreloadError = 'No available STRK deposits for fee payment';
-				}
+				// Both scenarios should show the modal, not the small error alert
+				showInsufficientFeeModal = true;
 			}
 		} catch (error) {
 			console.error('Error auto-selecting fee deposit:', error);
@@ -604,22 +605,41 @@
 						<Card
 							class_="border-0 shadow-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20"
 						>
-							<div class="flex items-start gap-3">
-								<div class="rounded-lg bg-blue-500 p-2 text-white">
-									<DollarSign class="h-4 w-4" />
+							<div class="space-y-4">
+								<div class="flex items-start gap-3">
+									<div class="rounded-lg bg-blue-500 p-2 text-white">
+										<DollarSign class="h-4 w-4" />
+									</div>
+									<div class="flex-1">
+										<h3 class="mb-2 font-semibold text-blue-800 dark:text-blue-300">
+											Fee Information
+										</h3>
+										<p class="text-sm text-blue-700 dark:text-blue-400">
+											Fee: <strong>{autoSelectedFeeInfo.feeInfo.formatted} STRK</strong>
+											{#if autoSelectedFeeInfo.feeDeposit}
+												• Auto-selected fee deposit: <strong
+													>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong
+												>
+											{/if}
+										</p>
+									</div>
 								</div>
-								<div class="flex-1">
-									<h3 class="mb-2 font-semibold text-blue-800 dark:text-blue-300">
-										Fee Information
-									</h3>
-									<p class="text-sm text-blue-700 dark:text-blue-400">
-										Fee: <strong>{autoSelectedFeeInfo.feeInfo.formatted} STRK</strong>
-										{#if autoSelectedFeeInfo.feeDeposit}
-											• Auto-selected fee deposit: <strong
-												>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong
-											>
-										{/if}
-									</p>
+								
+								<!-- Auto-selection explanation -->
+								<div class="rounded-lg bg-blue-100 p-3 dark:bg-blue-900/30">
+									<div class="flex items-start gap-2">
+										<CheckCircle class="mt-0.5 h-4 w-4 text-blue-600 dark:text-blue-400" />
+										<div class="text-xs text-blue-700 dark:text-blue-300">
+											<p class="font-medium mb-1">
+												{$t('common.auto_fee_selection', { default: 'Automatic Fee Selection' })}
+											</p>
+											<p>
+												{$t('common.auto_fee_swap_explanation', { 
+													default: 'The system automatically selected the best STRK deposit to pay for network fees. This deposit is separate from your swap deposit to maintain privacy.' 
+												})}
+											</p>
+										</div>
+									</div>
 								</div>
 							</div>
 						</Card>
@@ -636,6 +656,33 @@
 								</div>
 								<div class="flex-1">
 									<p class="text-sm text-red-700 dark:text-red-400">{feePreloadError}</p>
+								</div>
+							</div>
+						</Card>
+					{/if}
+
+					<!-- Fee issue information -->
+					{#if autoSelectedFeeInfo && !autoSelectedFeeInfo.feeDeposit}
+						<Card
+							class_="border-0 shadow-lg bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20"
+						>
+							<div class="flex items-start gap-3">
+								<div class="rounded-lg bg-red-500 p-2 text-white">
+									<Shield class="h-4 w-4" />
+								</div>
+								<div class="flex-1">
+									<h3 class="font-semibold text-red-800 dark:text-red-300 mb-1">
+										{$t('common.fee_payment_issue', { default: 'Fee Payment Issue' })}
+									</h3>
+									<p class="text-sm text-red-700 dark:text-red-400">
+										{#if !autoSelectedFeeInfo.hasEnoughBalance}
+											{$t('common.insufficient_strk_balance_short', { 
+												default: `Insufficient STRK balance. Required: ${autoSelectedFeeInfo.feeInfo.formatted} STRK`
+											})}
+										{:else}
+											{$t('common.no_available_strk_deposits', { default: 'No available STRK deposits for fee payment' })}
+										{/if}
+									</p>
 								</div>
 							</div>
 						</Card>
@@ -918,5 +965,11 @@
 		title={$progressModalStore.title}
 		steps={$progressModalStore.steps}
 		onClose={progressModalActions.hide}
+	/>
+
+	<InsufficientFeeModal
+		show={showInsufficientFeeModal}
+		requiredFeeAmount={autoSelectedFeeInfo?.feeInfo.formatted || ''}
+		onClose={() => showInsufficientFeeModal = false}
 	/>
 </ProtectedRoute>

@@ -10,6 +10,7 @@
 	import { NoteDataSchema, type NoteData } from '$lib/schemas/schemas';
 	import { fetchExtensionFee } from '$lib/utils/fetchFeeForExtension';
 	import Modal from '$lib/ui/Modal.svelte';
+	import InsufficientFeeModal from '$lib/ui/InsufficientFeeModal.svelte';
 	import {
 		PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
 		PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS
@@ -76,6 +77,7 @@
 
 	let isLoading = false;
 	let showFeeModal = false;
+	let showInsufficientFeeModal = false;
 
 	// Confirmation data
 	let withdrawNoteBalanceWei: bigint | null = null;
@@ -110,6 +112,7 @@
 		selectedFeeDeposit = null;
 		autoSelectedFeeInfo = null;
 		feePreloadError = null;
+		showInsufficientFeeModal = false;
 	}
 
 	/** Auto-select fee deposit when withdraw deposit is chosen */
@@ -117,6 +120,7 @@
 		if (!selectedWithdrawDeposit) return;
 
 		feePreloadError = null;
+		showInsufficientFeeModal = false;
 
 		try {
 			// Get fee info and auto-select the best STRK deposit
@@ -138,8 +142,10 @@
 
 				if (!autoSelectedFeeInfo.hasEnoughBalance) {
 					feePreloadError = `Insufficient STRK balance. Required: ${autoSelectedFeeInfo.feeInfo.formatted} STRK`;
+					showInsufficientFeeModal = true;
 				} else {
 					feePreloadError = 'No available STRK deposits for fee payment';
+					showInsufficientFeeModal = true;
 				}
 			}
 		} catch (error) {
@@ -521,12 +527,12 @@
 						<Card
 							class_="border-0 shadow-xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20"
 						>
-							<div class="space-y-3">
+							<div class="space-y-4">
 								<h3 class="flex items-center gap-2 font-semibold text-blue-800 dark:text-blue-300">
 									<Zap class="h-5 w-5" />
 									{$t('common.fee_information', { default: 'Fee Information' })}
 								</h3>
-								<div class="space-y-2">
+								<div class="space-y-3">
 									<div class="flex items-center justify-between">
 										<span class="text-sm text-blue-700 dark:text-blue-300">{$t('common.network_fee', { default: 'Network Fee' })}:</span>
 										<span class="font-bold text-blue-800 dark:text-blue-200"
@@ -541,6 +547,23 @@
 											>
 										</div>
 									{/if}
+								</div>
+								
+								<!-- Auto-selection explanation -->
+								<div class="rounded-lg bg-blue-100 p-3 dark:bg-blue-900/30">
+									<div class="flex items-start gap-2">
+										<CheckCircle class="mt-0.5 h-4 w-4 text-blue-600 dark:text-blue-400" />
+										<div class="text-xs text-blue-700 dark:text-blue-300">
+											<p class="font-medium mb-1">
+												{$t('common.auto_fee_selection', { default: 'Automatic Fee Selection' })}
+											</p>
+											<p>
+												{$t('common.auto_fee_explanation', { 
+													default: 'The system automatically selected the best STRK deposit to pay for network fees. This deposit has sufficient balance and is separate from your withdrawal deposit to maintain privacy.' 
+												})}
+											</p>
+										</div>
+									</div>
 								</div>
 							</div>
 						</Card>
@@ -665,6 +688,19 @@
 										2
 									</div>
 									<div>
+										<p class="text-text font-medium">{$t('ui.withdraw_page.how_it_works.auto_fee_selection.title', { default: 'Auto Fee Selection' })}</p>
+										<p class="text-text-secondary text-sm">
+											{$t('ui.withdraw_page.how_it_works.auto_fee_selection.description', { default: 'System automatically finds the best STRK deposit to pay network fees, ensuring privacy by using a separate deposit.' })}
+										</p>
+									</div>
+								</div>
+								<div class="flex items-start gap-3">
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-purple-500 text-sm font-bold text-white"
+									>
+										3
+									</div>
+									<div>
 										<p class="text-text font-medium">{$t('ui.withdraw_page.how_it_works.set_recipient.title')}</p>
 										<p class="text-text-secondary text-sm">
 											{$t('ui.withdraw_page.how_it_works.set_recipient.description')}
@@ -675,7 +711,7 @@
 									<div
 										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-purple-500 text-sm font-bold text-white"
 									>
-										3
+										4
 									</div>
 									<div>
 										<p class="text-text font-medium">{$t('ui.withdraw_page.how_it_works.zero_knowledge.title')}</p>
@@ -688,7 +724,7 @@
 									<div
 										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-pink-500 text-sm font-bold text-white"
 									>
-										4
+										5
 									</div>
 									<div>
 										<p class="text-text font-medium">{$t('ui.withdraw_page.how_it_works.anonymous_transfer.title')}</p>
@@ -824,5 +860,11 @@
 		title={$progressModalStore.title}
 		steps={$progressModalStore.steps}
 		onClose={progressModalActions.hide}
+	/>
+
+	<InsufficientFeeModal
+		show={showInsufficientFeeModal}
+		requiredFeeAmount={autoSelectedFeeInfo?.feeInfo.formatted || ''}
+		onClose={() => showInsufficientFeeModal = false}
 	/>
 </ProtectedRoute>
