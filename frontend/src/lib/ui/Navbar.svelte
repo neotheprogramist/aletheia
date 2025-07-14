@@ -121,7 +121,7 @@
 			</a>
 
 			<!-- Desktop Navigation -->
-			<div class="hidden items-center space-x-6 xl:flex">
+			<div class="hidden items-center space-x-6 lg:flex">
 				{#if $isConnected}
 					{#each ['/deposit', '/withdraw', '/merge', '/transfer', '/swap'] as route}
 						<a
@@ -168,7 +168,7 @@
 			</div>
 
 			<!-- Mobile menu button -->
-			<div class="flex items-center xl:hidden">
+			<div class="flex items-center lg:hidden">
 				<button
 					class="mobile-menu-button text-text hover:bg-surface rounded-lg p-2 transition-all duration-300 ease-in-out hover:scale-110"
 					on:click={toggleMobileMenu}
@@ -185,7 +185,7 @@
 
 		<!-- Mobile Navigation Menu -->
 		{#if showMobileMenu}
-			<div class="border-border bg-card border-t xl:hidden">
+			<div class="border-border bg-card border-t lg:hidden">
 				<div class="space-y-1 px-2 pt-2 pb-3">
 					<div class="border-border mb-3 flex items-center justify-between border-b px-3 py-2">
 						{#if $isConnected}

@@ -203,24 +203,6 @@ nav {
 	nav {
 		padding: 0.75rem;
 	}
-	
-	nav .nav-links {
-		display: none;
-	}
-	
-	nav .mobile-menu-button {
-		display: block;
-	}
-}
-
-@media (min-width: 769px) {
-	nav .nav-links {
-		display: flex;
-	}
-	
-	nav .mobile-menu-button {
-		display: none;
-	}
 }
 
 /* ============================
