@@ -165,7 +165,6 @@ export async function loadPendingEmptyDeposits(
 ) {
 	setLoading(true);
 	const ops = await getPendingEmptyDepositsForToken(token, setLoading);
-	console.log('ops', ops);
 
 	setPending(ops);
 }

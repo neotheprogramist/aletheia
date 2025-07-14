@@ -14,6 +14,72 @@
     "swap": "Tausch",
     "settings": "Einstellungen"
   },
+  "tooltips": {
+    "navbar": {
+      "export": "Backup aller Ihrer Operationen herunterladen",
+      "import": "Backup-Datei zum Wiederherstellen auswählen",
+      "settings": "Anwendungseinstellungen: Sprache und Einstellungen",
+      "export_description": "Ihre privaten Operationsdaten für Backup herunterladen",
+      "import_description": "Operationen aus einer zuvor exportierten Datei wiederherstellen",
+      "settings_description": "Ihre Privacy Poolz-Einstellungen konfigurieren"
+    },
+    "deposit": {
+      "select_token": "Wählen Sie den Token, den Sie privat einzahlen möchten",
+      "amount": "Geben Sie den einzuzahlenden Betrag ein. Sie können ihn später anonym abheben",
+      "create_button": "Private Einzahlung erstellen - Sie erhalten eine kryptographische Notiz für spätere Abhebung",
+      "max_button": "Gesamtes Wallet-Guthaben für diese Einzahlung verwenden",
+      "token_select": "Aus verfügbaren Token in Ihrem Wallet auswählen",
+      "amount_input": "Betrag muss größer als 0 sein und darf Ihr Guthaben nicht überschreiten"
+    },
+    "withdraw": {
+      "filter_token": "Einzahlungen nach Token-Typ filtern",
+      "table_index": "Einzahlungsnummer im System",
+      "table_amount": "Verfügbarer Betrag für Abhebung",
+      "table_status": "Einzahlungsstatus (verfügbar/verwendet)",
+      "table_sort": "Klicken um nach dieser Spalte zu sortieren",
+      "recipient": "Wallet-Adresse, die die abgehobenen Token erhalten wird",
+      "amount": "Abzuhebender Betrag (kann kleiner als Einzahlung sein)",
+      "max_button": "Gesamten verfügbaren Betrag von dieser Einzahlung abheben",
+      "execute_button": "Private Abhebung mit Zero-Knowledge-Beweis ausführen",
+      "auto_fee": "System hat automatisch die beste STRK-Einzahlung zur Zahlung der Netzwerkgebühren ausgewählt"
+    },
+    "merge": {
+      "selection_mode": "Auswahlmodus wählen: zuerst erste Einzahlung auswählen, dann zweite zum Zusammenführen",
+      "reset_button": "Alle ausgewählten Einzahlungen löschen und neu beginnen",
+      "first_deposit": "Erste Einzahlung zum Zusammenführen",
+      "second_deposit": "Zweite Einzahlung zum Zusammenführen",
+      "fee_deposit": "Automatisch ausgewählte STRK-Einzahlung zur Zahlung der Netzwerkgebühren",
+      "execute_button": "Beide Einzahlungen mit Zero-Knowledge-Beweis zu einer zusammenführen",
+      "auto_fee": "System hat automatisch die beste STRK-Einzahlung zur Zahlung der Netzwerkgebühren ausgewählt. Diese Einzahlung ist von Ihren Zusammenführungseinzahlungen getrennt, um Privatsphäre zu wahren."
+    },
+    "transfer": {
+      "mode_toggle": "Sendemodus - Token an jemanden senden | Empfangsmodus - Notiz zum Empfangen von Token generieren",
+      "generate_empty": "Leere kryptographische Notiz generieren, die Sie mit dem Sender teilen können",
+      "recipient_hash": "Hash der Empfängernotiz - erhalten Sie ihn von der Person, an die Sie Token senden möchten",
+      "amount": "An Empfänger zu übertragender Betrag",
+      "execute_button": "Private Übertragung mit Zero-Knowledge-Beweis ausführen"
+    },
+    "swap": {
+      "source_token": "Einzahlungen nach Token filtern, den Sie tauschen möchten",
+      "target_token": "Token wählen, den Sie im Austausch erhalten möchten",
+      "amount": "Von Ihrer Einzahlung zu tauschender Betrag",
+      "max_button": "Gesamten verfügbaren Betrag von dieser Einzahlung tauschen",
+      "execute_button": "Privaten Token-Tausch mit Zero-Knowledge-Beweis ausführen"
+    },
+    "common": {
+      "loading": "Operation läuft... Bitte warten",
+      "zero_knowledge": "Diese Operation verwendet Zero-Knowledge-Beweise zur Wahrung der Privatsphäre",
+      "network_fees": "Netzwerkgebühren werden automatisch aus STRK-Einzahlungen bezahlt, um Anonymität zu wahren",
+      "proof_time": "Beweisgenerierung kann einige Sekunden dauern",
+      "backup_important": "Bewahren Sie Backups Ihrer Operationsdaten auf",
+      "privacy_maintained": "Ihre Privatsphäre wird durch kryptographische Beweise gewährleistet",
+      "table_pagination": "Durch Ergebnisseiten navigieren",
+      "wallet_balance": "Aktuelles Guthaben dieses Tokens in Ihrem verbundenen Wallet",
+      "token_dropdown": "Liste verfügbarer Token öffnen",
+      "copy_address": "Wallet-Adresse in Zwischenablage kopieren",
+      "copied": "Adresse kopiert!"
+    }
+  },
   "progress_modal": {
     "deposit": {
       "title": "Einzahlungsfortschritt",

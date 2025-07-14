@@ -18,6 +18,7 @@
 	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
+	import Tooltip from '$lib/ui/Tooltip.svelte';
 	import SelectionToggle from '$lib/ui/SelectionToggle.svelte';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { fetchMergeFee } from '$lib/utils/fetchFeeForExtension';
@@ -218,15 +219,15 @@
 			if (autoSelectedFeeInfo.feeDeposit) {
 				selectedFeeDeposit = autoSelectedFeeInfo.feeDeposit;
 				selectedFeeKey = autoSelectedFeeInfo.feeDeposit.index;
-				
+
 				// Smooth scroll to merge form after successful deposit selection
 				setTimeout(() => {
 					if (mergeFormElement) {
-						mergeFormElement.scrollIntoView({ 
-							behavior: 'smooth', 
-							block: 'start' 
+						mergeFormElement.scrollIntoView({
+							behavior: 'smooth',
+							block: 'start'
 						});
-						
+
 						// Add highlight effect after scroll
 						setTimeout(() => {
 							highlightForm = true;
@@ -602,10 +603,12 @@
 							<div class="space-y-4">
 								<!-- Selection Toggle -->
 								<div class="space-y-3">
-									<label class="text-text flex items-center gap-2 text-sm font-semibold">
-										<Layers class="h-4 w-4" />
-										{$t('ui.merge_page.selection_mode')}
-									</label>
+									<Tooltip text={$t('tooltips.merge.selection_mode')} position="right" theme="dark">
+										<label class="text-text flex items-center gap-2 text-sm font-semibold">
+											<Layers class="h-4 w-4" />
+											{$t('ui.merge_page.selection_mode')}
+										</label>
+									</Tooltip>
 									<SelectionToggle
 										options={[
 											{ label: $t('ui.merge_page.first_deposit'), value: 'merge1', isFirst: true },
@@ -639,7 +642,9 @@
 										>
 											<Layers class="h-8 w-8 text-gray-400" />
 										</div>
-										<h3 class="text-text mb-2 text-lg font-medium">{$t('ui.merge_page.no_deposits_title')}</h3>
+										<h3 class="text-text mb-2 text-lg font-medium">
+											{$t('ui.merge_page.no_deposits_title')}
+										</h3>
 										<p class="text-text-secondary">{$t('ui.merge_page.no_deposits_description')}</p>
 									</div>
 								{:else}
@@ -671,65 +676,91 @@
 					<!-- Selected Deposits Display -->
 					{#if selectedMerge1Deposit || selectedMerge2Deposit || selectedFeeDeposit}
 						<Card class_="border-0 shadow-xl bg-gray-50 dark:bg-gray-800/50">
-							<div class="flex items-center gap-2 mb-4">
+							<div class="mb-4 flex items-center gap-2">
 								<CheckCircle class="h-5 w-5 text-green-500" />
-								<span class="text-lg font-semibold text-gray-700 dark:text-gray-300">Selected Deposits</span>
+								<span class="text-lg font-semibold text-gray-700 dark:text-gray-300"
+									>Selected Deposits</span
+								>
 							</div>
 							<div class="space-y-3">
 								<!-- Merge 1 Deposit -->
 								{#if selectedMerge1Deposit}
-									<div class="rounded-lg border border-purple-200 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20 p-4">
-										<div class="flex items-center justify-between mb-2">
+									<div
+										class="rounded-lg border border-purple-200 bg-purple-50 p-4 dark:border-purple-700 dark:bg-purple-900/20"
+									>
+										<div class="mb-2 flex items-center justify-between">
 											<div class="flex items-center gap-2">
-												<div class="w-2 h-2 rounded-full bg-purple-500"></div>
-												<span class="text-sm font-medium text-purple-800 dark:text-purple-300">Merge 1 Deposit</span>
+												<div class="h-2 w-2 rounded-full bg-purple-500"></div>
+												<span class="text-sm font-medium text-purple-800 dark:text-purple-300"
+													>Merge 1 Deposit</span
+												>
 											</div>
 											<button
 												on:click={() => resetMerge1()}
-												class="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 underline"
+												class="text-xs text-purple-600 underline hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-200"
 											>
 												Reset
 											</button>
 										</div>
 										<div class="flex items-center gap-2">
-											<span class="font-semibold text-purple-900 dark:text-purple-100">{selectedMerge1Deposit.displayAmount}</span>
-											<span class="text-sm text-purple-700 dark:text-purple-400">#{selectedMerge1Deposit.index}</span>
+											<span class="font-semibold text-purple-900 dark:text-purple-100"
+												>{selectedMerge1Deposit.displayAmount}</span
+											>
+											<span class="text-sm text-purple-700 dark:text-purple-400"
+												>#{selectedMerge1Deposit.index}</span
+											>
 										</div>
 									</div>
 								{/if}
 
 								<!-- Merge 2 Deposit -->
 								{#if selectedMerge2Deposit}
-									<div class="rounded-lg border border-orange-200 dark:border-orange-700 bg-orange-50 dark:bg-orange-900/20 p-4">
-										<div class="flex items-center justify-between mb-2">
+									<div
+										class="rounded-lg border border-orange-200 bg-orange-50 p-4 dark:border-orange-700 dark:bg-orange-900/20"
+									>
+										<div class="mb-2 flex items-center justify-between">
 											<div class="flex items-center gap-2">
-												<div class="w-2 h-2 rounded-full bg-orange-500"></div>
-												<span class="text-sm font-medium text-orange-800 dark:text-orange-300">Merge 2 Deposit</span>
+												<div class="h-2 w-2 rounded-full bg-orange-500"></div>
+												<span class="text-sm font-medium text-orange-800 dark:text-orange-300"
+													>Merge 2 Deposit</span
+												>
 											</div>
 											<button
 												on:click={() => resetMerge2()}
-												class="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-200 underline"
+												class="text-xs text-orange-600 underline hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-200"
 											>
 												Reset
 											</button>
 										</div>
 										<div class="flex items-center gap-2">
-											<span class="font-semibold text-orange-900 dark:text-orange-100">{selectedMerge2Deposit.displayAmount}</span>
-											<span class="text-sm text-orange-700 dark:text-orange-400">#{selectedMerge2Deposit.index}</span>
+											<span class="font-semibold text-orange-900 dark:text-orange-100"
+												>{selectedMerge2Deposit.displayAmount}</span
+											>
+											<span class="text-sm text-orange-700 dark:text-orange-400"
+												>#{selectedMerge2Deposit.index}</span
+											>
 										</div>
 									</div>
 								{/if}
 
 								<!-- Fee Deposit -->
 								{#if selectedFeeDeposit}
-									<div class="rounded-lg border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 p-4">
-										<div class="flex items-center gap-2 mb-2">
-											<div class="w-2 h-2 rounded-full bg-blue-500"></div>
-											<span class="text-sm font-medium text-blue-800 dark:text-blue-300">Fee Deposit (Auto-selected)</span>
+									<div
+										class="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-700 dark:bg-blue-900/20"
+									>
+										<div class="mb-2 flex items-center gap-2">
+											<div class="h-2 w-2 rounded-full bg-blue-500"></div>
+											<span class="text-sm font-medium text-blue-800 dark:text-blue-300"
+												>Fee Deposit (Auto-selected)</span
+											>
 										</div>
 										<div class="flex items-center gap-2">
-											<span class="font-semibold text-blue-900 dark:text-blue-100">{selectedFeeDeposit.displayAmount}</span>
-											<span class="text-sm text-blue-700 dark:text-blue-400">#{selectedFeeDeposit.index}</span>
+											<span class="font-semibold text-blue-900 dark:text-blue-100"
+												>{selectedFeeDeposit.displayAmount}</span
+											>
+											<span class="text-sm text-blue-700 dark:text-blue-400"
+												>#{selectedFeeDeposit.index}</span
+											>
 										</div>
 									</div>
 								{/if}
@@ -751,32 +782,37 @@
 								</h3>
 								<div class="space-y-3">
 									<div class="flex items-center justify-between">
-										<span class="text-sm text-orange-700 dark:text-orange-300">{$t('ui.merge_page.network_fee', { default: 'Network Fee' })}:</span>
+										<span class="text-sm text-orange-700 dark:text-orange-300"
+											>{$t('ui.merge_page.network_fee', { default: 'Network Fee' })}:</span
+										>
 										<span class="font-bold text-orange-800 dark:text-orange-200"
 											>{autoSelectedFeeInfo.feeInfo.formatted} STRK</span
 										>
 									</div>
 									{#if autoSelectedFeeInfo.feeDeposit}
 										<div class="flex items-center justify-between">
-											<span class="text-sm text-orange-700 dark:text-orange-300">{$t('ui.merge_page.fee_deposit', { default: 'Fee Deposit' })}:</span>
+											<span class="text-sm text-orange-700 dark:text-orange-300"
+												>{$t('ui.merge_page.fee_deposit', { default: 'Fee Deposit' })}:</span
+											>
 											<span class="font-medium text-orange-800 dark:text-orange-200"
 												>{autoSelectedFeeInfo.feeDeposit.displayAmount}</span
 											>
 										</div>
 									{/if}
 								</div>
-								
+
 								<!-- Auto-selection explanation -->
 								<div class="rounded-lg bg-orange-100 p-3 dark:bg-orange-900/30">
 									<div class="flex items-start gap-2">
 										<CheckCircle class="mt-0.5 h-4 w-4 text-orange-600 dark:text-orange-400" />
 										<div class="text-xs text-orange-700 dark:text-orange-300">
-											<p class="font-medium mb-1">
+											<p class="mb-1 font-medium">
 												{$t('common.auto_fee_selection', { default: 'Automatic Fee Selection' })}
 											</p>
 											<p>
-												{$t('common.auto_fee_merge_explanation', { 
-													default: 'The system automatically selected the best STRK deposit to pay for network fees. This deposit is separate from your merge deposits to maintain privacy.' 
+												{$t('common.auto_fee_merge_explanation', {
+													default:
+														'The system automatically selected the best STRK deposit to pay for network fees. This deposit is separate from your merge deposits to maintain privacy.'
 												})}
 											</p>
 										</div>
@@ -805,9 +841,14 @@
 
 					<!-- Merge Button -->
 					{#if selectedMerge1Deposit && selectedMerge2Deposit && selectedFeeDeposit && !feePreloadError}
-						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm {highlightForm ? 'ring-4 ring-orange-500 shadow-orange-500/25 shadow-2xl bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/30 dark:to-red-900/30 border-orange-300 dark:border-orange-500' : ''} {highlightForm && !stopPulsing ? 'animate-pulse-scale' : ''} transition-all duration-500 ease-in-out"
-							on:mouseenter={() => stopPulsing = true}
-							on:click={() => stopPulsing = true}
+						<Card
+							class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm {highlightForm
+								? 'ring-4 ring-orange-500 shadow-orange-500/25 shadow-2xl bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/30 dark:to-red-900/30 border-orange-300 dark:border-orange-500'
+								: ''} {highlightForm && !stopPulsing
+								? 'animate-pulse-scale'
+								: ''} transition-all duration-500 ease-in-out"
+							on:mouseenter={() => (stopPulsing = true)}
+							on:click={() => (stopPulsing = true)}
 						>
 							<div class="space-y-6" bind:this={mergeFormElement}>
 								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
@@ -843,12 +884,14 @@
 									</div>
 								</div>
 
-								<Button
-									text={$t('ui.merge_page.combine_deposits')}
-									loading={isLoading}
-									onClick={initiateMerge}
-									class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-								/>
+								<Tooltip text={$t('tooltips.merge.execute_button')} position="top" theme="dark">
+									<Button
+										text={$t('ui.merge_page.combine_deposits')}
+										loading={isLoading}
+										onClick={initiateMerge}
+										class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+									/>
+								</Tooltip>
 							</div>
 						</Card>
 					{/if}
@@ -932,15 +975,11 @@
 							<div class="space-y-3">
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-orange-500" />
-									<span class="text-text text-sm font-medium"
-										>{$t('ui.merge_page.benefit1')}</span
-									>
+									<span class="text-text text-sm font-medium">{$t('ui.merge_page.benefit1')}</span>
 								</div>
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-orange-500" />
-									<span class="text-text text-sm font-medium"
-										>{$t('ui.merge_page.benefit2')}</span
-									>
+									<span class="text-text text-sm font-medium">{$t('ui.merge_page.benefit2')}</span>
 								</div>
 								<div class="flex items-center gap-3">
 									<CheckCircle class="h-5 w-5 text-orange-500" />
@@ -1059,7 +1098,6 @@
 		show={showInsufficientFeeModal}
 		requiredFeeAmount={(() => {
 			const amount = autoSelectedFeeInfo?.feeInfo.formatted || '';
-			console.log('Modal requiredFeeAmount:', amount, 'autoSelectedFeeInfo:', autoSelectedFeeInfo);
 			return amount;
 		})()}
 		onClose={() => {
@@ -1074,7 +1112,8 @@
 
 <style>
 	@keyframes pulse-scale {
-		0%, 100% {
+		0%,
+		100% {
 			transform: scale(1);
 			opacity: 1;
 		}

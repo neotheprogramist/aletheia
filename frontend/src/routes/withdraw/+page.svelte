@@ -5,6 +5,7 @@
 	import Card from '$lib/ui/Card.svelte';
 	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
 	import ProgressModal from '$lib/ui/ProgressModal.svelte';
+	import Tooltip from '$lib/ui/Tooltip.svelte';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
 	import { fromWei, toWei } from '$lib/utils/toWei';
 	import { NoteDataSchema, type NoteData } from '$lib/schemas/schemas';
@@ -528,10 +529,12 @@
 							<div class="space-y-4">
 								<!-- Token Selection -->
 								<div class="space-y-3">
-									<label class="text-text flex items-center gap-2 text-sm font-semibold">
-										<DollarSign class="h-4 w-4" />
-										{$t('ui.withdraw_page.filter_by_token')}
-									</label>
+									<Tooltip text={$t('tooltips.withdraw.filter_token')} position="right" theme="dark">
+										<label class="text-text flex items-center gap-2 text-sm font-semibold">
+											<DollarSign class="h-4 w-4" />
+											{$t('ui.withdraw_page.filter_by_token')}
+										</label>
+									</Tooltip>
 									<TokenSelect
 										tokens={$tokens}
 										bind:value={$selectedToken}
@@ -737,10 +740,12 @@
 								<form on:submit|preventDefault={initiateWithdraw} class="space-y-6">
 									<!-- Recipient Address -->
 									<div class="space-y-3">
-										<label class="text-text flex items-center gap-2 text-sm font-semibold">
-											<Users class="h-4 w-4" />
-											{$t('withdraw.recipient_address')}
-										</label>
+										<Tooltip text={$t('tooltips.withdraw.recipient')} position="right" theme="dark">
+											<label class="text-text flex items-center gap-2 text-sm font-semibold">
+												<Users class="h-4 w-4" />
+												{$t('withdraw.recipient_address')}
+											</label>
+										</Tooltip>
 										<Input
 											bind:value={withdrawRecipient}
 											required
@@ -753,10 +758,12 @@
 
 									<!-- Amount Input -->
 									<div class="space-y-3">
-										<label class="text-text flex items-center gap-2 text-sm font-semibold">
-											<ArrowDown class="h-4 w-4" />
-											{$t('withdraw.withdraw_amount')}
-										</label>
+										<Tooltip text={$t('tooltips.withdraw.amount')} position="right" theme="dark">
+											<label class="text-text flex items-center gap-2 text-sm font-semibold">
+												<ArrowDown class="h-4 w-4" />
+												{$t('withdraw.withdraw_amount')}
+											</label>
+										</Tooltip>
 										<div class="flex gap-2">
 											<Input
 												bind:value={withdrawAmount}
@@ -766,29 +773,32 @@
 												})}
 												class_="flex-1 text-lg font-medium"
 											/>
-											<button
-												type="button"
-												class="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-purple-600"
-												on:click={() => {
-													if (selectedWithdrawDeposit) {
-														withdrawAmount = selectedWithdrawDeposit.displayAmount;
-													}
-												}}
-											>
-												{$t('deposit.max')}
-											</button>
+											<Tooltip text={$t('tooltips.withdraw.max_button')} position="top" theme="dark">
+												<button
+													type="button"
+													class="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-purple-600"
+													on:click={() => {
+														if (selectedWithdrawDeposit) {
+															withdrawAmount = selectedWithdrawDeposit.displayAmount;
+														}
+													}}
+												>
+													{$t('deposit.max')}
+												</button>
+											</Tooltip>
 										</div>
 									</div>
 
 									<!-- Submit Button -->
-									<Button
-										text={$t('common.execute_private_withdrawal', {
-											default: 'Execute Private Withdrawal'
-										})}
-										loading={isLoading}
-										type="submit"
-										class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-									/>
+
+									<Tooltip text={$t('tooltips.withdraw.execute_button')} position="top" theme="dark">
+										<Button
+											text={$t('common.execute_private_withdrawal', { default: 'Execute Private Withdrawal' })}
+											loading={isLoading}
+											type="submit"
+											class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+										/>
+									</Tooltip>
 								</form>
 							</div>
 						</Card>

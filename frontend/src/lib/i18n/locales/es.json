@@ -14,6 +14,72 @@
 		"swap": "Intercambio",
 		"settings": "Configuración"
 	},
+	"tooltips": {
+		"navbar": {
+			"export": "Descargar respaldo de todas tus operaciones",
+			"import": "Seleccionar archivo de respaldo para restaurar",
+			"settings": "Configuración de la aplicación: idioma y preferencias",
+			"export_description": "Descargar datos de tus operaciones privadas para respaldo",
+			"import_description": "Restaurar operaciones desde un archivo previamente exportado",
+			"settings_description": "Configurar tus preferencias de Privacy Poolz"
+		},
+		"deposit": {
+			"select_token": "Elige el token que quieres depositar privadamente",
+			"amount": "Introduce la cantidad a depositar. Podrás retirarla anónimamente más tarde",
+			"create_button": "Crear depósito privado - recibirás una nota criptográfica para retiro posterior",
+			"max_button": "Usar todo el saldo de tu billetera para este depósito",
+			"token_select": "Seleccionar entre tokens disponibles en tu billetera",
+			"amount_input": "La cantidad debe ser mayor que 0 y no exceder tu saldo"
+		},
+		"withdraw": {
+			"filter_token": "Filtrar depósitos por tipo de token",
+			"table_index": "Número de depósito en el sistema",
+			"table_amount": "Cantidad disponible para retiro",
+			"table_status": "Estado del depósito (disponible/usado)",
+			"table_sort": "Haz clic para ordenar por esta columna",
+			"recipient": "Dirección de billetera que recibirá los tokens retirados",
+			"amount": "Cantidad a retirar (puede ser menor que el depósito)",
+			"max_button": "Retirar toda la cantidad disponible de este depósito",
+			"execute_button": "Ejecutar retiro privado usando prueba de conocimiento cero",
+			"auto_fee": "El sistema seleccionó automáticamente el mejor depósito STRK para pagar tarifas de red"
+		},
+		"merge": {
+			"selection_mode": "Elegir modo de selección: primero selecciona el primer depósito, luego el segundo para combinar",
+			"reset_button": "Limpiar todos los depósitos seleccionados y empezar de nuevo",
+			"first_deposit": "Primer depósito para combinar",
+			"second_deposit": "Segundo depósito para combinar",
+			"fee_deposit": "Depósito STRK seleccionado automáticamente para pagar tarifas de red",
+			"execute_button": "Combinar ambos depósitos en uno usando prueba de conocimiento cero",
+			"auto_fee": "El sistema seleccionó automáticamente el mejor depósito STRK para pagar tarifas de red. Este depósito está separado de tus depósitos de fusión para mantener privacidad."
+		},
+		"transfer": {
+			"mode_toggle": "Modo envío - enviar tokens a alguien | Modo recepción - generar nota para recibir tokens",
+			"generate_empty": "Generar nota criptográfica vacía que puedes compartir con el remitente",
+			"recipient_hash": "Hash de la nota del destinatario - obtenerlo de la persona a quien quieres enviar tokens",
+			"amount": "Cantidad a transferir al destinatario",
+			"execute_button": "Ejecutar transferencia privada usando prueba de conocimiento cero"
+		},
+		"swap": {
+			"source_token": "Filtrar depósitos por token que quieres intercambiar",
+			"target_token": "Elegir token que quieres recibir a cambio",
+			"amount": "Cantidad a intercambiar desde tu depósito",
+			"max_button": "Intercambiar toda la cantidad disponible de este depósito",
+			"execute_button": "Ejecutar intercambio de tokens privado usando prueba de conocimiento cero"
+		},
+		"common": {
+			"loading": "Operación en curso... Por favor espera",
+			"zero_knowledge": "Esta operación usa pruebas de conocimiento cero para mantener privacidad",
+			"network_fees": "Las tarifas de red se pagan automáticamente desde depósitos STRK para mantener anonimato",
+			"proof_time": "La generación de prueba puede tomar unos segundos",
+			"backup_important": "Mantén respaldos de los datos de tus operaciones",
+			"privacy_maintained": "Tu privacidad se mantiene a través de pruebas criptográficas",
+			"table_pagination": "Navegar a través de páginas de resultados",
+			"wallet_balance": "Saldo actual de este token en tu billetera conectada",
+			"token_dropdown": "Abrir lista de tokens disponibles",
+			"copy_address": "Copiar dirección de billetera al portapapeles",
+			"copied": "¡Dirección copiada!"
+		}
+	},
 	"progress_modal": {
 		"deposit": {
 			"title": "Progreso del Depósito",

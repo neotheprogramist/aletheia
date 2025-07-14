@@ -3,10 +3,11 @@
 	import WalletConnector from '$lib/ui/WalletConnector.svelte';
 	import SettingsModal from '$lib/ui/SettingsModal.svelte';
 	import { isConnected } from '$lib/stores/wallet';
-	import { Download, Upload, Menu, X, Settings } from 'lucide-svelte';
+	import { Download, FolderOpen, Menu, X, Settings } from 'lucide-svelte';
 	import { exportOperations, importOperations } from '$lib/utils/operationsBackup';
 	import { toastStore } from '$lib/stores/toast';
 	import { t } from '$lib/i18n';
+	import Tooltip from '$lib/ui/Tooltip.svelte';
 
 	let fileInput: HTMLInputElement;
 	let showMobileMenu = false;
@@ -135,21 +136,23 @@
 					{/each}
 
 					<div class="flex items-center gap-2">
-						<button
-							class="text-text-secondary hover:text-primary hover:bg-surface rounded-lg p-2 transition-all duration-300 ease-in-out hover:scale-110"
-							title={$t('ui.navbar.export_tooltip')}
-							on:click={handleExport}
-						>
-							<Download size={18} />
-						</button>
+						<Tooltip text={$t('tooltips.navbar.export')} position="bottom" theme="dark">
+							<button
+								class="text-text-secondary hover:text-primary hover:bg-surface rounded-lg p-2 transition-all duration-300 ease-in-out hover:scale-110"
+								on:click={handleExport}
+							>
+								<Download size={18} />
+							</button>
+						</Tooltip>
 
-						<button
-							class="text-text-secondary hover:text-primary hover:bg-surface rounded-lg p-2 transition-all duration-300 ease-in-out hover:scale-110"
-							title={$t('ui.navbar.import_tooltip')}
-							on:click={openFilePicker}
-						>
-							<Upload size={18} />
-						</button>
+						<Tooltip text={$t('tooltips.navbar.import')} position="bottom" theme="dark">
+							<button
+								class="text-text-secondary hover:text-primary hover:bg-surface rounded-lg p-2 transition-all duration-300 ease-in-out hover:scale-110"
+								on:click={openFilePicker}
+							>
+								<FolderOpen size={18} />
+							</button>
+						</Tooltip>
 					</div>
 				{/if}
 
@@ -157,13 +160,14 @@
 					{#if $isConnected}
 						<WalletConnector />
 					{/if}
-					<button
-						class="text-text-secondary hover:text-primary hover:bg-surface rounded-lg p-2 transition-all duration-300 ease-in-out hover:scale-110"
-						title={$t('ui.navbar.settings_tooltip')}
-						on:click={toggleSettings}
-					>
-						<Settings size={18} />
-					</button>
+					<Tooltip text={$t('tooltips.navbar.settings')} position="bottom" theme="dark">
+						<button
+							class="text-text-secondary hover:text-primary hover:bg-surface rounded-lg p-2 transition-all duration-300 ease-in-out hover:scale-110"
+							on:click={toggleSettings}
+						>
+							<Settings size={18} />
+						</button>
+					</Tooltip>
 				</div>
 			</div>
 

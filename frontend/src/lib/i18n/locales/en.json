@@ -417,6 +417,72 @@
     "supported_pairs_title": "Supported Trading Pairs",
     "supported_pairs_description": "All swaps are powered by Ekubo DEX for optimal rates and deep liquidity. Supported pairs include all major token combinations in the privacy pool."
   },
+  "tooltips": {
+    "navbar": {
+      "export": "Download backup of all your operations",
+      "import": "Select backup file to restore operations",
+      "settings": "Application settings: language and preferences",
+      "export_description": "Download your private operations data for backup",
+      "import_description": "Restore operations from a previously exported file",
+      "settings_description": "Configure your Privacy Poolz preferences"
+    },
+    "deposit": {
+      "select_token": "Choose the token you want to deposit privately",
+      "amount": "Enter the amount to deposit. You can withdraw it anonymously later",
+      "create_button": "Create private deposit - you'll receive a cryptographic note for later withdrawal",
+      "max_button": "Use your entire wallet balance for this deposit",
+      "token_select": "Select from available tokens in your wallet",
+      "amount_input": "Amount must be greater than 0 and not exceed your balance"
+    },
+    "withdraw": {
+      "filter_token": "Filter deposits by token type",
+      "table_index": "Deposit number in the system",
+      "table_amount": "Amount available for withdrawal",
+      "table_status": "Deposit status (available/used)",
+      "table_sort": "Click to sort by this column",
+      "recipient": "Wallet address that will receive the withdrawn tokens",
+      "amount": "Amount to withdraw (can be less than the deposit)",
+      "max_button": "Withdraw the entire available amount from this deposit",
+      "execute_button": "Execute private withdrawal using zero-knowledge proof",
+      "auto_fee": "System automatically selected the best STRK deposit to pay network fees"
+    },
+    "merge": {
+      "selection_mode": "Choose selection mode: first select first deposit, then second deposit to combine",
+      "reset_button": "Clear all selected deposits and start over",
+      "first_deposit": "First deposit to combine",
+      "second_deposit": "Second deposit to combine",
+      "fee_deposit": "STRK deposit automatically selected to pay network fees",
+      "execute_button": "Combine both deposits into one using zero-knowledge proof",
+      "auto_fee": "System automatically selected the best STRK deposit to pay for network fees. This deposit is separate from your merge deposits to maintain privacy."
+    },
+    "transfer": {
+      "mode_toggle": "Sending mode - send tokens to someone | Receiving mode - generate note to receive tokens",
+      "generate_empty": "Generate empty cryptographic note that you can share with the sender",
+      "recipient_hash": "Hash of the note from recipient - get this from the person you want to send tokens to",
+      "amount": "Amount to transfer to the recipient",
+      "execute_button": "Execute private transfer using zero-knowledge proof"
+    },
+    "swap": {
+      "source_token": "Filter deposits by token you want to swap from",
+      "target_token": "Choose token you want to receive in exchange",
+      "amount": "Amount to swap from your deposit",
+      "max_button": "Swap the entire available amount from this deposit",
+      "execute_button": "Execute private token swap using zero-knowledge proof"
+    },
+    "common": {
+      "loading": "Operation in progress... Please wait",
+      "zero_knowledge": "This operation uses zero-knowledge proofs to maintain privacy",
+      "network_fees": "Network fees are automatically paid from STRK deposits to maintain anonymity",
+      "proof_time": "Proof generation may take a few seconds",
+      "backup_important": "Keep backups of your operations data",
+      "privacy_maintained": "Your privacy is maintained through cryptographic proofs",
+      "table_pagination": "Navigate through pages of results",
+      "wallet_balance": "Current balance of this token in your connected wallet",
+      "token_dropdown": "Open list of available tokens",
+      "copy_address": "Copy wallet address to clipboard",
+      "copied": "Address copied!"
+    }
+  },
   "features": {
     "private_deposits": {
       "title": "Private Deposits",
