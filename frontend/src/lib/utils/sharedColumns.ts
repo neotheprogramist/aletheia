@@ -13,6 +13,11 @@ export const createElegantDepositColumns = (
 ): Column<DisplayOperation>[] => [
 	{ 
 		label: 'Deposit', 
+		field: (deposit) => {
+			// Extract numeric value for sorting
+			const amount = parseFloat(deposit.displayAmount.replace(/[^0-9.-]/g, ''));
+			return amount;
+		},
 		render: (deposit) => {
 			const tokenConfig = supportedTokens.find(t => t.address === deposit.data.tokenAddress);
 			const tokenSymbol = tokenConfig?.symbol || deposit.data.tokenAddress.slice(0, 6);

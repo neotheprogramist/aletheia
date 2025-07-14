@@ -146,6 +146,7 @@
 		showInsufficientFeeModal = false;
 	}
 
+
 	/** Auto-select fee deposit when withdraw deposit is chosen */
 	async function autoSelectFeeDeposit() {
 		if (!selectedWithdrawDeposit) return;
@@ -518,6 +519,53 @@
 										class_="w-full sm:w-80"
 									/>
 								</div>
+
+								<!-- Selected Deposits Display -->
+								{#if selectedWithdrawDeposit || selectedFeeDeposit}
+									<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4 mb-4">
+										<div class="flex items-center gap-2 mb-3">
+											<CheckCircle class="h-4 w-4 text-green-500" />
+											<span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Selected Deposits</span>
+										</div>
+										<div class="space-y-3">
+											<!-- Operation Deposit -->
+											{#if selectedWithdrawDeposit}
+												<div class="rounded-lg border border-purple-200 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20 p-3">
+													<div class="flex items-center justify-between mb-2">
+														<div class="flex items-center gap-2">
+															<div class="w-2 h-2 rounded-full bg-purple-500"></div>
+															<span class="text-xs font-medium text-purple-800 dark:text-purple-300">Operation Deposit</span>
+														</div>
+														<button
+															on:click={() => resetAll()}
+															class="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 underline"
+														>
+															Remove
+														</button>
+													</div>
+													<div class="flex items-center gap-2">
+														<span class="font-semibold text-purple-900 dark:text-purple-100">{selectedWithdrawDeposit.displayAmount}</span>
+														<span class="text-sm text-purple-700 dark:text-purple-400">#{selectedWithdrawDeposit.index}</span>
+													</div>
+												</div>
+											{/if}
+
+											<!-- Fee Deposit -->
+											{#if selectedFeeDeposit}
+												<div class="rounded-lg border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 p-3">
+													<div class="flex items-center gap-2 mb-2">
+														<div class="w-2 h-2 rounded-full bg-blue-500"></div>
+														<span class="text-xs font-medium text-blue-800 dark:text-blue-300">Fee Deposit (Auto-selected)</span>
+													</div>
+													<div class="flex items-center gap-2">
+														<span class="font-semibold text-blue-900 dark:text-blue-100">{selectedFeeDeposit.displayAmount}</span>
+														<span class="text-sm text-blue-700 dark:text-blue-400">#{selectedFeeDeposit.index}</span>
+													</div>
+												</div>
+											{/if}
+										</div>
+									</div>
+								{/if}
 
 								<!-- Deposits Table -->
 								{#if !deposits.length}
