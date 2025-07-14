@@ -29,7 +29,7 @@
 	import { tokens, selectedToken } from '$lib/stores/tokens';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
-	import { defaultDepositColumns } from '$lib/utils/sharedColumns';
+	import { createElegantDepositColumns } from '$lib/utils/sharedColumns';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
 	import { supportedTokens } from '$lib/config/tokens';
@@ -94,7 +94,38 @@
 	}
 
 	function handleRowClick(globalIdx: number) {
-		selectedWithdrawKey = deposits[globalIdx].index;
+		const clickedKey = deposits[globalIdx].index;
+		
+		// If clicking on already selected withdraw deposit, deselect it
+		if (selectedWithdrawKey === clickedKey) {
+			resetAll();
+			return;
+		}
+		
+		// If clicking on the fee deposit, set it as operation deposit and auto-select new fee
+		if (selectedFeeKey === clickedKey) {
+			// Set clicked fee deposit as the new operation deposit
+			selectedWithdrawKey = clickedKey;
+			selectedWithdrawDeposit = deposits.find((d) => d.index === selectedWithdrawKey) ?? null;
+			withdrawRecipient = '';
+			withdrawAmount = '';
+			
+			// Clear old fee selection and auto-select new fee
+			selectedFeeKey = null;
+			selectedFeeDeposit = null;
+			autoSelectedFeeInfo = null;
+			feePreloadError = null;
+			showInsufficientFeeModal = false;
+			
+			// Auto-select new fee deposit
+			if (selectedWithdrawDeposit) {
+				autoSelectFeeDeposit();
+			}
+			return;
+		}
+		
+		// Select new withdraw deposit
+		selectedWithdrawKey = clickedKey;
 		selectedWithdrawDeposit = deposits.find((d) => d.index === selectedWithdrawKey) ?? null;
 		withdrawRecipient = '';
 		withdrawAmount = '';
@@ -502,19 +533,17 @@
 										</p>
 									</div>
 								{:else}
-									<div
-										class="rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 p-1 dark:from-gray-700 dark:to-gray-600"
-									>
+									<div class="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
 										<PaginatedTable
-											columns={defaultDepositColumns}
+											columns={createElegantDepositColumns(selectedWithdrawKey, selectedFeeKey)}
 											items={deposits}
 											pageSize={5}
 											keyField="index"
 											disabledKeys={undefined}
 											onRowClick={handleRowClick}
-											activeKey={selectedWithdrawKey}
-											inactiveKeys={selectedFeeKey !== null ? [selectedFeeKey] : []}
-											hoverClass="hover:bg-purple-600"
+											activeKey={null}
+											inactiveKeys={[]}
+											hoverClass="hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/30 dark:hover:to-pink-900/30 transition-all duration-200"
 										/>
 									</div>
 								{/if}
