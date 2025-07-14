@@ -28,9 +28,8 @@
 	import { tokens, selectedToken } from '$lib/stores/tokens';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
-	import { defaultDepositColumns } from '$lib/utils/sharedColumns';
+	import { createElegantDepositColumns } from '$lib/utils/sharedColumns';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
-	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
 	import { supportedTokens } from '$lib/config/tokens';
 	import { browser } from '$app/environment';
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
@@ -74,6 +73,11 @@
 	// Auto-selected fee information
 	let autoSelectedFeeInfo: AutoSelectedFee | null = null;
 	let feePreloadError: string | null = null;
+
+	// Animation variables
+	let swapFormElement: HTMLElement | null = null;
+	let highlightForm = false;
+	let stopPulsing = false;
 
 	let swapNote: NoteData | null = null;
 	let feeNote: NoteData | null = null;
@@ -126,7 +130,37 @@
 	}
 
 	function handleRowClick(globalIdx: number) {
-		selectedSwapKey = deposits[globalIdx].index;
+		const clickedKey = deposits[globalIdx].index;
+
+		// If clicking on already selected swap deposit, deselect it
+		if (selectedSwapKey === clickedKey) {
+			resetAll();
+			return;
+		}
+
+		// If clicking on the fee deposit, set it as swap deposit and auto-select new fee
+		if (selectedFeeKey === clickedKey) {
+			// Set clicked fee deposit as the new swap deposit
+			selectedSwapKey = clickedKey;
+			selectedSwapDeposit = deposits.find((d) => d.index === selectedSwapKey) ?? null;
+			swapAmount = '';
+
+			// Clear old fee selection and auto-select new fee
+			selectedFeeKey = null;
+			selectedFeeDeposit = null;
+			autoSelectedFeeInfo = null;
+			feePreloadError = null;
+			showInsufficientFeeModal = false;
+
+			// Auto-select new fee deposit
+			if (selectedSwapDeposit) {
+				autoSelectFeeDeposit();
+			}
+			return;
+		}
+
+		// Select new swap deposit
+		selectedSwapKey = clickedKey;
 		selectedSwapDeposit = deposits.find((d) => d.index === selectedSwapKey) ?? null;
 		swapAmount = '';
 
@@ -144,6 +178,8 @@
 		autoSelectedFeeInfo = null;
 		feePreloadError = null;
 		showInsufficientFeeModal = false;
+		highlightForm = false;
+		stopPulsing = false;
 	}
 
 	/** Auto-select fee deposit when swap deposit is chosen */
@@ -167,6 +203,26 @@
 			if (autoSelectedFeeInfo.feeDeposit) {
 				selectedFeeDeposit = autoSelectedFeeInfo.feeDeposit;
 				selectedFeeKey = autoSelectedFeeInfo.feeDeposit.index;
+
+				// Smooth scroll to swap form after successful deposit selection
+				setTimeout(() => {
+					if (swapFormElement) {
+						swapFormElement.scrollIntoView({
+							behavior: 'smooth',
+							block: 'start'
+						});
+
+						// Add highlight effect after scroll
+						setTimeout(() => {
+							highlightForm = true;
+							stopPulsing = false;
+							// Stop pulsing after 3 seconds, keep colors
+							setTimeout(() => {
+								stopPulsing = true;
+							}, 3000);
+						}, 600);
+					}
+				}, 100);
 			} else {
 				selectedFeeDeposit = null;
 				selectedFeeKey = null;
@@ -578,23 +634,26 @@
 									>
 										<Shuffle class="h-8 w-8 text-indigo-500" />
 									</div>
-									<h3 class="text-text mb-2 text-lg font-semibold">{$t('swap.no_deposits_title')}</h3>
+									<h3 class="text-text mb-2 text-lg font-semibold">
+										{$t('swap.no_deposits_title')}
+									</h3>
 									<p class="text-text-secondary">{$t('swap.no_deposits_description')}</p>
 								</div>
 							{:else}
-								<div
-									class="rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 p-1 dark:from-gray-700 dark:to-gray-600"
-								>
+								<div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
 									<PaginatedTable
-										columns={defaultDepositColumns}
+										columns={createElegantDepositColumns(
+											selectedSwapKey,
+											selectedFeeKey,
+											null,
+											'swap'
+										)}
 										items={deposits}
 										pageSize={5}
 										keyField="index"
 										disabledKeys={undefined}
 										onRowClick={handleRowClick}
-										activeKey={selectedSwapKey}
-										inactiveKeys={selectedFeeKey !== null ? [selectedFeeKey] : []}
-										hoverClass="hover:bg-indigo-600"
+										hoverClass="hover:bg-cyan-50 dark:hover:bg-cyan-900/20"
 									/>
 								</div>
 							{/if}
@@ -625,18 +684,19 @@
 										</p>
 									</div>
 								</div>
-								
+
 								<!-- Auto-selection explanation -->
 								<div class="rounded-lg bg-blue-100 p-3 dark:bg-blue-900/30">
 									<div class="flex items-start gap-2">
 										<CheckCircle class="mt-0.5 h-4 w-4 text-blue-600 dark:text-blue-400" />
 										<div class="text-xs text-blue-700 dark:text-blue-300">
-											<p class="font-medium mb-1">
+											<p class="mb-1 font-medium">
 												{$t('common.auto_fee_selection', { default: 'Automatic Fee Selection' })}
 											</p>
 											<p>
-												{$t('common.auto_fee_swap_explanation', { 
-													default: 'The system automatically selected the best STRK deposit to pay for network fees. This deposit is separate from your swap deposit to maintain privacy.' 
+												{$t('common.auto_fee_swap_explanation', {
+													default:
+														'The system automatically selected the best STRK deposit to pay for network fees. This deposit is separate from your swap deposit to maintain privacy.'
 												})}
 											</p>
 										</div>
@@ -662,32 +722,20 @@
 						</Card>
 					{/if}
 
-					<!-- Selected Deposits Display -->
-					{#if selectedSwapDeposit || selectedFeeDeposit}
-						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-							<div class="space-y-4">
-								<div class="mb-4 flex items-center gap-3">
-									<CheckCircle class="h-5 w-5 text-green-500" />
-									<h3 class="text-text text-xl font-bold">{$t('swap.selected_deposits_title')}</h3>
-								</div>
-								<SelectedDeposits
-									items={[
-										{ title: 'Swap Deposit', deposit: selectedSwapDeposit },
-										{ title: 'Fee Deposit (Auto-selected)', deposit: selectedFeeDeposit }
-									]}
-								/>
-							</div>
-						</Card>
-					{/if}
-
 					<!-- Swap Form -->
 					{#if selectedSwapDeposit && selectedFeeDeposit && !feePreloadError}
 						<Card
-							class_="border-0 shadow-xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20"
+							class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm {highlightForm
+								? 'ring-4 ring-cyan-500 shadow-cyan-500/25 shadow-2xl bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/30 dark:to-blue-900/30 border-cyan-300 dark:border-cyan-500'
+								: ''} {highlightForm && !stopPulsing
+								? 'animate-pulse-scale'
+								: ''} transition-all duration-500 ease-in-out"
+							on:mouseenter={() => (stopPulsing = true)}
+							on:click={() => (stopPulsing = true)}
 						>
-							<div class="space-y-6">
+							<div class="space-y-6" bind:this={swapFormElement}>
 								<div class="mb-4 flex items-center gap-3">
-									<RefreshCw class="h-5 w-5 text-indigo-500" />
+									<RefreshCw class="h-5 w-5 text-cyan-500" />
 									<h3 class="text-text text-xl font-bold">{$t('swap.configure_swap_title')}</h3>
 								</div>
 
@@ -854,16 +902,24 @@
 							class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
 						>
 							<div class="space-y-2">
-								<div class="text-2xl font-bold text-indigo-500">{$t('swap.stats_private_exchange')}</div>
-								<div class="text-text-secondary text-sm">{$t('swap.stats_private_exchange_label')}</div>
+								<div class="text-2xl font-bold text-indigo-500">
+									{$t('swap.stats_private_exchange')}
+								</div>
+								<div class="text-text-secondary text-sm">
+									{$t('swap.stats_private_exchange_label')}
+								</div>
 							</div>
 						</Card>
 						<Card
 							class_="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-center"
 						>
 							<div class="space-y-2">
-								<div class="text-2xl font-bold text-purple-500">{$t('swap.stats_instant_quotes')}</div>
-								<div class="text-text-secondary text-sm">{$t('swap.stats_instant_quotes_label')}</div>
+								<div class="text-2xl font-bold text-purple-500">
+									{$t('swap.stats_instant_quotes')}
+								</div>
+								<div class="text-text-secondary text-sm">
+									{$t('swap.stats_instant_quotes_label')}
+								</div>
 							</div>
 						</Card>
 					</div>
@@ -951,3 +1007,19 @@
 		}}
 	/>
 </ProtectedRoute>
+
+<style>
+	:global(.animate-pulse-scale) {
+		animation: pulse-scale 1.5s ease-in-out infinite;
+	}
+
+	@keyframes pulse-scale {
+		0%,
+		100% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.02);
+		}
+	}
+</style>

@@ -11,7 +11,7 @@ export const createElegantDepositColumns = (
 	selectedWithdrawKey: number | null = null,
 	selectedFeeKey: number | null = null,
 	selectedMerge2Key: number | null = null,
-	pageType: 'withdraw' | 'merge' = 'withdraw'
+	pageType: 'withdraw' | 'merge' | 'transfer' | 'swap' = 'withdraw'
 ): Column<DisplayOperation>[] => [
 	{ 
 		label: 'Deposit', 
@@ -32,7 +32,7 @@ export const createElegantDepositColumns = (
 			
 			if (deposit.index === selectedWithdrawKey) {
 				statusDot = 'bg-purple-500';
-				statusText = pageType === 'merge' ? 'Merge 1' : 'Operation';
+				statusText = pageType === 'merge' ? 'Merge 1' : pageType === 'transfer' ? 'Transfer' : pageType === 'swap' ? 'Swap' : 'Operation';
 				statusTextColor = 'text-purple-600 dark:text-purple-400';
 				borderColor = 'border-purple-300 dark:border-purple-500';
 			} else if (deposit.index === selectedMerge2Key) {

@@ -19,7 +19,6 @@
 	import InsufficientFeeModal from '$lib/ui/InsufficientFeeModal.svelte';
 	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
-	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
 	import SelectionToggle from '$lib/ui/SelectionToggle.svelte';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
@@ -29,7 +28,7 @@
 		type DisplayOperation,
 		type DisplayPendingEmptyOperation
 	} from '$lib/utils/loadDepositsForToken';
-	import { defaultDepositColumns, defaultPendingDepositColumns } from '$lib/utils/sharedColumns';
+	import { defaultPendingDepositColumns, createElegantDepositColumns } from '$lib/utils/sharedColumns';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { fromWei, toWei } from '$lib/utils/toWei';
 	import {
@@ -77,6 +76,11 @@
 	let autoSelectedFeeInfo: AutoSelectedFee | null = null;
 	let feePreloadError: string | null = null;
 
+	// Animation variables
+	let transferFormElement: HTMLElement | null = null;
+	let highlightForm = false;
+	let stopPulsing = false;
+
 	let transferNote: NoteData | null = null;
 	let feeNote: NoteData | null = null;
 
@@ -122,7 +126,38 @@
 	}
 
 	function handleRowClick(globalIdx: number) {
-		selectedTransferKey = deposits[globalIdx].index;
+		const clickedKey = deposits[globalIdx].index;
+		
+		// If clicking on already selected transfer deposit, deselect it
+		if (selectedTransferKey === clickedKey) {
+			resetAll();
+			return;
+		}
+		
+		// If clicking on the fee deposit, set it as transfer deposit and auto-select new fee
+		if (selectedFeeKey === clickedKey) {
+			// Set clicked fee deposit as the new transfer deposit
+			selectedTransferKey = clickedKey;
+			selectedTransferDeposit = deposits.find((d) => d.index === selectedTransferKey) ?? null;
+			transferSecretAndNullifierHash = '';
+			transferAmount = '';
+			
+			// Clear old fee selection and auto-select new fee
+			selectedFeeKey = null;
+			selectedFeeDeposit = null;
+			autoSelectedFeeInfo = null;
+			feePreloadError = null;
+			showInsufficientFeeModal = false;
+			
+			// Auto-select new fee deposit
+			if (selectedTransferDeposit) {
+				autoSelectFeeDeposit();
+			}
+			return;
+		}
+		
+		// Select new transfer deposit
+		selectedTransferKey = clickedKey;
 		selectedTransferDeposit = deposits.find((d) => d.index === selectedTransferKey) ?? null;
 		transferSecretAndNullifierHash = '';
 		transferAmount = '';
@@ -141,6 +176,8 @@
 		autoSelectedFeeInfo = null;
 		feePreloadError = null;
 		showInsufficientFeeModal = false;
+		highlightForm = false;
+		stopPulsing = false;
 	}
 
 	/** Auto-select fee deposit when transfer deposit is chosen */
@@ -164,6 +201,26 @@
 			if (autoSelectedFeeInfo.feeDeposit) {
 				selectedFeeDeposit = autoSelectedFeeInfo.feeDeposit;
 				selectedFeeKey = autoSelectedFeeInfo.feeDeposit.index;
+				
+				// Smooth scroll to transfer form after successful deposit selection
+				setTimeout(() => {
+					if (transferFormElement) {
+						transferFormElement.scrollIntoView({ 
+							behavior: 'smooth', 
+							block: 'start' 
+						});
+						
+						// Add highlight effect after scroll
+						setTimeout(() => {
+							highlightForm = true;
+							stopPulsing = false;
+							// Stop pulsing after 3 seconds, keep colors
+							setTimeout(() => {
+								stopPulsing = true;
+							}, 3000);
+						}, 600);
+					}
+				}, 100);
 			} else {
 				selectedFeeDeposit = null;
 				selectedFeeKey = null;
@@ -830,17 +887,79 @@
 											<ArrowUpDown class="h-5 w-5 text-blue-500" />
 											{$t('transfer.select_source_deposit')}
 										</h3>
-										<PaginatedTable
-											columns={defaultDepositColumns}
-											items={deposits}
-											pageSize={5}
-											keyField="index"
-											onRowClick={handleRowClick}
-											activeKey={selectedTransferKey}
-											inactiveKeys={selectedFeeKey !== null ? [selectedFeeKey] : []}
-											hoverClass="hover:bg-blue-50 dark:hover:bg-blue-900/20"
-										/>
+										<div class="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+											<PaginatedTable
+												columns={createElegantDepositColumns(selectedTransferKey, selectedFeeKey, null, 'transfer')}
+												items={deposits}
+												pageSize={5}
+												keyField="index"
+												onRowClick={handleRowClick}
+												disabledKeys={undefined}
+												hoverClass="hover:bg-blue-50 dark:hover:bg-blue-900/20"
+											/>
+										</div>
 									</div>
+								{/if}
+
+								<!-- Selected Deposits Display -->
+								{#if selectedTransferDeposit || selectedFeeDeposit}
+									<Card class_="border-0 shadow-xl bg-gray-50 dark:bg-gray-800/50">
+										<div class="flex items-center gap-2 mb-4">
+											<CheckCircle class="h-5 w-5 text-green-500" />
+											<span class="text-lg font-semibold text-gray-700 dark:text-gray-300">Selected Deposits</span>
+										</div>
+										<div class="space-y-3">
+											<!-- Transfer Deposit -->
+											{#if selectedTransferDeposit}
+												<div class="rounded-lg border border-purple-200 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20 p-4">
+													<div class="flex items-center justify-between mb-2">
+														<div class="flex items-center gap-2">
+															<div class="w-2 h-2 rounded-full bg-purple-500"></div>
+															<span class="text-sm font-medium text-purple-800 dark:text-purple-300">Transfer Deposit</span>
+														</div>
+														<button
+															on:click={() => {
+																selectedTransferKey = null;
+																selectedTransferDeposit = null;
+																if (autoSelectedFeeInfo) {
+																	selectedFeeKey = null;
+																	selectedFeeDeposit = null;
+																	autoSelectedFeeInfo = null;
+																}
+															}}
+															class="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 underline"
+														>
+															Reset
+														</button>
+													</div>
+													<div class="flex items-center gap-2">
+														<span class="font-semibold text-purple-900 dark:text-purple-100">{selectedTransferDeposit.displayAmount}</span>
+														<span class="text-sm text-purple-700 dark:text-purple-400">#{selectedTransferDeposit.index}</span>
+													</div>
+												</div>
+											{/if}
+
+											<!-- Fee Deposit -->
+											{#if selectedFeeDeposit && autoSelectedFeeInfo}
+												<div class="rounded-lg border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 p-4">
+													<div class="flex items-center justify-between mb-2">
+														<div class="flex items-center gap-2">
+															<div class="w-2 h-2 rounded-full bg-blue-500"></div>
+															<span class="text-sm font-medium text-blue-800 dark:text-blue-300">Fee Deposit</span>
+														</div>
+														<span class="text-xs text-blue-600 dark:text-blue-400 font-medium">Auto-selected</span>
+													</div>
+													<div class="flex items-center gap-2">
+														<span class="font-semibold text-blue-900 dark:text-blue-100">{selectedFeeDeposit.displayAmount}</span>
+														<span class="text-sm text-blue-700 dark:text-blue-400">#{selectedFeeDeposit.index}</span>
+													</div>
+													<div class="mt-2 text-xs text-blue-600 dark:text-blue-400">
+														Fee: {autoSelectedFeeInfo.feeInfo.formatted} STRK
+													</div>
+												</div>
+											{/if}
+										</div>
+									</Card>
 								{/if}
 
 								<!-- Auto-selected Fee Information -->
@@ -884,27 +1003,22 @@
 									</div>
 								{/if}
 
-
-								<!-- Selected Deposits Display -->
-								<SelectedDeposits
-									items={[
-										{ title: 'Transfer Deposit', deposit: selectedTransferDeposit },
-										{ title: 'Fee Deposit (Auto-selected)', deposit: selectedFeeDeposit }
-									]}
-								/>
-
 								<!-- Transfer Form -->
 								{#if selectedTransferDeposit && selectedFeeDeposit && !feePreloadError}
-									<Card
-										class_="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10 border border-blue-200 dark:border-blue-800"
+									<Card 
+										class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm {highlightForm ? 'ring-4 ring-blue-500 shadow-blue-500/25 shadow-2xl bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 border-blue-300 dark:border-blue-500' : ''} {highlightForm && !stopPulsing ? 'animate-pulse-scale' : ''} transition-all duration-500 ease-in-out"
+										on:mouseenter={() => stopPulsing = true}
+										on:click={() => stopPulsing = true}
 									>
-										<form on:submit|preventDefault={initiateTransfer} class="space-y-4">
-											<h3 class="text-text flex items-center gap-2 text-lg font-semibold">
+										<div class="space-y-6" bind:this={transferFormElement}>
+											<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 												<Hash class="h-5 w-5 text-blue-500" />
 												Transfer Details
 											</h3>
 
-											<div class="space-y-3">
+											<form on:submit|preventDefault={initiateTransfer} class="space-y-6">
+												<!-- Recipient Address -->
+												<div class="space-y-3">
 												<label class="text-text flex items-center gap-2 text-sm font-semibold">
 													<UserCheck class="h-4 w-4" />
 													Recipient Hash
@@ -950,6 +1064,7 @@
 												class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
 											/>
 										</form>
+										</div>
 									</Card>
 								{/if}
 							</div>
@@ -1175,3 +1290,14 @@
 		resetAll();
 	}}
 />
+
+<style>
+	:global(.animate-pulse-scale) {
+		animation: pulse-scale 1.5s ease-in-out infinite;
+	}
+
+	@keyframes pulse-scale {
+		0%, 100% { transform: scale(1); }
+		50% { transform: scale(1.02); }
+	}
+</style>
