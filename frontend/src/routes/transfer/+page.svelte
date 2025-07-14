@@ -16,6 +16,7 @@
 	import Card from '$lib/ui/Card.svelte';
 	import Input from '$lib/ui/Input.svelte';
 	import Modal from '$lib/ui/Modal.svelte';
+	import InsufficientFeeModal from '$lib/ui/InsufficientFeeModal.svelte';
 	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
@@ -87,6 +88,7 @@
 
 	let isLoading = false;
 	let showFeeModal = false;
+	let showInsufficientFeeModal = false;
 
 	// Confirmation data
 	let transferNoteBalanceWei: bigint | null = null;
@@ -138,6 +140,7 @@
 		selectedFeeDeposit = null;
 		autoSelectedFeeInfo = null;
 		feePreloadError = null;
+		showInsufficientFeeModal = false;
 	}
 
 	/** Auto-select fee deposit when transfer deposit is chosen */
@@ -145,6 +148,7 @@
 		if (!selectedTransferDeposit) return;
 
 		feePreloadError = null;
+		showInsufficientFeeModal = false;
 
 		try {
 			// Get fee info and auto-select the best STRK deposit
@@ -164,11 +168,9 @@
 				selectedFeeDeposit = null;
 				selectedFeeKey = null;
 
-				if (!autoSelectedFeeInfo.hasEnoughBalance) {
-					feePreloadError = `Insufficient STRK balance. Required: ${autoSelectedFeeInfo.feeInfo.formatted} STRK`;
-				} else {
-					feePreloadError = 'No available STRK deposits for fee payment';
-				}
+				// Both scenarios should show the modal, not the small error alert
+				showInsufficientFeeModal = true;
+				// Note: We keep autoSelectedFeeInfo so modal has fee amount information
 			}
 		} catch (error) {
 			console.error('Error auto-selecting fee deposit:', error);
@@ -847,30 +849,41 @@
 										class="rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 p-4 dark:border-blue-800 dark:from-blue-900/20 dark:to-cyan-900/20"
 									>
 										<h3
-											class="mb-2 flex items-center gap-2 text-base font-semibold text-blue-800 dark:text-blue-200"
+											class="mb-3 flex items-center gap-2 text-base font-semibold text-blue-800 dark:text-blue-200"
 										>
 											<Zap class="h-4 w-4" />
 											Fee Information
 										</h3>
-										<p class="text-sm text-blue-700 dark:text-blue-300">
-											Fee: <strong>{autoSelectedFeeInfo.feeInfo.formatted} STRK</strong>
-											{#if autoSelectedFeeInfo.feeDeposit}
-												• Auto-selected fee deposit: <strong
-													>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong
-												>
-											{/if}
-										</p>
+										<div class="space-y-2">
+											<p class="text-sm text-blue-700 dark:text-blue-300">
+												Fee: <strong>{autoSelectedFeeInfo.feeInfo.formatted} STRK</strong>
+												{#if autoSelectedFeeInfo.feeDeposit}
+													• Auto-selected fee deposit: <strong
+														>{autoSelectedFeeInfo.feeDeposit.displayAmount}</strong
+													>
+												{/if}
+											</p>
+											
+											<!-- Auto-selection explanation -->
+											<div class="rounded-lg bg-blue-100 p-3 dark:bg-blue-900/30">
+												<div class="flex items-start gap-2">
+													<CheckCircle class="mt-0.5 h-4 w-4 text-blue-600 dark:text-blue-400" />
+													<div class="text-xs text-blue-700 dark:text-blue-300">
+														<p class="font-medium mb-1">
+															{$t('common.auto_fee_selection', { default: 'Automatic Fee Selection' })}
+														</p>
+														<p>
+															{$t('common.auto_fee_transfer_explanation', { 
+																default: 'The system automatically selected the best STRK deposit to pay for network fees. This deposit is separate from your transfer deposit to maintain privacy.' 
+															})}
+														</p>
+													</div>
+												</div>
+											</div>
+										</div>
 									</div>
 								{/if}
 
-								<!-- Error Message -->
-								{#if feePreloadError}
-									<div
-										class="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20"
-									>
-										<p class="text-sm text-red-700 dark:text-red-300">{feePreloadError}</p>
-									</div>
-								{/if}
 
 								<!-- Selected Deposits Display -->
 								<SelectedDeposits
@@ -1152,3 +1165,13 @@
 		</div>
 	</div>
 </Modal>
+
+<InsufficientFeeModal
+	show={showInsufficientFeeModal}
+	requiredFeeAmount={autoSelectedFeeInfo?.feeInfo.formatted || ''}
+	onClose={() => {
+		showInsufficientFeeModal = false;
+		// Reset all deposit selections when closing modal
+		resetAll();
+	}}
+/>

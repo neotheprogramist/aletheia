@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { get } from 'svelte/store';
+	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 	import { tokens, selectedToken } from '$lib/stores/tokens';
 	import { wallet } from '$lib/stores/wallet';
 	import { wrapWithToast } from '$lib/utils/toast';
@@ -29,6 +31,25 @@
 
 	let amount = '';
 	let isLoading = false;
+
+	// Handle URL parameters for pre-filling amount and token
+	onMount(() => {
+		const urlParams = $page.url.searchParams;
+		const paramAmount = urlParams.get('amount');
+		const paramToken = urlParams.get('token');
+		
+		if (paramAmount) {
+			amount = paramAmount;
+		}
+		
+		if (paramToken) {
+			// Find token by symbol (e.g., 'STRK')
+			const token = $tokens.find(t => t.symbol === paramToken);
+			if (token) {
+				selectedToken.set(token.address);
+			}
+		}
+	});
 
 	function createCalls(hash: string, amountWei: bigint) {
 		const secretAndNullifierHash = BigInt(hash);

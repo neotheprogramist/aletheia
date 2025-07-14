@@ -10,6 +10,7 @@
 	import { NoteDataSchema, type NoteData } from '$lib/schemas/schemas';
 	import { fetchExtensionFee } from '$lib/utils/fetchFeeForExtension';
 	import Modal from '$lib/ui/Modal.svelte';
+	import InsufficientFeeModal from '$lib/ui/InsufficientFeeModal.svelte';
 	import {
 		PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
 		PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS
@@ -28,7 +29,7 @@
 	import { tokens, selectedToken } from '$lib/stores/tokens';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
-	import { defaultDepositColumns } from '$lib/utils/sharedColumns';
+	import { createElegantDepositColumns } from '$lib/utils/sharedColumns';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
 	import { supportedTokens } from '$lib/config/tokens';
@@ -76,12 +77,18 @@
 
 	let isLoading = false;
 	let showFeeModal = false;
+	let showInsufficientFeeModal = false;
 
 	// Confirmation data
 	let withdrawNoteBalanceWei: bigint | null = null;
 	let userWithdrawAmountWei: bigint | null = null;
 	let feeNoteBalanceWei: bigint | null = null;
 	let feeWei: bigint | null = null;
+
+	// Element reference for smooth scrolling
+	let withdrawFormElement: HTMLElement;
+	let highlightForm = false;
+	let stopPulsing = false;
 
 	$: if (browser && $selectedToken) {
 		loadDeposits(
@@ -92,7 +99,38 @@
 	}
 
 	function handleRowClick(globalIdx: number) {
-		selectedWithdrawKey = deposits[globalIdx].index;
+		const clickedKey = deposits[globalIdx].index;
+		
+		// If clicking on already selected withdraw deposit, deselect it
+		if (selectedWithdrawKey === clickedKey) {
+			resetAll();
+			return;
+		}
+		
+		// If clicking on the fee deposit, set it as operation deposit and auto-select new fee
+		if (selectedFeeKey === clickedKey) {
+			// Set clicked fee deposit as the new operation deposit
+			selectedWithdrawKey = clickedKey;
+			selectedWithdrawDeposit = deposits.find((d) => d.index === selectedWithdrawKey) ?? null;
+			withdrawRecipient = '';
+			withdrawAmount = '';
+			
+			// Clear old fee selection and auto-select new fee
+			selectedFeeKey = null;
+			selectedFeeDeposit = null;
+			autoSelectedFeeInfo = null;
+			feePreloadError = null;
+			showInsufficientFeeModal = false;
+			
+			// Auto-select new fee deposit
+			if (selectedWithdrawDeposit) {
+				autoSelectFeeDeposit();
+			}
+			return;
+		}
+		
+		// Select new withdraw deposit
+		selectedWithdrawKey = clickedKey;
 		selectedWithdrawDeposit = deposits.find((d) => d.index === selectedWithdrawKey) ?? null;
 		withdrawRecipient = '';
 		withdrawAmount = '';
@@ -110,13 +148,16 @@
 		selectedFeeDeposit = null;
 		autoSelectedFeeInfo = null;
 		feePreloadError = null;
+		showInsufficientFeeModal = false;
 	}
+
 
 	/** Auto-select fee deposit when withdraw deposit is chosen */
 	async function autoSelectFeeDeposit() {
 		if (!selectedWithdrawDeposit) return;
 
 		feePreloadError = null;
+		showInsufficientFeeModal = false;
 
 		try {
 			// Get fee info and auto-select the best STRK deposit
@@ -132,15 +173,33 @@
 			if (autoSelectedFeeInfo.feeDeposit) {
 				selectedFeeDeposit = autoSelectedFeeInfo.feeDeposit;
 				selectedFeeKey = autoSelectedFeeInfo.feeDeposit.index;
+				
+				// Smooth scroll to withdraw form after successful deposit selection
+				setTimeout(() => {
+					if (withdrawFormElement) {
+						withdrawFormElement.scrollIntoView({ 
+							behavior: 'smooth', 
+							block: 'start' 
+						});
+						
+						// Add highlight effect after scroll
+						setTimeout(() => {
+							highlightForm = true;
+							stopPulsing = false;
+							// Stop pulsing after 3 seconds, keep colors
+							setTimeout(() => {
+								stopPulsing = true;
+							}, 3000);
+						}, 600);
+					}
+				}, 100);
 			} else {
 				selectedFeeDeposit = null;
 				selectedFeeKey = null;
 
-				if (!autoSelectedFeeInfo.hasEnoughBalance) {
-					feePreloadError = `Insufficient STRK balance. Required: ${autoSelectedFeeInfo.feeInfo.formatted} STRK`;
-				} else {
-					feePreloadError = 'No available STRK deposits for fee payment';
-				}
+				// Both scenarios should show the modal, not the small error alert
+				showInsufficientFeeModal = true;
+				// Note: We keep autoSelectedFeeInfo so modal has fee amount information
 			}
 		} catch (error) {
 			console.error('Error auto-selecting fee deposit:', error);
@@ -496,19 +555,17 @@
 										</p>
 									</div>
 								{:else}
-									<div
-										class="rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 p-1 dark:from-gray-700 dark:to-gray-600"
-									>
+									<div class="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
 										<PaginatedTable
-											columns={defaultDepositColumns}
+											columns={createElegantDepositColumns(selectedWithdrawKey, selectedFeeKey, null, 'withdraw')}
 											items={deposits}
 											pageSize={5}
 											keyField="index"
 											disabledKeys={undefined}
 											onRowClick={handleRowClick}
-											activeKey={selectedWithdrawKey}
-											inactiveKeys={selectedFeeKey !== null ? [selectedFeeKey] : []}
-											hoverClass="hover:bg-purple-600"
+											activeKey={null}
+											inactiveKeys={[]}
+											hoverClass="hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/30 dark:hover:to-pink-900/30 transition-all duration-200"
 										/>
 									</div>
 								{/if}
@@ -516,17 +573,66 @@
 						</div>
 					</Card>
 
+					<!-- Selected Deposits Display -->
+					{#if selectedWithdrawDeposit || selectedFeeDeposit}
+						<Card class_="border-0 shadow-xl bg-gray-50 dark:bg-gray-800/50">
+							<div class="flex items-center gap-2 mb-4">
+								<CheckCircle class="h-5 w-5 text-green-500" />
+								<span class="text-lg font-semibold text-gray-700 dark:text-gray-300">Selected Deposits</span>
+							</div>
+							<div class="space-y-3">
+								<!-- Operation Deposit -->
+								{#if selectedWithdrawDeposit}
+									<div class="rounded-lg border border-purple-200 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20 p-4">
+										<div class="flex items-center justify-between mb-2">
+											<div class="flex items-center gap-2">
+												<div class="w-2 h-2 rounded-full bg-purple-500"></div>
+												<span class="text-sm font-medium text-purple-800 dark:text-purple-300">Operation Deposit</span>
+											</div>
+											<button
+												on:click={() => resetAll()}
+												class="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 underline"
+											>
+												Remove
+											</button>
+										</div>
+										<div class="flex items-center gap-2">
+											<span class="font-semibold text-purple-900 dark:text-purple-100">{selectedWithdrawDeposit.displayAmount}</span>
+											<span class="text-sm text-purple-700 dark:text-purple-400">#{selectedWithdrawDeposit.index}</span>
+										</div>
+									</div>
+								{/if}
+
+								<!-- Fee Deposit -->
+								{#if selectedFeeDeposit}
+									<div class="rounded-lg border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 p-4">
+										<div class="flex items-center gap-2 mb-2">
+											<div class="w-2 h-2 rounded-full bg-blue-500"></div>
+											<span class="text-sm font-medium text-blue-800 dark:text-blue-300">Fee Deposit (Auto-selected)</span>
+										</div>
+										<div class="flex items-center gap-2">
+											<span class="font-semibold text-blue-900 dark:text-blue-100">{selectedFeeDeposit.displayAmount}</span>
+											<span class="text-sm text-blue-700 dark:text-blue-400">#{selectedFeeDeposit.index}</span>
+										</div>
+									</div>
+								{/if}
+							</div>
+						</Card>
+					{/if}
+
+					
+
 					<!-- Auto-selected fee information -->
 					{#if autoSelectedFeeInfo}
 						<Card
 							class_="border-0 shadow-xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20"
 						>
-							<div class="space-y-3">
+							<div class="space-y-4">
 								<h3 class="flex items-center gap-2 font-semibold text-blue-800 dark:text-blue-300">
 									<Zap class="h-5 w-5" />
 									{$t('common.fee_information', { default: 'Fee Information' })}
 								</h3>
-								<div class="space-y-2">
+								<div class="space-y-3">
 									<div class="flex items-center justify-between">
 										<span class="text-sm text-blue-700 dark:text-blue-300">{$t('common.network_fee', { default: 'Network Fee' })}:</span>
 										<span class="font-bold text-blue-800 dark:text-blue-200"
@@ -541,6 +647,23 @@
 											>
 										</div>
 									{/if}
+								</div>
+								
+								<!-- Auto-selection explanation -->
+								<div class="rounded-lg bg-blue-100 p-3 dark:bg-blue-900/30">
+									<div class="flex items-start gap-2">
+										<CheckCircle class="mt-0.5 h-4 w-4 text-blue-600 dark:text-blue-400" />
+										<div class="text-xs text-blue-700 dark:text-blue-300">
+											<p class="font-medium mb-1">
+												{$t('common.auto_fee_selection', { default: 'Automatic Fee Selection' })}
+											</p>
+											<p>
+												{$t('common.auto_fee_explanation', { 
+													default: 'The system automatically selected the best STRK deposit to pay for network fees. This deposit has sufficient balance and is separate from your withdrawal deposit to maintain privacy.' 
+												})}
+											</p>
+										</div>
+									</div>
 								</div>
 							</div>
 						</Card>
@@ -563,18 +686,13 @@
 						</Card>
 					{/if}
 
-					<!-- Selected Deposits Display -->
-					<SelectedDeposits
-						items={[
-							{ title: $t('common.withdrawal_deposit', { default: 'Withdrawal Deposit' }), deposit: selectedWithdrawDeposit },
-							{ title: $t('common.fee_deposit_auto', { default: 'Fee Deposit (Auto-selected)' }), deposit: selectedFeeDeposit }
-						]}
-					/>
-
 					<!-- Withdraw Form -->
 					{#if selectedWithdrawDeposit && selectedFeeDeposit && !feePreloadError}
-						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-							<div class="space-y-6">
+						<Card class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm {highlightForm ? 'ring-4 ring-purple-500 shadow-purple-500/25 shadow-2xl bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 border-purple-300 dark:border-purple-500' : ''} {highlightForm && !stopPulsing ? 'animate-pulse-scale' : ''} transition-all duration-500 ease-in-out"
+							on:mouseenter={() => stopPulsing = true}
+							on:click={() => stopPulsing = true}
+						>
+							<div class="space-y-6" bind:this={withdrawFormElement}>
 								<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 									<Wallet class="h-5 w-5 text-purple-500" />
 									{$t('common.withdrawal_details', { default: 'Withdrawal Details' })}
@@ -665,6 +783,19 @@
 										2
 									</div>
 									<div>
+										<p class="text-text font-medium">{$t('ui.withdraw_page.how_it_works.auto_fee_selection.title', { default: 'Auto Fee Selection' })}</p>
+										<p class="text-text-secondary text-sm">
+											{$t('ui.withdraw_page.how_it_works.auto_fee_selection.description', { default: 'System automatically finds the best STRK deposit to pay network fees, ensuring privacy by using a separate deposit.' })}
+										</p>
+									</div>
+								</div>
+								<div class="flex items-start gap-3">
+									<div
+										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-purple-500 text-sm font-bold text-white"
+									>
+										3
+									</div>
+									<div>
 										<p class="text-text font-medium">{$t('ui.withdraw_page.how_it_works.set_recipient.title')}</p>
 										<p class="text-text-secondary text-sm">
 											{$t('ui.withdraw_page.how_it_works.set_recipient.description')}
@@ -675,7 +806,7 @@
 									<div
 										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-purple-500 text-sm font-bold text-white"
 									>
-										3
+										4
 									</div>
 									<div>
 										<p class="text-text font-medium">{$t('ui.withdraw_page.how_it_works.zero_knowledge.title')}</p>
@@ -688,7 +819,7 @@
 									<div
 										class="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-pink-500 text-sm font-bold text-white"
 									>
-										4
+										5
 									</div>
 									<div>
 										<p class="text-text font-medium">{$t('ui.withdraw_page.how_it_works.anonymous_transfer.title')}</p>
@@ -825,4 +956,31 @@
 		steps={$progressModalStore.steps}
 		onClose={progressModalActions.hide}
 	/>
+
+	<InsufficientFeeModal
+		show={showInsufficientFeeModal}
+		requiredFeeAmount={autoSelectedFeeInfo?.feeInfo.formatted || ''}
+		onClose={() => {
+			showInsufficientFeeModal = false;
+			// Reset all deposit selections when closing modal
+			resetAll();
+		}}
+	/>
 </ProtectedRoute>
+
+<style>
+	@keyframes pulse-scale {
+		0%, 100% {
+			transform: scale(1);
+			opacity: 1;
+		}
+		50% {
+			transform: scale(1.03);
+			opacity: 0.9;
+		}
+	}
+
+	:global(.animate-pulse-scale) {
+		animation: pulse-scale 1.5s ease-in-out infinite;
+	}
+</style>
