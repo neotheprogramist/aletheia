@@ -173,6 +173,7 @@
 
 				// Both scenarios should show the modal, not the small error alert
 				showInsufficientFeeModal = true;
+				// Note: We keep autoSelectedFeeInfo so modal has fee amount information
 			}
 		} catch (error) {
 			console.error('Error auto-selecting fee deposit:', error);

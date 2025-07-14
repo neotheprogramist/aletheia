@@ -244,6 +244,7 @@
 
 				// Both scenarios should show the modal, not the small error alert
 				showInsufficientFeeModal = true;
+				// Note: We keep autoSelectedFeeInfo so modal has fee amount information
 			}
 		} catch (error) {
 			console.error('Error auto-selecting fee deposit:', error);
@@ -1056,7 +1057,11 @@
 
 	<InsufficientFeeModal
 		show={showInsufficientFeeModal}
-		requiredFeeAmount={autoSelectedFeeInfo?.feeInfo.formatted || ''}
+		requiredFeeAmount={(() => {
+			const amount = autoSelectedFeeInfo?.feeInfo.formatted || '';
+			console.log('Modal requiredFeeAmount:', amount, 'autoSelectedFeeInfo:', autoSelectedFeeInfo);
+			return amount;
+		})()}
 		onClose={() => {
 			showInsufficientFeeModal = false;
 			// Reset all deposit selections when closing modal

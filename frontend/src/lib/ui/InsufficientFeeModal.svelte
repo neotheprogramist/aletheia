@@ -17,9 +17,8 @@
 	}
 
 	function handleGoToDeposit() {
-		handleClose();
 		
-		// Calculate recommended amount: fee + 10% margin, rounded up to nice number
+		// Calculate recommended amount BEFORE closing modal (which resets autoSelectedFeeInfo)
 		const feeAmount = parseFloat(requiredFeeAmount);
 		const withMargin = feeAmount * 1.1; // Add 10% margin
 		
@@ -35,6 +34,11 @@
 			recommendedAmount = Math.ceil(withMargin / 10) * 10; // Round to 10
 		}
 		
+		
+		// Close modal AFTER calculating amount
+		handleClose();
+		
+		// Navigate to deposit page
 		goto(`/deposit?amount=${recommendedAmount}&token=STRK`);
 	}
 
