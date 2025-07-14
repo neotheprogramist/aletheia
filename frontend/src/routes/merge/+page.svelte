@@ -18,6 +18,7 @@
 	import PaginatedTable from '$lib/ui/PaginatedTable.svelte';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
+	import Tooltip from '$lib/ui/Tooltip.svelte';
 	import SelectionToggle from '$lib/ui/SelectionToggle.svelte';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { fetchMergeFee } from '$lib/utils/fetchFeeForExtension';
@@ -602,10 +603,12 @@
 							<div class="space-y-4">
 								<!-- Selection Toggle -->
 								<div class="space-y-3">
-									<label class="text-text flex items-center gap-2 text-sm font-semibold">
-										<Layers class="h-4 w-4" />
-										{$t('ui.merge_page.selection_mode')}
-									</label>
+									<Tooltip text={$t('tooltips.merge.selection_mode')} position="right" theme="dark">
+										<label class="text-text flex items-center gap-2 text-sm font-semibold">
+											<Layers class="h-4 w-4" />
+											{$t('ui.merge_page.selection_mode')}
+										</label>
+									</Tooltip>
 									<SelectionToggle
 										options={[
 											{ label: $t('ui.merge_page.first_deposit'), value: 'merge1', isFirst: true },
@@ -881,12 +884,14 @@
 									</div>
 								</div>
 
-								<Button
-									text={$t('ui.merge_page.combine_deposits')}
-									loading={isLoading}
-									onClick={initiateMerge}
-									class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-								/>
+								<Tooltip text={$t('tooltips.merge.execute_button')} position="top" theme="dark">
+									<Button
+										text={$t('ui.merge_page.combine_deposits')}
+										loading={isLoading}
+										onClick={initiateMerge}
+										class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+									/>
+								</Tooltip>
 							</div>
 						</Card>
 					{/if}

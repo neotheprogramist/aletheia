@@ -14,6 +14,72 @@
 		"swap": "Zamień",
 		"settings": "Ustawienia"
 	},
+	"tooltips": {
+		"navbar": {
+			"export": "Eksportuj wszystkie operacje do pliku JSON jako backup",
+			"import": "Importuj operacje z pliku backup JSON",
+			"settings": "Ustawienia aplikacji: język, motyw, preferowane tokeny",
+			"export_description": "Pobierz dane swoich prywatnych operacji do kopii zapasowej",
+			"import_description": "Przywróć operacje z wcześniej wyeksportowanego pliku",
+			"settings_description": "Skonfiguruj swoje preferencje Privacy Poolz"
+		},
+		"deposit": {
+			"select_token": "Wybierz token który chcesz wpłacić prywatnie",
+			"amount": "Wprowadź kwotę do wpłaty. Możesz ją później anonimowo wypłacić",
+			"create_button": "Utwórz prywatną wpłatę - otrzymasz kryptograficzną notatkę do późniejszej wypłaty",
+			"max_button": "Użyj całego salda z portfela do tej wpłaty",
+			"token_select": "Wybierz z dostępnych tokenów w swoim portfelu",
+			"amount_input": "Kwota musi być większa niż 0 i nie przekraczać salda"
+		},
+		"withdraw": {
+			"filter_token": "Filtruj wpłaty według typu tokena",
+			"table_index": "Numer wpłaty w systemie",
+			"table_amount": "Dostępna kwota do wypłaty",
+			"table_status": "Status wpłaty (dostępna/wykorzystana)",
+			"table_sort": "Kliknij aby sortować według tej kolumny",
+			"recipient": "Adres portfela który otrzyma wypłacone tokeny",
+			"amount": "Kwota do wypłaty (może być mniejsza niż wpłata)",
+			"max_button": "Wypłać całą dostępną kwotę z tej wpłaty",
+			"execute_button": "Wykonaj prywatną wypłatę używając dowodu zero-knowledge",
+			"auto_fee": "System automatycznie wybrał najlepszą wpłatę STRK do opłacenia kosztów sieci"
+		},
+		"merge": {
+			"selection_mode": "Wybierz tryb selekcji: najpierw wybierz pierwszą wpłatę, potem drugą do połączenia",
+			"reset_button": "Wyczyść wszystkie wybrane wpłaty i zacznij od nowa",
+			"first_deposit": "Pierwsza wpłata do połączenia",
+			"second_deposit": "Druga wpłata do połączenia",
+			"fee_deposit": "Wpłata STRK automatycznie wybrana do opłacenia kosztów sieci",
+			"execute_button": "Połącz obie wpłaty w jedną używając dowodu zero-knowledge",
+			"auto_fee": "System automatycznie wybrał najlepszą wpłatę STRK do opłacenia kosztów sieci. Ta wpłata jest oddzielna od twoich wpłat do połączenia aby zachować prywatność."
+		},
+		"transfer": {
+			"mode_toggle": "Tryb wysyłania - wyślij tokeny do kogoś | Tryb odbierania - wygeneruj notatkę do otrzymania tokenów",
+			"generate_empty": "Wygeneruj pustą kryptograficzną notatkę którą możesz udostępnić nadawcy",
+			"recipient_hash": "Hash notatki od odbiorcy - otrzymaj go od osoby której chcesz wysłać tokeny",
+			"amount": "Kwota do przesłania odbiorcy",
+			"execute_button": "Wykonaj prywatny przelew używając dowodu zero-knowledge"
+		},
+		"swap": {
+			"source_token": "Filtruj wpłaty według tokena z którego chcesz wymienić",
+			"target_token": "Wybierz token który chcesz otrzymać w zamian",
+			"amount": "Kwota do wymiany z twojej wpłaty",
+			"max_button": "Wymień całą dostępną kwotę z tej wpłaty",
+			"execute_button": "Wykonaj prywatną wymianę tokenów używając dowodu zero-knowledge"
+		},
+		"common": {
+			"loading": "Operacja w toku... Proszę czekać",
+			"zero_knowledge": "Ta operacja używa dowodów zero-knowledge aby zachować prywatność",
+			"network_fees": "Opłaty sieciowe są automatycznie płacone z wpłat STRK aby zachować anonimowość",
+			"proof_time": "Generowanie dowodu może potrwać kilka sekund",
+			"backup_important": "Zachowuj kopie zapasowe danych swoich operacji",
+			"privacy_maintained": "Twoja prywatność jest zachowana przez kryptograficzne dowody",
+			"table_pagination": "Nawiguj przez strony wyników",
+			"wallet_balance": "Aktualne saldo tego tokena w podłączonym portfelu",
+			"token_dropdown": "Otwórz listę dostępnych tokenów",
+			"copy_address": "Skopiuj adres portfela do schowka",
+			"copied": "Adres skopiowany!"
+		}
+	},
 	"progress_modal": {
 		"deposit": {
 			"title": "Postęp Wpłaty",

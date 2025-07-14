@@ -13,6 +13,7 @@
 	import Button from '$lib/ui/Button.svelte';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
+	import Tooltip from '$lib/ui/Tooltip.svelte';
 	import WalletBalance from '$lib/ui/WalletBalance.svelte';
 	import ProgressModal from '$lib/ui/ProgressModal.svelte';
 
@@ -188,10 +189,12 @@
 						<div class="space-y-6">
 							<!-- Token Selection -->
 							<div class="space-y-3">
-								<label class="text-text flex items-center gap-2 text-sm font-semibold">
-									<DollarSign class="h-4 w-4" />
-									{$t('ui.deposit_page.select_token')}
-								</label>
+								<Tooltip text={$t('tooltips.deposit.select_token')} position="right" theme="dark">
+									<label class="text-text flex items-center gap-2 text-sm font-semibold">
+										<DollarSign class="h-4 w-4" />
+										{$t('ui.deposit_page.select_token')}
+									</label>
+								</Tooltip>
 								<TokenSelect
 									tokens={$tokens}
 									bind:value={$selectedToken}
@@ -212,10 +215,12 @@
 
 							<!-- Amount Input -->
 							<div class="space-y-3">
-								<label class="text-text flex items-center gap-2 text-sm font-semibold">
-									<ArrowRight class="h-4 w-4" />
-									{$t('ui.deposit_page.deposit_amount')}
-								</label>
+								<Tooltip text={$t('tooltips.deposit.amount')} position="right" theme="dark">
+									<label class="text-text flex items-center gap-2 text-sm font-semibold">
+										<ArrowRight class="h-4 w-4" />
+										{$t('ui.deposit_page.deposit_amount')}
+									</label>
+								</Tooltip>
 								<div class="flex gap-2">
 									<Input
 										placeholder={$t('ui.deposit_page.amount_placeholder')}
@@ -227,12 +232,14 @@
 							</div>
 
 							<!-- Submit Button -->
-							<Button
-								text={$t('ui.deposit_page.create_deposit_button')}
-								loading={isLoading}
-								onClick={depositHandler}
-								class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-							/>
+							<Tooltip text={$t('tooltips.deposit.create_button')} position="top" theme="dark">
+								<Button
+									text={$t('ui.deposit_page.create_deposit_button')}
+									loading={isLoading}
+									onClick={depositHandler}
+									class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+								/>
+							</Tooltip>
 						</div>
 					</Card>
 

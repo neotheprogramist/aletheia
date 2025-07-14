@@ -14,6 +14,72 @@
     "swap": "Échange",
     "settings": "Paramètres"
   },
+  "tooltips": {
+    "navbar": {
+      "export": "Exporter toutes les opérations vers un fichier JSON comme sauvegarde",
+      "import": "Importer les opérations depuis un fichier de sauvegarde JSON",
+      "settings": "Paramètres de l'application : langue, thème, jetons préférés",
+      "export_description": "Télécharger vos données d'opérations privées pour sauvegarde",
+      "import_description": "Restaurer les opérations depuis un fichier précédemment exporté",
+      "settings_description": "Configurer vos préférences Privacy Poolz"
+    },
+    "deposit": {
+      "select_token": "Choisissez le jeton que vous voulez déposer en privé",
+      "amount": "Entrez le montant à déposer. Vous pourrez le retirer anonymement plus tard",
+      "create_button": "Créer un dépôt privé - vous recevrez une note cryptographique pour un retrait ultérieur",
+      "max_button": "Utiliser tout le solde de votre portefeuille pour ce dépôt",
+      "token_select": "Sélectionner parmi les jetons disponibles dans votre portefeuille",
+      "amount_input": "Le montant doit être supérieur à 0 et ne pas dépasser votre solde"
+    },
+    "withdraw": {
+      "filter_token": "Filtrer les dépôts par type de jeton",
+      "table_index": "Numéro de dépôt dans le système",
+      "table_amount": "Montant disponible pour le retrait",
+      "table_status": "Statut du dépôt (disponible/utilisé)",
+      "table_sort": "Cliquer pour trier par cette colonne",
+      "recipient": "Adresse du portefeuille qui recevra les jetons retirés",
+      "amount": "Montant à retirer (peut être inférieur au dépôt)",
+      "max_button": "Retirer tout le montant disponible de ce dépôt",
+      "execute_button": "Exécuter un retrait privé en utilisant une preuve à connaissance nulle",
+      "auto_fee": "Le système a automatiquement sélectionné le meilleur dépôt STRK pour payer les frais de réseau"
+    },
+    "merge": {
+      "selection_mode": "Choisir le mode de sélection : d'abord sélectionner le premier dépôt, puis le second à combiner",
+      "reset_button": "Effacer tous les dépôts sélectionnés et recommencer",
+      "first_deposit": "Premier dépôt à combiner",
+      "second_deposit": "Deuxième dépôt à combiner",
+      "fee_deposit": "Dépôt STRK automatiquement sélectionné pour payer les frais de réseau",
+      "execute_button": "Combiner les deux dépôts en un seul en utilisant une preuve à connaissance nulle",
+      "auto_fee": "Le système a automatiquement sélectionné le meilleur dépôt STRK pour payer les frais de réseau. Ce dépôt est séparé de vos dépôts de fusion pour maintenir la confidentialité."
+    },
+    "transfer": {
+      "mode_toggle": "Mode envoi - envoyer des jetons à quelqu'un | Mode réception - générer une note pour recevoir des jetons",
+      "generate_empty": "Générer une note cryptographique vide que vous pouvez partager avec l'expéditeur",
+      "recipient_hash": "Hash de la note du destinataire - obtenez-le de la personne à qui vous voulez envoyer des jetons",
+      "amount": "Montant à transférer au destinataire",
+      "execute_button": "Exécuter un transfert privé en utilisant une preuve à connaissance nulle"
+    },
+    "swap": {
+      "source_token": "Filtrer les dépôts par jeton que vous voulez échanger",
+      "target_token": "Choisir le jeton que vous voulez recevoir en échange",
+      "amount": "Montant à échanger depuis votre dépôt",
+      "max_button": "Échanger tout le montant disponible de ce dépôt",
+      "execute_button": "Exécuter un échange de jetons privé en utilisant une preuve à connaissance nulle"
+    },
+    "common": {
+      "loading": "Opération en cours... Veuillez patienter",
+      "zero_knowledge": "Cette opération utilise des preuves à connaissance nulle pour maintenir la confidentialité",
+      "network_fees": "Les frais de réseau sont automatiquement payés depuis les dépôts STRK pour maintenir l'anonymat",
+      "proof_time": "La génération de preuve peut prendre quelques secondes",
+      "backup_important": "Conservez des sauvegardes de vos données d'opérations",
+      "privacy_maintained": "Votre confidentialité est maintenue grâce aux preuves cryptographiques",
+      "table_pagination": "Naviguer à travers les pages de résultats",
+      "wallet_balance": "Solde actuel de ce jeton dans votre portefeuille connecté",
+      "token_dropdown": "Ouvrir la liste des jetons disponibles",
+      "copy_address": "Copier l'adresse du portefeuille dans le presse-papiers",
+      "copied": "Adresse copiée !"
+    }
+  },
   "progress_modal": {
     "deposit": {
       "title": "Progression du Dépôt",
