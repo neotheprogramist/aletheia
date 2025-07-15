@@ -337,7 +337,7 @@
   },
   "deposit": {
     "title": "Einzahlung",
-    "description": "Zahlen Sie Ihre Token in den Privacy Pool ein, um anonyme Transaktionen zu starten",
+    "description": "Zahlen Sie Ihre Token in den Aletheia ein, um anonyme Transaktionen zu starten",
     "select_token": "Token auswählen",
     "enter_amount": "Betrag eingeben",
     "max": "Max",
