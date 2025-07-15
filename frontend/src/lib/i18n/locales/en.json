@@ -246,7 +246,9 @@
     "status_merge_1": "Merge 1",
     "status_merge_2": "Merge 2",
     "status_transfer": "Transfer",
-    "status_swap": "Swap"
+    "status_swap": "Swap",
+    "click_to_unselect": "Click to unselect",
+    "click_to_change_fee": "Click to change fee"
   },
   "wallet": {
     "connect": "Connect Wallet",

@@ -312,7 +312,9 @@
     "status_merge_1": "Fusion 1",
     "status_merge_2": "Fusion 2",
     "status_transfer": "Transfert",
-    "status_swap": "Échange"
+    "status_swap": "Échange",
+    "click_to_unselect": "Cliquez pour désélectionner",
+    "click_to_change_fee": "Cliquez pour changer les frais"
   },
   "wallet": {
     "connect": "Connecter le portefeuille",

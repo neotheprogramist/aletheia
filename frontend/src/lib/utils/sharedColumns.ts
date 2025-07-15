@@ -20,6 +20,8 @@ export const createElegantDepositColumns = (
 		merge2: string;
 		transfer: string;
 		swap: string;
+		clickToUnselect: string;
+		clickToChangeFee: string;
 	}
 ): Column<DisplayOperation>[] => [
 	{ 
@@ -58,11 +60,11 @@ export const createElegantDepositColumns = (
 			
 			let clickHint = '';
 			if (deposit.index === selectedWithdrawKey) {
-				clickHint = '<div class="text-xs text-gray-400 mt-0.5">Click to unselect</div>';
+				clickHint = `<div class="text-xs text-gray-400 mt-0.5">${translations?.clickToUnselect || 'Click to unselect'}</div>`;
 			} else if (deposit.index === selectedMerge2Key) {
-				clickHint = '<div class="text-xs text-gray-400 mt-0.5">Click to unselect</div>';
+				clickHint = `<div class="text-xs text-gray-400 mt-0.5">${translations?.clickToUnselect || 'Click to unselect'}</div>`;
 			} else if (deposit.index === selectedFeeKey) {
-				clickHint = '<div class="text-xs text-gray-400 mt-0.5">Click to change fee</div>';
+				clickHint = `<div class="text-xs text-gray-400 mt-0.5">${translations?.clickToChangeFee || 'Click to change fee'}</div>`;
 			}
 
 			return `

@@ -312,7 +312,9 @@
 		"status_merge_1": "Łączenie 1",
 		"status_merge_2": "Łączenie 2",
 		"status_transfer": "Przelew",
-		"status_swap": "Zamiana"
+		"status_swap": "Zamiana",
+		"click_to_unselect": "Kliknij aby odznaczyć",
+		"click_to_change_fee": "Kliknij aby zmienić opłatę"
 	},
 	"wallet": {
 		"connect": "Podłącz portfel",

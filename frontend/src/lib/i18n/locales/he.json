@@ -312,7 +312,9 @@
 		"status_merge_1": "מיזוג 1",
 		"status_merge_2": "מיזוג 2",
 		"status_transfer": "העברה",
-		"status_swap": "החלפה"
+		"status_swap": "החלפה",
+		"click_to_unselect": "לחץ כדי לבטל בחירה",
+		"click_to_change_fee": "לחץ כדי לשנות עמלה"
 	},
 	"wallet": {
 		"connect": "חבר ארנק",

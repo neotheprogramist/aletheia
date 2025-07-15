@@ -312,7 +312,9 @@
     "status_merge_1": "Zusammenführung 1",
     "status_merge_2": "Zusammenführung 2",
     "status_transfer": "Übertragung",
-    "status_swap": "Tausch"
+    "status_swap": "Tausch",
+    "click_to_unselect": "Klicken zum Abwählen",
+    "click_to_change_fee": "Klicken zum Ändern der Gebühr"
   },
   "wallet": {
     "connect": "Wallet verbinden",
