@@ -291,7 +291,18 @@
 		"execute_withdrawal": "בצע משיכה",
 		"withdrawal_summary": "סיכום משיכה",
 		"recipient": "נמען",
-		"withdrawal_confirmation_text": "משיכה זו תעובד באופן אנונימי ולא ניתן לבטלה. אנא וודאו שכל הפרטים נכונים."
+		"withdrawal_confirmation_text": "משיכה זו תעובד באופן אנונימי ולא ניתן לבטלה. אנא וודאו שכל הפרטים נכונים.",
+		"insufficient_fee_deposit": "הפקדת עמלה לא מספקת",
+		"fee_payment_required": "נדרש תשלום עמלה",
+		"insufficient_strk_balance": "אתה צריך לפחות {requiredFeeAmount} STRK כדי לשלם עבור עמלת הרשת, אבל אין לך הפקדת STRK מתאימה זמינה לכסות אותה.",
+		"how_fees_work": "איך עמלות עובדות",
+		"fee_explanation_1": "כל עמלות הרשת משולמות אוטומטית באמצעות הפקדות STRK שלך כדי לשמור על פרטיות העסקה.",
+		"fee_explanation_2": "אתה צריך להיות בעל הפקדת STRK יחידה עם יתרה מספקת לכסות את כל עמלת הרשת לפעולה.",
+		"fee_explanation_3": "בצע הפקדת STRK של לפחות הסכום הנדרש, ואז חזור להשלמת העסקה שלך.",
+		"next_steps": "שלבים הבאים",
+		"deposit_strk_instructions": "עבור לעמוד ההפקדה ובצע הפקדת STRK של לפחות {requiredFeeAmount} STRK כדי לכסות את עמלת המשיכה.",
+		"close": "סגור",
+		"go_to_deposit": "עבור להפקדה"
 	},
 	"wallet": {
 		"connect": "חבר ארנק",

@@ -71,7 +71,7 @@
 					<AlertTriangle class="h-6 w-6 text-red-600 dark:text-red-400" />
 				</div>
 				<h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">
-					{$t('common.insufficient_fee_deposit', { default: 'Insufficient Fee Deposit' })}
+					{$t('common.insufficient_fee_deposit')}
 				</h2>
 			</div>
 
@@ -83,12 +83,10 @@
 						<DollarSign class="mt-0.5 h-5 w-5 text-red-600 dark:text-red-400" />
 						<div>
 							<h3 class="font-semibold text-red-800 dark:text-red-300">
-								{$t('common.fee_payment_required', { default: 'Fee Payment Required' })}
+								{$t('common.fee_payment_required')}
 							</h3>
 							<p class="mt-1 text-sm text-red-700 dark:text-red-300">
-								{$t('common.insufficient_strk_balance', { 
-									default: `You need at least ${requiredFeeAmount} STRK to pay for the network fee, but you don't have a suitable STRK deposit available to cover it.`
-								})}
+								{$t('common.insufficient_strk_balance').replace('{requiredFeeAmount}', requiredFeeAmount)}
 							</p>
 						</div>
 					</div>
@@ -100,17 +98,17 @@
 						<Info class="mt-0.5 h-5 w-5 text-blue-600 dark:text-blue-400" />
 						<div>
 							<h3 class="font-semibold text-blue-800 dark:text-blue-300">
-								{$t('common.how_fees_work', { default: 'How Fees Work' })}
+								{$t('common.how_fees_work')}
 							</h3>
 							<div class="mt-2 space-y-2 text-sm text-blue-700 dark:text-blue-300">
 								<p>
-									{$t('common.fee_explanation_1', { default: 'All network fees are automatically paid using your STRK deposits to maintain transaction privacy.' })}
+									{$t('common.fee_explanation_1')}
 								</p>
 								<p>
-									{$t('common.fee_explanation_2', { default: 'You need to have a single STRK deposit with sufficient balance to cover the entire network fee for the operation.' })}
+									{$t('common.fee_explanation_2')}
 								</p>
 								<p>
-									{$t('common.fee_explanation_3', { default: 'Make a STRK deposit of at least the required amount, then return to complete your transaction.' })}
+									{$t('common.fee_explanation_3')}
 								</p>
 							</div>
 						</div>
@@ -123,12 +121,10 @@
 						<ArrowRight class="mt-0.5 h-5 w-5 text-green-600 dark:text-green-400" />
 						<div>
 							<h3 class="font-semibold text-green-800 dark:text-green-300">
-								{$t('common.next_steps', { default: 'Next Steps' })}
+								{$t('common.next_steps')}
 							</h3>
 							<p class="mt-1 text-sm text-green-700 dark:text-green-300">
-								{$t('common.deposit_strk_instructions', { 
-									default: `Go to the deposit page and make a STRK deposit of at least ${requiredFeeAmount} STRK to cover the withdrawal fee.`
-								})}
+								{$t('common.deposit_strk_instructions').replace('{requiredFeeAmount}', requiredFeeAmount)}
 							</p>
 						</div>
 					</div>
@@ -141,14 +137,14 @@
 					class="rounded-lg bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
 					on:click={handleClose}
 				>
-					{$t('common.close', { default: 'Close' })}
+					{$t('common.close')}
 				</button>
 				<button
 					class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 text-white hover:from-purple-600 hover:to-pink-600"
 					on:click={handleGoToDeposit}
 				>
 					<DollarSign class="h-4 w-4" />
-					{$t('common.go_to_deposit', { default: 'Go to Deposit' })}
+					{$t('common.go_to_deposit')}
 				</button>
 			</div>
 		</div>

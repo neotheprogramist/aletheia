@@ -291,7 +291,18 @@
     "execute_withdrawal": "Exécuter le retrait",
     "withdrawal_summary": "Résumé du retrait",
     "recipient": "Destinataire",
-    "withdrawal_confirmation_text": "Ce retrait sera traité anonymement et ne peut pas être annulé. Veuillez vérifier que tous les détails sont corrects."
+    "withdrawal_confirmation_text": "Ce retrait sera traité anonymement et ne peut pas être annulé. Veuillez vérifier que tous les détails sont corrects.",
+    "insufficient_fee_deposit": "Dépôt de Frais Insuffisant",
+    "fee_payment_required": "Paiement des Frais Requis",
+    "insufficient_strk_balance": "Vous avez besoin d'au moins {requiredFeeAmount} STRK pour payer les frais de réseau, mais vous n'avez pas de dépôt STRK approprié disponible pour les couvrir.",
+    "how_fees_work": "Comment Fonctionnent les Frais",
+    "fee_explanation_1": "Tous les frais de réseau sont automatiquement payés avec vos dépôts STRK pour maintenir la confidentialité des transactions.",
+    "fee_explanation_2": "Vous devez avoir un seul dépôt STRK avec un solde suffisant pour couvrir l'intégralité des frais de réseau pour l'opération.",
+    "fee_explanation_3": "Effectuez un dépôt STRK d'au moins le montant requis, puis revenez pour terminer votre transaction.",
+    "next_steps": "Prochaines Étapes",
+    "deposit_strk_instructions": "Allez à la page de dépôt et effectuez un dépôt STRK d'au moins {requiredFeeAmount} STRK pour couvrir les frais de retrait.",
+    "close": "Fermer",
+    "go_to_deposit": "Aller au Dépôt"
   },
   "wallet": {
     "connect": "Connecter le portefeuille",

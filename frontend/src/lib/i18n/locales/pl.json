@@ -291,7 +291,18 @@
 		"execute_withdrawal": "Wykonaj wypłatę",
 		"withdrawal_summary": "Podsumowanie wypłaty",
 		"recipient": "Odbiorca",
-		"withdrawal_confirmation_text": "Ta wypłata zostanie przetworzona anonimowo i nie może być cofnięta. Sprawdź czy wszystkie szczegóły są poprawne."
+		"withdrawal_confirmation_text": "Ta wypłata zostanie przetworzona anonimowo i nie może być cofnięta. Sprawdź czy wszystkie szczegóły są poprawne.",
+		"insufficient_fee_deposit": "Niewystarczająca Wpłata na Opłatę",
+		"fee_payment_required": "Wymagana Płatność Opłaty",
+		"insufficient_strk_balance": "Potrzebujesz przynajmniej {requiredFeeAmount} STRK, aby opłacić opłatę sieciową, ale nie masz odpowiedniej wpłaty STRK dostępnej do jej pokrycia.",
+		"how_fees_work": "Jak Działają Opłaty",
+		"fee_explanation_1": "Wszystkie opłaty sieciowe są automatycznie opłacane z twoich wpłat STRK, aby zachować prywatność transakcji.",
+		"fee_explanation_2": "Musisz mieć pojedynczą wpłatę STRK z wystarczającym saldem, aby pokryć całą opłatę sieciową za operację.",
+		"fee_explanation_3": "Dokonaj wpłaty STRK o wymaganej kwocie, a następnie wróć, aby ukończyć transakcję.",
+		"next_steps": "Następne Kroki",
+		"deposit_strk_instructions": "Przejdź na stronę wpłat i dokonaj wpłaty STRK o wartości co najmniej {requiredFeeAmount} STRK, aby pokryć opłatę za wypłatę.",
+		"close": "Zamknij",
+		"go_to_deposit": "Przejdź do Wpłat"
 	},
 	"wallet": {
 		"connect": "Podłącz portfel",
