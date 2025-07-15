@@ -28,11 +28,13 @@
 	import { tokens, selectedToken } from '$lib/stores/tokens';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
+	import { createDisplayOperationsStore, refreshOperations } from '$lib/stores/operations';
 	import { createElegantDepositColumns } from '$lib/utils/sharedColumns';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import { supportedTokens } from '$lib/config/tokens';
 	import { browser } from '$app/environment';
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
+	import { onDestroy } from 'svelte';
 	import { autoSelectCompleteProcess, type AutoSelectedFee } from '$lib/utils/autoSelectFeeDeposit';
 	import { walletAddress } from '$lib/stores/wallet';
 	import { buildSwapCalldata, fetchEkuboQuote } from '$lib/utils/swap';
@@ -64,6 +66,8 @@
 	const STRK_ADDRESS = supportedTokens[0].address;
 
 	let deposits: DisplayOperation[] = [];
+	let displayOperationsStore: any = null;
+	let unsubscribeDisplayOps: any = null;
 
 	let selectedSwapKey: number | null = null;
 	let selectedSwapDeposit: DisplayOperation | null = null;
@@ -102,6 +106,30 @@
 	let targetToken = '';
 
 	$: if (browser && $selectedToken) {
+		// Clean up previous subscriptions
+		if (unsubscribeDisplayOps) {
+			unsubscribeDisplayOps();
+			unsubscribeDisplayOps = null;
+		}
+		if (displayOperationsStore?.destroy) {
+			displayOperationsStore.destroy();
+			displayOperationsStore = null;
+		}
+		
+		// Create reactive store for this token
+		displayOperationsStore = createDisplayOperationsStore($selectedToken);
+		
+		// Subscribe to store updates
+		if (displayOperationsStore) {
+			unsubscribeDisplayOps = displayOperationsStore.subscribe((storeData: any) => {
+				if (storeData && storeData.deposits) {
+					deposits = storeData.deposits;
+				}
+				isLoading = storeData ? storeData.isLoading : false;
+			});
+		}
+		
+		// Initial load (fallback)
 		loadDeposits(
 			$selectedToken,
 			(d) => (deposits = d),
@@ -527,16 +555,11 @@
 			await nullifyOperation(selectedSwapDeposit.hash);
 			await nullifyOperation(selectedFeeDeposit.hash);
 
-			// 13) Reset component state after successful swap
-			resetAll();
+			// 13) Refresh operations store to trigger auto-update
+			await refreshOperations();
 
-			if ($selectedToken) {
-				loadDeposits(
-					$selectedToken,
-					(d) => (deposits = d),
-					(b) => (isLoading = b)
-				);
-			}
+			// 14) Reset component state after successful swap
+			resetAll();
 
 			setTimeout(() => {
 				progressModalActions.hide();
@@ -583,6 +606,15 @@
 
 		isLoading = false;
 	}
+	
+	onDestroy(() => {
+		if (unsubscribeDisplayOps) {
+			unsubscribeDisplayOps();
+		}
+		if (displayOperationsStore?.destroy) {
+			displayOperationsStore.destroy();
+		}
+	});
 </script>
 
 <ProtectedRoute>
