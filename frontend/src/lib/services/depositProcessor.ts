@@ -11,6 +11,7 @@ import { HybridMerkleTree } from '$lib/merkle/hybridMerkleTree';
 import { getDepositsFromRange } from '$lib/starknet/client';
 import { getAllByStatus, updateOperation } from '$lib/db/operationsDb';
 import { confirmOperation } from '$lib/privacy/confirmOperation';
+import { refreshOperations } from '$lib/stores/operations';
 
 export let merkleTree: HybridMerkleTree;
 let initialized = false;
@@ -32,36 +33,53 @@ export async function initMerkleTree() {
  * Starts listening to new blocks and processes deposits.
  */
 export function startDepositProcessor() {
+	console.log('[depositProcessor] 🚀 Starting deposit processor...');
+	
 	blockUpdates.subscribe(async (update) => {
 		if (!initialized || !update) return;
 
 		try {
+			console.log(`[depositProcessor] 📦 Processing block ${update.blockNumber}...`);
 			const toBlock = update.blockNumber;
 			const fromBlock = await get_latest_db_block_number();
 
-			if (toBlock <= fromBlock) return;
+			if (toBlock <= fromBlock) {
+				console.log(`[depositProcessor] ⏭️ Block ${toBlock} already processed (fromBlock: ${fromBlock})`);
+				return;
+			}
 
 			await delete_latest_db_block_number(fromBlock);
 
 			const deposits = await getDepositsFromRange(fromBlock, toBlock);
+			console.log(`[depositProcessor] 💰 Found ${deposits.length} deposits in block range ${fromBlock}-${toBlock}`);
+			
 			for (const { hash, block_number } of deposits) {
 				await db_add_leaf(hash, block_number);
 				merkleTree.addLeaf(BigInt(hash));
 			}
 
 			const pendingOps = await getAllByStatus('pending');
+			console.log(`[depositProcessor] ⏳ Checking ${pendingOps.length} pending operations...`);
 
 			const leafs = await get_all_leafs();
 			const leafHashSet = new Set(leafs.map((l) => BigInt(l.hash)));
 
+			let hasConfirmedOps = false;
 			for (const op of pendingOps) {
 				if (op.commitment && leafHashSet.has(BigInt(op.commitment))) {
-					console.log(`✅ Auto-confirming pending op ${op.hash} (commitment ${op.commitment})`);
+					console.log(`[depositProcessor] ✅ Auto-confirming pending op ${op.hash} (commitment ${op.commitment})`);
 					await confirmOperation(op.hash);
+					hasConfirmedOps = true;
 				}
 			}
+			
+			// Refresh operations store if any operations were confirmed
+			if (hasConfirmedOps) {
+				console.log(`[depositProcessor] 🔄 Refreshing operations store...`);
+				await refreshOperations();
+			}
 		} catch (err) {
-			console.error('❌ Error in depositProcessor:', err);
+			console.error('[depositProcessor] ❌ Error in depositProcessor:', err);
 		}
 	});
 }

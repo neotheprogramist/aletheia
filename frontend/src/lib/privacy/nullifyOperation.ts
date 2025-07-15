@@ -1,4 +1,5 @@
 import { getOperationByHash, updateOperation } from '$lib/db/operationsDb';
+import { updateOperationInStore } from '$lib/stores/operations';
 
 /**
  * Move a previously confirmed operation → nullified.
@@ -11,4 +12,8 @@ export async function nullifyOperation(hash: string) {
 
 	op.status = 'nullified';
 	await updateOperation(op);
+
+	// Update the operations store for immediate UI updates
+	updateOperationInStore(hash, { status: 'nullified' });
+	console.log(`[nullifyOperation] ✅ Nullified operation ${hash}`);
 }

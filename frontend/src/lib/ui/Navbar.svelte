@@ -3,7 +3,7 @@
 	import WalletConnector from '$lib/ui/WalletConnector.svelte';
 	import SettingsModal from '$lib/ui/SettingsModal.svelte';
 	import { isConnected } from '$lib/stores/wallet';
-	import { Download, FolderOpen, Menu, X, Settings } from 'lucide-svelte';
+	import { Download, FolderOpen, Menu, X, Settings, Upload } from 'lucide-svelte';
 	import { exportOperations, importOperations } from '$lib/utils/operationsBackup';
 	import { toastStore } from '$lib/stores/toast';
 	import { t } from '$lib/i18n';
@@ -128,7 +128,7 @@
 						<a
 							href={route}
 							class="rounded-lg px-2 py-2 transition-all duration-300 ease-in-out"
-							class:active="{page.url.pathname.includes(route)}"
+							class:active={page.url.pathname.includes(route)}
 							aria-current={page.url.pathname.includes(route) ? 'page' : undefined}
 						>
 							{$t(`nav.${route.slice(1)}`)}
@@ -202,7 +202,7 @@
 							<a
 								href={route}
 								class="block rounded-lg px-3 py-2 text-base font-medium transition-all duration-300 ease-in-out"
-								class:active="{page.url.pathname.includes(route)}"
+								class:active={page.url.pathname.includes(route)}
 								on:click={closeMobileMenu}
 								aria-current={page.url.pathname.includes(route) ? 'page' : undefined}
 							>
@@ -260,7 +260,13 @@
 		left: 50%;
 		width: 0;
 		height: 2px;
-		background: linear-gradient(90deg, transparent, var(--color-primary), var(--color-secondary), transparent);
+		background: linear-gradient(
+			90deg,
+			transparent,
+			var(--color-primary),
+			var(--color-secondary),
+			transparent
+		);
 		transform: translateX(-50%);
 		animation: expandGlow 0.3s ease-out forwards;
 		box-shadow: 0 0 8px var(--color-primary);

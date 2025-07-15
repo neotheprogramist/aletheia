@@ -3,6 +3,7 @@ import { zkLibraries } from '$lib/stores/zkLibraries';
 import type { Operation, OperationStatus } from './types';
 import { addOperation, getAllByStatus } from '$lib/db/operationsDb';
 import { getOrCreateMasterSeed } from '$lib/stores/masterSeed';
+import { addOperation as addOperationToStore } from '$lib/stores/operations';
 
 export interface GenerateParams {
 	/** Any application-specific data to attach */
@@ -61,7 +62,10 @@ export async function generateOperation(params: GenerateParams) {
 
 	// 7 Persist into IndexedDB
 	await addOperation(op);
+	
+	// 8 Update the operations store for immediate UI updates
+	addOperationToStore(op);
 
-	// 8 Return the hash so your UI can submit it on-chain
+	// 9 Return the hash so your UI can submit it on-chain
 	return { hash: hash.toString() };
 }

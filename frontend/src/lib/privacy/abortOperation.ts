@@ -1,4 +1,5 @@
 import { getOperationByHash, updateOperation } from '$lib/db/operationsDb';
+import { updateOperationInStore } from '$lib/stores/operations';
 
 /**
  * Move a previously pending operation → aborted.
@@ -11,4 +12,7 @@ export async function abortOperation(hash: string) {
 
 	op.status = 'aborted';
 	await updateOperation(op);
+	
+	// Update the operations store for immediate UI updates
+	updateOperationInStore(hash, { status: 'aborted' });
 }

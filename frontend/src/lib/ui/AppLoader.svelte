@@ -6,6 +6,7 @@
 	import FullPageError from './FullPageError.svelte';
 	import { initMerkleTree, startDepositProcessor } from '$lib/services/depositProcessor';
 	import { initTokensWithSymbols } from '$lib/stores/tokens';
+	import { initOperationsStore } from '$lib/stores/operations';
 
 	onMount(() => {
 		initZkLibraries();
@@ -15,6 +16,7 @@
 		const unsubscribeZk = zkLibraries.subscribe(async ($lib) => {
 			if ($lib.status === 'ready') {
 				await initMerkleTree();
+				await initOperationsStore();
 				startDepositProcessor();
 				unsubscribeZk();
 			}

@@ -28,6 +28,7 @@
 		type DisplayOperation,
 		type DisplayPendingEmptyOperation
 	} from '$lib/utils/loadDepositsForToken';
+	import { createDisplayOperationsStore, refreshOperations } from '$lib/stores/operations';
 	import { defaultPendingDepositColumns, createElegantDepositColumns } from '$lib/utils/sharedColumns';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { fromWei, toWei } from '$lib/utils/toWei';
@@ -54,6 +55,7 @@
 	import { get } from 'svelte/store';
 	import { browser } from '$app/environment';
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
+	import { onDestroy } from 'svelte';
 	import { autoSelectCompleteProcess, type AutoSelectedFee } from '$lib/utils/autoSelectFeeDeposit';
 	import ProgressModal from '$lib/ui/ProgressModal.svelte';
 	import {
@@ -66,6 +68,8 @@
 	// --- VIEW & TRANSFER STATE ---
 	let viewMode: 'sender' | 'recipient' = 'sender';
 	let deposits: DisplayOperation[] = [];
+	let displayOperationsStore: any = null;
+	let unsubscribeDisplayOps: any = null;
 
 	let selectedTransferKey: number | null = null;
 	let selectedTransferDeposit: DisplayOperation | null = null;
@@ -109,6 +113,30 @@
 
 	// Whenever viewMode = 'sender', load all confirmed deposits for selected token
 	$: if (browser && viewMode === 'sender' && $selectedToken) {
+		// Clean up previous subscriptions
+		if (unsubscribeDisplayOps) {
+			unsubscribeDisplayOps();
+			unsubscribeDisplayOps = null;
+		}
+		if (displayOperationsStore?.destroy) {
+			displayOperationsStore.destroy();
+			displayOperationsStore = null;
+		}
+		
+		// Create reactive store for this token
+		displayOperationsStore = createDisplayOperationsStore($selectedToken);
+		
+		// Subscribe to store updates
+		if (displayOperationsStore) {
+			unsubscribeDisplayOps = displayOperationsStore.subscribe((storeData: any) => {
+				if (storeData && storeData.deposits) {
+					deposits = storeData.deposits;
+				}
+				isLoading = storeData ? storeData.isLoading : false;
+			});
+		}
+		
+		// Initial load (fallback)
 		loadDeposits(
 			$selectedToken,
 			(d) => (deposits = d),
@@ -118,6 +146,16 @@
 
 	// Whenever viewMode = 'recipient', load all pending‐empty deposits for selected token
 	$: if (browser && viewMode === 'recipient' && $selectedToken) {
+		// Clean up operations store when switching to recipient mode
+		if (unsubscribeDisplayOps) {
+			unsubscribeDisplayOps();
+			unsubscribeDisplayOps = null;
+		}
+		if (displayOperationsStore?.destroy) {
+			displayOperationsStore.destroy();
+			displayOperationsStore = null;
+		}
+		
 		loadPendingEmptyDeposits(
 			$selectedToken,
 			(ops) => (pendingEmptyDeposits = ops),
@@ -465,16 +503,11 @@
 			await nullifyOperation(selectedTransferDeposit.hash);
 			await nullifyOperation(selectedFeeDeposit.hash);
 
+			// Refresh operations store to trigger auto-update
+			await refreshOperations();
+
 			// Reset state
 			resetAll();
-
-			if (viewMode === 'sender' && $selectedToken) {
-				loadDeposits(
-					$selectedToken,
-					(d) => (deposits = d),
-					(b) => (isLoading = b)
-				);
-			}
 
 			setTimeout(() => {
 				progressModalActions.hide();
@@ -655,6 +688,15 @@
 		showEditModal = false;
 		editRow = null;
 	}
+	
+	onDestroy(() => {
+		if (unsubscribeDisplayOps) {
+			unsubscribeDisplayOps();
+		}
+		if (displayOperationsStore?.destroy) {
+			displayOperationsStore.destroy();
+		}
+	});
 </script>
 
 <ProtectedRoute>
