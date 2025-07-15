@@ -63,7 +63,7 @@
 </script>
 
 <div 
-	class="relative inline-block {class_}"
+	class="relative block {class_}"
 	on:mouseenter={show}
 	on:mouseleave={hide}
 	on:focus={show}

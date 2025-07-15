@@ -773,7 +773,7 @@
 												})}
 												class_="flex-1 text-lg font-medium"
 											/>
-											<Tooltip text={$t('tooltips.withdraw.max_button')} position="top" theme="dark">
+											<Tooltip text={$t('tooltips.withdraw.max_button')} position="top" theme="dark" class_="inline-block">
 												<button
 													type="button"
 													class="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-purple-600"
