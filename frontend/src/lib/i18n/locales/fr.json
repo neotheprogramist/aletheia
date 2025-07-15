@@ -316,7 +316,10 @@
     "click_to_unselect": "Cliquez pour désélectionner",
     "click_to_change_fee": "Cliquez pour changer les frais",
     "auto_fee_selection": "Sélection automatique des frais",
-    "auto_fee_merge_explanation": "Le système a automatiquement sélectionné le meilleur dépôt STRK pour payer les frais de réseau. Ce dépôt est séparé de vos dépôts de fusion pour maintenir la confidentialité."
+    "auto_fee_merge_explanation": "Le système a automatiquement sélectionné le meilleur dépôt STRK pour payer les frais de réseau. Ce dépôt est séparé de vos dépôts de fusion pour maintenir la confidentialité.",
+    "auto_fee_transfer_explanation": "Le système a automatiquement sélectionné le meilleur dépôt STRK pour payer les frais de réseau. Ce dépôt est séparé de votre dépôt de transfert pour maintenir la confidentialité.",
+    "auto_selected": "Sélectionné automatiquement",
+    "transfer_details": "Détails du transfert"
   },
   "wallet": {
     "connect": "Connecter le portefeuille",
