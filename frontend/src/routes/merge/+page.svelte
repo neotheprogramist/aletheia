@@ -24,6 +24,7 @@
 	import { fetchMergeFee } from '$lib/utils/fetchFeeForExtension';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
 	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
+	import { createDisplayOperationsStore, refreshOperations } from '$lib/stores/operations';
 	import { createElegantDepositColumns } from '$lib/utils/sharedColumns';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { fromWei } from '$lib/utils/toWei';
@@ -32,6 +33,7 @@
 	import { supportedTokens } from '$lib/config/tokens';
 	import { browser } from '$app/environment';
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
+	import { onDestroy } from 'svelte';
 	import { autoSelectCompleteProcess, type AutoSelectedFee } from '$lib/utils/autoSelectFeeDeposit';
 	import ProgressModal from '$lib/ui/ProgressModal.svelte';
 	import {
@@ -55,6 +57,8 @@
 	const STRK_ADDRESS = supportedTokens[0].address;
 
 	let deposits: DisplayOperation[] = [];
+	let displayOperationsStore: any = null;
+	let unsubscribeDisplayOps: any = null;
 	let selectionMode: 'merge1' | 'merge2' = 'merge1';
 
 	let selectedMerge1Key: number | null = null;
@@ -95,6 +99,30 @@
 	let stopPulsing = false;
 
 	$: if (browser && $selectedToken) {
+		// Clean up previous subscriptions
+		if (unsubscribeDisplayOps) {
+			unsubscribeDisplayOps();
+			unsubscribeDisplayOps = null;
+		}
+		if (displayOperationsStore?.destroy) {
+			displayOperationsStore.destroy();
+			displayOperationsStore = null;
+		}
+		
+		// Create reactive store for this token
+		displayOperationsStore = createDisplayOperationsStore($selectedToken);
+		
+		// Subscribe to store updates
+		if (displayOperationsStore) {
+			unsubscribeDisplayOps = displayOperationsStore.subscribe((storeData: any) => {
+				if (storeData && storeData.deposits) {
+					deposits = storeData.deposits;
+				}
+				isLoading = storeData ? storeData.isLoading : false;
+			});
+		}
+		
+		// Initial load (fallback)
 		loadDeposits(
 			$selectedToken,
 			(d) => (deposits = d),
@@ -512,16 +540,11 @@
 			await nullifyOperation(selectedMerge2Deposit.hash);
 			await nullifyOperation(selectedFeeDeposit.hash);
 
-			// 12) Reset component state after successful merge
-			resetAll();
+			// 12) Refresh operations store to trigger auto-update
+			await refreshOperations();
 
-			if ($selectedToken) {
-				loadDeposits(
-					$selectedToken,
-					(d) => (deposits = d),
-					(b) => (isLoading = b)
-				);
-			}
+			// 13) Reset component state after successful merge
+			resetAll();
 
 			setTimeout(() => {
 				progressModalActions.hide();
@@ -561,6 +584,15 @@
 
 		isLoading = false;
 	}
+	
+	onDestroy(() => {
+		if (unsubscribeDisplayOps) {
+			unsubscribeDisplayOps();
+		}
+		if (displayOperationsStore?.destroy) {
+			displayOperationsStore.destroy();
+		}
+	});
 </script>
 
 <ProtectedRoute>
