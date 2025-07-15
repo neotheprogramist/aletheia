@@ -889,7 +889,23 @@
 										</h3>
 										<div class="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
 											<PaginatedTable
-												columns={createElegantDepositColumns(selectedTransferKey, selectedFeeKey, null, 'transfer')}
+												columns={createElegantDepositColumns(
+													selectedTransferKey,
+													selectedFeeKey,
+													null,
+													'transfer',
+													{
+														available: $t('common.status_available'),
+														operation: $t('common.status_operation'),
+														fee: $t('common.status_fee'),
+														merge1: $t('common.status_merge_1'),
+														merge2: $t('common.status_merge_2'),
+														transfer: $t('common.status_transfer'),
+														swap: $t('common.status_swap'),
+														clickToUnselect: $t('common.click_to_unselect'),
+														clickToChangeFee: $t('common.click_to_change_fee')
+													}
+												)}
 												items={deposits}
 												pageSize={5}
 												keyField="index"
@@ -906,7 +922,7 @@
 									<Card class_="border-0 shadow-xl bg-gray-50 dark:bg-gray-800/50">
 										<div class="flex items-center gap-2 mb-4">
 											<CheckCircle class="h-5 w-5 text-green-500" />
-											<span class="text-lg font-semibold text-gray-700 dark:text-gray-300">Selected Deposits</span>
+											<span class="text-lg font-semibold text-gray-700 dark:text-gray-300">{$t('common.selected_deposits')}</span>
 										</div>
 										<div class="space-y-3">
 											<!-- Transfer Deposit -->
@@ -915,7 +931,7 @@
 													<div class="flex items-center justify-between mb-2">
 														<div class="flex items-center gap-2">
 															<div class="w-2 h-2 rounded-full bg-purple-500"></div>
-															<span class="text-sm font-medium text-purple-800 dark:text-purple-300">Transfer Deposit</span>
+															<span class="text-sm font-medium text-purple-800 dark:text-purple-300">{$t('common.operation_deposit')}</span>
 														</div>
 														<button
 															on:click={() => {
@@ -929,7 +945,7 @@
 															}}
 															class="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 underline"
 														>
-															Reset
+															{$t('transfer.reset')}
 														</button>
 													</div>
 													<div class="flex items-center gap-2">
@@ -945,9 +961,9 @@
 													<div class="flex items-center justify-between mb-2">
 														<div class="flex items-center gap-2">
 															<div class="w-2 h-2 rounded-full bg-blue-500"></div>
-															<span class="text-sm font-medium text-blue-800 dark:text-blue-300">Fee Deposit</span>
+															<span class="text-sm font-medium text-blue-800 dark:text-blue-300">{$t('common.status_fee')}</span>
 														</div>
-														<span class="text-xs text-blue-600 dark:text-blue-400 font-medium">Auto-selected</span>
+														<span class="text-xs text-blue-600 dark:text-blue-400 font-medium">{$t('common.auto_selected')}</span>
 													</div>
 													<div class="flex items-center gap-2">
 														<span class="font-semibold text-blue-900 dark:text-blue-100">{selectedFeeDeposit.displayAmount}</span>
@@ -971,7 +987,7 @@
 											class="mb-3 flex items-center gap-2 text-base font-semibold text-blue-800 dark:text-blue-200"
 										>
 											<Zap class="h-4 w-4" />
-											Fee Information
+											{$t('transfer.fee_information')}
 										</h3>
 										<div class="space-y-2">
 											<p class="text-sm text-blue-700 dark:text-blue-300">
@@ -1013,7 +1029,7 @@
 										<div class="space-y-6" bind:this={transferFormElement}>
 											<h3 class="text-text flex items-center gap-2 text-xl font-bold">
 												<Hash class="h-5 w-5 text-blue-500" />
-												Transfer Details
+												{$t('common.transfer_details')}
 											</h3>
 
 											<form on:submit|preventDefault={initiateTransfer} class="space-y-6">
@@ -1021,12 +1037,12 @@
 												<div class="space-y-3">
 												<label class="text-text flex items-center gap-2 text-sm font-semibold">
 													<UserCheck class="h-4 w-4" />
-													Recipient Hash
+													{$t('transfer.recipient_hash')}
 												</label>
 												<Input
 													bind:value={transferSecretAndNullifierHash}
 													required
-													placeholder="Enter recipient's note hash"
+													placeholder={$t('transfer.recipient_hash_placeholder')}
 													class_="w-full"
 												/>
 											</div>
@@ -1034,13 +1050,13 @@
 											<div class="space-y-3">
 												<label class="text-text flex items-center gap-2 text-sm font-semibold">
 													<ArrowRight class="h-4 w-4" />
-													Transfer Amount
+													{$t('transfer.transfer_amount_label')}
 												</label>
 												<div class="flex gap-2">
 													<Input
 														bind:value={transferAmount}
 														required
-														placeholder="Amount to transfer"
+														placeholder={$t('transfer.transfer_amount_placeholder')}
 														class_="flex-1"
 													/>
 													<button
@@ -1052,13 +1068,13 @@
 															}
 														}}
 													>
-														Max
+														{$t('transfer.max')}
 													</button>
 												</div>
 											</div>
 
 											<Button
-												text="Execute Transfer"
+												text={$t('transfer.execute_transfer')}
 												loading={isLoading}
 												type="submit"
 												class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
@@ -1257,25 +1273,25 @@
 		>
 			<h3 class="text-text mb-2 flex items-center gap-2 font-semibold">
 				<Pen class="h-4 w-4" />
-				Update Note Details
+				{$t('transfer.update_note_details')}
 			</h3>
-			<p class="text-text-secondary text-sm">Specify the token and amount for this pending note</p>
+			<p class="text-text-secondary text-sm">{$t('transfer.specify_token_amount')}</p>
 		</div>
 
 		<div class="space-y-4">
 			<div class="space-y-2">
-				<label for="edit-token" class="text-text text-sm font-medium">Token</label>
+				<label for="edit-token" class="text-text text-sm font-medium">{$t('transfer.token_label')}</label>
 				<TokenSelect
 					tokens={$tokens}
 					bind:value={editToken}
-					placeholder="Choose token"
+					placeholder={$t('transfer.choose_token')}
 					class_="w-full"
 				/>
 			</div>
 
 			<div class="space-y-2">
-				<label for="edit-amount" class="text-text text-sm font-medium">Amount</label>
-				<Input bind:value={editAmount} placeholder="Enter amount" class_="w-full" required />
+				<label for="edit-amount" class="text-text text-sm font-medium">{$t('transfer.amount_label')}</label>
+				<Input bind:value={editAmount} placeholder={$t('transfer.enter_amount')} class_="w-full" required />
 			</div>
 		</div>
 	</div>

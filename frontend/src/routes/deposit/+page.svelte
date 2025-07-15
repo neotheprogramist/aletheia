@@ -221,14 +221,12 @@
 										{$t('ui.deposit_page.deposit_amount')}
 									</label>
 								</Tooltip>
-								<div class="flex gap-2">
-									<Input
-										placeholder={$t('ui.deposit_page.amount_placeholder')}
-										bind:value={amount}
-										required
-										class_="flex-1 text-lg font-medium"
-									/>
-								</div>
+								<Input
+									placeholder={$t('ui.deposit_page.amount_placeholder')}
+									bind:value={amount}
+									required
+									class_="!w-full text-lg font-medium"
+								/>
 							</div>
 
 							<!-- Submit Button -->
@@ -237,7 +235,7 @@
 									text={$t('ui.deposit_page.create_deposit_button')}
 									loading={isLoading}
 									onClick={depositHandler}
-									class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+									class_="!w-full py-4 text-lg font-semibold bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 border border-transparent"
 								/>
 							</Tooltip>
 						</div>

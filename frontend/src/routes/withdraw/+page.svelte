@@ -569,7 +569,18 @@
 												selectedWithdrawKey,
 												selectedFeeKey,
 												null,
-												'withdraw'
+												'withdraw',
+												{
+													available: $t('common.status_available'),
+													operation: $t('common.status_operation'),
+													fee: $t('common.status_fee'),
+													merge1: $t('common.status_merge_1'),
+													merge2: $t('common.status_merge_2'),
+													transfer: $t('common.status_transfer'),
+													swap: $t('common.status_swap'),
+													clickToUnselect: $t('common.click_to_unselect'),
+													clickToChangeFee: $t('common.click_to_change_fee')
+												}
 											)}
 											items={deposits}
 											pageSize={5}
@@ -592,7 +603,7 @@
 							<div class="mb-4 flex items-center gap-2">
 								<CheckCircle class="h-5 w-5 text-green-500" />
 								<span class="text-lg font-semibold text-gray-700 dark:text-gray-300"
-									>Selected Deposits</span
+									>{$t('common.selected_deposits')}</span
 								>
 							</div>
 							<div class="space-y-3">
@@ -605,7 +616,7 @@
 											<div class="flex items-center gap-2">
 												<div class="h-2 w-2 rounded-full bg-purple-500"></div>
 												<span class="text-sm font-medium text-purple-800 dark:text-purple-300"
-													>Operation Deposit</span
+													>{$t('common.operation_deposit')}</span
 												>
 											</div>
 											<button
@@ -634,7 +645,7 @@
 										<div class="mb-2 flex items-center gap-2">
 											<div class="h-2 w-2 rounded-full bg-blue-500"></div>
 											<span class="text-sm font-medium text-blue-800 dark:text-blue-300"
-												>Fee Deposit (Auto-selected)</span
+												>{$t('common.fee_deposit_auto_selected')}</span
 											>
 										</div>
 										<div class="flex items-center gap-2">
@@ -773,7 +784,7 @@
 												})}
 												class_="flex-1 text-lg font-medium"
 											/>
-											<Tooltip text={$t('tooltips.withdraw.max_button')} position="top" theme="dark">
+											<Tooltip text={$t('tooltips.withdraw.max_button')} position="top" theme="dark" class_="inline-block">
 												<button
 													type="button"
 													class="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-purple-600"
