@@ -646,7 +646,18 @@
 											selectedSwapKey,
 											selectedFeeKey,
 											null,
-											'swap'
+											'swap',
+											{
+												available: $t('common.status_available'),
+												operation: $t('common.status_operation'),
+												fee: $t('common.status_fee'),
+												merge1: $t('common.status_merge_1'),
+												merge2: $t('common.status_merge_2'),
+												transfer: $t('common.status_transfer'),
+												swap: $t('common.status_swap'),
+												clickToUnselect: $t('common.click_to_unselect'),
+												clickToChangeFee: $t('common.click_to_change_fee')
+											}
 										)}
 										items={deposits}
 										pageSize={5}
