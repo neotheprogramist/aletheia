@@ -302,7 +302,17 @@
 		"next_steps": "Siguientes Pasos",
 		"deposit_strk_instructions": "Ve a la página de depósito y haz un depósito STRK de al menos {requiredFeeAmount} STRK para cubrir la comisión de retiro.",
 		"close": "Cerrar",
-		"go_to_deposit": "Ir a Depósito"
+		"go_to_deposit": "Ir a Depósito",
+		"selected_deposits": "Depósitos Seleccionados",
+		"operation_deposit": "Depósito de Operación",
+		"fee_deposit_auto_selected": "Depósito de Comisión (Auto-seleccionado)",
+		"status_available": "Disponible",
+		"status_operation": "Operación",
+		"status_fee": "Comisión",
+		"status_merge_1": "Fusión 1",
+		"status_merge_2": "Fusión 2",
+		"status_transfer": "Transferencia",
+		"status_swap": "Intercambio"
 	},
 	"wallet": {
 		"connect": "Conectar",

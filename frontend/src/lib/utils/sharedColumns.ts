@@ -11,7 +11,16 @@ export const createElegantDepositColumns = (
 	selectedWithdrawKey: number | null = null,
 	selectedFeeKey: number | null = null,
 	selectedMerge2Key: number | null = null,
-	pageType: 'withdraw' | 'merge' | 'transfer' | 'swap' = 'withdraw'
+	pageType: 'withdraw' | 'merge' | 'transfer' | 'swap' = 'withdraw',
+	translations?: {
+		available: string;
+		operation: string;
+		fee: string;
+		merge1: string;
+		merge2: string;
+		transfer: string;
+		swap: string;
+	}
 ): Column<DisplayOperation>[] => [
 	{ 
 		label: 'Deposit', 
@@ -26,23 +35,23 @@ export const createElegantDepositColumns = (
 			const logoPath = tokenConfig?.logoPath || '/tokens/default.png';
 			
 			let statusDot = 'bg-green-500';
-			let statusText = 'Available';
+			let statusText = translations?.available || 'Available';
 			let statusTextColor = 'text-green-600 dark:text-green-400';
 			let borderColor = 'border-gray-200 dark:border-gray-600';
 			
 			if (deposit.index === selectedWithdrawKey) {
 				statusDot = 'bg-purple-500';
-				statusText = pageType === 'merge' ? 'Merge 1' : pageType === 'transfer' ? 'Transfer' : pageType === 'swap' ? 'Swap' : 'Operation';
+				statusText = pageType === 'merge' ? (translations?.merge1 || 'Merge 1') : pageType === 'transfer' ? (translations?.transfer || 'Transfer') : pageType === 'swap' ? (translations?.swap || 'Swap') : (translations?.operation || 'Operation');
 				statusTextColor = 'text-purple-600 dark:text-purple-400';
 				borderColor = 'border-purple-300 dark:border-purple-500';
 			} else if (deposit.index === selectedMerge2Key) {
 				statusDot = 'bg-orange-500';
-				statusText = 'Merge 2';
+				statusText = translations?.merge2 || 'Merge 2';
 				statusTextColor = 'text-orange-600 dark:text-orange-400';
 				borderColor = 'border-orange-300 dark:border-orange-500';
 			} else if (deposit.index === selectedFeeKey) {
 				statusDot = 'bg-blue-500';
-				statusText = 'Fee';
+				statusText = translations?.fee || 'Fee';
 				statusTextColor = 'text-blue-600 dark:text-blue-400';
 				borderColor = 'border-blue-300 dark:border-blue-500';
 			}

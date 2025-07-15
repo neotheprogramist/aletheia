@@ -302,7 +302,17 @@
 		"next_steps": "שלבים הבאים",
 		"deposit_strk_instructions": "עבור לעמוד ההפקדה ובצע הפקדת STRK של לפחות {requiredFeeAmount} STRK כדי לכסות את עמלת המשיכה.",
 		"close": "סגור",
-		"go_to_deposit": "עבור להפקדה"
+		"go_to_deposit": "עבור להפקדה",
+		"selected_deposits": "הפקדות נבחרות",
+		"operation_deposit": "הפקדת פעולה",
+		"fee_deposit_auto_selected": "הפקדת עמלה (נבחרה אוטומטית)",
+		"status_available": "זמין",
+		"status_operation": "פעולה",
+		"status_fee": "עמלה",
+		"status_merge_1": "מיזוג 1",
+		"status_merge_2": "מיזוג 2",
+		"status_transfer": "העברה",
+		"status_swap": "החלפה"
 	},
 	"wallet": {
 		"connect": "חבר ארנק",

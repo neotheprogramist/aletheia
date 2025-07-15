@@ -236,7 +236,17 @@
     "next_steps": "Next Steps",
     "deposit_strk_instructions": "Go to the deposit page and make a STRK deposit of at least {requiredFeeAmount} STRK to cover the withdrawal fee.",
     "close": "Close",
-    "go_to_deposit": "Go to Deposit"
+    "go_to_deposit": "Go to Deposit",
+    "selected_deposits": "Selected Deposits",
+    "operation_deposit": "Operation Deposit",
+    "fee_deposit_auto_selected": "Fee Deposit (Auto-selected)",
+    "status_available": "Available",
+    "status_operation": "Operation",
+    "status_fee": "Fee",
+    "status_merge_1": "Merge 1",
+    "status_merge_2": "Merge 2",
+    "status_transfer": "Transfer",
+    "status_swap": "Swap"
   },
   "wallet": {
     "connect": "Connect Wallet",

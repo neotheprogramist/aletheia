@@ -302,7 +302,17 @@
     "next_steps": "Nächste Schritte",
     "deposit_strk_instructions": "Gehen Sie zur Einzahlungsseite und tätigen Sie eine STRK-Einzahlung von mindestens {requiredFeeAmount} STRK, um die Abhebungsgebühr zu decken.",
     "close": "Schließen",
-    "go_to_deposit": "Zur Einzahlung Gehen"
+    "go_to_deposit": "Zur Einzahlung Gehen",
+    "selected_deposits": "Ausgewählte Einzahlungen",
+    "operation_deposit": "Operationseinzahlung",
+    "fee_deposit_auto_selected": "Gebühreneinzahlung (Automatisch ausgewählt)",
+    "status_available": "Verfügbar",
+    "status_operation": "Operation",
+    "status_fee": "Gebühr",
+    "status_merge_1": "Zusammenführung 1",
+    "status_merge_2": "Zusammenführung 2",
+    "status_transfer": "Übertragung",
+    "status_swap": "Tausch"
   },
   "wallet": {
     "connect": "Wallet verbinden",

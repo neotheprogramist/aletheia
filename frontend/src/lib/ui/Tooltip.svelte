@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onDestroy } from 'svelte';
 	
 	export let text: string;
 	export let position: 'top' | 'bottom' | 'left' | 'right' = 'top';

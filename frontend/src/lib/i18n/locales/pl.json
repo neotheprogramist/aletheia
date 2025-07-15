@@ -302,7 +302,17 @@
 		"next_steps": "Następne Kroki",
 		"deposit_strk_instructions": "Przejdź na stronę wpłat i dokonaj wpłaty STRK o wartości co najmniej {requiredFeeAmount} STRK, aby pokryć opłatę za wypłatę.",
 		"close": "Zamknij",
-		"go_to_deposit": "Przejdź do Wpłat"
+		"go_to_deposit": "Przejdź do Wpłat",
+		"selected_deposits": "Wybrane Wpłaty",
+		"operation_deposit": "Wpłata Operacyjna",
+		"fee_deposit_auto_selected": "Wpłata na Opłatę (Auto-wybrana)",
+		"status_available": "Dostępna",
+		"status_operation": "Operacja",
+		"status_fee": "Opłata",
+		"status_merge_1": "Łączenie 1",
+		"status_merge_2": "Łączenie 2",
+		"status_transfer": "Przelew",
+		"status_swap": "Zamiana"
 	},
 	"wallet": {
 		"connect": "Podłącz portfel",

@@ -302,7 +302,17 @@
     "next_steps": "Prochaines Étapes",
     "deposit_strk_instructions": "Allez à la page de dépôt et effectuez un dépôt STRK d'au moins {requiredFeeAmount} STRK pour couvrir les frais de retrait.",
     "close": "Fermer",
-    "go_to_deposit": "Aller au Dépôt"
+    "go_to_deposit": "Aller au Dépôt",
+    "selected_deposits": "Dépôts Sélectionnés",
+    "operation_deposit": "Dépôt d'Opération",
+    "fee_deposit_auto_selected": "Dépôt de Frais (Auto-sélectionné)",
+    "status_available": "Disponible",
+    "status_operation": "Opération",
+    "status_fee": "Frais",
+    "status_merge_1": "Fusion 1",
+    "status_merge_2": "Fusion 2",
+    "status_transfer": "Transfert",
+    "status_swap": "Échange"
   },
   "wallet": {
     "connect": "Connecter le portefeuille",
