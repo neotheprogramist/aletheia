@@ -18,9 +18,9 @@ use crate::utils::{
 
 pub async fn withdraw(withdraw_amount: u128) {
     let sierra_path =
-        PathBuf::from("../sn/target/release/sn_WithdrawExtension.contract_class.json");
+        PathBuf::from("../sn/target/dev/sn_WithdrawExtension.contract_class.json");
     let casm_path =
-        PathBuf::from("../sn/target/release/sn_WithdrawExtension.compiled_contract_class.json");
+        PathBuf::from("../sn/target/dev/sn_WithdrawExtension.compiled_contract_class.json");
 
     let devnet = setup_devnet(None).await;
     let privacy_pool_deployed_contract_address = deploy_privacy_pools(&devnet).await;
@@ -31,7 +31,7 @@ pub async fn withdraw(withdraw_amount: u128) {
         withdraw_extension_address,
         Felt::from_dec_str("22000").unwrap(),
     )
-    .await;
+    .await.1;
 
     let mut witness_execute = WitnessExecute::new_with_secrets();
     let mut merkle_tree = HybridMerkleTree::new(None, 32);

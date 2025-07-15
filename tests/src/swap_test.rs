@@ -163,9 +163,8 @@ pub async fn swap(amount_to_swap: u128) {
         .unwrap();
 
     let privacy_pool_deployed_contract_address = deploy_privacy_pools(&second_devnet).await;
-    let sierra_path = PathBuf::from("../sn/target/release/sn_SwapExtension.contract_class.json");
-    let casm_path =
-        PathBuf::from("../sn/target/release/sn_SwapExtension.compiled_contract_class.json");
+    let sierra_path = PathBuf::from("../sn/target/dev/sn_SwapExtension.contract_class.json");
+    let casm_path = PathBuf::from("../sn/target/dev/sn_SwapExtension.compiled_contract_class.json");
     let ekubo_core =
         Felt::from_hex("0x0444a09d96389aa7148f1aada508e30b71299ffe650d9c97fdaae38cb9a23384")
             .unwrap();
@@ -188,7 +187,8 @@ pub async fn swap(amount_to_swap: u128) {
         swap_extension_address,
         Felt::from_dec_str("22000").unwrap(),
     )
-    .await;
+    .await
+    .1;
 
     let mut witness_execute = WitnessExecute::new_with_secrets();
     let mut merkle_tree = HybridMerkleTree::new(None, 32);
