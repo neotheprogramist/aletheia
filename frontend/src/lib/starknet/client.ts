@@ -1,5 +1,5 @@
 import {
-	PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+	PUBLIC_ALETHEIA_CONTRACT_ADDRESS,
 	PUBLIC_PRIVACY_LEAF_ADDED_SELECTOR
 } from '$env/static/public';
 import { provider } from '$lib/stores/provider';
@@ -14,7 +14,7 @@ export async function getDepositsFromRange(from: number, to: number) {
 	const filter = {
 		from_block: { block_number: from },
 		to_block: { block_number: to },
-		address: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+		address: PUBLIC_ALETHEIA_CONTRACT_ADDRESS,
 		keys: [[PUBLIC_PRIVACY_LEAF_ADDED_SELECTOR]],
 		chunk_size: 100
 	};

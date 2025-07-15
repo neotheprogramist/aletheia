@@ -10,7 +10,7 @@
 	import Modal from '$lib/ui/Modal.svelte';
 	import InsufficientFeeModal from '$lib/ui/InsufficientFeeModal.svelte';
 	import {
-		PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+		PUBLIC_ALETHEIA_CONTRACT_ADDRESS,
 		PUBLIC_SWAP_EXTENSION_CONTRACT_ADDRESS,
 		PUBLIC_SWAP_EXTENSION_DEPOSITED_SELECTOR
 	} from '$env/static/public';
@@ -222,7 +222,7 @@
 			const excludeDeposits = [selectedSwapDeposit];
 			autoSelectedFeeInfo = await autoSelectCompleteProcess(
 				'swap',
-				PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				PUBLIC_ALETHEIA_CONTRACT_ADDRESS,
 				PUBLIC_SWAP_EXTENSION_CONTRACT_ADDRESS,
 				excludeDeposits
 			);
@@ -484,10 +484,10 @@
 			const account = get(paymasterWallet);
 			if (!account) throw new Error('Missing Account');
 
-			const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
+			const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_ALETHEIA_CONTRACT_ADDRESS);
 			if (!privacyAbi) throw new Error('Missing ABI');
 
-			const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
+			const privacy = new Contract(privacyAbi, PUBLIC_ALETHEIA_CONTRACT_ADDRESS, rpc);
 			privacy.connect(account);
 
 			const honkCalldataWithLen = [
@@ -496,7 +496,7 @@
 			];
 
 			const call = {
-				contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				contractAddress: PUBLIC_ALETHEIA_CONTRACT_ADDRESS,
 				entrypoint: 'execute_extension',
 				calldata: [
 					...honkCalldataWithLen,

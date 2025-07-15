@@ -299,13 +299,13 @@ pub async fn swap(amount_to_swap: u128) {
     println!("Eth balance after swap: {:?}", balance_eth_after_swap);
 
     println!(
-        "Swapped tokens using Privacy Pools Extension: {:?}",
+        "Swapped tokens using Aletheia Extension: {:?}",
         extension_swapped
     );
 
     assert!(
         ekubo_router_swapped == extension_swapped,
-        "Ekubo Router and Privacy Pools Extension swapped amounts do not match!"
+        "Ekubo Router and Aletheia Extension swapped amounts do not match!"
     );
     println!("🎉 Swap test completed successfully!");
 }

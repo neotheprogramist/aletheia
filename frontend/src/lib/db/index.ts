@@ -1,6 +1,6 @@
 // Central IndexedDB setup + generic transaction helper
 
-const DB_NAME = 'privacy-pools-data';
+const DB_NAME = 'aletheia-data';
 const DB_VERSION = 6;
 
 // Our two stores

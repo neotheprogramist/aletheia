@@ -21,7 +21,7 @@
 			"settings": "Configuración de la aplicación: idioma y preferencias",
 			"export_description": "Descargar datos de tus operaciones privadas para respaldo",
 			"import_description": "Restaurar operaciones desde un archivo previamente exportado",
-			"settings_description": "Configurar tus preferencias de Privacy Poolz"
+			"settings_description": "Configurar tus preferencias de Aletheia"
 		},
 		"deposit": {
 			"select_token": "Elige el token que quieres depositar privadamente",
@@ -194,7 +194,7 @@
 		}
 	},
 	"home": {
-		"title": "Privacy Pools",
+		"title": "Aletheia",
 		"subtitle": "La solución de privacidad definitiva para sus transacciones StarkNet. Opere, transfiera y realice transacciones con total anonimato.",
 		"unlock_privacy": "Desbloquear privacidad",
 		"connect_wallet_description": "Conecte su billetera para comenzar a experimentar la verdadera privacidad financiera en StarkNet",
@@ -236,7 +236,7 @@
 			"step3": "Retire, transfiera o intercambie de forma anónima"
 		},
 		"why_choose": {
-			"title": "Por qué elegir Privacy Pools",
+			"title": "Por qué elegir Aletheia",
 			"privacy": "Las pruebas de conocimiento cero garantizan privacidad completa",
 			"starknet": "Construido en StarkNet para tarifas bajas y transacciones rápidas",
 			"decentralized": "Protocolo descentralizado y sin confianza"
@@ -381,7 +381,7 @@
 		"same_note_error": "Error de misma nota",
 		"note_not_found": "Nota no encontrada",
 		"page_title": "Transferencias Privadas",
-		"page_description": "Transfiera fondos entre notas privadas dentro del pool de privacidad con total anonimato",
+		"page_description": "Transfiera fondos entre notas privadas dentro de Aletheia con total anonimato",
 		"mode_send": "Enviar Transferencia",
 		"mode_receive": "Recibir Transferencia",
 		"send_title": "Enviar Transferencia Privada",
@@ -511,14 +511,14 @@
 		"stats_instant_quotes": "⚡",
 		"stats_instant_quotes_label": "Cotizaciones Instantáneas",
 		"supported_pairs_title": "Pares de Trading Soportados",
-		"supported_pairs_description": "Todos los intercambios están alimentados por Ekubo DEX para tarifas óptimas y liquidez profunda. Los pares soportados incluyen todas las combinaciones principales de tokens en el pool de privacidad."
+		"supported_pairs_description": "Todos los intercambios están alimentados por Ekubo DEX para tarifas óptimas y liquidez profunda. Los pares soportados incluyen todas las combinaciones principales de tokens en Aletheia."
 	},
 	"features": {
 		"private_deposits": {
 			"title": "Depósitos Privados",
 			"description": "Transforme sus tokens en notas privadas usando pruebas de conocimiento cero. Sus depósitos se vuelven completamente anónimos e inrastreables, garantizando máxima privacidad financiera en StarkNet.",
 			"how_it_works": [
-				"Conecte su billetera StarkNet al pool de privacidad",
+				"Conecte su billetera StarkNet a Aletheia",
 				"Seleccione el token y cantidad que desea depositar",
 				"Reciba una nota criptográfica representando su depósito",
 				"Su depósito es ahora completamente privado y anónimo"
@@ -645,16 +645,16 @@
 		},
 		"onboarding": {
 			"welcome": {
-				"title": "¡Bienvenido a Privacy Pools!",
+				"title": "¡Bienvenido a Aletheia!",
 				"description": "Un protocolo de privacidad descentralizado que le permite depositar, retirar, transferir e intercambiar tokens con total anonimato usando pruebas de conocimiento cero."
 			},
 			"connect_wallet": {
 				"title": "Conecte Su Billetera",
-				"description": "Primero, conecte su billetera StarkNet para comenzar a usar Privacy Pools. Admitimos todas las principales billeteras StarkNet."
+				"description": "Primero, conecte su billetera StarkNet para comenzar a usar Aletheia. Admitimos todas las principales billeteras StarkNet."
 			},
 			"make_deposit": {
 				"title": "Hacer un Depósito",
-				"description": "Deposite tokens en el pool de privacidad para recibir notas privadas. Estas notas representan sus fondos manteniéndolos completamente anónimos."
+				"description": "Deposite tokens en Aletheia para recibir notas privadas. Estas notas representan sus fondos manteniéndolos completamente anónimos."
 			},
 			"withdraw_anonymously": {
 				"title": "Retirar Anónimamente",
@@ -672,7 +672,7 @@
 			"step_counter": "Paso {current} de {total}"
 		},
 		"navbar": {
-			"privacy_pools": "Privacy Pools",
+			"aletheia": "Aletheia",
 			"export_tooltip": "Exportar todas las operaciones a JSON",
 			"import_tooltip": "Importar operaciones desde JSON",
 			"settings_tooltip": "Configuración",

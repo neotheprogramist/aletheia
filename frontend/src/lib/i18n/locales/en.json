@@ -128,7 +128,7 @@
     }
   },
   "home": {
-    "title": "Privacy Pools",
+    "title": "Aletheia",
     "subtitle": "The ultimate privacy solution for your StarkNet transactions. Trade, transfer, and transact with complete anonymity.",
     "unlock_privacy": "Unlock Privacy",
     "connect_wallet_description": "Connect your wallet to start experiencing true financial privacy on StarkNet",
@@ -170,7 +170,7 @@
       "step3": "Withdraw, transfer, or swap anonymously"
     },
     "why_choose": {
-      "title": "Why Choose Privacy Pools",
+      "title": "Why Choose Aletheia",
       "privacy": "Zero-knowledge proofs ensure complete privacy",
       "starknet": "Built on StarkNet for low fees and fast transactions",
       "decentralized": "Decentralized and trustless protocol"
@@ -271,7 +271,7 @@
   },
   "deposit": {
     "title": "Deposit",
-    "description": "Deposit your tokens into the privacy pool to start anonymous transactions",
+    "description": "Deposit your tokens into the aletheia to start anonymous transactions",
     "select_token": "Select Token",
     "enter_amount": "Enter Amount",
     "max": "Max",
@@ -303,7 +303,7 @@
   },
   "transfer": {
     "title": "Transfer",
-    "description": "Transfer funds privately between users within the privacy pool",
+    "description": "Transfer funds privately between users within Aletheia",
     "select_source": "Select Source Note",
     "recipient_note": "Recipient Note Hash",
     "transfer_amount": "Transfer Amount",
@@ -315,7 +315,7 @@
     "same_note_error": "Cannot transfer to same note",
     "note_not_found": "Recipient note not found",
     "page_title": "Private Transfers",
-    "page_description": "Transfer funds between private notes within the privacy pool with complete anonymity",
+    "page_description": "Transfer funds between private notes within Aletheia with complete anonymity",
     "mode_send": "Send Transfer",
     "mode_receive": "Receive Transfer",
     "send_title": "Send Private Transfer",
@@ -454,7 +454,7 @@
     "stats_instant_quotes": "⚡",
     "stats_instant_quotes_label": "Instant Quotes",
     "supported_pairs_title": "Supported Trading Pairs",
-    "supported_pairs_description": "All swaps are powered by Ekubo DEX for optimal rates and deep liquidity. Supported pairs include all major token combinations in the privacy pool."
+    "supported_pairs_description": "All swaps are powered by Ekubo DEX for optimal rates and deep liquidity. Supported pairs include all major token combinations in Aletheia."
   },
   "tooltips": {
     "navbar": {
@@ -463,7 +463,7 @@
       "settings": "Application settings: language and preferences",
       "export_description": "Download your private operations data for backup",
       "import_description": "Restore operations from a previously exported file",
-      "settings_description": "Configure your Privacy Poolz preferences"
+      "settings_description": "Configure your Aletheia preferences"
     },
     "deposit": {
       "select_token": "Choose the token you want to deposit privately",
@@ -527,7 +527,7 @@
       "title": "Private Deposits",
       "description": "Transform your tokens into private notes using zero-knowledge proofs. Your deposits become completely anonymous and untraceable, ensuring maximum financial privacy on StarkNet.",
       "how_it_works": [
-        "Connect your StarkNet wallet to the privacy pool",
+        "Connect your StarkNet wallet to Aletheia",
         "Select the token and amount you want to deposit",
         "Receive a cryptographic note representing your deposit",
         "Your deposit is now completely private and anonymous"
@@ -654,16 +654,16 @@
     },
     "onboarding": {
       "welcome": {
-        "title": "Welcome to Privacy Pools!",
+        "title": "Welcome to Aletheia!",
         "description": "A decentralized privacy protocol that lets you deposit, withdraw, transfer, and swap tokens with complete anonymity using zero-knowledge proofs."
       },
       "connect_wallet": {
         "title": "Connect Your Wallet",
-        "description": "First, connect your StarkNet wallet to start using Privacy Pools. We support all major StarkNet wallets."
+        "description": "First, connect your StarkNet wallet to start using Aletheia. We support all major StarkNet wallets."
       },
       "make_deposit": {
         "title": "Make a Deposit",
-        "description": "Deposit tokens into the privacy pool to receive private notes. These notes represent your funds while keeping them completely anonymous."
+        "description": "Deposit tokens into Aletheia to receive private notes. These notes represent your funds while keeping them completely anonymous."
       },
       "withdraw_anonymously": {
         "title": "Withdraw Anonymously",
@@ -681,7 +681,7 @@
       "step_counter": "Step {current} of {total}"
     },
     "navbar": {
-      "privacy_pools": "Privacy Pools",
+      "aletheia": "Aletheia",
       "export_tooltip": "Export all operations to JSON",
       "import_tooltip": "Import operations from JSON",
       "settings_tooltip": "Settings",

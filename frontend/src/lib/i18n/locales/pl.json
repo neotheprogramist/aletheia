@@ -21,7 +21,7 @@
 			"settings": "Ustawienia aplikacji: język i preferencje",
 			"export_description": "Pobierz dane swoich prywatnych operacji do kopii zapasowej",
 			"import_description": "Przywróć operacje z wcześniej wyeksportowanego pliku",
-			"settings_description": "Skonfiguruj swoje preferencje Privacy Poolz"
+			"settings_description": "Skonfiguruj swoje preferencje Aletheia"
 		},
 		"deposit": {
 			"select_token": "Wybierz token który chcesz wpłacić prywatnie",
@@ -194,7 +194,7 @@
 		}
 	},
 	"home": {
-		"title": "Privacy Pools",
+		"title": "Aletheia",
 		"subtitle": "Najlepsze rozwiązanie prywatności dla Twoich transakcji StarkNet. Handluj, przelewaj i dokonuj transakcji z całkowitą anonimowością.",
 		"unlock_privacy": "Odblokuj prywatność",
 		"connect_wallet_description": "Podłącz swój portfel, aby rozpocząć doświadczanie prawdziwej prywatności finansowej w StarkNet",
@@ -236,7 +236,7 @@
 			"step3": "Wypłacaj, przelewaj lub wymieniaj anonimowo"
 		},
 		"why_choose": {
-			"title": "Dlaczego wybrać Privacy Pools",
+			"title": "Dlaczego wybrać Aletheia",
 			"privacy": "Dowody zero-knowledge zapewniają całkowitą prywatność",
 			"starknet": "Zbudowane na StarkNet dla niskich opłat i szybkich transakcji",
 			"decentralized": "Zdecentralizowany i bezpieczny protokół"
@@ -369,7 +369,7 @@
 	},
 	"transfer": {
 		"title": "Przelew",
-		"description": "Przelewaj środki prywatnie między użytkownikami w puli prywatności",
+		"description": "Przelewaj środki prywatnie między użytkownikami w Aletheia",
 		"select_source": "Wybierz źródłową notatkę",
 		"recipient_note": "Hash notatki odbiorcy",
 		"transfer_amount": "Kwota przelewu",
@@ -381,7 +381,7 @@
 		"same_note_error": "Nie można przelać na tę samą notatkę",
 		"note_not_found": "Notatka odbiorcy nie znaleziona",
 		"page_title": "Prywatne Przelewy",
-		"page_description": "Przelewaj środki między prywatnymi notatkami w puli prywatności z całkowitą anonimowością",
+		"page_description": "Przelewaj środki między prywatnymi notatkami w Aletheia z całkowitą anonimowością",
 		"mode_send": "Wyślij Przelew",
 		"mode_receive": "Odbierz Przelew",
 		"send_title": "Wyślij Prywatny Przelew",
@@ -520,14 +520,14 @@
 		"stats_instant_quotes": "⚡",
 		"stats_instant_quotes_label": "Natychmiastowe Wyceny",
 		"supported_pairs_title": "Obsługiwane Pary Handlowe",
-		"supported_pairs_description": "Wszystkie wymiany są obsługiwane przez Ekubo DEX dla optymalnych kursów i głębokiej płynności. Obsługiwane pary obejmują wszystkie główne kombinacje tokenów w puli prywatności."
+		"supported_pairs_description": "Wszystkie wymiany są obsługiwane przez Ekubo DEX dla optymalnych kursów i głębokiej płynności. Obsługiwane pary obejmują wszystkie główne kombinacje tokenów w Aletheia."
 	},
 	"features": {
 		"private_deposits": {
 			"title": "Prywatne Wpłaty",
 			"description": "Przekształć swoje tokeny w prywatne notatki używając dowodów zero-knowledge. Twoje wpłaty stają się całkowicie anonimowe i nieśledzone, zapewniając maksymalną prywatność finansową w StarkNet.",
 			"how_it_works": [
-				"Podłącz swój portfel StarkNet do puli prywatności",
+				"Podłącz swój portfel StarkNet do Aletheia",
 				"Wybierz token i kwotę, którą chcesz wpłacić",
 				"Otrzymaj kryptograficzną notatkę reprezentującą Twoją wpłatę",
 				"Twoja wpłata jest teraz całkowicie prywatna i anonimowa"
@@ -654,16 +654,16 @@
 		},
 		"onboarding": {
 			"welcome": {
-				"title": "Witamy w Privacy Pools!",
+				"title": "Witamy w Aletheia!",
 				"description": "Zdecentralizowany protokół prywatności, który pozwala wpłacać, wypłacać, przelewać i wymieniać tokeny z całkowitą anonimowością używając dowodów zero-knowledge."
 			},
 			"connect_wallet": {
 				"title": "Podłącz Swój Portfel",
-				"description": "Najpierw podłącz swój portfel StarkNet, aby rozpocząć korzystanie z Privacy Pools. Wspieramy wszystkie główne portfele StarkNet."
+				"description": "Najpierw podłącz swój portfel StarkNet, aby rozpocząć korzystanie z Aletheia. Wspieramy wszystkie główne portfele StarkNet."
 			},
 			"make_deposit": {
 				"title": "Dokonaj Wpłaty",
-				"description": "Wpłać tokeny do puli prywatności, aby otrzymać prywatne notatki. Te notatki reprezentują Twoje środki, zachowując je całkowicie anonimowe."
+				"description": "Wpłać tokeny do Aletheia, aby otrzymać prywatne notatki. Te notatki reprezentują Twoje środki, zachowując je całkowicie anonimowe."
 			},
 			"withdraw_anonymously": {
 				"title": "Wypłacaj Anonimowo",
@@ -681,7 +681,7 @@
 			"step_counter": "Krok {current} z {total}"
 		},
 		"navbar": {
-			"privacy_pools": "Privacy Pools",
+			"aletheia": "Aletheia",
 			"export_tooltip": "Eksportuj wszystkie operacje do JSON",
 			"import_tooltip": "Importuj operacje z JSON",
 			"settings_tooltip": "Ustawienia",

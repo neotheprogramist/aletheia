@@ -45,7 +45,7 @@ export function changeLanguage(lang: string) {
 		
 		// Zapisz w localStorage
 		if (typeof window !== 'undefined') {
-			localStorage.setItem('privacy-pools-language', lang);
+			localStorage.setItem('aletheia-language', lang);
 		}
 	}
 }
@@ -56,7 +56,7 @@ export function initI18n() {
 	
 	if (typeof window !== 'undefined') {
 		// Sprawdź localStorage
-		const savedLang = localStorage.getItem('privacy-pools-language');
+		const savedLang = localStorage.getItem('aletheia-language');
 		if (savedLang && savedLang in availableLanguages) {
 			initialLocale = savedLang;
 		} else {

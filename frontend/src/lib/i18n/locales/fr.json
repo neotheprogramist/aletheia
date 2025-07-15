@@ -21,7 +21,7 @@
       "settings": "Paramètres de l'application : langue et préférences",
       "export_description": "Télécharger vos données d'opérations privées pour sauvegarde",
       "import_description": "Restaurer les opérations depuis un fichier précédemment exporté",
-      "settings_description": "Configurer vos préférences Privacy Poolz"
+      "settings_description": "Configurer vos préférences Aletheia"
     },
     "deposit": {
       "select_token": "Choisissez le jeton que vous voulez déposer en privé",
@@ -194,7 +194,7 @@
     }
   },
   "home": {
-    "title": "Privacy Pools",
+    "title": "Aletheia",
     "subtitle": "La solution de confidentialité ultime pour vos transactions StarkNet. Échangez, transférez et effectuez des transactions en toute anonymité.",
     "unlock_privacy": "Déverrouiller la confidentialité",
     "connect_wallet_description": "Connectez votre portefeuille pour commencer à expérimenter la vraie confidentialité financière sur StarkNet",
@@ -236,7 +236,7 @@
       "step3": "Retirez, transférez ou échangez anonymement"
     },
     "why_choose": {
-      "title": "Pourquoi choisir Privacy Pools",
+      "title": "Pourquoi choisir Aletheia",
       "privacy": "Les preuves à connaissance nulle garantissent une confidentialité complète",
       "starknet": "Construit sur StarkNet pour des frais bas et des transactions rapides",
       "decentralized": "Protocole décentralisé et sans confiance"
@@ -381,7 +381,7 @@
     "same_note_error": "Erreur de note identique",
     "note_not_found": "Note non trouvée",
     "page_title": "Transferts Privés",
-    "page_description": "Transférez des fonds entre notes privées dans le pool de confidentialité avec un anonymat complet",
+    "page_description": "Transférez des fonds entre notes privées dans Aletheia avec un anonymat complet",
     "mode_send": "Envoyer un Transfert",
     "mode_receive": "Recevoir un Transfert",
     "send_title": "Envoyer un Transfert Privé",
@@ -511,14 +511,14 @@
     "stats_instant_quotes": "⚡",
     "stats_instant_quotes_label": "Cotations Instantanées",
     "supported_pairs_title": "Paires de Trading Supportées",
-    "supported_pairs_description": "Tous les échanges sont alimentés par Ekubo DEX pour des taux optimaux et une liquidité profonde. Les paires supportées incluent toutes les combinaisons de jetons majeures du pool de confidentialité."
+    "supported_pairs_description": "Tous les échanges sont alimentés par Ekubo DEX pour des taux optimaux et une liquidité profonde. Les paires supportées incluent toutes les combinaisons de jetons majeures d'Aletheia."
   },
   "features": {
     "private_deposits": {
       "title": "Dépôts Privés",
       "description": "Transformez vos jetons en notes privées grâce aux preuves à connaissance nulle. Vos dépôts deviennent complètement anonymes et intraçables, garantissant une confidentialité financière maximale sur StarkNet.",
       "how_it_works": [
-        "Connectez votre portefeuille StarkNet au pool de confidentialité",
+        "Connectez votre portefeuille StarkNet à Aletheia",
         "Sélectionnez le jeton et le montant que vous souhaitez déposer",
         "Recevez une note cryptographique représentant votre dépôt",
         "Votre dépôt est maintenant complètement privé et anonyme"
@@ -645,16 +645,16 @@
     },
     "onboarding": {
       "welcome": {
-        "title": "Bienvenue dans Privacy Pools !",
+        "title": "Bienvenue dans Aletheia !",
         "description": "Un protocole de confidentialité décentralisé qui vous permet de déposer, retirer, transférer et échanger des jetons en toute anonymité grâce aux preuves à connaissance nulle."
       },
       "connect_wallet": {
         "title": "Connectez votre portefeuille",
-        "description": "D'abord, connectez votre portefeuille StarkNet pour commencer à utiliser Privacy Pools. Nous supportons tous les principaux portefeuilles StarkNet."
+        "description": "D'abord, connectez votre portefeuille StarkNet pour commencer à utiliser Aletheia. Nous supportons tous les principaux portefeuilles StarkNet."
       },
       "make_deposit": {
         "title": "Effectuez un dépôt",
-        "description": "Déposez des jetons dans le pool de confidentialité pour recevoir des notes privées. Ces notes représentent vos fonds tout en les gardant complètement anonymes."
+        "description": "Déposez des jetons dans Aletheia pour recevoir des notes privées. Ces notes représentent vos fonds tout en les gardant complètement anonymes."
       },
       "withdraw_anonymously": {
         "title": "Retirez anonymement",
@@ -672,7 +672,7 @@
       "step_counter": "Étape {current} sur {total}"
     },
     "navbar": {
-      "privacy_pools": "Privacy Pools",
+      "aletheia": "Aletheia",
       "export_tooltip": "Exporter toutes les opérations en JSON",
       "import_tooltip": "Importer des opérations depuis JSON",
       "settings_tooltip": "Paramètres",

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS } from '$env/static/public';
+	import { PUBLIC_ALETHEIA_CONTRACT_ADDRESS } from '$env/static/public';
 	import { t } from '$lib/i18n';
 	import { getOperationDetails } from '$lib/db/operations';
 	import { abortOperation } from '$lib/privacy/abortOperation';
@@ -238,7 +238,7 @@
 			const excludeDeposits = [selectedMerge1Deposit, selectedMerge2Deposit];
 			autoSelectedFeeInfo = await autoSelectCompleteProcess(
 				'merge',
-				PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				PUBLIC_ALETHEIA_CONTRACT_ADDRESS,
 				undefined, // merge doesn't need extension address
 				excludeDeposits
 			);
@@ -501,10 +501,10 @@
 			const account = get(paymasterWallet);
 			if (!account) throw new Error($t('ui.common.errors.missing_account'));
 
-			const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
+			const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_ALETHEIA_CONTRACT_ADDRESS);
 			if (!privacyAbi) throw new Error($t('ui.common.errors.missing_abi'));
 
-			const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
+			const privacy = new Contract(privacyAbi, PUBLIC_ALETHEIA_CONTRACT_ADDRESS, rpc);
 			privacy.connect(account);
 
 			// 10) Prepare Starknet call
@@ -513,7 +513,7 @@
 				...honkCalldataHex
 			];
 			const call = {
-				contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				contractAddress: PUBLIC_ALETHEIA_CONTRACT_ADDRESS,
 				entrypoint: 'merge',
 				calldata: honkCalldataWithLen
 			};

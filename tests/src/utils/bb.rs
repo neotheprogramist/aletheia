@@ -1,4 +1,4 @@
-// setup devnet, deploy privacy pools
+// setup devnet, deploy Aletheia
 
 use starknet_rs_core::types::Felt;
 use std::env;

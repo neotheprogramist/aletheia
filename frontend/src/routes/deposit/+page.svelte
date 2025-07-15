@@ -5,7 +5,7 @@
 	import { tokens, selectedToken } from '$lib/stores/tokens';
 	import { wallet } from '$lib/stores/wallet';
 	import { wrapWithToast } from '$lib/utils/toast';
-	import { PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS } from '$env/static/public';
+	import { PUBLIC_ALETHEIA_CONTRACT_ADDRESS } from '$env/static/public';
 	import { t } from '$lib/i18n';
 
 	import Card from '$lib/ui/Card.svelte';
@@ -61,10 +61,10 @@
 			{
 				contract_address: $selectedToken,
 				entry_point: 'approve',
-				calldata: [PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, amountLow, amountHigh]
+				calldata: [PUBLIC_ALETHEIA_CONTRACT_ADDRESS, amountLow, amountHigh]
 			},
 			{
-				contract_address: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				contract_address: PUBLIC_ALETHEIA_CONTRACT_ADDRESS,
 				entry_point: 'deposit',
 				calldata: [hashLow, hashHigh, amountLow, amountHigh, $selectedToken]
 			}

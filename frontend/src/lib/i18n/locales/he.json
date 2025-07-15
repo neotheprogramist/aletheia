@@ -21,7 +21,7 @@
 			"settings": "הגדרות האפליקציה: שפה והעדפות",
 			"export_description": "הורד את נתוני הפעולות הפרטיות שלך לגיבוי",
 			"import_description": "שחזר פעולות מקובץ שיוצא בעבר",
-			"settings_description": "הגדר את העדפות Privacy Poolz שלך"
+			"settings_description": "הגדר את העדפות Aletheia שלך"
 		},
 		"deposit": {
 			"select_token": "בחר את הטוקן שברצונך להפקיד באופן פרטי",
@@ -194,7 +194,7 @@
 		}
 	},
 	"home": {
-		"title": "Privacy Pools",
+		"title": "Aletheia",
 		"subtitle": "פתרון הפרטיות האולטימטיבי לעסקאות StarkNet שלכם. סחרו, העבירו ובצעו עסקאות באנונימיות מלאה.",
 		"unlock_privacy": "פתח פרטיות",
 		"connect_wallet_description": "חברו את הארנק שלכם כדי להתחיל לחוות פרטיות פיננסית אמיתית ב-StarkNet",
@@ -236,7 +236,7 @@
 			"step3": "משכו, העבירו או החליפו באנונימיות"
 		},
 		"why_choose": {
-			"title": "למה לבחור ב-Privacy Pools",
+			"title": "למה לבחור ב-Aletheia",
 			"privacy": "הוכחות אפס ידע מבטיחות פרטיות מלאה",
 			"starknet": "נבנה על StarkNet לעמלות נמוכות ועסקאות מהירות",
 			"decentralized": "פרוטוקול מבוזר וללא אמון"
@@ -381,7 +381,7 @@
 		"same_note_error": "לא ניתן להעביר לאותה הערה",
 		"note_not_found": "הערת מקבל לא נמצאה",
 		"page_title": "העברות פרטיות",
-		"page_description": "העבר כספים בין הערות פרטיות בתוך בריכת הפרטיות עם אנונימיות מלאה",
+		"page_description": "העבר כספים בין הערות פרטיות בתוך Aletheia עם אנונימיות מלאה",
 		"mode_send": "שלח העברה",
 		"mode_receive": "קבל העברה",
 		"send_title": "שלח העברה פרטית",
@@ -511,14 +511,14 @@
 		"stats_instant_quotes": "⚡",
 		"stats_instant_quotes_label": "ציטוטים מיידיים",
 		"supported_pairs_title": "צמדי מסחר נתמכים",
-		"supported_pairs_description": "כל ההחלפות מופעלות על ידי Ekubo DEX לשיעורים אופטימליים ונזילות עמוקה. הצמדים הנתמכים כוללים את כל צירופי הטוקנים העיקריים בבריכת הפרטיות."
+		"supported_pairs_description": "כל ההחלפות מופעלות על ידי Ekubo DEX לשיעורים אופטימליים ונזילות עמוקה. הצמדים הנתמכים כוללים את כל צירופי הטוקנים העיקריים ב-Aletheia."
 	},
 	"features": {
 		"private_deposits": {
 			"title": "הפקדות פרטיות",
 			"description": "הפכו את הטוקנים שלכם להערות פרטיות באמצעות הוכחות אפס ידע. ההפקדות שלכם הופכות לאנונימיות ובלתי ניתנות למעקב לחלוטין.",
 			"how_it_works": [
-				"חברו את ארנק StarkNet שלכם למאגר הפרטיות",
+				"חברו את ארנק StarkNet שלכם ל-Aletheia",
 				"בחרו את הטוקן והכמות שאתם רוצים להפקיד",
 				"קבלו הערה קריפטוגרפית המייצגת את ההפקדה שלכם",
 				"ההפקדה שלכם היא כעת פרטית ואנונימית לחלוטין"
@@ -645,16 +645,16 @@
 		},
 		"onboarding": {
 			"welcome": {
-				"title": "ברוכים הבאים ל-Privacy Pools!",
+				"title": "ברוכים הבאים ל-Aletheia!",
 				"description": "פרוטוקול פרטיות מבוזר המאפשר לכם להפקיד, למשוך, להעביר ולהחליף טוקנים באנונימיות מלאה באמצעות הוכחות אפס ידע."
 			},
 			"connect_wallet": {
 				"title": "חברו את הארנק שלכם",
-				"description": "ראשית, חברו את ארנק StarkNet שלכם כדי להתחיל להשתמש ב-Privacy Pools. אנו תומכים בכל ארנקי StarkNet העיקריים."
+				"description": "ראשית, חברו את ארנק StarkNet שלכם כדי להתחיל להשתמש ב-Aletheia. אנו תומכים בכל ארנקי StarkNet העיקריים."
 			},
 			"make_deposit": {
 				"title": "בצעו הפקדה",
-				"description": "הפקידו טוקנים לבריכת הפרטיות כדי לקבל הערות פרטיות. הערות אלה מייצגות את הכספים שלכם תוך שמירה על אנונימיות מלאה."
+				"description": "הפקידו טוקנים ל-Aletheia כדי לקבל הערות פרטיות. הערות אלה מייצגות את הכספים שלכם תוך שמירה על אנונימיות מלאה."
 			},
 			"withdraw_anonymously": {
 				"title": "משכו באנונימיות",
@@ -672,7 +672,7 @@
 			"step_counter": "שלב {current} מתוך {total}"
 		},
 		"navbar": {
-			"privacy_pools": "Privacy Pools",
+			"aletheia": "Aletheia",
 			"export_tooltip": "ייצא את כל הפעולות ל-JSON",
 			"import_tooltip": "ייבא פעולות מ-JSON",
 			"settings_tooltip": "הגדרות",
