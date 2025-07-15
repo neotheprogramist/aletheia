@@ -316,8 +316,10 @@
 		"click_to_unselect": "Haz clic para deseleccionar",
 		"click_to_change_fee": "Haz clic para cambiar la comisión",
 		"auto_fee_selection": "Selección automática de comisión",
+		"auto_fee_explanation": "El sistema seleccionó automáticamente el mejor depósito STRK para pagar las comisiones de red. Este depósito tiene saldo suficiente y está separado de su depósito de retiro para mantener la privacidad.",
 		"auto_fee_merge_explanation": "El sistema seleccionó automáticamente el mejor depósito STRK para pagar las comisiones de red. Este depósito está separado de sus depósitos de fusión para mantener la privacidad.",
 		"auto_fee_transfer_explanation": "El sistema seleccionó automáticamente el mejor depósito STRK para pagar las comisiones de red. Este depósito está separado de su depósito de transferencia para mantener la privacidad.",
+		"auto_fee_swap_explanation": "El sistema seleccionó automáticamente el mejor depósito STRK para pagar las comisiones de red. Este depósito está separado de su depósito de intercambio para mantener la privacidad.",
 		"auto_selected": "Seleccionado automáticamente",
 		"transfer_details": "Detalles de transferencia"
 	},

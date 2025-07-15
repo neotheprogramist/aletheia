@@ -250,8 +250,10 @@
     "click_to_unselect": "Click to unselect",
     "click_to_change_fee": "Click to change fee",
     "auto_fee_selection": "Automatic Fee Selection",
+    "auto_fee_explanation": "The system automatically selected the best STRK deposit to pay for network fees. This deposit has sufficient balance and is separate from your withdrawal deposit to maintain privacy.",
     "auto_fee_merge_explanation": "The system automatically selected the best STRK deposit to pay for network fees. This deposit is separate from your merge deposits to maintain privacy.",
     "auto_fee_transfer_explanation": "The system automatically selected the best STRK deposit to pay for network fees. This deposit is separate from your transfer deposit to maintain privacy.",
+    "auto_fee_swap_explanation": "The system automatically selected the best STRK deposit to pay for network fees. This deposit is separate from your swap deposit to maintain privacy.",
     "auto_selected": "Auto-selected",
     "transfer_details": "Transfer Details"
   },

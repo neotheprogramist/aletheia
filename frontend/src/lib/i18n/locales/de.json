@@ -316,8 +316,10 @@
     "click_to_unselect": "Klicken zum Abwählen",
     "click_to_change_fee": "Klicken zum Ändern der Gebühr",
     "auto_fee_selection": "Automatische Gebührauswahl",
+    "auto_fee_explanation": "Das System hat automatisch die beste STRK-Einzahlung zur Zahlung der Netzwerkgebühren ausgewählt. Diese Einzahlung hat ausreichendes Guthaben und ist von Ihrer Abhebungseinzahlung getrennt, um die Privatsphäre zu wahren.",
     "auto_fee_merge_explanation": "Das System hat automatisch die beste STRK-Einzahlung zur Zahlung der Netzwerkgebühren ausgewählt. Diese Einzahlung ist von Ihren Zusammenführungseinzahlungen getrennt, um die Privatsphäre zu wahren.",
     "auto_fee_transfer_explanation": "Das System hat automatisch die beste STRK-Einzahlung zur Zahlung der Netzwerkgebühren ausgewählt. Diese Einzahlung ist von Ihrer Übertragungseinzahlung getrennt, um die Privatsphäre zu wahren.",
+    "auto_fee_swap_explanation": "Das System hat automatisch die beste STRK-Einzahlung zur Zahlung der Netzwerkgebühren ausgewählt. Diese Einzahlung ist von Ihrer Tauscheinzahlung getrennt, um die Privatsphäre zu wahren.",
     "auto_selected": "Automatisch ausgewählt",
     "transfer_details": "Übertragungsdetails"
   },

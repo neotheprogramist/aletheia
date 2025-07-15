@@ -316,8 +316,10 @@
 		"click_to_unselect": "Kliknij aby odznaczyć",
 		"click_to_change_fee": "Kliknij aby zmienić opłatę",
 		"auto_fee_selection": "Automatyczny wybór opłaty",
+		"auto_fee_explanation": "System automatycznie wybrał najlepszą wpłatę STRK do opłacenia kosztów sieci. Ta wpłata ma wystarczające saldo i jest oddzielna od twojej wpłaty do wypłaty aby zachować prywatność.",
 		"auto_fee_merge_explanation": "System automatycznie wybrał najlepszą wpłatę STRK do opłacenia kosztów sieci. Ta wpłata jest oddzielna od twoich wpłat do połączenia aby zachować prywatność.",
 		"auto_fee_transfer_explanation": "System automatycznie wybrał najlepszą wpłatę STRK do opłacenia kosztów sieci. Ta wpłata jest oddzielna od twojej wpłaty do przelania aby zachować prywatność.",
+		"auto_fee_swap_explanation": "System automatycznie wybrał najlepszą wpłatę STRK do opłacenia kosztów sieci. Ta wpłata jest oddzielna od twojej wpłaty do wymiany aby zachować prywatność.",
 		"auto_selected": "Automatycznie wybrana",
 		"transfer_details": "Szczegóły przelewu"
 	},
