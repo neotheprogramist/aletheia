@@ -1,4 +1,5 @@
 import { getOperationByHash, updateOperation } from '$lib/db/operationsDb';
+import { updateOperationInStore } from '$lib/stores/operations';
 
 /**
  * Move a previously pending operation → confirmed.
@@ -11,4 +12,8 @@ export async function confirmOperation(hash: string) {
 
 	op.status = 'confirmed';
 	await updateOperation(op);
+	
+	// Update the operations store for immediate UI updates
+	updateOperationInStore(hash, { status: 'confirmed' });
+	console.log(`[confirmOperation] ✅ Confirmed operation ${hash}`);
 }

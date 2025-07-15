@@ -30,12 +30,14 @@
 	import { tokens, selectedToken } from '$lib/stores/tokens';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
+import { createDisplayOperationsStore, refreshOperations } from '$lib/stores/operations';
 	import { createElegantDepositColumns } from '$lib/utils/sharedColumns';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
 	import { supportedTokens } from '$lib/config/tokens';
 	import { browser } from '$app/environment';
 	import { generateHonkCalldata } from '$lib/privacy/generateProof';
+	import { onDestroy } from 'svelte';
 	import { autoSelectCompleteProcess, type AutoSelectedFee } from '$lib/utils/autoSelectFeeDeposit';
 	import {
 		progressModalStore,
@@ -57,6 +59,8 @@
 	const STRK_ADDRESS = supportedTokens[0].address;
 
 	let deposits: DisplayOperation[] = [];
+let displayOperationsStore: any = null;
+let unsubscribeDisplayOps: any = null;
 
 	let selectedWithdrawKey: number | null = null;
 	let selectedWithdrawDeposit: DisplayOperation | null = null;
@@ -92,6 +96,30 @@
 	let stopPulsing = false;
 
 	$: if (browser && $selectedToken) {
+		// Clean up previous subscriptions
+		if (unsubscribeDisplayOps) {
+			unsubscribeDisplayOps();
+			unsubscribeDisplayOps = null;
+		}
+		if (displayOperationsStore?.destroy) {
+			displayOperationsStore.destroy();
+			displayOperationsStore = null;
+		}
+		
+		// Create reactive store for this token
+		displayOperationsStore = createDisplayOperationsStore($selectedToken);
+		
+		// Subscribe to store updates
+		if (displayOperationsStore) {
+			unsubscribeDisplayOps = displayOperationsStore.subscribe((storeData: any) => {
+				if (storeData && storeData.deposits) {
+					deposits = storeData.deposits;
+				}
+				isLoading = storeData ? storeData.isLoading : false;
+			});
+		}
+		
+		// Initial load (fallback)
 		loadDeposits(
 			$selectedToken,
 			(d) => (deposits = d),
@@ -439,16 +467,11 @@
 			await nullifyOperation(selectedWithdrawDeposit.hash);
 			await nullifyOperation(selectedFeeDeposit.hash);
 
-			// 12) Reset component state after successful withdrawal
-			resetAll();
+			// 12) Refresh operations store to trigger auto-update
+			await refreshOperations();
 
-			if ($selectedToken) {
-				loadDeposits(
-					$selectedToken,
-					(d) => (deposits = d),
-					(b) => (isLoading = b)
-				);
-			}
+			// 13) Reset component state after successful withdrawal
+			resetAll();
 
 			setTimeout(() => {
 				progressModalActions.hide();
@@ -487,6 +510,15 @@
 
 		isLoading = false;
 	}
+	
+	onDestroy(() => {
+		if (unsubscribeDisplayOps) {
+			unsubscribeDisplayOps();
+		}
+		if (displayOperationsStore?.destroy) {
+			displayOperationsStore.destroy();
+		}
+	});
 </script>
 
 <ProtectedRoute>
