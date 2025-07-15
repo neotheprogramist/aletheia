@@ -13,7 +13,7 @@
 	import Modal from '$lib/ui/Modal.svelte';
 	import InsufficientFeeModal from '$lib/ui/InsufficientFeeModal.svelte';
 	import {
-		PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+		PUBLIC_ALETHEIA_CONTRACT_ADDRESS,
 		PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS
 	} from '$env/static/public';
 	import { get } from 'svelte/store';
@@ -192,7 +192,7 @@ let unsubscribeDisplayOps: any = null;
 			const excludeDeposits = [selectedWithdrawDeposit];
 			autoSelectedFeeInfo = await autoSelectCompleteProcess(
 				'withdraw',
-				PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				PUBLIC_ALETHEIA_CONTRACT_ADDRESS,
 				PUBLIC_WITHDRAW_EXTENSION_CONTRACT_ADDRESS,
 				excludeDeposits
 			);
@@ -412,15 +412,15 @@ let unsubscribeDisplayOps: any = null;
 			const account = get(paymasterWallet);
 			if (!account) throw new Error('Missing Account');
 
-			const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
+			const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_ALETHEIA_CONTRACT_ADDRESS);
 			if (!privacyAbi) throw new Error('Missing ABI');
 
-			const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
+			const privacy = new Contract(privacyAbi, PUBLIC_ALETHEIA_CONTRACT_ADDRESS, rpc);
 			privacy.connect(account);
 
 			// 10) Prepare calldata and Starknet call
 			const extensionCalldata = [
-				PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				PUBLIC_ALETHEIA_CONTRACT_ADDRESS,
 				withdrawRecipient,
 				selectedWithdrawDeposit.data.tokenAddress,
 				`0x${userWithdrawAmountWei.toString(16)}`
@@ -437,7 +437,7 @@ let unsubscribeDisplayOps: any = null;
 			];
 
 			const call = {
-				contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				contractAddress: PUBLIC_ALETHEIA_CONTRACT_ADDRESS,
 				entrypoint: 'execute_extension',
 				calldata: [
 					...honkCalldataWithLen,

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS } from '$env/static/public';
+	import { PUBLIC_ALETHEIA_CONTRACT_ADDRESS } from '$env/static/public';
 	import { getOperationDetails } from '$lib/db/operations';
 	import { updateOperation } from '$lib/db/operationsDb';
 	import { abortOperation } from '$lib/privacy/abortOperation';
@@ -230,7 +230,7 @@
 			const excludeDeposits = [selectedTransferDeposit];
 			autoSelectedFeeInfo = await autoSelectCompleteProcess(
 				'transfer',
-				PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				PUBLIC_ALETHEIA_CONTRACT_ADDRESS,
 				undefined, // transfer doesn't need extension address
 				excludeDeposits
 			);
@@ -455,9 +455,9 @@
 			if (!rpc) throw new Error('Missing Provider');
 			const account = get(paymasterWallet);
 			if (!account) throw new Error('Missing Account');
-			const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS);
+			const { abi: privacyAbi } = await rpc.getClassAt(PUBLIC_ALETHEIA_CONTRACT_ADDRESS);
 			if (!privacyAbi) throw new Error('Missing ABI');
-			const privacy = new Contract(privacyAbi, PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS, rpc);
+			const privacy = new Contract(privacyAbi, PUBLIC_ALETHEIA_CONTRACT_ADDRESS, rpc);
 			privacy.connect(account);
 
 			const honkCalldataWithLen = [
@@ -466,7 +466,7 @@
 			];
 
 			const call = {
-				contractAddress: PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS,
+				contractAddress: PUBLIC_ALETHEIA_CONTRACT_ADDRESS,
 				entrypoint: 'transfer',
 				calldata: honkCalldataWithLen
 			};

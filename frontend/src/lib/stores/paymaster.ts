@@ -1,12 +1,12 @@
 import { get, writable } from 'svelte/store';
 import { Account } from 'starknet';
-import { PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS } from '$env/static/public';
+import { PUBLIC_ALETHEIA_CONTRACT_ADDRESS } from '$env/static/public';
 import { provider } from './provider';
 
 const rpc = get(provider);
 if (!rpc) throw new Error('No provider');
 
-const PAYMASTER_ADDRESS = PUBLIC_PRIVACY_POOLS_CONTRACT_ADDRESS;
+const PAYMASTER_ADDRESS = PUBLIC_ALETHEIA_CONTRACT_ADDRESS;
 const PAYMASTER_PRIVATE_KEY = '0x04b10399eb3eee3bddbe485790b2d81ab30be8019b634e44728b96e6ec383d47';
 
 const paymasterAccount = new Account(

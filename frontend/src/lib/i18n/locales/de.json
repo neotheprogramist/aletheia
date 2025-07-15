@@ -21,7 +21,7 @@
       "settings": "Anwendungseinstellungen: Sprache und Einstellungen",
       "export_description": "Ihre privaten Operationsdaten für Backup herunterladen",
       "import_description": "Operationen aus einer zuvor exportierten Datei wiederherstellen",
-      "settings_description": "Ihre Privacy Poolz-Einstellungen konfigurieren"
+      "settings_description": "Ihre Aletheia-Einstellungen konfigurieren"
     },
     "deposit": {
       "select_token": "Wählen Sie den Token, den Sie privat einzahlen möchten",
@@ -194,7 +194,7 @@
     }
   },
   "home": {
-    "title": "Privacy Pools",
+    "title": "Aletheia",
     "subtitle": "Die ultimative Datenschutzlösung für Ihre StarkNet-Transaktionen. Handeln, übertragen und transagieren Sie mit völliger Anonymität.",
     "unlock_privacy": "Datenschutz freischalten",
     "connect_wallet_description": "Verbinden Sie Ihr Wallet, um echte finanzielle Privatsphäre auf StarkNet zu erleben",
@@ -236,7 +236,7 @@
       "step3": "Abheben, übertragen oder anonym tauschen"
     },
     "why_choose": {
-      "title": "Warum Privacy Pools wählen",
+      "title": "Warum Aletheia wählen",
       "privacy": "Zero-Knowledge-Proofs gewährleisten vollständige Privatsphäre",
       "starknet": "Auf StarkNet für niedrige Gebühren und schnelle Transaktionen gebaut",
       "decentralized": "Dezentralisiertes und vertrauensloses Protokoll"
@@ -337,7 +337,7 @@
   },
   "deposit": {
     "title": "Einzahlung",
-    "description": "Zahlen Sie Ihre Token in den Privacy Pool ein, um anonyme Transaktionen zu starten",
+    "description": "Zahlen Sie Ihre Token in den Aletheia ein, um anonyme Transaktionen zu starten",
     "select_token": "Token auswählen",
     "enter_amount": "Betrag eingeben",
     "max": "Max",
@@ -369,7 +369,7 @@
   },
   "transfer": {
     "title": "Übertragung",
-    "description": "Übertragen Sie Gelder privat zwischen Benutzern innerhalb des Privacy Pools",
+    "description": "Übertragen Sie Gelder privat zwischen Benutzern innerhalb von Aletheia",
     "select_source": "Quell-Notiz auswählen",
     "recipient_note": "Empfänger-Notiz-Hash",
     "transfer_amount": "Übertragungsbetrag",
@@ -381,7 +381,7 @@
     "same_note_error": "Kann nicht an dieselbe Notiz übertragen",
     "note_not_found": "Empfänger-Notiz nicht gefunden",
     "page_title": "Private Übertragungen",
-    "page_description": "Übertragen Sie Gelder zwischen privaten Notizen innerhalb des Privacy Pools mit vollständiger Anonymität",
+    "page_description": "Übertragen Sie Gelder zwischen privaten Notizen innerhalb von Aletheia mit vollständiger Anonymität",
     "mode_send": "Übertragung Senden",
     "mode_receive": "Übertragung Empfangen",
     "send_title": "Private Übertragung Senden",
@@ -511,14 +511,14 @@
     "stats_instant_quotes": "⚡",
     "stats_instant_quotes_label": "Sofortige Angebote",
     "supported_pairs_title": "Unterstützte Handelspaare",
-    "supported_pairs_description": "Alle Täusche werden von Ekubo DEX für optimale Kurse und tiefe Liquidität angetrieben. Unterstützte Paare umfassen alle wichtigen Token-Kombinationen im Privacy Pool."
+    "supported_pairs_description": "Alle Täusche werden von Ekubo DEX für optimale Kurse und tiefe Liquidität angetrieben. Unterstützte Paare umfassen alle wichtigen Token-Kombinationen in Aletheia."
   },
   "features": {
     "private_deposits": {
       "title": "Private Einzahlungen",
       "description": "Verwandeln Sie Ihre Token mit Zero-Knowledge-Proofs in private Notizen. Ihre Einzahlungen werden vollständig anonym und nicht nachverfolgbar, was maximale finanzielle Privatsphäre auf StarkNet gewährleistet.",
       "how_it_works": [
-        "Verbinden Sie Ihr StarkNet-Wallet mit dem Privacy Pool",
+        "Verbinden Sie Ihr StarkNet-Wallet mit Aletheia",
         "Wählen Sie den Token und Betrag aus, den Sie einzahlen möchten",
         "Erhalten Sie eine kryptographische Notiz, die Ihre Einzahlung repräsentiert",
         "Ihre Einzahlung ist jetzt vollständig privat und anonym"
@@ -645,16 +645,16 @@
     },
     "onboarding": {
       "welcome": {
-        "title": "Willkommen bei Privacy Pools!",
+        "title": "Willkommen bei Aletheia!",
         "description": "Ein dezentralisiertes Datenschutzprotokoll, mit dem Sie Token mit vollständiger Anonymität über Zero-Knowledge-Proofs einzahlen, abheben, übertragen und tauschen können."
       },
       "connect_wallet": {
         "title": "Verbinden Sie Ihr Wallet",
-        "description": "Verbinden Sie zuerst Ihr StarkNet-Wallet, um Privacy Pools zu verwenden. Wir unterstützen alle wichtigen StarkNet-Wallets."
+        "description": "Verbinden Sie zuerst Ihr StarkNet-Wallet, um Aletheia zu verwenden. Wir unterstützen alle wichtigen StarkNet-Wallets."
       },
       "make_deposit": {
         "title": "Machen Sie eine Einzahlung",
-        "description": "Zahlen Sie Token in den Privacy Pool ein, um private Notizen zu erhalten. Diese Notizen repräsentieren Ihre Gelder und halten sie dabei vollständig anonym."
+        "description": "Zahlen Sie Token in Aletheia ein, um private Notizen zu erhalten. Diese Notizen repräsentieren Ihre Gelder und halten sie dabei vollständig anonym."
       },
       "withdraw_anonymously": {
         "title": "Anonym abheben",
@@ -672,7 +672,7 @@
       "step_counter": "Schritt {current} von {total}"
     },
     "navbar": {
-      "privacy_pools": "Privacy Pools",
+      "aletheia": "Aletheia",
       "export_tooltip": "Alle Operationen als JSON exportieren",
       "import_tooltip": "Operationen aus JSON importieren",
       "settings_tooltip": "Einstellungen",

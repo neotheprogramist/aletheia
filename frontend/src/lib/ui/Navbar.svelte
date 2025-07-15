@@ -108,7 +108,7 @@
 				<div class="relative">
 					<img
 						src="/logo.svg"
-						alt={$t('ui.navbar.privacy_pools')}
+						alt={$t('ui.navbar.aletheia')}
 						class="h-6 w-6 transition-transform duration-200 group-hover:scale-110 sm:h-8 sm:w-8"
 					/>
 					<div
@@ -117,7 +117,7 @@
 				</div>
 				<span
 					class="hidden bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent md:block"
-					>{$t('ui.navbar.privacy_pools')}</span
+					>{$t('ui.navbar.aletheia')}</span
 				>
 			</a>
 

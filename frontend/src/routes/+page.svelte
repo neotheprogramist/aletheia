@@ -90,19 +90,19 @@
 	];
 	
 	onMount(() => {
-		const hasSeenOnboarding = localStorage.getItem('privacy-pools-onboarding-seen');
+		const hasSeenOnboarding = localStorage.getItem('aletheia-onboarding-seen');
 		if (!hasSeenOnboarding) {
 			showOnboarding = true;
 		}
 	});
 	
 	function handleOnboardingComplete() {
-		localStorage.setItem('privacy-pools-onboarding-seen', 'true');
+		localStorage.setItem('aletheia-onboarding-seen', 'true');
 		showOnboarding = false;
 	}
 	
 	function handleOnboardingSkip() {
-		localStorage.setItem('privacy-pools-onboarding-seen', 'true');
+		localStorage.setItem('aletheia-onboarding-seen', 'true');
 		showOnboarding = false;
 	}
 	
@@ -135,7 +135,7 @@
 	<div class="text-center mb-8 sm:mb-12">
 		<div class="flex items-center justify-center gap-2 sm:gap-3 mb-6">
 			<div class="relative">
-				<img src="/logo.svg" alt="Privacy Pools" class="w-12 h-12 sm:w-16 sm:h-16 drop-shadow-lg" />
+				<img src="/logo.svg" alt="Aletheia" class="w-12 h-12 sm:w-16 sm:h-16 drop-shadow-lg" />
 				<div class="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full animate-pulse"></div>
 			</div>
 			<h1 class="text-primary text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">

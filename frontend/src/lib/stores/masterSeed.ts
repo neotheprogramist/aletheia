@@ -4,7 +4,7 @@ import { writable } from 'svelte/store';
 export const masterSeed = writable<bigint | null>(null);
 
 // Key for localStorage
-const MASTER_SEED_KEY = 'privacy-poolz-master-seed';
+const MASTER_SEED_KEY = 'aletheia-master-seed';
 
 /**
  * Generate a new master seed (256-bit random number)
