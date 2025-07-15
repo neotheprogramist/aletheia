@@ -314,7 +314,9 @@
 		"status_transfer": "Transferencia",
 		"status_swap": "Intercambio",
 		"click_to_unselect": "Haz clic para deseleccionar",
-		"click_to_change_fee": "Haz clic para cambiar la comisión"
+		"click_to_change_fee": "Haz clic para cambiar la comisión",
+		"auto_fee_selection": "Selección automática de comisión",
+		"auto_fee_merge_explanation": "El sistema seleccionó automáticamente el mejor depósito STRK para pagar las comisiones de red. Este depósito está separado de sus depósitos de fusión para mantener la privacidad."
 	},
 	"wallet": {
 		"connect": "Conectar",

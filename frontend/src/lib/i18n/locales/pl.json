@@ -314,7 +314,9 @@
 		"status_transfer": "Przelew",
 		"status_swap": "Zamiana",
 		"click_to_unselect": "Kliknij aby odznaczyć",
-		"click_to_change_fee": "Kliknij aby zmienić opłatę"
+		"click_to_change_fee": "Kliknij aby zmienić opłatę",
+		"auto_fee_selection": "Automatyczny wybór opłaty",
+		"auto_fee_merge_explanation": "System automatycznie wybrał najlepszą wpłatę STRK do opłacenia kosztów sieci. Ta wpłata jest oddzielna od twoich wpłat do połączenia aby zachować prywatność."
 	},
 	"wallet": {
 		"connect": "Podłącz portfel",

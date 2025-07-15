@@ -314,7 +314,9 @@
     "status_transfer": "Transfert",
     "status_swap": "Échange",
     "click_to_unselect": "Cliquez pour désélectionner",
-    "click_to_change_fee": "Cliquez pour changer les frais"
+    "click_to_change_fee": "Cliquez pour changer les frais",
+    "auto_fee_selection": "Sélection automatique des frais",
+    "auto_fee_merge_explanation": "Le système a automatiquement sélectionné le meilleur dépôt STRK pour payer les frais de réseau. Ce dépôt est séparé de vos dépôts de fusion pour maintenir la confidentialité."
   },
   "wallet": {
     "connect": "Connecter le portefeuille",

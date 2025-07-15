@@ -248,7 +248,9 @@
     "status_transfer": "Transfer",
     "status_swap": "Swap",
     "click_to_unselect": "Click to unselect",
-    "click_to_change_fee": "Click to change fee"
+    "click_to_change_fee": "Click to change fee",
+    "auto_fee_selection": "Automatic Fee Selection",
+    "auto_fee_merge_explanation": "The system automatically selected the best STRK deposit to pay for network fees. This deposit is separate from your merge deposits to maintain privacy."
   },
   "wallet": {
     "connect": "Connect Wallet",
