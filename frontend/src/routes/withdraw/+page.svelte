@@ -30,7 +30,7 @@
 	import { tokens, selectedToken } from '$lib/stores/tokens';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
-import { createDisplayOperationsStore, refreshOperations } from '$lib/stores/operations';
+import { createDisplayOperationsStore, refreshOperations, operationsStore } from '$lib/stores/operations';
 	import { createElegantDepositColumns } from '$lib/utils/sharedColumns';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
@@ -461,6 +461,44 @@ let unsubscribeDisplayOps: any = null;
 				throw new Error(`Transaction error: ${receipt.value}`);
 			}
 
+			// Wait for both refund operations to be confirmed in IndexedDB
+			await Promise.all([
+				new Promise<void>((resolve) => {
+					let unsubscribe: (() => void) | undefined;
+					
+					const timeout = setTimeout(() => {
+						if (unsubscribe) unsubscribe();
+						resolve(); // Don't reject, just resolve after timeout
+					}, 60000);
+
+					unsubscribe = operationsStore.subscribe(($operations) => {
+						const operation = $operations.allOperations.find(op => op.hash === withdrawRefundHash);
+						if (operation && operation.status === 'confirmed') {
+							clearTimeout(timeout);
+							if (unsubscribe) unsubscribe();
+							resolve();
+						}
+					});
+				}),
+				new Promise<void>((resolve) => {
+					let unsubscribe: (() => void) | undefined;
+					
+					const timeout = setTimeout(() => {
+						if (unsubscribe) unsubscribe();
+						resolve(); // Don't reject, just resolve after timeout
+					}, 60000);
+
+					unsubscribe = operationsStore.subscribe(($operations) => {
+						const operation = $operations.allOperations.find(op => op.hash === feeRefundHash);
+						if (operation && operation.status === 'confirmed') {
+							clearTimeout(timeout);
+							if (unsubscribe) unsubscribe();
+							resolve();
+						}
+					});
+				})
+			]);
+
 			progressModalActions.updateStep('onchain-confirmation', 'completed');
 
 			// 11) Confirm and nullify operations in the database
@@ -488,16 +526,26 @@ let unsubscribeDisplayOps: any = null;
 
 			if (withdrawRefundHash) {
 				try {
-					await abortOperation(withdrawRefundHash);
-					console.warn('🧯 Aborted refund operation:', withdrawRefundHash);
+					// Only abort if the operation is still pending (not confirmed)
+					const currentOps = get(operationsStore);
+					const withdrawRefundOp = currentOps.allOperations.find(op => op.hash === withdrawRefundHash);
+					if (withdrawRefundOp && withdrawRefundOp.status === 'pending') {
+						await abortOperation(withdrawRefundHash);
+						console.warn('🧯 Aborted refund operation:', withdrawRefundHash);
+					}
 				} catch (abortError) {
 					console.error('🚨 Failed to abort withdraw refund:', abortError);
 				}
 			}
 			if (feeRefundHash) {
 				try {
-					await abortOperation(feeRefundHash);
-					console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
+					// Only abort if the operation is still pending (not confirmed)
+					const currentOps = get(operationsStore);
+					const feeRefundOp = currentOps.allOperations.find(op => op.hash === feeRefundHash);
+					if (feeRefundOp && feeRefundOp.status === 'pending') {
+						await abortOperation(feeRefundHash);
+						console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
+					}
 				} catch (abortError) {
 					console.error('🚨 Failed to abort fee refund:', abortError);
 				}

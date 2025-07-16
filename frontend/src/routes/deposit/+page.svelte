@@ -113,17 +113,19 @@
 			}
 
 			// Wait for IndexedDB confirmation using operationsStore subscription
-			await new Promise<void>((resolve, reject) => {
+			await new Promise<void>((resolve) => {
+				let unsubscribe: (() => void) | undefined;
+				
 				const timeout = setTimeout(() => {
-					unsubscribe();
+					if (unsubscribe) unsubscribe();
 					resolve(); // Don't reject, just resolve after timeout
 				}, 60000);
 
-				const unsubscribe = operationsStore.subscribe(($operations) => {
+				unsubscribe = operationsStore.subscribe(($operations) => {
 					const operation = $operations.allOperations.find(op => op.hash === operationHash);
 					if (operation && operation.status === 'confirmed') {
 						clearTimeout(timeout);
-						unsubscribe();
+						if (unsubscribe) unsubscribe();
 						resolve();
 					}
 				});
