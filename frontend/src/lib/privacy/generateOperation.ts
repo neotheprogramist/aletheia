@@ -19,7 +19,7 @@ export async function generateOperation(params: GenerateParams) {
 	const { data } = params;
 
 	// Sprawdź czy to jest "pełna" operacja czy placeholder
-	const isPlaceholder = !data || !data.tokenAddress || !data.amount;
+	const isPlaceholder = !data || !data.tokenAddress || data.amount === undefined;
 
 	// 1 Get or create master seed (deterministic)
 	const masterNonce = getOrCreateMasterSeed();
