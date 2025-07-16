@@ -30,7 +30,11 @@
 	import { tokens, selectedToken } from '$lib/stores/tokens';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
-import { createDisplayOperationsStore, refreshOperations, operationsStore } from '$lib/stores/operations';
+	import {
+		createDisplayOperationsStore,
+		refreshOperations,
+		operationsStore
+	} from '$lib/stores/operations';
 	import { createElegantDepositColumns } from '$lib/utils/sharedColumns';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import SelectedDeposits from '$lib/ui/SelectedDeposits.svelte';
@@ -59,8 +63,8 @@ import { createDisplayOperationsStore, refreshOperations, operationsStore } from
 	const STRK_ADDRESS = supportedTokens[0].address;
 
 	let deposits: DisplayOperation[] = [];
-let displayOperationsStore: any = null;
-let unsubscribeDisplayOps: any = null;
+	let displayOperationsStore: any = null;
+	let unsubscribeDisplayOps: any = null;
 
 	let selectedWithdrawKey: number | null = null;
 	let selectedWithdrawDeposit: DisplayOperation | null = null;
@@ -105,10 +109,10 @@ let unsubscribeDisplayOps: any = null;
 			displayOperationsStore.destroy();
 			displayOperationsStore = null;
 		}
-		
+
 		// Create reactive store for this token
 		displayOperationsStore = createDisplayOperationsStore($selectedToken);
-		
+
 		// Subscribe to store updates
 		if (displayOperationsStore) {
 			unsubscribeDisplayOps = displayOperationsStore.subscribe((storeData: any) => {
@@ -118,7 +122,7 @@ let unsubscribeDisplayOps: any = null;
 				isLoading = storeData ? storeData.isLoading : false;
 			});
 		}
-		
+
 		// Initial load (fallback)
 		loadDeposits(
 			$selectedToken,
@@ -448,7 +452,8 @@ let unsubscribeDisplayOps: any = null;
 			progressModalActions.updateStep('transaction-prepare', 'completed');
 
 			progressModalActions.updateStep('executing-transaction', 'loading');
-			const tx = await account.execute(call);
+			const tx = await account.execute(call, { nonce: await account.getSnip9Nonce() });
+
 			progressModalActions.updateStep('executing-transaction', 'completed');
 
 			progressModalActions.updateStep('onchain-confirmation', 'loading');
@@ -465,14 +470,16 @@ let unsubscribeDisplayOps: any = null;
 			await Promise.all([
 				new Promise<void>((resolve) => {
 					let unsubscribe: (() => void) | undefined;
-					
+
 					const timeout = setTimeout(() => {
 						if (unsubscribe) unsubscribe();
 						resolve(); // Don't reject, just resolve after timeout
 					}, 60000);
 
 					unsubscribe = operationsStore.subscribe(($operations) => {
-						const operation = $operations.allOperations.find(op => op.hash === withdrawRefundHash);
+						const operation = $operations.allOperations.find(
+							(op) => op.hash === withdrawRefundHash
+						);
 						if (operation && operation.status === 'confirmed') {
 							clearTimeout(timeout);
 							if (unsubscribe) unsubscribe();
@@ -482,14 +489,14 @@ let unsubscribeDisplayOps: any = null;
 				}),
 				new Promise<void>((resolve) => {
 					let unsubscribe: (() => void) | undefined;
-					
+
 					const timeout = setTimeout(() => {
 						if (unsubscribe) unsubscribe();
 						resolve(); // Don't reject, just resolve after timeout
 					}, 60000);
 
 					unsubscribe = operationsStore.subscribe(($operations) => {
-						const operation = $operations.allOperations.find(op => op.hash === feeRefundHash);
+						const operation = $operations.allOperations.find((op) => op.hash === feeRefundHash);
 						if (operation && operation.status === 'confirmed') {
 							clearTimeout(timeout);
 							if (unsubscribe) unsubscribe();
@@ -528,7 +535,9 @@ let unsubscribeDisplayOps: any = null;
 				try {
 					// Only abort if the operation is still pending (not confirmed)
 					const currentOps = get(operationsStore);
-					const withdrawRefundOp = currentOps.allOperations.find(op => op.hash === withdrawRefundHash);
+					const withdrawRefundOp = currentOps.allOperations.find(
+						(op) => op.hash === withdrawRefundHash
+					);
 					if (withdrawRefundOp && withdrawRefundOp.status === 'pending') {
 						await abortOperation(withdrawRefundHash);
 						console.warn('🧯 Aborted refund operation:', withdrawRefundHash);
@@ -541,7 +550,7 @@ let unsubscribeDisplayOps: any = null;
 				try {
 					// Only abort if the operation is still pending (not confirmed)
 					const currentOps = get(operationsStore);
-					const feeRefundOp = currentOps.allOperations.find(op => op.hash === feeRefundHash);
+					const feeRefundOp = currentOps.allOperations.find((op) => op.hash === feeRefundHash);
 					if (feeRefundOp && feeRefundOp.status === 'pending') {
 						await abortOperation(feeRefundHash);
 						console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
@@ -558,7 +567,7 @@ let unsubscribeDisplayOps: any = null;
 
 		isLoading = false;
 	}
-	
+
 	onDestroy(() => {
 		if (unsubscribeDisplayOps) {
 			unsubscribeDisplayOps();
@@ -609,7 +618,11 @@ let unsubscribeDisplayOps: any = null;
 							<div class="space-y-4">
 								<!-- Token Selection -->
 								<div class="space-y-3">
-									<Tooltip text={$t('tooltips.withdraw.filter_token')} position="right" theme="dark">
+									<Tooltip
+										text={$t('tooltips.withdraw.filter_token')}
+										position="right"
+										theme="dark"
+									>
 										<label class="text-text flex items-center gap-2 text-sm font-semibold">
 											<DollarSign class="h-4 w-4" />
 											{$t('ui.withdraw_page.filter_by_token')}
@@ -864,7 +877,12 @@ let unsubscribeDisplayOps: any = null;
 												})}
 												class_="flex-1 text-lg font-medium"
 											/>
-											<Tooltip text={$t('tooltips.withdraw.max_button')} position="top" theme="dark" class_="inline-block">
+											<Tooltip
+												text={$t('tooltips.withdraw.max_button')}
+												position="top"
+												theme="dark"
+												class_="inline-block"
+											>
 												<button
 													type="button"
 													class="rounded-lg bg-purple-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-purple-600"
@@ -882,9 +900,15 @@ let unsubscribeDisplayOps: any = null;
 
 									<!-- Submit Button -->
 
-									<Tooltip text={$t('tooltips.withdraw.execute_button')} position="top" theme="dark">
+									<Tooltip
+										text={$t('tooltips.withdraw.execute_button')}
+										position="top"
+										theme="dark"
+									>
 										<Button
-											text={$t('common.execute_private_withdrawal', { default: 'Execute Private Withdrawal' })}
+											text={$t('common.execute_private_withdrawal', {
+												default: 'Execute Private Withdrawal'
+											})}
 											loading={isLoading}
 											type="submit"
 											class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"

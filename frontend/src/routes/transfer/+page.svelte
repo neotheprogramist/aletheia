@@ -28,8 +28,15 @@
 		type DisplayOperation,
 		type DisplayPendingEmptyOperation
 	} from '$lib/utils/loadDepositsForToken';
-	import { createDisplayOperationsStore, refreshOperations, operationsStore } from '$lib/stores/operations';
-	import { defaultPendingDepositColumns, createElegantDepositColumns } from '$lib/utils/sharedColumns';
+	import {
+		createDisplayOperationsStore,
+		refreshOperations,
+		operationsStore
+	} from '$lib/stores/operations';
+	import {
+		defaultPendingDepositColumns,
+		createElegantDepositColumns
+	} from '$lib/utils/sharedColumns';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { fromWei, toWei } from '$lib/utils/toWei';
 	import {
@@ -122,10 +129,10 @@
 			displayOperationsStore.destroy();
 			displayOperationsStore = null;
 		}
-		
+
 		// Create reactive store for this token
 		displayOperationsStore = createDisplayOperationsStore($selectedToken);
-		
+
 		// Subscribe to store updates
 		if (displayOperationsStore) {
 			unsubscribeDisplayOps = displayOperationsStore.subscribe((storeData: any) => {
@@ -135,7 +142,7 @@
 				isLoading = storeData ? storeData.isLoading : false;
 			});
 		}
-		
+
 		// Initial load (fallback)
 		loadDeposits(
 			$selectedToken,
@@ -155,7 +162,7 @@
 			displayOperationsStore.destroy();
 			displayOperationsStore = null;
 		}
-		
+
 		loadPendingEmptyDeposits(
 			$selectedToken,
 			(ops) => (pendingEmptyDeposits = ops),
@@ -165,13 +172,13 @@
 
 	function handleRowClick(globalIdx: number) {
 		const clickedKey = deposits[globalIdx].index;
-		
+
 		// If clicking on already selected transfer deposit, deselect it
 		if (selectedTransferKey === clickedKey) {
 			resetAll();
 			return;
 		}
-		
+
 		// If clicking on the fee deposit, set it as transfer deposit and auto-select new fee
 		if (selectedFeeKey === clickedKey) {
 			// Set clicked fee deposit as the new transfer deposit
@@ -179,21 +186,21 @@
 			selectedTransferDeposit = deposits.find((d) => d.index === selectedTransferKey) ?? null;
 			transferSecretAndNullifierHash = '';
 			transferAmount = '';
-			
+
 			// Clear old fee selection and auto-select new fee
 			selectedFeeKey = null;
 			selectedFeeDeposit = null;
 			autoSelectedFeeInfo = null;
 			feePreloadError = null;
 			showInsufficientFeeModal = false;
-			
+
 			// Auto-select new fee deposit
 			if (selectedTransferDeposit) {
 				autoSelectFeeDeposit();
 			}
 			return;
 		}
-		
+
 		// Select new transfer deposit
 		selectedTransferKey = clickedKey;
 		selectedTransferDeposit = deposits.find((d) => d.index === selectedTransferKey) ?? null;
@@ -239,15 +246,15 @@
 			if (autoSelectedFeeInfo.feeDeposit) {
 				selectedFeeDeposit = autoSelectedFeeInfo.feeDeposit;
 				selectedFeeKey = autoSelectedFeeInfo.feeDeposit.index;
-				
+
 				// Smooth scroll to transfer form after successful deposit selection
 				setTimeout(() => {
 					if (transferFormElement) {
-						transferFormElement.scrollIntoView({ 
-							behavior: 'smooth', 
-							block: 'start' 
+						transferFormElement.scrollIntoView({
+							behavior: 'smooth',
+							block: 'start'
 						});
-						
+
 						// Add highlight effect after scroll
 						setTimeout(() => {
 							highlightForm = true;
@@ -473,7 +480,7 @@
 			progressModalActions.updateStep('transaction-prepare', 'completed');
 
 			progressModalActions.updateStep('executing-transaction', 'loading');
-			const tx = await account.execute(call);
+			const tx = await account.execute(call, { nonce: await account.getSnip9Nonce() });
 			progressModalActions.updateStep('executing-transaction', 'completed');
 
 			progressModalActions.updateStep('onchain-confirmation', 'loading');
@@ -501,14 +508,16 @@
 			await Promise.all([
 				new Promise<void>((resolve) => {
 					let unsubscribe: (() => void) | undefined;
-					
+
 					const timeout = setTimeout(() => {
 						if (unsubscribe) unsubscribe();
 						resolve(); // Don't reject, just resolve after timeout
 					}, 60000);
 
 					unsubscribe = operationsStore.subscribe(($operations) => {
-						const operation = $operations.allOperations.find(op => op.hash === transferRefundHash);
+						const operation = $operations.allOperations.find(
+							(op) => op.hash === transferRefundHash
+						);
 						if (operation && operation.status === 'confirmed') {
 							clearTimeout(timeout);
 							if (unsubscribe) unsubscribe();
@@ -518,14 +527,14 @@
 				}),
 				new Promise<void>((resolve) => {
 					let unsubscribe: (() => void) | undefined;
-					
+
 					const timeout = setTimeout(() => {
 						if (unsubscribe) unsubscribe();
 						resolve(); // Don't reject, just resolve after timeout
 					}, 60000);
 
 					unsubscribe = operationsStore.subscribe(($operations) => {
-						const operation = $operations.allOperations.find(op => op.hash === feeRefundHash);
+						const operation = $operations.allOperations.find((op) => op.hash === feeRefundHash);
 						if (operation && operation.status === 'confirmed') {
 							clearTimeout(timeout);
 							if (unsubscribe) unsubscribe();
@@ -564,7 +573,9 @@
 				try {
 					// Only abort if the operation is still pending (not confirmed)
 					const currentOps = get(operationsStore);
-					const transferRefundOp = currentOps.allOperations.find(op => op.hash === transferRefundHash);
+					const transferRefundOp = currentOps.allOperations.find(
+						(op) => op.hash === transferRefundHash
+					);
 					if (transferRefundOp && transferRefundOp.status === 'pending') {
 						await abortOperation(transferRefundHash);
 						console.warn('🧯 Aborted refund operation:', transferRefundHash);
@@ -577,7 +588,7 @@
 				try {
 					// Only abort if the operation is still pending (not confirmed)
 					const currentOps = get(operationsStore);
-					const feeRefundOp = currentOps.allOperations.find(op => op.hash === feeRefundHash);
+					const feeRefundOp = currentOps.allOperations.find((op) => op.hash === feeRefundHash);
 					if (feeRefundOp && feeRefundOp.status === 'pending') {
 						await abortOperation(feeRefundHash);
 						console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
@@ -736,7 +747,7 @@
 		showEditModal = false;
 		editRow = null;
 	}
-	
+
 	onDestroy(() => {
 		if (unsubscribeDisplayOps) {
 			unsubscribeDisplayOps();
@@ -910,19 +921,27 @@
 								<div class="space-y-3">
 									<div class="flex items-center gap-3">
 										<CheckCircle class="h-5 w-5 text-cyan-500" />
-										<span class="text-text text-sm font-medium">{$t('transfer.privacy_feature1')}</span>
+										<span class="text-text text-sm font-medium"
+											>{$t('transfer.privacy_feature1')}</span
+										>
 									</div>
 									<div class="flex items-center gap-3">
 										<CheckCircle class="h-5 w-5 text-cyan-500" />
-										<span class="text-text text-sm font-medium">{$t('transfer.privacy_feature2')}</span>
+										<span class="text-text text-sm font-medium"
+											>{$t('transfer.privacy_feature2')}</span
+										>
 									</div>
 									<div class="flex items-center gap-3">
 										<CheckCircle class="h-5 w-5 text-cyan-500" />
-										<span class="text-text text-sm font-medium">{$t('transfer.privacy_feature3')}</span>
+										<span class="text-text text-sm font-medium"
+											>{$t('transfer.privacy_feature3')}</span
+										>
 									</div>
 									<div class="flex items-center gap-3">
 										<CheckCircle class="h-5 w-5 text-cyan-500" />
-										<span class="text-text text-sm font-medium">{$t('transfer.privacy_feature4')}</span>
+										<span class="text-text text-sm font-medium"
+											>{$t('transfer.privacy_feature4')}</span
+										>
 									</div>
 								</div>
 							</div>
@@ -966,7 +985,9 @@
 								{#if !deposits.length}
 									<div class="py-8 text-center">
 										<Eye class="mx-auto mb-4 h-12 w-12 text-gray-400" />
-										<h3 class="text-text mb-2 text-lg font-medium">{$t('transfer.no_deposits_title')}</h3>
+										<h3 class="text-text mb-2 text-lg font-medium">
+											{$t('transfer.no_deposits_title')}
+										</h3>
 										<p class="text-text-secondary">
 											{$t('transfer.no_deposits_description')}
 										</p>
@@ -977,7 +998,9 @@
 											<ArrowUpDown class="h-5 w-5 text-blue-500" />
 											{$t('transfer.select_source_deposit')}
 										</h3>
-										<div class="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+										<div
+											class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
+										>
 											<PaginatedTable
 												columns={createElegantDepositColumns(
 													selectedTransferKey,
@@ -1010,18 +1033,24 @@
 								<!-- Selected Deposits Display -->
 								{#if selectedTransferDeposit || selectedFeeDeposit}
 									<Card class_="border-0 shadow-xl bg-gray-50 dark:bg-gray-800/50">
-										<div class="flex items-center gap-2 mb-4">
+										<div class="mb-4 flex items-center gap-2">
 											<CheckCircle class="h-5 w-5 text-green-500" />
-											<span class="text-lg font-semibold text-gray-700 dark:text-gray-300">{$t('common.selected_deposits')}</span>
+											<span class="text-lg font-semibold text-gray-700 dark:text-gray-300"
+												>{$t('common.selected_deposits')}</span
+											>
 										</div>
 										<div class="space-y-3">
 											<!-- Transfer Deposit -->
 											{#if selectedTransferDeposit}
-												<div class="rounded-lg border border-purple-200 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20 p-4">
-													<div class="flex items-center justify-between mb-2">
+												<div
+													class="rounded-lg border border-purple-200 bg-purple-50 p-4 dark:border-purple-700 dark:bg-purple-900/20"
+												>
+													<div class="mb-2 flex items-center justify-between">
 														<div class="flex items-center gap-2">
-															<div class="w-2 h-2 rounded-full bg-purple-500"></div>
-															<span class="text-sm font-medium text-purple-800 dark:text-purple-300">{$t('common.operation_deposit')}</span>
+															<div class="h-2 w-2 rounded-full bg-purple-500"></div>
+															<span class="text-sm font-medium text-purple-800 dark:text-purple-300"
+																>{$t('common.operation_deposit')}</span
+															>
 														</div>
 														<button
 															on:click={() => {
@@ -1033,31 +1062,45 @@
 																	autoSelectedFeeInfo = null;
 																}
 															}}
-															class="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 underline"
+															class="text-xs text-purple-600 underline hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-200"
 														>
 															{$t('transfer.reset')}
 														</button>
 													</div>
 													<div class="flex items-center gap-2">
-														<span class="font-semibold text-purple-900 dark:text-purple-100">{selectedTransferDeposit.displayAmount}</span>
-														<span class="text-sm text-purple-700 dark:text-purple-400">#{selectedTransferDeposit.index}</span>
+														<span class="font-semibold text-purple-900 dark:text-purple-100"
+															>{selectedTransferDeposit.displayAmount}</span
+														>
+														<span class="text-sm text-purple-700 dark:text-purple-400"
+															>#{selectedTransferDeposit.index}</span
+														>
 													</div>
 												</div>
 											{/if}
 
 											<!-- Fee Deposit -->
 											{#if selectedFeeDeposit && autoSelectedFeeInfo}
-												<div class="rounded-lg border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 p-4">
-													<div class="flex items-center justify-between mb-2">
+												<div
+													class="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-700 dark:bg-blue-900/20"
+												>
+													<div class="mb-2 flex items-center justify-between">
 														<div class="flex items-center gap-2">
-															<div class="w-2 h-2 rounded-full bg-blue-500"></div>
-															<span class="text-sm font-medium text-blue-800 dark:text-blue-300">{$t('common.status_fee')}</span>
+															<div class="h-2 w-2 rounded-full bg-blue-500"></div>
+															<span class="text-sm font-medium text-blue-800 dark:text-blue-300"
+																>{$t('common.status_fee')}</span
+															>
 														</div>
-														<span class="text-xs text-blue-600 dark:text-blue-400 font-medium">{$t('common.auto_selected')}</span>
+														<span class="text-xs font-medium text-blue-600 dark:text-blue-400"
+															>{$t('common.auto_selected')}</span
+														>
 													</div>
 													<div class="flex items-center gap-2">
-														<span class="font-semibold text-blue-900 dark:text-blue-100">{selectedFeeDeposit.displayAmount}</span>
-														<span class="text-sm text-blue-700 dark:text-blue-400">#{selectedFeeDeposit.index}</span>
+														<span class="font-semibold text-blue-900 dark:text-blue-100"
+															>{selectedFeeDeposit.displayAmount}</span
+														>
+														<span class="text-sm text-blue-700 dark:text-blue-400"
+															>#{selectedFeeDeposit.index}</span
+														>
 													</div>
 													<div class="mt-2 text-xs text-blue-600 dark:text-blue-400">
 														Fee: {autoSelectedFeeInfo.feeInfo.formatted} STRK
@@ -1088,18 +1131,21 @@
 													>
 												{/if}
 											</p>
-											
+
 											<!-- Auto-selection explanation -->
 											<div class="rounded-lg bg-blue-100 p-3 dark:bg-blue-900/30">
 												<div class="flex items-start gap-2">
 													<CheckCircle class="mt-0.5 h-4 w-4 text-blue-600 dark:text-blue-400" />
 													<div class="text-xs text-blue-700 dark:text-blue-300">
-														<p class="font-medium mb-1">
-															{$t('common.auto_fee_selection', { default: 'Automatic Fee Selection' })}
+														<p class="mb-1 font-medium">
+															{$t('common.auto_fee_selection', {
+																default: 'Automatic Fee Selection'
+															})}
 														</p>
 														<p>
-															{$t('common.auto_fee_transfer_explanation', { 
-																default: 'The system automatically selected the best STRK deposit to pay for network fees. This deposit is separate from your transfer deposit to maintain privacy.' 
+															{$t('common.auto_fee_transfer_explanation', {
+																default:
+																	'The system automatically selected the best STRK deposit to pay for network fees. This deposit is separate from your transfer deposit to maintain privacy.'
 															})}
 														</p>
 													</div>
@@ -1111,10 +1157,14 @@
 
 								<!-- Transfer Form -->
 								{#if selectedTransferDeposit && selectedFeeDeposit && !feePreloadError}
-									<Card 
-										class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm {highlightForm ? 'ring-4 ring-blue-500 shadow-blue-500/25 shadow-2xl bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 border-blue-300 dark:border-blue-500' : ''} {highlightForm && !stopPulsing ? 'animate-pulse-scale' : ''} transition-all duration-500 ease-in-out"
-										on:mouseenter={() => stopPulsing = true}
-										on:click={() => stopPulsing = true}
+									<Card
+										class_="border-0 shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm {highlightForm
+											? 'ring-4 ring-blue-500 shadow-blue-500/25 shadow-2xl bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 border-blue-300 dark:border-blue-500'
+											: ''} {highlightForm && !stopPulsing
+											? 'animate-pulse-scale'
+											: ''} transition-all duration-500 ease-in-out"
+										on:mouseenter={() => (stopPulsing = true)}
+										on:click={() => (stopPulsing = true)}
 									>
 										<div class="space-y-6" bind:this={transferFormElement}>
 											<h3 class="text-text flex items-center gap-2 text-xl font-bold">
@@ -1125,51 +1175,51 @@
 											<form on:submit|preventDefault={initiateTransfer} class="space-y-6">
 												<!-- Recipient Address -->
 												<div class="space-y-3">
-												<label class="text-text flex items-center gap-2 text-sm font-semibold">
-													<UserCheck class="h-4 w-4" />
-													{$t('transfer.recipient_hash')}
-												</label>
-												<Input
-													bind:value={transferSecretAndNullifierHash}
-													required
-													placeholder={$t('transfer.recipient_hash_placeholder')}
-													class_="w-full"
-												/>
-											</div>
-
-											<div class="space-y-3">
-												<label class="text-text flex items-center gap-2 text-sm font-semibold">
-													<ArrowRight class="h-4 w-4" />
-													{$t('transfer.transfer_amount_label')}
-												</label>
-												<div class="flex gap-2">
+													<label class="text-text flex items-center gap-2 text-sm font-semibold">
+														<UserCheck class="h-4 w-4" />
+														{$t('transfer.recipient_hash')}
+													</label>
 													<Input
-														bind:value={transferAmount}
+														bind:value={transferSecretAndNullifierHash}
 														required
-														placeholder={$t('transfer.transfer_amount_placeholder')}
-														class_="flex-1"
+														placeholder={$t('transfer.recipient_hash_placeholder')}
+														class_="w-full"
 													/>
-													<button
-														type="button"
-														class="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-blue-600"
-														on:click={() => {
-															if (selectedTransferDeposit) {
-																transferAmount = selectedTransferDeposit.displayAmount;
-															}
-														}}
-													>
-														{$t('transfer.max')}
-													</button>
 												</div>
-											</div>
 
-											<Button
-												text={$t('transfer.execute_transfer')}
-												loading={isLoading}
-												type="submit"
-												class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-											/>
-										</form>
+												<div class="space-y-3">
+													<label class="text-text flex items-center gap-2 text-sm font-semibold">
+														<ArrowRight class="h-4 w-4" />
+														{$t('transfer.transfer_amount_label')}
+													</label>
+													<div class="flex gap-2">
+														<Input
+															bind:value={transferAmount}
+															required
+															placeholder={$t('transfer.transfer_amount_placeholder')}
+															class_="flex-1"
+														/>
+														<button
+															type="button"
+															class="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-blue-600"
+															on:click={() => {
+																if (selectedTransferDeposit) {
+																	transferAmount = selectedTransferDeposit.displayAmount;
+																}
+															}}
+														>
+															{$t('transfer.max')}
+														</button>
+													</div>
+												</div>
+
+												<Button
+													text={$t('transfer.execute_transfer')}
+													loading={isLoading}
+													type="submit"
+													class_="w-full py-4 text-lg font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+												/>
+											</form>
 										</div>
 									</Card>
 								{/if}
@@ -1255,19 +1305,27 @@
 								<div class="space-y-3">
 									<div class="flex items-center gap-3">
 										<CheckCircle class="h-5 w-5 text-blue-500" />
-										<span class="text-text text-sm font-medium">{$t('transfer.security_feature1')}</span>
+										<span class="text-text text-sm font-medium"
+											>{$t('transfer.security_feature1')}</span
+										>
 									</div>
 									<div class="flex items-center gap-3">
 										<CheckCircle class="h-5 w-5 text-blue-500" />
-										<span class="text-text text-sm font-medium">{$t('transfer.security_feature2')}</span>
+										<span class="text-text text-sm font-medium"
+											>{$t('transfer.security_feature2')}</span
+										>
 									</div>
 									<div class="flex items-center gap-3">
 										<CheckCircle class="h-5 w-5 text-blue-500" />
-										<span class="text-text text-sm font-medium">{$t('transfer.security_feature3')}</span>
+										<span class="text-text text-sm font-medium"
+											>{$t('transfer.security_feature3')}</span
+										>
 									</div>
 									<div class="flex items-center gap-3">
 										<CheckCircle class="h-5 w-5 text-blue-500" />
-										<span class="text-text text-sm font-medium">{$t('transfer.security_feature4')}</span>
+										<span class="text-text text-sm font-medium"
+											>{$t('transfer.security_feature4')}</span
+										>
 									</div>
 								</div>
 							</div>
@@ -1280,7 +1338,9 @@
 							>
 								<div class="space-y-2">
 									<div class="text-2xl font-bold text-blue-500">{$t('transfer.stats_private')}</div>
-									<div class="text-text-secondary text-sm">{$t('transfer.stats_private_label')}</div>
+									<div class="text-text-secondary text-sm">
+										{$t('transfer.stats_private_label')}
+									</div>
 								</div>
 							</Card>
 							<Card
@@ -1370,7 +1430,9 @@
 
 		<div class="space-y-4">
 			<div class="space-y-2">
-				<label for="edit-token" class="text-text text-sm font-medium">{$t('transfer.token_label')}</label>
+				<label for="edit-token" class="text-text text-sm font-medium"
+					>{$t('transfer.token_label')}</label
+				>
 				<TokenSelect
 					tokens={$tokens}
 					bind:value={editToken}
@@ -1380,8 +1442,15 @@
 			</div>
 
 			<div class="space-y-2">
-				<label for="edit-amount" class="text-text text-sm font-medium">{$t('transfer.amount_label')}</label>
-				<Input bind:value={editAmount} placeholder={$t('transfer.enter_amount')} class_="w-full" required />
+				<label for="edit-amount" class="text-text text-sm font-medium"
+					>{$t('transfer.amount_label')}</label
+				>
+				<Input
+					bind:value={editAmount}
+					placeholder={$t('transfer.enter_amount')}
+					class_="w-full"
+					required
+				/>
 			</div>
 		</div>
 	</div>
@@ -1403,7 +1472,12 @@
 	}
 
 	@keyframes pulse-scale {
-		0%, 100% { transform: scale(1); }
-		50% { transform: scale(1.02); }
+		0%,
+		100% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.02);
+		}
 	}
 </style>

@@ -28,7 +28,11 @@
 	import { tokens, selectedToken } from '$lib/stores/tokens';
 	import TokenSelect from '$lib/ui/TokenSelect.svelte';
 	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
-	import { createDisplayOperationsStore, refreshOperations, operationsStore } from '$lib/stores/operations';
+	import {
+		createDisplayOperationsStore,
+		refreshOperations,
+		operationsStore
+	} from '$lib/stores/operations';
 	import { createElegantDepositColumns } from '$lib/utils/sharedColumns';
 	import ProtectedRoute from '$lib/ui/ProtectedRoute.svelte';
 	import { supportedTokens } from '$lib/config/tokens';
@@ -115,10 +119,10 @@
 			displayOperationsStore.destroy();
 			displayOperationsStore = null;
 		}
-		
+
 		// Create reactive store for this token
 		displayOperationsStore = createDisplayOperationsStore($selectedToken);
-		
+
 		// Subscribe to store updates
 		if (displayOperationsStore) {
 			unsubscribeDisplayOps = displayOperationsStore.subscribe((storeData: any) => {
@@ -128,7 +132,7 @@
 				isLoading = storeData ? storeData.isLoading : false;
 			});
 		}
-		
+
 		// Initial load (fallback)
 		loadDeposits(
 			$selectedToken,
@@ -507,7 +511,7 @@
 			progressModalActions.updateStep('transaction-prepare', 'completed');
 
 			progressModalActions.updateStep('executing-transaction', 'loading');
-			const tx = await account.execute(call);
+			const tx = await account.execute(call, { nonce: await account.getSnip9Nonce() });
 			progressModalActions.updateStep('executing-transaction', 'completed');
 
 			progressModalActions.updateStep('onchain-confirmation', 'loading');
@@ -553,14 +557,14 @@
 			await Promise.all([
 				new Promise<void>((resolve) => {
 					let unsubscribe: (() => void) | undefined;
-					
+
 					const timeout = setTimeout(() => {
 						if (unsubscribe) unsubscribe();
 						resolve(); // Don't reject, just resolve after timeout
 					}, 60000);
 
 					unsubscribe = operationsStore.subscribe(($operations) => {
-						const operation = $operations.allOperations.find(op => op.hash === emptyOpHash);
+						const operation = $operations.allOperations.find((op) => op.hash === emptyOpHash);
 						if (operation && operation.status === 'confirmed') {
 							clearTimeout(timeout);
 							if (unsubscribe) unsubscribe();
@@ -570,14 +574,14 @@
 				}),
 				new Promise<void>((resolve) => {
 					let unsubscribe: (() => void) | undefined;
-					
+
 					const timeout = setTimeout(() => {
 						if (unsubscribe) unsubscribe();
 						resolve(); // Don't reject, just resolve after timeout
 					}, 60000);
 
 					unsubscribe = operationsStore.subscribe(($operations) => {
-						const operation = $operations.allOperations.find(op => op.hash === swapRefundHash);
+						const operation = $operations.allOperations.find((op) => op.hash === swapRefundHash);
 						if (operation && operation.status === 'confirmed') {
 							clearTimeout(timeout);
 							if (unsubscribe) unsubscribe();
@@ -587,14 +591,14 @@
 				}),
 				new Promise<void>((resolve) => {
 					let unsubscribe: (() => void) | undefined;
-					
+
 					const timeout = setTimeout(() => {
 						if (unsubscribe) unsubscribe();
 						resolve(); // Don't reject, just resolve after timeout
 					}, 60000);
 
 					unsubscribe = operationsStore.subscribe(($operations) => {
-						const operation = $operations.allOperations.find(op => op.hash === feeRefundHash);
+						const operation = $operations.allOperations.find((op) => op.hash === feeRefundHash);
 						if (operation && operation.status === 'confirmed') {
 							clearTimeout(timeout);
 							if (unsubscribe) unsubscribe();
@@ -633,7 +637,7 @@
 				try {
 					// Only abort if the operation is still pending (not confirmed)
 					const currentOps = get(operationsStore);
-					const emptyOp = currentOps.allOperations.find(op => op.hash === emptyOpHash);
+					const emptyOp = currentOps.allOperations.find((op) => op.hash === emptyOpHash);
 					if (emptyOp && emptyOp.status === 'pending') {
 						await abortOperation(emptyOpHash);
 						console.warn('🧯 Aborted swap result operation:', emptyOpHash);
@@ -646,7 +650,7 @@
 				try {
 					// Only abort if the operation is still pending (not confirmed)
 					const currentOps = get(operationsStore);
-					const swapRefundOp = currentOps.allOperations.find(op => op.hash === swapRefundHash);
+					const swapRefundOp = currentOps.allOperations.find((op) => op.hash === swapRefundHash);
 					if (swapRefundOp && swapRefundOp.status === 'pending') {
 						await abortOperation(swapRefundHash);
 						console.warn('🧯 Aborted refund operation:', swapRefundHash);
@@ -659,7 +663,7 @@
 				try {
 					// Only abort if the operation is still pending (not confirmed)
 					const currentOps = get(operationsStore);
-					const feeRefundOp = currentOps.allOperations.find(op => op.hash === feeRefundHash);
+					const feeRefundOp = currentOps.allOperations.find((op) => op.hash === feeRefundHash);
 					if (feeRefundOp && feeRefundOp.status === 'pending') {
 						await abortOperation(feeRefundHash);
 						console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
@@ -676,7 +680,7 @@
 
 		isLoading = false;
 	}
-	
+
 	onDestroy(() => {
 		if (unsubscribeDisplayOps) {
 			unsubscribeDisplayOps();
