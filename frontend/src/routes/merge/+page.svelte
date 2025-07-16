@@ -24,7 +24,11 @@
 	import { fetchMergeFee } from '$lib/utils/fetchFeeForExtension';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
 	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
-	import { createDisplayOperationsStore, refreshOperations, operationsStore } from '$lib/stores/operations';
+	import {
+		createDisplayOperationsStore,
+		refreshOperations,
+		operationsStore
+	} from '$lib/stores/operations';
 	import { createElegantDepositColumns } from '$lib/utils/sharedColumns';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { fromWei } from '$lib/utils/toWei';
@@ -108,10 +112,10 @@
 			displayOperationsStore.destroy();
 			displayOperationsStore = null;
 		}
-		
+
 		// Create reactive store for this token
 		displayOperationsStore = createDisplayOperationsStore($selectedToken);
-		
+
 		// Subscribe to store updates
 		if (displayOperationsStore) {
 			unsubscribeDisplayOps = displayOperationsStore.subscribe((storeData: any) => {
@@ -121,7 +125,7 @@
 				isLoading = storeData ? storeData.isLoading : false;
 			});
 		}
-		
+
 		// Initial load (fallback)
 		loadDeposits(
 			$selectedToken,
@@ -520,7 +524,10 @@
 			progressModalActions.updateStep('transaction-prepare', 'completed');
 
 			progressModalActions.updateStep('executing-transaction', 'loading');
-			const tx = await account.execute(call);
+			
+			const pendingNonce = await rpc.getNonceForAddress(account.address, 'pending');
+			const tx = await account.execute(call, { nonce: pendingNonce });
+
 			progressModalActions.updateStep('executing-transaction', 'completed');
 
 			progressModalActions.updateStep('onchain-confirmation', 'loading');
@@ -537,14 +544,14 @@
 			await Promise.all([
 				new Promise<void>((resolve) => {
 					let unsubscribe: (() => void) | undefined;
-					
+
 					const timeout = setTimeout(() => {
 						if (unsubscribe) unsubscribe();
 						resolve(); // Don't reject, just resolve after timeout
 					}, 60000);
 
 					unsubscribe = operationsStore.subscribe(($operations) => {
-						const operation = $operations.allOperations.find(op => op.hash === mergeRefundHash);
+						const operation = $operations.allOperations.find((op) => op.hash === mergeRefundHash);
 						if (operation && operation.status === 'confirmed') {
 							clearTimeout(timeout);
 							if (unsubscribe) unsubscribe();
@@ -554,14 +561,14 @@
 				}),
 				new Promise<void>((resolve) => {
 					let unsubscribe: (() => void) | undefined;
-					
+
 					const timeout = setTimeout(() => {
 						if (unsubscribe) unsubscribe();
 						resolve(); // Don't reject, just resolve after timeout
 					}, 60000);
 
 					unsubscribe = operationsStore.subscribe(($operations) => {
-						const operation = $operations.allOperations.find(op => op.hash === feeRefundHash);
+						const operation = $operations.allOperations.find((op) => op.hash === feeRefundHash);
 						if (operation && operation.status === 'confirmed') {
 							clearTimeout(timeout);
 							if (unsubscribe) unsubscribe();
@@ -601,7 +608,7 @@
 				try {
 					// Only abort if the operation is still pending (not confirmed)
 					const currentOps = get(operationsStore);
-					const mergeRefundOp = currentOps.allOperations.find(op => op.hash === mergeRefundHash);
+					const mergeRefundOp = currentOps.allOperations.find((op) => op.hash === mergeRefundHash);
 					if (mergeRefundOp && mergeRefundOp.status === 'pending') {
 						await abortOperation(mergeRefundHash);
 						console.warn('🧯 Aborted merge refund operation:', mergeRefundHash);
@@ -615,7 +622,7 @@
 				try {
 					// Only abort if the operation is still pending (not confirmed)
 					const currentOps = get(operationsStore);
-					const feeRefundOp = currentOps.allOperations.find(op => op.hash === feeRefundHash);
+					const feeRefundOp = currentOps.allOperations.find((op) => op.hash === feeRefundHash);
 					if (feeRefundOp && feeRefundOp.status === 'pending') {
 						await abortOperation(feeRefundHash);
 						console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
@@ -632,7 +639,7 @@
 
 		isLoading = false;
 	}
-	
+
 	onDestroy(() => {
 		if (unsubscribeDisplayOps) {
 			unsubscribeDisplayOps();
