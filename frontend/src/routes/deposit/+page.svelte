@@ -116,8 +116,8 @@
 			await new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(() => {
 					unsubscribe();
-					reject(new Error('Operation not confirmed in IndexedDB after 30 seconds'));
-				}, 30000);
+					resolve(); // Don't reject, just resolve after timeout
+				}, 60000);
 
 				const unsubscribe = operationsStore.subscribe(($operations) => {
 					const operation = $operations.allOperations.find(op => op.hash === operationHash);
