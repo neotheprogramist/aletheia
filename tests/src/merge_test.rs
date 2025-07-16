@@ -8,8 +8,8 @@ use crate::utils::{
     merkle::HybridMerkleTree,
     shared::{
         build_merkle_and_set_witness_merge, deploy_privacy_pools, execute_merge,
-        perform_deposits_merge, setup_devnet, setup_privacy_pool_config, WitnessMerge,
-        SECOND_FUNDING_ACCOUNT_ADDRESS, STRK_ERC20_CONTRACT_ADDRESS,
+        get_leaf_added_events, perform_deposits_merge, setup_devnet, setup_privacy_pool_config,
+        WitnessMerge, SECOND_FUNDING_ACCOUNT_ADDRESS, STRK_ERC20_CONTRACT_ADDRESS,
     },
 };
 
@@ -73,6 +73,11 @@ pub async fn merge(deposit_1: u128, deposit_2: u128) {
         merge_refund_amount.to_string(),
     );
 
+    let expected_merge_commitment =
+        U256::from_str(&witness_merge.clone().refund_commitment_hash_2.unwrap()).unwrap();
+    let expected_fee_commitment =
+        U256::from_str(&witness_merge.clone().refund_commitment_hash_1.unwrap()).unwrap();
+
     let _ = witness_merge
         .save_to_toml_file(Path::new("../frontend/static/circuits/merge/Prover.toml"))
         .await
@@ -81,4 +86,24 @@ pub async fn merge(deposit_1: u128, deposit_2: u128) {
     run_nargo_witness("merge").unwrap();
 
     execute_merge(&devnet, privacy_pool_deployed_contract_address, merge_vk).await;
+
+    let leaf_added_events =
+        get_leaf_added_events(&devnet, privacy_pool_deployed_contract_address).await;
+
+    let fee_refund_event = leaf_added_events[leaf_added_events.len() - 1];
+    let merge_refund_event = leaf_added_events[leaf_added_events.len() - 2];
+
+    assert!(
+        expected_merge_commitment == merge_refund_event,
+        "Expected merge commitment: {}, but got: {}",
+        expected_merge_commitment,
+        merge_refund_event
+    );
+
+    assert!(
+        expected_fee_commitment == fee_refund_event,
+        "Expected fee commitment: {}, but got: {}",
+        expected_fee_commitment,
+        fee_refund_event
+    );
 }

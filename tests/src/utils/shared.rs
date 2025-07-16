@@ -915,6 +915,34 @@ pub async fn perform_deposits(
     leafs
 }
 
+pub async fn get_leaf_added_events(
+    devnet: &Devnet,
+    privacy_pool_address: Felt,
+) -> Vec<U256> {
+    let events = devnet
+        .get_events(
+            None,
+            Some(CoreBlock::Tag(BlockTag::Latest)),
+            Some(ContractAddress::new(privacy_pool_address).unwrap()),
+            Some(
+                [[Felt::from_hex_unchecked(
+                    "0x2f8ea430e5eca9b5d3a23e1cce4fc9d7da98cceeaa994d4fca332ea7e3b82cd",
+                )]
+                .to_vec()]
+                .to_vec(),
+            ),
+            0,
+            None,
+        )
+        .await
+        .unwrap();
+
+    events
+        .iter()
+        .map(|event| (event.data[0], event.data[1]).try_into().unwrap())
+        .collect()
+}
+
 pub async fn perform_deposits_merge(
     devnet: &Devnet,
     witness_merge: &mut WitnessMerge,
@@ -1270,7 +1298,7 @@ fn parse_hex_strings_to_biguint(hex_strings: Vec<String>) -> Vec<BigUint> {
         .collect()
 }
 
-pub async fn generate_merge_proof(execute_vk: Vec<Felt>) -> Vec<Felt> {
+pub async fn generate_merge_proof(merge_vk: Vec<Felt>) -> Vec<Felt> {
     // Generate execute circuit proof
     run_bb_prove(
         "merge",
@@ -1295,7 +1323,7 @@ pub async fn generate_merge_proof(execute_vk: Vec<Felt>) -> Vec<Felt> {
     let recursive_witness = WitnessRecursive {
         proof: vec_proof,
         public_inputs: vec_pub_inputs,
-        verification_key: execute_vk,
+        verification_key: merge_vk,
     };
 
     recursive_witness
