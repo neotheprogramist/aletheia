@@ -23,6 +23,7 @@
 	import { abortOperation } from '$lib/privacy/abortOperation';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
 	import { provider } from '$lib/stores/provider';
+	import { operationsStore } from '$lib/stores/operations';
 	import {
 		progressModalStore,
 		progressModalActions,
@@ -110,6 +111,23 @@
 			} else if (!receipt.isSuccess()) {
 				throw new Error('Transaction error: ${receipt.value}');
 			}
+
+			// Wait for IndexedDB confirmation using operationsStore subscription
+			await new Promise<void>((resolve, reject) => {
+				const timeout = setTimeout(() => {
+					unsubscribe();
+					reject(new Error('Operation not confirmed in IndexedDB after 30 seconds'));
+				}, 30000);
+
+				const unsubscribe = operationsStore.subscribe(($operations) => {
+					const operation = $operations.allOperations.find(op => op.hash === operationHash);
+					if (operation && operation.status === 'confirmed') {
+						clearTimeout(timeout);
+						unsubscribe();
+						resolve();
+					}
+				});
+			});
 
 			progressModalActions.updateStep('onchain-confirmation', 'completed');
 			amount = '';
