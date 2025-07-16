@@ -28,7 +28,7 @@
 		type DisplayOperation,
 		type DisplayPendingEmptyOperation
 	} from '$lib/utils/loadDepositsForToken';
-	import { createDisplayOperationsStore, refreshOperations } from '$lib/stores/operations';
+	import { createDisplayOperationsStore, refreshOperations, operationsStore } from '$lib/stores/operations';
 	import { defaultPendingDepositColumns, createElegantDepositColumns } from '$lib/utils/sharedColumns';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { fromWei, toWei } from '$lib/utils/toWei';
@@ -497,6 +497,44 @@
 				throw new Error(`Transaction error: ${receipt.value}`);
 			}
 
+			// Wait for both refund operations to be confirmed in IndexedDB
+			await Promise.all([
+				new Promise<void>((resolve) => {
+					let unsubscribe: (() => void) | undefined;
+					
+					const timeout = setTimeout(() => {
+						if (unsubscribe) unsubscribe();
+						resolve(); // Don't reject, just resolve after timeout
+					}, 60000);
+
+					unsubscribe = operationsStore.subscribe(($operations) => {
+						const operation = $operations.allOperations.find(op => op.hash === transferRefundHash);
+						if (operation && operation.status === 'confirmed') {
+							clearTimeout(timeout);
+							if (unsubscribe) unsubscribe();
+							resolve();
+						}
+					});
+				}),
+				new Promise<void>((resolve) => {
+					let unsubscribe: (() => void) | undefined;
+					
+					const timeout = setTimeout(() => {
+						if (unsubscribe) unsubscribe();
+						resolve(); // Don't reject, just resolve after timeout
+					}, 60000);
+
+					unsubscribe = operationsStore.subscribe(($operations) => {
+						const operation = $operations.allOperations.find(op => op.hash === feeRefundHash);
+						if (operation && operation.status === 'confirmed') {
+							clearTimeout(timeout);
+							if (unsubscribe) unsubscribe();
+							resolve();
+						}
+					});
+				})
+			]);
+
 			progressModalActions.updateStep('onchain-confirmation', 'completed');
 
 			//  nullify in DB
@@ -524,16 +562,26 @@
 
 			if (transferRefundHash) {
 				try {
-					await abortOperation(transferRefundHash);
-					console.warn('🧯 Aborted refund operation:', transferRefundHash);
+					// Only abort if the operation is still pending (not confirmed)
+					const currentOps = get(operationsStore);
+					const transferRefundOp = currentOps.allOperations.find(op => op.hash === transferRefundHash);
+					if (transferRefundOp && transferRefundOp.status === 'pending') {
+						await abortOperation(transferRefundHash);
+						console.warn('🧯 Aborted refund operation:', transferRefundHash);
+					}
 				} catch (abortError) {
 					console.error('🚨 Failed to abort transfer refund:', abortError);
 				}
 			}
 			if (feeRefundHash) {
 				try {
-					await abortOperation(feeRefundHash);
-					console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
+					// Only abort if the operation is still pending (not confirmed)
+					const currentOps = get(operationsStore);
+					const feeRefundOp = currentOps.allOperations.find(op => op.hash === feeRefundHash);
+					if (feeRefundOp && feeRefundOp.status === 'pending') {
+						await abortOperation(feeRefundHash);
+						console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
+					}
 				} catch (abortError) {
 					console.error('🚨 Failed to abort fee refund:', abortError);
 				}
