@@ -24,7 +24,7 @@
 	import { fetchMergeFee } from '$lib/utils/fetchFeeForExtension';
 	import { fetchTokenDecimals } from '$lib/utils/fetchTokenDecimals';
 	import { loadDeposits, type DisplayOperation } from '$lib/utils/loadDepositsForToken';
-	import { createDisplayOperationsStore, refreshOperations } from '$lib/stores/operations';
+	import { createDisplayOperationsStore, refreshOperations, operationsStore } from '$lib/stores/operations';
 	import { createElegantDepositColumns } from '$lib/utils/sharedColumns';
 	import { wrapWithToast } from '$lib/utils/toast';
 	import { fromWei } from '$lib/utils/toWei';
@@ -533,6 +533,44 @@
 				throw new Error(`Transaction error: ${receipt.value}`);
 			}
 
+			// Wait for both refund operations to be confirmed in IndexedDB
+			await Promise.all([
+				new Promise<void>((resolve) => {
+					let unsubscribe: (() => void) | undefined;
+					
+					const timeout = setTimeout(() => {
+						if (unsubscribe) unsubscribe();
+						resolve(); // Don't reject, just resolve after timeout
+					}, 60000);
+
+					unsubscribe = operationsStore.subscribe(($operations) => {
+						const operation = $operations.allOperations.find(op => op.hash === mergeRefundHash);
+						if (operation && operation.status === 'confirmed') {
+							clearTimeout(timeout);
+							if (unsubscribe) unsubscribe();
+							resolve();
+						}
+					});
+				}),
+				new Promise<void>((resolve) => {
+					let unsubscribe: (() => void) | undefined;
+					
+					const timeout = setTimeout(() => {
+						if (unsubscribe) unsubscribe();
+						resolve(); // Don't reject, just resolve after timeout
+					}, 60000);
+
+					unsubscribe = operationsStore.subscribe(($operations) => {
+						const operation = $operations.allOperations.find(op => op.hash === feeRefundHash);
+						if (operation && operation.status === 'confirmed') {
+							clearTimeout(timeout);
+							if (unsubscribe) unsubscribe();
+							resolve();
+						}
+					});
+				})
+			]);
+
 			progressModalActions.updateStep('onchain-confirmation', 'completed');
 
 			// 11) Confirm and nullify operations in the database
@@ -561,8 +599,13 @@
 
 			if (mergeRefundHash) {
 				try {
-					await abortOperation(mergeRefundHash);
-					console.warn('🧯 Aborted merge refund operation:', mergeRefundHash);
+					// Only abort if the operation is still pending (not confirmed)
+					const currentOps = get(operationsStore);
+					const mergeRefundOp = currentOps.allOperations.find(op => op.hash === mergeRefundHash);
+					if (mergeRefundOp && mergeRefundOp.status === 'pending') {
+						await abortOperation(mergeRefundHash);
+						console.warn('🧯 Aborted merge refund operation:', mergeRefundHash);
+					}
 				} catch (abortError) {
 					console.error('🚨 Failed to abort merge refund:', abortError);
 				}
@@ -570,8 +613,13 @@
 
 			if (feeRefundHash) {
 				try {
-					await abortOperation(feeRefundHash);
-					console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
+					// Only abort if the operation is still pending (not confirmed)
+					const currentOps = get(operationsStore);
+					const feeRefundOp = currentOps.allOperations.find(op => op.hash === feeRefundHash);
+					if (feeRefundOp && feeRefundOp.status === 'pending') {
+						await abortOperation(feeRefundHash);
+						console.warn('🧯 Aborted fee refund operation:', feeRefundHash);
+					}
 				} catch (abortError) {
 					console.error('🚨 Failed to abort fee refund:', abortError);
 				}
