@@ -287,6 +287,7 @@ pub mod PrivacyAccount {
     use core::option::OptionTrait;
     use openzeppelin::account::extensions::SRC9Component;
     use openzeppelin::introspection::src5::SRC5Component;
+    use openzeppelin::security::pausable::PausableComponent;
     use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
     use openzeppelin::upgrades::UpgradeableComponent;
     use openzeppelin::upgrades::interface::IUpgradeable;
@@ -314,6 +315,7 @@ pub mod PrivacyAccount {
     component!(path: UpgradeableComponent, storage: upgradeable, event: UpgradeableEvent);
     component!(path: MerkleTreeComponent, storage: merkle, event: MerkleEvent);
     component!(path: AccessControlComponent, storage: accesscontrol, event: AccessControlEvent);
+    component!(path: PausableComponent, storage: pausable, event: PausableEvent);
 
     // External
     #[abi(embed_v0)]
@@ -322,6 +324,8 @@ pub mod PrivacyAccount {
     #[abi(embed_v0)]
     impl AccessControlMixinImpl =
         AccessControlComponent::AccessControlCamelImpl<ContractState>;
+    #[abi(embed_v0)]
+    impl PausableImpl = PausableComponent::PausableImpl<ContractState>;
     #[abi(embed_v0)]
     impl Clear = ekubo::components::clear::ClearImpl<ContractState>;
     #[abi(embed_v0)]
@@ -334,6 +338,7 @@ pub mod PrivacyAccount {
     impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
     impl MerkleTreeInternalImpl = MerkleTreeComponent::InternalImpl<ContractState>;
     impl AccessControlInternalImpl = AccessControlComponent::InternalImpl<ContractState>;
+    impl PausableInternalImpl = PausableComponent::InternalImpl<ContractState>;
 
 
     #[storage]
@@ -344,6 +349,8 @@ pub mod PrivacyAccount {
         src5: SRC5Component::Storage,
         #[substorage(v0)]
         src9: SRC9Component::Storage,
+        #[substorage(v0)]
+        pausable: PausableComponent::Storage,
         #[substorage(v0)]
         upgradeable: UpgradeableComponent::Storage,
         #[substorage(v0)]
@@ -370,6 +377,8 @@ pub mod PrivacyAccount {
         SRC5Event: SRC5Component::Event,
         #[flat]
         SRC9Event: SRC9Component::Event,
+        #[flat]
+        PausableEvent: PausableComponent::Event,
         #[flat]
         UpgradeableEvent: UpgradeableComponent::Event,
         #[flat]
@@ -451,6 +460,22 @@ pub mod PrivacyAccount {
         self.transfer_gas_consumed.write(transfer_gas_consumed);
     }
 
+    #[generate_trait]
+    #[abi(per_item)]
+    impl ExternalImpl of ExternalTrait {
+        #[external(v0)]
+        fn pause(ref self: ContractState) {
+            self.accesscontrol.assert_only_role(DEFAULT_ADMIN_ROLE);
+            self.pausable.pause();
+        }
+
+        #[external(v0)]
+        fn unpause(ref self: ContractState) {
+            self.accesscontrol.assert_only_role(DEFAULT_ADMIN_ROLE);
+            self.pausable.unpause();
+        }
+    }
+
     #[abi(embed_v0)]
     impl UpgradeableImpl of IUpgradeable<ContractState> {
         fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
@@ -467,6 +492,7 @@ pub mod PrivacyAccount {
             amount: u256,
             token_address: ContractAddress,
         ) -> bool {
+            self.pausable.assert_not_paused();
             let secret_nullifier_amount_hash = hash(secret_and_nullifier_hash, amount);
             let token_felt: felt252 = token_address.into();
             let token_u256: u256 = token_felt.into();
