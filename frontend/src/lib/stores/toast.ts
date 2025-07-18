@@ -38,7 +38,7 @@ function createToastStore() {
 	 * @returns The generated ID for the toast
 	 */
 	function addToast(toast: Omit<Toast, 'id'>) {
-		const id = crypto.randomUUID?.() ?? Math.random().toString(36).substring(2, 11);
+		const id = crypto.randomUUID();
 		const fullToast = { ...toast, id };
 
 		update((toasts) => [...toasts, fullToast]);

@@ -48,38 +48,14 @@ export function startDepositProcessor() {
 				return;
 			}
 
-			// Fetch deposits from fromBlock+1 to toBlock (exclusive start, inclusive end)
-			const deposits = await getDepositsFromRange(fromBlock + 1, toBlock);
-			console.log(`[depositProcessor] 💰 Found ${deposits.length} deposits in block range ${fromBlock + 1}-${toBlock}`);
+			await delete_latest_db_block_number(fromBlock);
+
+			const deposits = await getDepositsFromRange(fromBlock, toBlock);
+			console.log(`[depositProcessor] 💰 Found ${deposits.length} deposits in block range ${fromBlock}-${toBlock}`);
 			
-			// Process deposits in block order to ensure no gaps
-			const depositsByBlock = new Map<number, typeof deposits>();
-			for (const deposit of deposits) {
-				const blockNum = deposit.block_number;
-				if (!depositsByBlock.has(blockNum)) {
-					depositsByBlock.set(blockNum, []);
-				}
-				depositsByBlock.get(blockNum)!.push(deposit);
-			}
-			
-			// Only process blocks that we actually have data for
-			// This prevents gaps if API didn't return all blocks
-			const processedBlocks = Array.from(depositsByBlock.keys()).sort((a, b) => a - b);
-			let lastProcessedBlock = fromBlock;
-			
-			for (const blockNum of processedBlocks) {
-				// Check for gaps - if there's a gap, stop processing to avoid inconsistency
-				if (blockNum !== lastProcessedBlock + 1 && lastProcessedBlock !== fromBlock) {
-					console.warn(`[depositProcessor] ⚠️ Gap detected: expected block ${lastProcessedBlock + 1}, got ${blockNum}. Stopping processing.`);
-					break;
-				}
-				
-				const blockDeposits = depositsByBlock.get(blockNum)!;
-				for (const { hash, block_number } of blockDeposits) {
-					await db_add_leaf(hash, block_number);
-					merkleTree.addLeaf(BigInt(hash));
-				}
-				lastProcessedBlock = blockNum;
+			for (const { hash, block_number } of deposits) {
+				await db_add_leaf(hash, block_number);
+				merkleTree.addLeaf(BigInt(hash));
 			}
 
 			const pendingOps = await getAllByStatus('pending');
