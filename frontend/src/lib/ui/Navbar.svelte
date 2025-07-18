@@ -3,15 +3,20 @@
 	import WalletConnector from '$lib/ui/WalletConnector.svelte';
 	import SettingsModal from '$lib/ui/SettingsModal.svelte';
 	import { isConnected } from '$lib/stores/wallet';
-	import { Download, FolderOpen, Menu, X, Settings, Upload } from 'lucide-svelte';
+	import { Download, FolderOpen, Menu, X, Settings, Upload, Copy, Check, Eye } from 'lucide-svelte';
 	import { exportOperations, importOperations } from '$lib/utils/operationsBackup';
 	import { toastStore } from '$lib/stores/toast';
 	import { t } from '$lib/i18n';
 	import Tooltip from '$lib/ui/Tooltip.svelte';
+	import Modal from '$lib/ui/Modal.svelte';
 
 	let fileInput: HTMLInputElement;
 	let showMobileMenu = false;
 	let showSettings = false;
+	let copied = false;
+	let showDataModal = false;
+	let modalCopied = false;
+	let exportData = '';
 
 	function toggleMobileMenu() {
 		showMobileMenu = !showMobileMenu;
@@ -27,6 +32,48 @@
 
 	function closeSettings() {
 		showSettings = false;
+	}
+
+	function closeDataModal() {
+		showDataModal = false;
+		modalCopied = false;
+		exportData = '';
+	}
+
+	async function showDataInModal() {
+		try {
+			const data = await exportOperations();
+			exportData = JSON.stringify(JSON.parse(data), null, 2);
+			showDataModal = true;
+		} catch (err) {
+			console.error('Failed to export operations:', err);
+			toastStore.addToast({
+				type: 'error',
+				message: 'Failed to export operations'
+			});
+		}
+	}
+
+	async function copyFromModal() {
+		try {
+			const compactJson = JSON.stringify(JSON.parse(exportData));
+
+			if (navigator.clipboard && window.isSecureContext) {
+				console.log('Using modern clipboard API');
+				await navigator.clipboard.writeText(compactJson);
+			}
+
+			modalCopied = true;
+			setTimeout(() => {
+				modalCopied = false;
+			}, 2000);
+		} catch (err) {
+			console.error('Failed to copy from modal:', err);
+			toastStore.addToast({
+				type: 'error',
+				message: 'Failed to copy to clipboard'
+			});
+		}
 	}
 
 	async function handleExport() {
@@ -136,6 +183,31 @@
 					{/each}
 
 					<div class="flex items-center gap-2">
+						<Tooltip text="View operations data" position="bottom" theme="dark">
+							<button
+								class="text-text-secondary hover:text-primary hover:bg-surface rounded-lg p-2 transition-all duration-300 ease-in-out hover:scale-110"
+								on:click={showDataInModal}
+							>
+								<Eye size={18} />
+							</button>
+						</Tooltip>
+
+						<!-- <Tooltip text={copied ? $t('tooltips.common.copied') : $t('tooltips.navbar.copy')} position="bottom" theme="dark">
+							<button
+								class="text-text-secondary hover:text-primary hover:bg-surface rounded-lg p-2 transition-all duration-300 ease-in-out hover:scale-110"
+								class:text-green-600={copied}
+								class:bg-green-50={copied}
+								class:dark:bg-green-900={copied}
+								on:click={copyOperations}
+							>
+								{#if copied}
+									<Check size={18} />
+								{:else}
+									<Copy size={18} />
+								{/if}
+							</button>
+						</Tooltip> -->
+
 						<Tooltip text={$t('tooltips.navbar.export')} position="bottom" theme="dark">
 							<button
 								class="text-text-secondary hover:text-primary hover:bg-surface rounded-lg p-2 transition-all duration-300 ease-in-out hover:scale-110"
@@ -213,6 +285,27 @@
 						<div class="border-border mt-3 flex justify-center gap-4 border-t pt-3">
 							<button
 								class="text-text hover:bg-surface rounded-lg p-3 transition-all duration-300 ease-in-out hover:scale-110"
+								title="View operations data"
+								on:click={showDataInModal}
+							>
+								<Eye size={20} />
+							</button>
+							<!-- <button
+								class="text-text hover:bg-surface rounded-lg p-3 transition-all duration-300 ease-in-out hover:scale-110"
+								class:text-green-600={copied}
+								class:bg-green-50={copied}
+								class:dark:bg-green-900={copied}
+								title={copied ? $t('tooltips.common.copied') : $t('tooltips.navbar.copy')}
+								on:click={copyOperations}
+							>
+								{#if copied}
+									<Check size={20} />
+								{:else}
+									<Copy size={20} />
+								{/if}
+							</button> -->
+							<button
+								class="text-text hover:bg-surface rounded-lg p-3 transition-all duration-300 ease-in-out hover:scale-110"
 								title={$t('ui.navbar.export_operations')}
 								on:click={handleExport}
 							>
@@ -242,6 +335,50 @@
 </nav>
 
 <SettingsModal show={showSettings} onClose={closeSettings} />
+
+<Modal
+	title="Operations Data"
+	show={showDataModal}
+	onClose={closeDataModal}
+	singleButton={false}
+	confirmText="Close"
+	cancelText="Cancel"
+	showButtons={false}
+>
+	<div class="space-y-4">
+		<div class="flex items-center justify-between">
+			<h3 class="text-lg font-medium">Export Data</h3>
+			<button
+				class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
+				class:bg-green-600={modalCopied}
+				class:hover:bg-green-700={modalCopied}
+				on:click={copyFromModal}
+			>
+				{#if modalCopied}
+					<Check size={16} />
+					Copied!
+				{:else}
+					<Copy size={16} />
+					Copy
+				{/if}
+			</button>
+		</div>
+		<div
+			class="max-h-96 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800"
+		>
+			<pre
+				class="text-sm break-words whitespace-pre-wrap text-gray-800 dark:text-gray-200">{exportData}</pre>
+		</div>
+		<div class="flex justify-end">
+			<button
+				class="rounded-lg bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+				on:click={closeDataModal}
+			>
+				Close
+			</button>
+		</div>
+	</div>
+</Modal>
 
 <style>
 	/* Desktop active link - czysty look z dolnym podświetleniem */
