@@ -30,6 +30,8 @@ export default defineConfig({
 
 	// Allow Vite dev server  read worker files from node_modules
 	server: {
+		host: '0.0.0.0',
+		port: 5173,
 		fs: {
 			allow: ['node_modules/@aztec/bb.js/dest/browser']
 		}
