@@ -10,6 +10,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import serveStatic from 'vite-plugin-serve-static';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import { defineConfig } from 'vite';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 
 export default defineConfig({
 	define: {
@@ -32,6 +33,7 @@ export default defineConfig({
 	server: {
 		host: '0.0.0.0',
 		port: 5173,
+		allowedHosts: ['898ef8813484.ngrok-free.app'],
 		fs: {
 			allow: ['node_modules/@aztec/bb.js/dest/browser']
 		}
