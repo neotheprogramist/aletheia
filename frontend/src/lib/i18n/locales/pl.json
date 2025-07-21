@@ -19,6 +19,7 @@
 			"export": "Pobierz kopię zapasową wszystkich operacji",
 			"import": "Wybierz plik kopii zapasowej do przywrócenia",
 			"settings": "Ustawienia aplikacji: język i preferencje",
+			"view_operations": "Pokaż dane operacji",
 			"export_description": "Pobierz dane swoich prywatnych operacji do kopii zapasowej",
 			"import_description": "Przywróć operacje z wcześniej wyeksportowanego pliku",
 			"settings_description": "Skonfiguruj swoje preferencje Aletheia"
@@ -297,7 +298,7 @@
 		"insufficient_strk_balance": "Potrzebujesz przynajmniej {requiredFeeAmount} STRK, aby opłacić opłatę sieciową, ale nie masz odpowiedniej wpłaty STRK dostępnej do jej pokrycia.",
 		"how_fees_work": "Jak Działają Opłaty",
 		"fee_explanation_1": "Wszystkie opłaty sieciowe są automatycznie opłacane z twoich wpłat STRK, aby zachować prywatność transakcji.",
-		"fee_explanation_2": "Musisz mieć pojedynczą wpłatę STRK z wystarczającym saldem, aby pokryć całą opłatę sieciową za operację.",
+		"fee_explanation_2": "Musisz mieć oddzielną wpłatę STRK (niezależną od wybranego depozytu/notatki) z wystarczającym saldem, aby pokryć całą opłatę sieciową za operację.",
 		"fee_explanation_3": "Dokonaj wpłaty STRK o wymaganej kwocie, a następnie wróć, aby ukończyć transakcję.",
 		"next_steps": "Następne Kroki",
 		"deposit_strk_instructions": "Przejdź na stronę wpłat i dokonaj wpłaty STRK o wartości co najmniej {requiredFeeAmount} STRK, aby pokryć opłatę za wypłatę.",
@@ -650,7 +651,14 @@
 			"key_benefits": "Główne korzyści",
 			"use_cases": "Przypadki użycia",
 			"start_using": "Zacznij używać {feature}",
-			"close": "Zamknij"
+			"close": "Zamknij",
+			"operations_data": {
+				"title": "Dane Operacji",
+				"export_data": "Eksportuj Dane",
+				"copy": "Kopiuj",
+				"copied": "Skopiowano!",
+				"close": "Zamknij"
+			}
 		},
 		"onboarding": {
 			"welcome": {
@@ -879,6 +887,7 @@
 		"export_failed": "Eksport operacji nieudany.",
 		"import_success": "Operacje pomyślnie zaimportowane.",
 		"import_failed": "Import operacji nieudany. Upewnij się, że plik to prawidłowy JSON.",
-		"file_read_error": "Błąd odczytywania pliku."
+		"file_read_error": "Błąd odczytywania pliku.",
+		"security_warning": "⚠️ OSTRZEŻENIE BEZPIECZEŃSTWA: Natychmiast zapisz skopiowane dane do bezpiecznego pliku! Wrażliwe dane w schowku mogą zostać przechwycone lub utracone."
 	}
 }

@@ -19,6 +19,7 @@
 			"export": "Descargar respaldo de todas tus operaciones",
 			"import": "Seleccionar archivo de respaldo para restaurar",
 			"settings": "Configuración de la aplicación: idioma y preferencias",
+			"view_operations": "Ver datos de operaciones",
 			"export_description": "Descargar datos de tus operaciones privadas para respaldo",
 			"import_description": "Restaurar operaciones desde un archivo previamente exportado",
 			"settings_description": "Configurar tus preferencias de Aletheia"
@@ -297,7 +298,7 @@
 		"insufficient_strk_balance": "Necesitas al menos {requiredFeeAmount} STRK para pagar la comisión de red, pero no tienes un depósito STRK adecuado disponible para cubrirla.",
 		"how_fees_work": "Cómo Funcionan las Comisiones",
 		"fee_explanation_1": "Todas las comisiones de red se pagan automáticamente usando tus depósitos STRK para mantener la privacidad de las transacciones.",
-		"fee_explanation_2": "Necesitas tener un solo depósito STRK con saldo suficiente para cubrir toda la comisión de red para la operación.",
+		"fee_explanation_2": "Necesitas tener un depósito STRK separado (independiente del depósito/nota seleccionada) con saldo suficiente para cubrir toda la comisión de red para la operación.",
 		"fee_explanation_3": "Haz un depósito STRK de al menos la cantidad requerida, luego regresa para completar tu transacción.",
 		"next_steps": "Siguientes Pasos",
 		"deposit_strk_instructions": "Ve a la página de depósito y haz un depósito STRK de al menos {requiredFeeAmount} STRK para cubrir la comisión de retiro.",
@@ -641,7 +642,14 @@
 			"key_benefits": "Beneficios clave",
 			"use_cases": "Casos de uso",
 			"start_using": "Comenzar a usar {feature}",
-			"close": "Cerrar"
+			"close": "Cerrar",
+			"operations_data": {
+				"title": "Datos de Operaciones",
+				"export_data": "Exportar Datos",
+				"copy": "Copiar",
+				"copied": "¡Copiado!",
+				"close": "Cerrar"
+			}
 		},
 		"onboarding": {
 			"welcome": {
@@ -870,6 +878,7 @@
 		"export_failed": "Falló la exportación de operaciones.",
 		"import_success": "Operaciones importadas exitosamente.",
 		"import_failed": "Falló la importación de operaciones. Asegúrese de que el archivo sea JSON válido.",
-		"file_read_error": "Error al leer el archivo."
+		"file_read_error": "Error al leer el archivo.",
+		"security_warning": "⚠️ ADVERTENCIA DE SEGURIDAD: ¡Guarde los datos copiados en un archivo seguro inmediatamente! Los datos sensibles en el portapapeles pueden ser interceptados o perdidos."
 	}
 }

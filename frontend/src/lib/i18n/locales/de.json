@@ -19,6 +19,7 @@
       "export": "Backup aller Ihrer Operationen herunterladen",
       "import": "Backup-Datei zum Wiederherstellen auswählen",
       "settings": "Anwendungseinstellungen: Sprache und Einstellungen",
+      "view_operations": "Operationsdaten anzeigen",
       "export_description": "Ihre privaten Operationsdaten für Backup herunterladen",
       "import_description": "Operationen aus einer zuvor exportierten Datei wiederherstellen",
       "settings_description": "Ihre Aletheia-Einstellungen konfigurieren"
@@ -297,7 +298,7 @@
     "insufficient_strk_balance": "Sie benötigen mindestens {requiredFeeAmount} STRK, um die Netzwerkgebühr zu bezahlen, aber Sie haben keine geeignete STRK-Einzahlung zur Verfügung, um diese zu decken.",
     "how_fees_work": "Wie Gebühren Funktionieren",
     "fee_explanation_1": "Alle Netzwerkgebühren werden automatisch mit Ihren STRK-Einzahlungen bezahlt, um die Transaktionsprivatsphäre zu wahren.",
-    "fee_explanation_2": "Sie müssen eine einzelne STRK-Einzahlung mit ausreichendem Guthaben haben, um die gesamte Netzwerkgebühr für die Operation zu decken.",
+    "fee_explanation_2": "Sie müssen eine separate STRK-Einzahlung (unabhängig von der ausgewählten Einzahlung/Notiz) mit ausreichendem Guthaben haben, um die gesamte Netzwerkgebühr für die Operation zu decken.",
     "fee_explanation_3": "Tätigen Sie eine STRK-Einzahlung von mindestens dem erforderlichen Betrag und kehren Sie dann zurück, um Ihre Transaktion abzuschließen.",
     "next_steps": "Nächste Schritte",
     "deposit_strk_instructions": "Gehen Sie zur Einzahlungsseite und tätigen Sie eine STRK-Einzahlung von mindestens {requiredFeeAmount} STRK, um die Abhebungsgebühr zu decken.",
@@ -641,7 +642,14 @@
       "key_benefits": "Hauptvorteile",
       "use_cases": "Anwendungsfälle",
       "start_using": "{feature} verwenden",
-      "close": "Schließen"
+      "close": "Schließen",
+      "operations_data": {
+        "title": "Operationsdaten",
+        "export_data": "Daten exportieren",
+        "copy": "Kopieren",
+        "copied": "Kopiert!",
+        "close": "Schließen"
+      }
     },
     "onboarding": {
       "welcome": {
@@ -974,6 +982,7 @@
     "export_failed": "Export der Operationen fehlgeschlagen.",
     "import_success": "Operationen erfolgreich importiert.",
     "import_failed": "Import der Operationen fehlgeschlagen. Stellen Sie sicher, dass die Datei gültiges JSON ist.",
-    "file_read_error": "Fehler beim Lesen der Datei."
+    "file_read_error": "Fehler beim Lesen der Datei.",
+    "security_warning": "⚠️ SICHERHEITSWARNUNG: Speichern Sie die kopierten Daten sofort in einer sicheren Datei! Sensible Daten in der Zwischenablage können abgefangen oder verloren gehen."
   }
 }
