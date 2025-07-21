@@ -141,7 +141,7 @@ main {
 .content {
 	display: flex;
 	justify-content: flex-start;
-	align-items: flex-start;
+	align-items: center;
 	flex-direction: column;
 	padding: 1rem;
 	padding-top: calc(1rem + 4rem);
@@ -172,8 +172,8 @@ main {
 	.content {
 		padding: 2rem;
 		padding-top: calc(2rem + 4rem);
-		max-width: 1200px;
-		margin: 0 auto;
+		max-width: none;
+		margin: 0;
 	}
 }
 
