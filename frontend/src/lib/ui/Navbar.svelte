@@ -325,6 +325,13 @@
 							>
 								<Upload size={20} />
 							</button>
+							<button
+								class="text-text hover:bg-surface rounded-lg p-3 transition-all duration-300 ease-in-out hover:scale-110"
+								title={$t('tooltips.navbar.settings')}
+								on:click={toggleSettings}
+							>
+								<Settings size={20} />
+							</button>
 						</div>
 					{/if}
 				</div>
