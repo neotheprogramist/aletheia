@@ -524,7 +524,7 @@
 			progressModalActions.updateStep('transaction-prepare', 'completed');
 
 			progressModalActions.updateStep('executing-transaction', 'loading');
-			
+
 			const pendingNonce = await rpc.getNonceForAddress(account.address, 'pending');
 			const tx = await account.execute(call, { nonce: pendingNonce });
 
