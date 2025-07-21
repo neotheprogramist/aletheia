@@ -19,6 +19,7 @@
 			"export": "Pobierz kopię zapasową wszystkich operacji",
 			"import": "Wybierz plik kopii zapasowej do przywrócenia",
 			"settings": "Ustawienia aplikacji: język i preferencje",
+			"view_operations": "Pokaż dane operacji",
 			"export_description": "Pobierz dane swoich prywatnych operacji do kopii zapasowej",
 			"import_description": "Przywróć operacje z wcześniej wyeksportowanego pliku",
 			"settings_description": "Skonfiguruj swoje preferencje Aletheia"
@@ -650,7 +651,14 @@
 			"key_benefits": "Główne korzyści",
 			"use_cases": "Przypadki użycia",
 			"start_using": "Zacznij używać {feature}",
-			"close": "Zamknij"
+			"close": "Zamknij",
+			"operations_data": {
+				"title": "Dane Operacji",
+				"export_data": "Eksportuj Dane",
+				"copy": "Kopiuj",
+				"copied": "Skopiowano!",
+				"close": "Zamknij"
+			}
 		},
 		"onboarding": {
 			"welcome": {
@@ -879,6 +887,7 @@
 		"export_failed": "Eksport operacji nieudany.",
 		"import_success": "Operacje pomyślnie zaimportowane.",
 		"import_failed": "Import operacji nieudany. Upewnij się, że plik to prawidłowy JSON.",
-		"file_read_error": "Błąd odczytywania pliku."
+		"file_read_error": "Błąd odczytywania pliku.",
+		"security_warning": "⚠️ OSTRZEŻENIE BEZPIECZEŃSTWA: Natychmiast zapisz skopiowane dane do bezpiecznego pliku! Wrażliwe dane w schowku mogą zostać przechwycone lub utracone."
 	}
 }

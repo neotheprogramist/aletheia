@@ -19,6 +19,7 @@
       "export": "Télécharger une sauvegarde de toutes vos opérations",
       "import": "Sélectionner un fichier de sauvegarde à restaurer",
       "settings": "Paramètres de l'application : langue et préférences",
+      "view_operations": "Afficher les données d'opérations",
       "export_description": "Télécharger vos données d'opérations privées pour sauvegarde",
       "import_description": "Restaurer les opérations depuis un fichier précédemment exporté",
       "settings_description": "Configurer vos préférences Aletheia"
@@ -641,7 +642,14 @@
       "key_benefits": "Avantages clés",
       "use_cases": "Cas d'usage",
       "start_using": "Commencer à utiliser {feature}",
-      "close": "Fermer"
+      "close": "Fermer",
+      "operations_data": {
+        "title": "Données d'Opérations",
+        "export_data": "Exporter les Données",
+        "copy": "Copier",
+        "copied": "Copié !",
+        "close": "Fermer"
+      }
     },
     "onboarding": {
       "welcome": {
@@ -974,6 +982,7 @@
     "export_failed": "Échec de l'exportation des opérations.",
     "import_success": "Opérations importées avec succès.",
     "import_failed": "Échec de l'importation des opérations. Assurez-vous que le fichier est un JSON valide.",
-    "file_read_error": "Erreur lors de la lecture du fichier."
+    "file_read_error": "Erreur lors de la lecture du fichier.",
+    "security_warning": "⚠️ AVERTISSEMENT DE SÉCURITÉ : Sauvegardez immédiatement les données copiées dans un fichier sécurisé ! Les données sensibles dans le presse-papiers peuvent être interceptées ou perdues."
   }
 }

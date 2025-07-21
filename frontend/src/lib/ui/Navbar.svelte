@@ -64,6 +64,13 @@
 			}
 
 			modalCopied = true;
+			
+			toastStore.addToast({
+				type: 'info',
+				message: $t('notifications.security_warning'),
+				duration: 8000
+			});
+			
 			setTimeout(() => {
 				modalCopied = false;
 			}, 2000);
@@ -183,7 +190,7 @@
 					{/each}
 
 					<div class="flex items-center gap-2">
-						<Tooltip text="View operations data" position="bottom" theme="dark">
+						<Tooltip text={$t('tooltips.navbar.view_operations')} position="bottom" theme="dark">
 							<button
 								class="text-text-secondary hover:text-primary hover:bg-surface rounded-lg p-2 transition-all duration-300 ease-in-out hover:scale-110"
 								on:click={showDataInModal}
@@ -285,7 +292,7 @@
 						<div class="border-border mt-3 flex justify-center gap-4 border-t pt-3">
 							<button
 								class="text-text hover:bg-surface rounded-lg p-3 transition-all duration-300 ease-in-out hover:scale-110"
-								title="View operations data"
+								title={$t('tooltips.navbar.view_operations')}
 								on:click={showDataInModal}
 							>
 								<Eye size={20} />
@@ -337,17 +344,17 @@
 <SettingsModal show={showSettings} onClose={closeSettings} />
 
 <Modal
-	title="Operations Data"
+	title={$t('ui.modal.operations_data.title')}
 	show={showDataModal}
 	onClose={closeDataModal}
 	singleButton={false}
-	confirmText="Close"
+	confirmText={$t('ui.modal.operations_data.close')}
 	cancelText="Cancel"
 	showButtons={false}
 >
 	<div class="space-y-4">
 		<div class="flex items-center justify-between">
-			<h3 class="text-lg font-medium">Export Data</h3>
+			<h3 class="text-lg font-medium">{$t('ui.modal.operations_data.export_data')}</h3>
 			<button
 				class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
 				class:bg-green-600={modalCopied}
@@ -356,10 +363,10 @@
 			>
 				{#if modalCopied}
 					<Check size={16} />
-					Copied!
+					{$t('ui.modal.operations_data.copied')}
 				{:else}
 					<Copy size={16} />
-					Copy
+					{$t('ui.modal.operations_data.copy')}
 				{/if}
 			</button>
 		</div>
@@ -374,7 +381,7 @@
 				class="rounded-lg bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
 				on:click={closeDataModal}
 			>
-				Close
+				{$t('ui.modal.operations_data.close')}
 			</button>
 		</div>
 	</div>

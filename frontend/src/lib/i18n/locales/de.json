@@ -19,6 +19,7 @@
       "export": "Backup aller Ihrer Operationen herunterladen",
       "import": "Backup-Datei zum Wiederherstellen auswählen",
       "settings": "Anwendungseinstellungen: Sprache und Einstellungen",
+      "view_operations": "Operationsdaten anzeigen",
       "export_description": "Ihre privaten Operationsdaten für Backup herunterladen",
       "import_description": "Operationen aus einer zuvor exportierten Datei wiederherstellen",
       "settings_description": "Ihre Aletheia-Einstellungen konfigurieren"
@@ -641,7 +642,14 @@
       "key_benefits": "Hauptvorteile",
       "use_cases": "Anwendungsfälle",
       "start_using": "{feature} verwenden",
-      "close": "Schließen"
+      "close": "Schließen",
+      "operations_data": {
+        "title": "Operationsdaten",
+        "export_data": "Daten exportieren",
+        "copy": "Kopieren",
+        "copied": "Kopiert!",
+        "close": "Schließen"
+      }
     },
     "onboarding": {
       "welcome": {
@@ -974,6 +982,7 @@
     "export_failed": "Export der Operationen fehlgeschlagen.",
     "import_success": "Operationen erfolgreich importiert.",
     "import_failed": "Import der Operationen fehlgeschlagen. Stellen Sie sicher, dass die Datei gültiges JSON ist.",
-    "file_read_error": "Fehler beim Lesen der Datei."
+    "file_read_error": "Fehler beim Lesen der Datei.",
+    "security_warning": "⚠️ SICHERHEITSWARNUNG: Speichern Sie die kopierten Daten sofort in einer sicheren Datei! Sensible Daten in der Zwischenablage können abgefangen oder verloren gehen."
   }
 }

@@ -461,6 +461,7 @@
       "export": "Download backup of all your operations",
       "import": "Select backup file to restore operations",
       "settings": "Application settings: language and preferences",
+      "view_operations": "View operations data",
       "export_description": "Download your private operations data for backup",
       "import_description": "Restore operations from a previously exported file",
       "settings_description": "Configure your Aletheia preferences"
@@ -650,7 +651,14 @@
       "key_benefits": "Key Benefits",
       "use_cases": "Use Cases",
       "start_using": "Start Using {feature}",
-      "close": "Close"
+      "close": "Close",
+      "operations_data": {
+        "title": "Operations Data",
+        "export_data": "Export Data",
+        "copy": "Copy",
+        "copied": "Copied!",
+        "close": "Close"
+      }
     },
     "onboarding": {
       "welcome": {
@@ -984,6 +992,7 @@
     "export_failed": "Failed to export operations.",
     "import_success": "Operations successfully imported.",
     "import_failed": "Failed to import operations. Ensure the file is valid JSON.",
-    "file_read_error": "Error reading the file."
+    "file_read_error": "Error reading the file.",
+    "security_warning": "⚠️ SECURITY WARNING: Save copied data to a secure file immediately! Sensitive data in clipboard may be intercepted or lost."
   }
 }
