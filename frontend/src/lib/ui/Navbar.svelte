@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { onMount } from 'svelte';
 	import WalletConnector from '$lib/ui/WalletConnector.svelte';
 	import SettingsModal from '$lib/ui/SettingsModal.svelte';
 	import { isConnected } from '$lib/stores/wallet';
@@ -18,12 +19,21 @@
 	let modalCopied = false;
 	let exportData = '';
 
-	function toggleMobileMenu() {
+	function toggleMobileMenu(event: MouseEvent) {
+		event.stopPropagation();
 		showMobileMenu = !showMobileMenu;
 	}
 
 	function closeMobileMenu() {
 		showMobileMenu = false;
+	}
+
+	function handleClickOutside(event: MouseEvent) {
+		const target = event.target as Element;
+		// Don't close if clicking on the menu itself or the hamburger button
+		if (showMobileMenu && !target.closest('.mobile-menu') && !target.closest('.mobile-menu-button')) {
+			closeMobileMenu();
+		}
 	}
 
 	function toggleSettings() {
@@ -149,6 +159,13 @@
 
 		reader.readAsText(file);
 	}
+
+	onMount(() => {
+		document.addEventListener('click', handleClickOutside);
+		return () => {
+			document.removeEventListener('click', handleClickOutside);
+		};
+	});
 </script>
 
 <nav class="border-border bg-background fixed inset-x-0 top-0 z-10 border-b backdrop-blur-sm">
@@ -268,7 +285,7 @@
 
 		<!-- Mobile Navigation Menu -->
 		{#if showMobileMenu}
-			<div class="border-border bg-card border-t lg:hidden">
+			<div class="mobile-menu border-border bg-card border-t lg:hidden">
 				<div class="space-y-1 px-2 pt-2 pb-3">
 					<div class="border-border mb-3 flex items-center justify-between border-b px-3 py-2">
 						{#if $isConnected}
