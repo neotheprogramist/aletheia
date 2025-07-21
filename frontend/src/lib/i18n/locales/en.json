@@ -231,7 +231,7 @@
     "insufficient_strk_balance": "You need at least {requiredFeeAmount} STRK to pay for the network fee, but you don't have a suitable STRK deposit available to cover it.",
     "how_fees_work": "How Fees Work",
     "fee_explanation_1": "All network fees are automatically paid using your STRK deposits to maintain transaction privacy.",
-    "fee_explanation_2": "You need to have a single STRK deposit with sufficient balance to cover the entire network fee for the operation.",
+    "fee_explanation_2": "You need to have a separate STRK deposit (independent of the selected deposit/note) with sufficient balance to cover the entire network fee for the operation.",
     "fee_explanation_3": "Make a STRK deposit of at least the required amount, then return to complete your transaction.",
     "next_steps": "Next Steps",
     "deposit_strk_instructions": "Go to the deposit page and make a STRK deposit of at least {requiredFeeAmount} STRK to cover the withdrawal fee.",

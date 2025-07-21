@@ -298,7 +298,7 @@
     "insufficient_strk_balance": "Sie benötigen mindestens {requiredFeeAmount} STRK, um die Netzwerkgebühr zu bezahlen, aber Sie haben keine geeignete STRK-Einzahlung zur Verfügung, um diese zu decken.",
     "how_fees_work": "Wie Gebühren Funktionieren",
     "fee_explanation_1": "Alle Netzwerkgebühren werden automatisch mit Ihren STRK-Einzahlungen bezahlt, um die Transaktionsprivatsphäre zu wahren.",
-    "fee_explanation_2": "Sie müssen eine einzelne STRK-Einzahlung mit ausreichendem Guthaben haben, um die gesamte Netzwerkgebühr für die Operation zu decken.",
+    "fee_explanation_2": "Sie müssen eine separate STRK-Einzahlung (unabhängig von der ausgewählten Einzahlung/Notiz) mit ausreichendem Guthaben haben, um die gesamte Netzwerkgebühr für die Operation zu decken.",
     "fee_explanation_3": "Tätigen Sie eine STRK-Einzahlung von mindestens dem erforderlichen Betrag und kehren Sie dann zurück, um Ihre Transaktion abzuschließen.",
     "next_steps": "Nächste Schritte",
     "deposit_strk_instructions": "Gehen Sie zur Einzahlungsseite und tätigen Sie eine STRK-Einzahlung von mindestens {requiredFeeAmount} STRK, um die Abhebungsgebühr zu decken.",

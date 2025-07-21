@@ -298,7 +298,7 @@
 		"insufficient_strk_balance": "Necesitas al menos {requiredFeeAmount} STRK para pagar la comisión de red, pero no tienes un depósito STRK adecuado disponible para cubrirla.",
 		"how_fees_work": "Cómo Funcionan las Comisiones",
 		"fee_explanation_1": "Todas las comisiones de red se pagan automáticamente usando tus depósitos STRK para mantener la privacidad de las transacciones.",
-		"fee_explanation_2": "Necesitas tener un solo depósito STRK con saldo suficiente para cubrir toda la comisión de red para la operación.",
+		"fee_explanation_2": "Necesitas tener un depósito STRK separado (independiente del depósito/nota seleccionada) con saldo suficiente para cubrir toda la comisión de red para la operación.",
 		"fee_explanation_3": "Haz un depósito STRK de al menos la cantidad requerida, luego regresa para completar tu transacción.",
 		"next_steps": "Siguientes Pasos",
 		"deposit_strk_instructions": "Ve a la página de depósito y haz un depósito STRK de al menos {requiredFeeAmount} STRK para cubrir la comisión de retiro.",
