@@ -37,13 +37,15 @@ export const blockUpdates = readable<BlockUpdate | null>(null, (set) => {
 				};
 
 				ws?.send(JSON.stringify(subscribeMessage));
-				
+
 				// Start heartbeat to monitor connection
 				heartbeatInterval = setInterval(() => {
 					if (ws?.readyState === WebSocket.OPEN) {
 						console.log('[blockFetcher] 💓 WebSocket heartbeat - connection alive');
 					} else {
-						console.log(`[blockFetcher] 💔 WebSocket heartbeat - connection dead (state: ${ws?.readyState})`);
+						console.log(
+							`[blockFetcher] 💔 WebSocket heartbeat - connection dead (state: ${ws?.readyState})`
+						);
 					}
 				}, 30000); // Every 30 seconds
 			};
@@ -61,9 +63,11 @@ export const blockUpdates = readable<BlockUpdate | null>(null, (set) => {
 						console.log(`[blockFetcher] 🔍 Block header received:`, blockHeader);
 
 						if (blockHeader) {
-							const blockNumber = parseInt(blockHeader.block_number, 16);
-							const timestamp = parseInt(blockHeader.timestamp, 16);
-							console.log(`[blockFetcher] 🔔 Got block number ${blockNumber}, timestamp ${timestamp}`);
+							const blockNumber = parseInt(blockHeader.block_number, 10);
+							const timestamp = parseInt(blockHeader.timestamp, 10);
+							console.log(
+								`[blockFetcher] 🔔 Got block number ${blockNumber}, timestamp ${timestamp}`
+							);
 
 							// Only emit if this is a newer block than what we've already emitted
 							if (blockNumber > lastEmittedBlock) {
@@ -73,10 +77,14 @@ export const blockUpdates = readable<BlockUpdate | null>(null, (set) => {
 								};
 
 								lastEmittedBlock = blockNumber;
-								console.log(`[blockFetcher] ⬆️ New block emitted: ${blockNumber} (prev: ${lastEmittedBlock > 0 ? lastEmittedBlock - 1 : 'none'})`);
+								console.log(
+									`[blockFetcher] ⬆️ New block emitted: ${blockNumber} (prev: ${lastEmittedBlock > 0 ? lastEmittedBlock - 1 : 'none'})`
+								);
 								set(update);
 							} else {
-								console.log(`[blockFetcher] ⏭️ Block ${blockNumber} already processed (lastEmitted: ${lastEmittedBlock})`);
+								console.log(
+									`[blockFetcher] ⏭️ Block ${blockNumber} already processed (lastEmitted: ${lastEmittedBlock})`
+								);
 							}
 						}
 					} else {
@@ -89,7 +97,9 @@ export const blockUpdates = readable<BlockUpdate | null>(null, (set) => {
 			};
 
 			ws.onclose = (event) => {
-				console.log(`[blockFetcher] 🔌 WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`);
+				console.log(
+					`[blockFetcher] 🔌 WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`
+				);
 				if (heartbeatInterval) {
 					clearInterval(heartbeatInterval);
 					heartbeatInterval = null;

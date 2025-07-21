@@ -15,6 +15,7 @@ import { refreshOperations } from '$lib/stores/operations';
 
 export let merkleTree: HybridMerkleTree;
 let initialized = false;
+let processorStarted = false;
 const MERKLE_HEIGHT = 32;
 
 /**
@@ -33,8 +34,14 @@ export async function initMerkleTree() {
  * Starts listening to new blocks and processes deposits.
  */
 export function startDepositProcessor() {
+	if (processorStarted) {
+		console.log('[depositProcessor] ⚠️ Deposit processor already started, ignoring...');
+		return;
+	}
+
+	processorStarted = true;
 	console.log('[depositProcessor] 🚀 Starting deposit processor...');
-	
+
 	blockUpdates.subscribe(async (update) => {
 		if (!initialized || !update) return;
 
@@ -44,19 +51,26 @@ export function startDepositProcessor() {
 			const fromBlock = await get_latest_db_block_number();
 
 			if (toBlock <= fromBlock) {
-				console.log(`[depositProcessor] ⏭️ Block ${toBlock} already processed (fromBlock: ${fromBlock})`);
+				console.log(
+					`[depositProcessor] ⏭️ Block ${toBlock} already processed (fromBlock: ${fromBlock})`
+				);
 				return;
 			}
 
 			await delete_latest_db_block_number(fromBlock);
 
 			const deposits = await getDepositsFromRange(fromBlock, toBlock);
-			console.log(`[depositProcessor] 💰 Found ${deposits.length} deposits in block range ${fromBlock}-${toBlock}`);
-			
+			console.log(
+				`[depositProcessor] 💰 Found ${deposits.length} deposits in block range ${fromBlock}-${toBlock}`
+			);
+
 			for (const { hash, block_number } of deposits) {
 				await db_add_leaf(hash, block_number);
 				merkleTree.addLeaf(BigInt(hash));
 			}
+			const dbLeafs = await get_all_leafs();
+			console.log(`--> Leaves Amount in Memory: ${merkleTree.leafs.length}`);
+			console.log(`--> Leaves Amount in IndexedDB: ${dbLeafs.length}`);
 
 			const pendingOps = await getAllByStatus('pending');
 			console.log(`[depositProcessor] ⏳ Checking ${pendingOps.length} pending operations...`);
@@ -67,12 +81,14 @@ export function startDepositProcessor() {
 			let hasConfirmedOps = false;
 			for (const op of pendingOps) {
 				if (op.commitment && leafHashSet.has(BigInt(op.commitment))) {
-					console.log(`[depositProcessor] ✅ Auto-confirming pending op ${op.hash} (commitment ${op.commitment})`);
+					console.log(
+						`[depositProcessor] ✅ Auto-confirming pending op ${op.hash} (commitment ${op.commitment})`
+					);
 					await confirmOperation(op.hash);
 					hasConfirmedOps = true;
 				}
 			}
-			
+
 			// Refresh operations store if any operations were confirmed
 			if (hasConfirmedOps) {
 				console.log(`[depositProcessor] 🔄 Refreshing operations store...`);

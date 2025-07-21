@@ -24,10 +24,29 @@ export async function getDepositsFromRange(from: number, to: number) {
 	const rpc = get(provider);
 
 	do {
-		const res = await rpc.getEvents({ ...filter, continuation_token });
+		let retries = 3;
+		let res;
+		
+		while (retries > 0) {
+			try {
+				res = await rpc.getEvents({ ...filter, continuation_token });
+				break;
+			} catch (err: any) {
+				retries--;
+				if (err.code === -32000 || err.message?.includes('503') || err.message?.includes('Unable to complete')) {
+					console.warn(`[getDepositsFromRange] ⚠️ RPC error, retries left: ${retries}`, err.message);
+					if (retries === 0) throw err;
+					await new Promise(resolve => setTimeout(resolve, 1000 * (3 - retries)));
+				} else {
+					throw err;
+				}
+			}
+		}
 
-		events.push(...res.events);
-		continuation_token = res.continuation_token;
+		if (res) {
+			events.push(...res.events);
+			continuation_token = res.continuation_token;
+		}
 	} while (continuation_token);
 
 	const deposits = events.map((ev) => {
